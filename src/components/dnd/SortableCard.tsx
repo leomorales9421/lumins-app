@@ -55,7 +55,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({
     }
   };
 
-  const getLabelColor = (label: string): string => {
+  const getLabelColor = (label: any): string => {
     const colors = [
       '#4F46E5', // Indigo
       '#10B981', // Emerald
@@ -64,7 +64,19 @@ export const SortableCard: React.FC<SortableCardProps> = ({
       '#8B5CF6', // Violet
       '#06B6D4', // Cyan
     ];
-    const hash = label.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Handle both string labels and object labels
+    let labelString: string;
+    if (typeof label === 'string') {
+      labelString = label;
+    } else if (label && typeof label === 'object') {
+      // Try to get name property from label object
+      labelString = label.name || label.title || label.id || JSON.stringify(label);
+    } else {
+      labelString = String(label || '');
+    }
+    
+    const hash = labelString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[hash % colors.length];
   };
 
@@ -72,6 +84,8 @@ export const SortableCard: React.FC<SortableCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       className={`bg-[#111618] rounded-lg p-4 border border-[#3b4b54] hover:border-primary/30 cursor-pointer transition-all card-hover ${isDragging ? 'shadow-2xl shadow-primary/20 rotate-1' : ''}`}
       onClick={onClick}
     >
@@ -97,8 +111,6 @@ export const SortableCard: React.FC<SortableCardProps> = ({
           ) : (
             <div className="flex items-center">
               <button
-                {...attributes}
-                {...listeners}
                 className="mr-2 text-[#9db0b9] hover:text-white cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/5"
                 title="Arrastrar para mover"
                 onClick={(e) => e.stopPropagation()}
@@ -155,14 +167,24 @@ export const SortableCard: React.FC<SortableCardProps> = ({
         
         {card.labels && card.labels.length > 0 && (
           <div className="flex space-x-1">
-            {card.labels.slice(0, 2).map((label, idx) => (
-              <span
-                key={idx}
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: getLabelColor(label) }}
-                title={label}
-              />
-            ))}
+            {card.labels.slice(0, 2).map((label, idx) => {
+              // Extract label text for title
+              let labelText = '';
+              if (typeof label === 'string') {
+                labelText = label;
+              } else if (label && typeof label === 'object') {
+                labelText = label.name || label.title || label.id || '';
+              }
+              
+              return (
+                <span
+                  key={idx}
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: getLabelColor(label) }}
+                  title={labelText}
+                />
+              );
+            })}
             {card.labels.length > 2 && (
               <span className="text-xs text-[#9db0b9]">
                 +{card.labels.length - 2}

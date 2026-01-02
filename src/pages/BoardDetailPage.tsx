@@ -13,9 +13,9 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
 export interface List {
   id: string;
-  name: string;  // Changed from 'title' to 'name' to match backend response
+  name: string;
   boardId: string;
-  position: number;  // Changed from 'order' to 'position' to match backend response
+  position: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,9 +25,9 @@ export interface Card {
   title: string;
   description?: string;
   listId: string;
-  order: number;
+  position: number;
   dueDate?: string;
-  labels?: string[];
+  labels?: (string | { id?: string; name?: string; title?: string; color?: string })[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -47,17 +47,14 @@ const BoardDetailPage: React.FC = () => {
   const [newListTitle, setNewListTitle] = useState('');
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   
-  // Modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [listToDelete, setListToDelete] = useState<List | null>(null);
   const [cardsInListToDelete, setCardsInListToDelete] = useState<number>(0);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   
-  // Card modal state
   const [showCardModal, setShowCardModal] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   
-  // Archived cards state
   const [showArchivedCards, setShowArchivedCards] = useState(false);
   const [archivedCards, setArchivedCards] = useState<Card[]>([]);
   const [isLoadingArchived, setIsLoadingArchived] = useState(false);
@@ -69,21 +66,24 @@ const BoardDetailPage: React.FC = () => {
     setError(null);
     
     try {
-      // Fetch board details
       const boardResponse = await apiClient.get<{ data: { board: Board } }>(`/api/boards/${id}`);
       const boardData = boardResponse.data.board;
       setBoard(boardData);
       
-      // Fetch lists for this board - using the lists endpoint that filters archived lists
       const listsResponse = await apiClient.get<{ data: { lists: List[] } }>(`/api/lists/boards/${id}/lists`);
       setLists(listsResponse.data.lists || []);
       
-      // Fetch cards for this board - using the correct route based on backend implementation
-      // Only fetch cards with status 'open' (not archived/closed)
       const cardsResponse = await apiClient.get<{ data: { cards: Card[] } }>(`/api/cards/boards/${id}/cards`, {
         params: { status: 'open' }
       });
-      setCards(cardsResponse.data.cards || []);
+      
+      const cardsData = cardsResponse.data.cards || [];
+      const cardsWithValidPosition = cardsData.map((card, index) => ({
+        ...card,
+        position: card.position !== undefined && !isNaN(card.position) ? card.position : index,
+      }));
+      
+      setCards(cardsWithValidPosition);
       
     } catch (err: any) {
       setError(err.message || 'Error al cargar el tablero');
@@ -93,10 +93,8 @@ const BoardDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  // Memoized list IDs for DnD
   const listIds = useMemo(() => lists.map(list => list.id), [lists]);
 
-  // Handle list creation
   const handleCreateList = async () => {
     if (!newListTitle.trim() || !id) return;
     
@@ -105,39 +103,18 @@ const BoardDetailPage: React.FC = () => {
         name: newListTitle,
       });
       
-      // The backend response structure is { data: { list: List } }
       const newList = response.data.list;
       setLists(prev => [...prev, newList]);
       setNewListTitle('');
       setIsCreatingList(false);
-      setError(null); // Clear any previous errors
+      setError(null);
     } catch (err: any) {
       console.error('Error creating list:', err);
-      console.error('Error response:', err.response?.data);
-      
-      // Extract validation error details from backend response
       const errorMessage = err.response?.data?.message || err.message || 'Error al crear la lista';
-      const validationErrors = err.response?.data?.errors;
-      
-      if (validationErrors && Array.isArray(validationErrors)) {
-        // Format validation errors for display (array of objects with path and message)
-        const formattedErrors = validationErrors
-          .map((error: any) => `${error.path}: ${error.message}`)
-          .join('; ');
-        setError(`Error de validación: ${formattedErrors}`);
-      } else if (validationErrors) {
-        // Handle object format (if errors is an object instead of array)
-        const formattedErrors = Object.entries(validationErrors)
-          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-          .join('; ');
-        setError(`Error de validación: ${formattedErrors}`);
-      } else {
-        setError(errorMessage);
-      }
+      setError(errorMessage);
     }
   };
 
-  // Handle list rename
   const handleRenameList = async (listId: string, newTitle: string) => {
     try {
       await apiClient.patch(`/api/lists/${listId}`, { name: newTitle });
@@ -150,12 +127,10 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle list archiving (instead of deletion)
   const handleArchiveList = async (listId: string) => {
     try {
       await apiClient.patch(`/api/lists/${listId}/archive`);
       setLists(prev => prev.filter(list => list.id !== listId));
-      // Also remove cards from this list from active view
       setCards(prev => prev.filter(card => card.listId !== listId));
       return true;
     } catch (err: any) {
@@ -165,7 +140,6 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Open delete confirmation modal
   const openDeleteModal = (list: List) => {
     const cardCount = cards.filter(card => card.listId === list.id).length;
     setListToDelete(list);
@@ -174,7 +148,6 @@ const BoardDetailPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  // Close delete confirmation modal
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
     setListToDelete(null);
@@ -182,7 +155,6 @@ const BoardDetailPage: React.FC = () => {
     setDeleteError(null);
   };
 
-  // Confirm list archiving
   const confirmArchiveList = async () => {
     if (!listToDelete) return;
     
@@ -194,17 +166,15 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle card creation
   const handleCreateCard = async (listId: string, title: string) => {
     try {
       const response = await apiClient.post<{ data: { card: Card } }>(`/api/cards/lists/${listId}/cards`, {
         title,
-        priority: 'P2', // Default value from validation schema
-        module: 'other', // Default value from validation schema
-        riskLevel: 'med', // Default value from validation schema
+        priority: 'P2',
+        module: 'other',
+        riskLevel: 'med',
       });
       
-      // The backend response structure is { data: { card: Card } }
       const newCard = response.data.card;
       setCards(prev => [...prev, newCard]);
     } catch (err: any) {
@@ -213,7 +183,6 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle card rename
   const handleRenameCard = async (cardId: string, newTitle: string) => {
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { title: newTitle });
@@ -226,7 +195,6 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle card deletion
   const handleDeleteCard = async (cardId: string) => {
     try {
       await apiClient.delete(`/api/cards/${cardId}`);
@@ -237,13 +205,11 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle card click to open modal
   const handleCardClick = (cardId: string) => {
     setSelectedCardId(cardId);
     setShowCardModal(true);
   };
 
-  // Handle card update from modal
   const handleCardUpdated = (updatedCard: CardDetail) => {
     setCards(prev => prev.map(card => 
       card.id === updatedCard.id 
@@ -252,18 +218,15 @@ const BoardDetailPage: React.FC = () => {
             title: updatedCard.title,
             description: updatedCard.description,
             dueDate: updatedCard.dueDate,
-            // Add other fields as needed
           }
         : card
     ));
   };
 
-  // Handle card deletion from modal
   const handleCardDeleted = (cardId: string) => {
     setCards(prev => prev.filter(card => card.id !== cardId));
   };
 
-  // Load archived cards
   const loadArchivedCards = async () => {
     if (!id || !showArchivedCards) return;
     
@@ -281,30 +244,21 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Restore archived card
   const handleRestoreCard = async (cardId: string) => {
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { status: 'open' });
-      
-      // Remove from archived cards
       setArchivedCards(prev => prev.filter(card => card.id !== cardId));
-      
-      // Refresh active cards
       fetchBoardData();
-      
-      // Show success message
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Error al restaurar la tarjeta');
     }
   };
 
-  // Toggle archived cards view
   const toggleArchivedCards = () => {
     setShowArchivedCards(!showArchivedCards);
   };
 
-  // Load archived cards when toggled
   useEffect(() => {
     if (showArchivedCards) {
       loadArchivedCards();
@@ -313,75 +267,128 @@ const BoardDetailPage: React.FC = () => {
     }
   }, [showArchivedCards, id]);
 
-  // Handle drag end for lists and cards
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
+    console.log('DragEnd Event:', { active: active.id, over: over?.id });
+    
     if (!over || active.id === over.id) {
+      console.log('No valid drop target or same element');
       setActiveDragId(null);
       return;
     }
 
-    // Handle list reordering
     if (active.id.toString().startsWith('list-') || lists.some(l => l.id === active.id)) {
       const oldIndex = lists.findIndex(list => list.id === active.id);
       const newIndex = lists.findIndex(list => list.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-        // Optimistic update
         const newLists = [...lists];
         const [movedList] = newLists.splice(oldIndex, 1);
         newLists.splice(newIndex, 0, movedList);
         
-        // Update order values
         const updatedLists = newLists.map((list, index) => ({
           ...list,
-          order: index,
+          position: index,
         }));
         
         setLists(updatedLists);
         
         try {
-          // Call API to reorder lists
           await apiClient.post('/api/lists/reorder', {
             listId: active.id,
             newOrder: newIndex,
           });
         } catch (err) {
-          // Rollback on error
           setLists(lists);
           setError('Error al reordenar las listas');
         }
       }
     }
     
-    // Handle card movement between lists
     else if (cards.some(c => c.id === active.id)) {
       const sourceListId = cards.find(card => card.id === active.id)?.listId;
-      const targetListId = over.id.toString().startsWith('list-') 
-        ? over.id.toString().replace('list-', '')
-        : cards.find(card => card.id === over.id)?.listId;
+      
+      let targetListId: string | undefined;
+      
+      if (lists.some(list => list.id === over.id)) {
+        targetListId = over.id as string;
+      } 
+      else if (cards.some(card => card.id === over.id)) {
+        targetListId = cards.find(card => card.id === over.id)?.listId;
+      }
+      else if (over.id.toString().startsWith('list-')) {
+        targetListId = over.id.toString().replace('list-', '');
+      }
       
       if (sourceListId && targetListId) {
-        // Optimistic update
-        setCards(prev => prev.map(card => {
-          if (card.id === active.id) {
-            return { ...card, listId: targetListId };
+        if (sourceListId === targetListId) {
+          const listCards = cards.filter(card => card.listId === sourceListId)
+            .sort((a, b) => a.position - b.position);
+          
+          const oldIndex = listCards.findIndex(card => card.id === active.id);
+          const overCard = cards.find(card => card.id === over.id);
+          let newIndex = 0;
+          
+          if (overCard) {
+            newIndex = listCards.findIndex(card => card.id === over.id);
           }
-          return card;
-        }));
-        
-        try {
-          // Call API to move card
-          await apiClient.post('/api/cards/move', {
-            cardId: active.id,
-            targetListId,
-            targetPosition: 0, // Place at top for now
-          });
-        } catch (err) {
-          // Rollback on error
-          fetchBoardData();
-          setError('Error al mover la tarjeta');
+          
+          if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+            const newListCards = [...listCards];
+            const [movedCard] = newListCards.splice(oldIndex, 1);
+            newListCards.splice(newIndex, 0, movedCard);
+            
+            const updatedCards = newListCards.map((card, index) => ({
+              ...card,
+              position: index,
+            }));
+            
+            setCards(prev => prev.map(card => {
+              const updatedCard = updatedCards.find(c => c.id === card.id);
+              return updatedCard || card;
+            }));
+            
+            try {
+              await apiClient.post(`/api/cards/${active.id}/move`, {
+                toListId: sourceListId,
+                position: newIndex,
+              });
+            } catch (err) {
+              fetchBoardData();
+              setError('Error al reordenar la tarjeta');
+            }
+          }
+        } else {
+          const targetListCards = cards.filter(card => card.listId === targetListId)
+            .sort((a, b) => a.position - b.position);
+          
+          let targetPosition = 0;
+          const overCard = cards.find(card => card.id === over.id);
+          
+          if (overCard && overCard.listId === targetListId) {
+            const overIndex = targetListCards.findIndex(card => card.id === over.id);
+            targetPosition = overIndex >= 0 ? overIndex : targetListCards.length;
+          } else {
+            targetPosition = targetListCards.length;
+          }
+          
+          setCards(prev => prev.map(card => {
+            if (card.id === active.id) {
+              return { ...card, listId: targetListId!, position: targetPosition };
+            }
+            return card;
+          }));
+          
+          try {
+            await apiClient.post(`/api/cards/${active.id}/move`, {
+              toListId: targetListId,
+              position: targetPosition,
+            });
+          } catch (err) {
+            fetchBoardData();
+            setError('Error al mover la tarjeta');
+          }
         }
       }
     }
@@ -479,10 +486,9 @@ const BoardDetailPage: React.FC = () => {
     );
   }
 
-  // Group cards by list
   const cardsByList = lists.reduce((acc, list) => {
     acc[list.id] = cards.filter(card => card.listId === list.id)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => a.position - b.position);
     return acc;
   }, {} as Record<string, Card[]>);
 
@@ -509,7 +515,6 @@ const BoardDetailPage: React.FC = () => {
       <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Board Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between">
             <div>
@@ -555,7 +560,6 @@ const BoardDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
             <div className="flex items-center justify-between">
@@ -575,7 +579,6 @@ const BoardDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Lists and Cards with DnD */}
         <DndProvider
           items={listIds}
           onDragEnd={handleDragEnd}
@@ -583,27 +586,32 @@ const BoardDetailPage: React.FC = () => {
           activeId={activeDragId}
         >
           <div className="flex space-x-6 overflow-x-auto pb-6">
-            {lists.sort((a, b) => a.position - b.position).map((list) => (
-              <SortableList
-                key={list.id}
-                list={list}
-                onRename={handleRenameList}
-                onDelete={() => openDeleteModal(list)}
-                onCreateCard={handleCreateCard}
-              >
-                {cardsByList[list.id]?.map((card) => (
-                  <SortableCard
-                    key={card.id}
-                    card={card}
-                    onRename={handleRenameCard}
-                    onDelete={handleDeleteCard}
-                    onClick={() => handleCardClick(card.id)}
-                  />
-                ))}
-              </SortableList>
-            ))}
+            {lists.sort((a, b) => a.position - b.position).map((list) => {
+              const listCards = cardsByList[list.id] || [];
+              const cardIds = listCards.map(card => card.id);
+              
+              return (
+                <SortableList
+                  key={list.id}
+                  list={list}
+                  cardIds={cardIds}
+                  onRename={handleRenameList}
+                  onDelete={() => openDeleteModal(list)}
+                  onCreateCard={handleCreateCard}
+                >
+                  {listCards.map((card) => (
+                    <SortableCard
+                      key={card.id}
+                      card={card}
+                      onRename={handleRenameCard}
+                      onDelete={handleDeleteCard}
+                      onClick={() => handleCardClick(card.id)}
+                    />
+                  ))}
+                </SortableList>
+              );
+            })}
             
-            {/* Create List Form */}
             {isCreatingList ? (
               <div className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4">
                 <div className="mb-4">
@@ -655,7 +663,6 @@ const BoardDetailPage: React.FC = () => {
           </div>
         </DndProvider>
 
-        {/* Archived Cards Section */}
         <div className="mt-12 pt-8 border-t border-white/10">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -743,20 +750,16 @@ const BoardDetailPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Confirmation Modal */}
       {showDeleteModal && listToDelete && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            {/* Backdrop */}
             <div 
               className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
               aria-hidden="true"
               onClick={closeDeleteModal}
             />
             
-            {/* Modal */}
             <div className="relative transform overflow-hidden rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full max-w-md">
-              {/* Header */}
               <div className="p-6 border-b border-white/5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
@@ -769,7 +772,6 @@ const BoardDetailPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* Content */}
               <div className="p-6">
                 <p className="text-[#9db0b9]">
                   ¿Estás seguro de que deseas eliminar la lista <span className="font-medium text-white">"{listToDelete.name}"</span>?
@@ -809,7 +811,6 @@ const BoardDetailPage: React.FC = () => {
                 )}
               </div>
               
-              {/* Footer */}
               <div className="px-6 py-4 border-t border-white/5 bg-[#111618]/50 flex justify-end space-x-3">
                 <Button
                   onClick={closeDeleteModal}
@@ -835,7 +836,6 @@ const BoardDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Card Modal */}
       <CardModal
         cardId={selectedCardId || ''}
         isOpen={showCardModal}
@@ -847,7 +847,6 @@ const BoardDetailPage: React.FC = () => {
   );
 };
 
-// NavBar Component
 const NavBar: React.FC<{ user: any; logout: () => void; onBack: () => void }> = ({ user, logout, onBack }) => (
   <nav className="bg-[#1c2327] border-b border-white/5">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -29,7 +29,8 @@ export const DndProvider: React.FC<DndProviderProps> = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        // Lower threshold so the drag starts with a small movement
+        distance: 2,
       },
     })
   );

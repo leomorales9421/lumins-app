@@ -9,7 +9,7 @@ export interface CardDetail {
   title: string;
   description?: string;
   listId: string;
-  order: number;
+  position: number;
   dueDate?: string;
   priority?: 'P0' | 'P1' | 'P2';
   module?: string;
@@ -790,7 +790,7 @@ const CardModal: React.FC<CardModalProps> = ({
                           disabled={isSubmitting}
                         >
                           <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center mr-1.5">
-                            <span className="text-xs">{assignee.name.charAt(0).toUpperCase()}</span>
+                            <span className="text-xs">{(assignee.name || assignee.email || '?').charAt(0).toUpperCase()}</span>
                           </div>
                           {assignee.name}
                           <span className="ml-1.5">✓</span>
@@ -960,7 +960,7 @@ const CardModal: React.FC<CardModalProps> = ({
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center">
                             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold mr-2">
-                              {comment.author.name.charAt(0).toUpperCase()}
+                              {(comment.author.name || comment.author.email || '?').charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <p className="text-white font-medium">{comment.author.name}</p>
