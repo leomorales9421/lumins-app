@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -32,7 +33,21 @@ export const SortableList: React.FC<SortableListProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: list.id });
+  } = useSortable({ 
+    id: list.id,
+    data: {
+      type: 'list',
+      listId: list.id,
+    }
+  });
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `list-${list.id}`,
+    data: {
+      type: 'list',
+      listId: list.id,
+    }
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(list.name);
@@ -71,9 +86,14 @@ export const SortableList: React.FC<SortableListProps> = ({
   return (
     <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
       <div
-        ref={setNodeRef}
+        ref={(node) => {
+          setNodeRef(node);
+          setDroppableRef(node);
+        }}
         style={style}
-        className={`flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4 ${isDragging ? 'shadow-2xl shadow-primary/20' : ''}`}
+        className={`flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border ${isOver ? 'border-primary/50' : 'border-white/5'} rounded-2xl p-4 ${isDragging ? 'shadow-2xl shadow-primary/20' : ''}`}
+        data-type="list"
+        data-list-id={list.id}
       >
         {/* List Header with Drag Handle */}
         <div className="flex justify-between items-center mb-4">

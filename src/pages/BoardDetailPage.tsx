@@ -270,7 +270,12 @@ const BoardDetailPage: React.FC = () => {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
-    console.log('DragEnd Event:', { active: active.id, over: over?.id });
+    console.log('DragEnd Event:', { 
+      active: active.id, 
+      over: over?.id,
+      activeType: active.data.current?.type,
+      overType: over?.data.current?.type 
+    });
     
     if (!over || active.id === over.id) {
       console.log('No valid drop target or same element');
@@ -278,6 +283,7 @@ const BoardDetailPage: React.FC = () => {
       return;
     }
 
+    // Handle list reordering
     if (active.id.toString().startsWith('list-') || lists.some(l => l.id === active.id)) {
       const oldIndex = lists.findIndex(list => list.id === active.id);
       const newIndex = lists.findIndex(list => list.id === over.id);
@@ -306,25 +312,29 @@ const BoardDetailPage: React.FC = () => {
       }
     }
     
+    // Handle card dragging
     else if (cards.some(c => c.id === active.id)) {
       const sourceListId = cards.find(card => card.id === active.id)?.listId;
       
       let targetListId: string | undefined;
       
-      if (lists.some(list => list.id === over.id)) {
+      // Check droppable types to detect target list
+      if (over.data.current?.type === 'list') {
+        targetListId = (over.data.current as any).listId || (over.id as string);
+      } else if (lists.some(list => list.id === over.id)) {
         targetListId = over.id as string;
-      } 
-      else if (cards.some(card => card.id === over.id)) {
+      } else if (cards.some(card => card.id === over.id)) {
         targetListId = cards.find(card => card.id === over.id)?.listId;
-      }
-      else if (over.id.toString().startsWith('list-')) {
+      } else if (over.id.toString().startsWith('list-')) {
         targetListId = over.id.toString().replace('list-', '');
       }
       
       if (sourceListId && targetListId) {
         if (sourceListId === targetListId) {
-          const listCards = cards.filter(card => card.listId === sourceListId)
-            .sort((a, b) => a.position - b.position);
+          // Reorder within same list
+          const listCards = cards
+            .filter(card => card.listId === sourceListId)
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
           
           const oldIndex = listCards.findIndex(card => card.id === active.id);
           const overCard = cards.find(card => card.id === over.id);
@@ -360,8 +370,10 @@ const BoardDetailPage: React.FC = () => {
             }
           }
         } else {
-          const targetListCards = cards.filter(card => card.listId === targetListId)
-            .sort((a, b) => a.position - b.position);
+          // Move to different list
+          const targetListCards = cards
+            .filter(card => card.listId === targetListId)
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
           
           let targetPosition = 0;
           const overCard = cards.find(card => card.id === over.id);
@@ -372,6 +384,8 @@ const BoardDetailPage: React.FC = () => {
           } else {
             targetPosition = targetListCards.length;
           }
+          
+          console.log('Moving card to list:', targetListId, 'at position:', targetPosition);
           
           setCards(prev => prev.map(card => {
             if (card.id === active.id) {
@@ -386,10 +400,13 @@ const BoardDetailPage: React.FC = () => {
               position: targetPosition,
             });
           } catch (err) {
+            console.error('Error moving card:', err);
             fetchBoardData();
             setError('Error al mover la tarjeta');
           }
         }
+      } else {
+        console.log('Missing source or target list ID:', { sourceListId, targetListId });
       }
     }
     
@@ -487,8 +504,9 @@ const BoardDetailPage: React.FC = () => {
   }
 
   const cardsByList = lists.reduce((acc, list) => {
-    acc[list.id] = cards.filter(card => card.listId === list.id)
-      .sort((a, b) => a.position - b.position);
+    acc[list.id] = cards
+      .filter(card => card.listId === list.id)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
     return acc;
   }, {} as Record<string, Card[]>);
 

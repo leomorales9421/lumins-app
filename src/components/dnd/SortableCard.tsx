@@ -23,7 +23,14 @@ export const SortableCard: React.FC<SortableCardProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card.id });
+  } = useSortable({ 
+    id: card.id,
+    data: {
+      type: 'card',
+      cardId: card.id,
+      listId: card.listId,
+    }
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
