@@ -1,0 +1,740 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import apiClient from '../lib/api-client';
+import type { Board } from '../types/board';
+import Button from '../components/ui/Button';
+import { DndProvider } from '../components/dnd/DndProvider';
+import { SortableList } from '../components/dnd/SortableList';
+import { SortableCard } from '../components/dnd/SortableCard';
+import CardModal from '../components/CardModal';
+import type { CardDetail } from '../components/CardModal';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+
+export interface List {
+  id: string;
+  name: string;  // Changed from 'title' to 'name' to match backend response
+  boardId: string;
+  position: number;  // Changed from 'order' to 'position' to match backend response
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Card {
+  id: string;
+  title: string;
+  description?: string;
+  listId: string;
+  order: number;
+  dueDate?: string;
+  labels?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+const BoardDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  
+  const [board, setBoard] = useState<Board | null>(null);
+  const [lists, setLists] = useState<List[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [isCreatingList, setIsCreatingList] = useState(false);
+  const [newListTitle, setNewListTitle] = useState('');
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  
+  // Modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [listToDelete, setListToDelete] = useState<List | null>(null);
+  const [cardsInListToDelete, setCardsInListToDelete] = useState<number>(0);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  
+  // Card modal state
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+
+  const fetchBoardData = useCallback(async () => {
+    if (!id) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch board details (includes lists)
+      const boardResponse = await apiClient.get<{ data: { board: Board & { lists: List[] } } }>(`/api/boards/${id}`);
+      const boardData = boardResponse.data.board;
+      setBoard(boardData);
+      setLists(boardData.lists || []);
+      
+      // Fetch cards for this board - using the correct route based on backend implementation
+      const cardsResponse = await apiClient.get<{ data: { cards: Card[] } }>(`/api/cards/boards/${id}/cards`);
+      setCards(cardsResponse.data.cards || []);
+      
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar el tablero');
+      console.error('Error fetching board data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  // Memoized list IDs for DnD
+  const listIds = useMemo(() => lists.map(list => list.id), [lists]);
+
+  // Handle list creation
+  const handleCreateList = async () => {
+    if (!newListTitle.trim() || !id) return;
+    
+    try {
+      const response = await apiClient.post<{ data: List }>(`/api/lists/boards/${id}/lists`, {
+        name: newListTitle,  // Changed from 'title' to 'name' to match validation schema
+        position: lists.length,  // Changed from 'order' to 'position' to match validation schema
+      });
+      
+      setLists(prev => [...prev, response.data]);
+      setNewListTitle('');
+      setIsCreatingList(false);
+      setError(null); // Clear any previous errors
+    } catch (err: any) {
+      console.error('Error creating list:', err);
+      console.error('Error response:', err.response?.data);
+      
+      // Extract validation error details from backend response
+      const errorMessage = err.response?.data?.message || err.message || 'Error al crear la lista';
+      const validationErrors = err.response?.data?.errors;
+      
+      if (validationErrors && Array.isArray(validationErrors)) {
+        // Format validation errors for display (array of objects with path and message)
+        const formattedErrors = validationErrors
+          .map((error: any) => `${error.path}: ${error.message}`)
+          .join('; ');
+        setError(`Error de validación: ${formattedErrors}`);
+      } else if (validationErrors) {
+        // Handle object format (if errors is an object instead of array)
+        const formattedErrors = Object.entries(validationErrors)
+          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+          .join('; ');
+        setError(`Error de validación: ${formattedErrors}`);
+      } else {
+        setError(errorMessage);
+      }
+    }
+  };
+
+  // Handle list rename
+  const handleRenameList = async (listId: string, newTitle: string) => {
+    try {
+      await apiClient.patch(`/api/lists/${listId}`, { name: newTitle });
+      setLists(prev => prev.map(list => 
+        list.id === listId ? { ...list, name: newTitle } : list
+      ));
+    } catch (err: any) {
+      setError(err.message || 'Error al renombrar la lista');
+      throw err;
+    }
+  };
+
+  // Handle list deletion
+  const handleDeleteList = async (listId: string) => {
+    try {
+      await apiClient.delete(`/api/lists/${listId}`);
+      setLists(prev => prev.filter(list => list.id !== listId));
+      // Also remove cards from this list
+      setCards(prev => prev.filter(card => card.listId !== listId));
+      return true;
+    } catch (err: any) {
+      // Check if it's the "cannot delete list with cards" error
+      if (err.response?.data?.message?.includes('Cannot delete list with cards')) {
+        const errorMsg = 'No puedes eliminar una lista que contiene tarjetas. Mueve las tarjetas primero a otra lista.';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Error al eliminar la lista';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+    }
+  };
+
+  // Open delete confirmation modal
+  const openDeleteModal = (list: List) => {
+    const cardCount = cards.filter(card => card.listId === list.id).length;
+    setListToDelete(list);
+    setCardsInListToDelete(cardCount);
+    setDeleteError(null);
+    setShowDeleteModal(true);
+  };
+
+  // Close delete confirmation modal
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setListToDelete(null);
+    setCardsInListToDelete(0);
+    setDeleteError(null);
+  };
+
+  // Confirm list deletion
+  const confirmDeleteList = async () => {
+    if (!listToDelete) return;
+    
+    try {
+      await handleDeleteList(listToDelete.id);
+      closeDeleteModal();
+    } catch (err: any) {
+      setDeleteError(err.message || 'Error al eliminar la lista');
+    }
+  };
+
+  // Handle card creation
+  const handleCreateCard = async (listId: string, title: string) => {
+    try {
+      const response = await apiClient.post<{ data: Card }>(`/api/cards/lists/${listId}/cards`, {
+        title,
+        order: cards.filter(card => card.listId === listId).length,
+        priority: 'P2', // Default value from validation schema
+        module: 'other', // Default value from validation schema
+        riskLevel: 'med', // Default value from validation schema
+      });
+      
+      setCards(prev => [...prev, response.data]);
+    } catch (err: any) {
+      setError(err.message || 'Error al crear la tarjeta');
+      throw err;
+    }
+  };
+
+  // Handle card rename
+  const handleRenameCard = async (cardId: string, newTitle: string) => {
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, { title: newTitle });
+      setCards(prev => prev.map(card => 
+        card.id === cardId ? { ...card, title: newTitle } : card
+      ));
+    } catch (err: any) {
+      setError(err.message || 'Error al renombrar la tarjeta');
+      throw err;
+    }
+  };
+
+  // Handle card deletion
+  const handleDeleteCard = async (cardId: string) => {
+    try {
+      await apiClient.delete(`/api/cards/${cardId}`);
+      setCards(prev => prev.filter(card => card.id !== cardId));
+    } catch (err: any) {
+      setError(err.message || 'Error al eliminar la tarjeta');
+      throw err;
+    }
+  };
+
+  // Handle card click to open modal
+  const handleCardClick = (cardId: string) => {
+    setSelectedCardId(cardId);
+    setShowCardModal(true);
+  };
+
+  // Handle card update from modal
+  const handleCardUpdated = (updatedCard: CardDetail) => {
+    setCards(prev => prev.map(card => 
+      card.id === updatedCard.id 
+        ? { 
+            ...card, 
+            title: updatedCard.title,
+            description: updatedCard.description,
+            dueDate: updatedCard.dueDate,
+            // Add other fields as needed
+          }
+        : card
+    ));
+  };
+
+  // Handle card deletion from modal
+  const handleCardDeleted = (cardId: string) => {
+    setCards(prev => prev.filter(card => card.id !== cardId));
+  };
+
+  // Handle drag end for lists and cards
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      setActiveDragId(null);
+      return;
+    }
+
+    // Handle list reordering
+    if (active.id.toString().startsWith('list-') || lists.some(l => l.id === active.id)) {
+      const oldIndex = lists.findIndex(list => list.id === active.id);
+      const newIndex = lists.findIndex(list => list.id === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        // Optimistic update
+        const newLists = [...lists];
+        const [movedList] = newLists.splice(oldIndex, 1);
+        newLists.splice(newIndex, 0, movedList);
+        
+        // Update order values
+        const updatedLists = newLists.map((list, index) => ({
+          ...list,
+          order: index,
+        }));
+        
+        setLists(updatedLists);
+        
+        try {
+          // Call API to reorder lists
+          await apiClient.post('/api/lists/reorder', {
+            listId: active.id,
+            newOrder: newIndex,
+          });
+        } catch (err) {
+          // Rollback on error
+          setLists(lists);
+          setError('Error al reordenar las listas');
+        }
+      }
+    }
+    
+    // Handle card movement between lists
+    else if (cards.some(c => c.id === active.id)) {
+      const sourceListId = cards.find(card => card.id === active.id)?.listId;
+      const targetListId = over.id.toString().startsWith('list-') 
+        ? over.id.toString().replace('list-', '')
+        : cards.find(card => card.id === over.id)?.listId;
+      
+      if (sourceListId && targetListId) {
+        // Optimistic update
+        setCards(prev => prev.map(card => {
+          if (card.id === active.id) {
+            return { ...card, listId: targetListId };
+          }
+          return card;
+        }));
+        
+        try {
+          // Call API to move card
+          await apiClient.post('/api/cards/move', {
+            cardId: active.id,
+            targetListId,
+            targetPosition: 0, // Place at top for now
+          });
+        } catch (err) {
+          // Rollback on error
+          fetchBoardData();
+          setError('Error al mover la tarjeta');
+        }
+      }
+    }
+    
+    setActiveDragId(null);
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  };
+
+  useEffect(() => {
+    fetchBoardData();
+  }, [fetchBoardData]);
+
+  const handleRetry = () => {
+    fetchBoardData();
+  };
+
+  const handleBackToBoards = () => {
+    navigate('/app');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background-dark">
+        <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-[#9db0b9]">Cargando tablero...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background-dark">
+        <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center py-16">
+            <div className="mx-auto w-24 h-24 text-red-500/30 mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-white mb-2">Error al cargar el tablero</h3>
+            <p className="text-[#9db0b9] mb-6 max-w-md mx-auto">{error}</p>
+            <div className="flex justify-center space-x-3">
+              <Button
+                onClick={handleBackToBoards}
+                variant="outline"
+              >
+                Volver a tableros
+              </Button>
+              <Button
+                onClick={handleRetry}
+              >
+                Reintentar
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!board) {
+    return (
+      <div className="min-h-screen bg-background-dark">
+        <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center py-16">
+            <div className="mx-auto w-24 h-24 text-[#3b4b54] mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-white mb-2">Tablero no encontrado</h3>
+            <p className="text-[#9db0b9] mb-6 max-w-md mx-auto">
+              El tablero que buscas no existe o no tienes permisos para verlo.
+            </p>
+            <Button
+              onClick={handleBackToBoards}
+            >
+              Volver a tableros
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Group cards by list
+  const cardsByList = lists.reduce((acc, list) => {
+    acc[list.id] = cards.filter(card => card.listId === list.id)
+      .sort((a, b) => a.order - b.order);
+    return acc;
+  }, {} as Record<string, Card[]>);
+
+  const getVisibilityColor = () => {
+    switch (board.visibility) {
+      case 'public': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'team': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'private': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const getVisibilityText = () => {
+    switch (board.visibility) {
+      case 'public': return 'Público';
+      case 'team': return 'Equipo';
+      case 'private': return 'Privado';
+      default: return board.visibility;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background-dark">
+      <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Board Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">{board.name}</h1>
+              {board.description && (
+                <p className="text-[#9db0b9] mt-2">{board.description}</p>
+              )}
+              <div className="flex items-center mt-4 space-x-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getVisibilityColor()}`}>
+                  {getVisibilityText()}
+                </span>
+                {board.updatedAt && (
+                  <span className="text-sm text-[#9db0b9] flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Actualizado: {new Date(board.updatedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => {/* Implement invite */}}
+                variant="secondary"
+                leftIcon={
+                  <span className="material-symbols-outlined text-sm">person_add</span>
+                }
+              >
+                Invitar miembros
+              </Button>
+              <Button
+                onClick={() => {/* Implement settings */}}
+                variant="outline"
+                leftIcon={
+                  <span className="material-symbols-outlined text-sm">settings</span>
+                }
+              >
+                Configuración
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p className="text-red-400">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="px-3 py-1 text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Lists and Cards with DnD */}
+        <DndProvider
+          items={listIds}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          activeId={activeDragId}
+        >
+          <div className="flex space-x-6 overflow-x-auto pb-6">
+            {lists.sort((a, b) => a.position - b.position).map((list) => (
+              <SortableList
+                key={list.id}
+                list={list}
+                onRename={handleRenameList}
+                onDelete={() => openDeleteModal(list)}
+                onCreateCard={handleCreateCard}
+              >
+                {cardsByList[list.id]?.map((card) => (
+                  <SortableCard
+                    key={card.id}
+                    card={card}
+                    onRename={handleRenameCard}
+                    onDelete={handleDeleteCard}
+                    onClick={() => handleCardClick(card.id)}
+                  />
+                ))}
+              </SortableList>
+            ))}
+            
+            {/* Create List Form */}
+            {isCreatingList ? (
+              <div className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4">
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    value={newListTitle}
+                    onChange={(e) => setNewListTitle(e.target.value)}
+                    placeholder="Título de la lista..."
+                    className="w-full px-4 py-2 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872]"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleCreateList();
+                      if (e.key === 'Escape') {
+                        setNewListTitle('');
+                        setIsCreatingList(false);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleCreateList}
+                    disabled={!newListTitle.trim()}
+                    size="sm"
+                  >
+                    Crear lista
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setNewListTitle('');
+                      setIsCreatingList(false);
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsCreatingList(true)}
+                className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-dashed border-[#3b4b54] hover:border-primary/50 rounded-2xl p-4 text-[#9db0b9] hover:text-white transition-colors flex items-center justify-center"
+              >
+                <span className="material-symbols-outlined text-lg mr-2">add</span>
+                Añadir lista
+              </button>
+            )}
+          </div>
+        </DndProvider>
+      </main>
+
+      {/* Confirmation Modal */}
+      {showDeleteModal && listToDelete && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+              aria-hidden="true"
+              onClick={closeDeleteModal}
+            />
+            
+            {/* Modal */}
+            <div className="relative transform overflow-hidden rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full max-w-md">
+              {/* Header */}
+              <div className="p-6 border-b border-white/5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-red-400 text-lg">warning</span>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold text-white">Eliminar lista</h3>
+                    <p className="text-sm text-[#9db0b9] mt-1">Esta acción no se puede deshacer</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Content */}
+              <div className="p-6">
+                <p className="text-[#9db0b9]">
+                  ¿Estás seguro de que deseas eliminar la lista <span className="font-medium text-white">"{listToDelete.name}"</span>?
+                </p>
+                
+                {cardsInListToDelete > 0 ? (
+                  <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <div className="flex items-start">
+                      <span className="material-symbols-outlined text-yellow-400 text-lg mr-2">error</span>
+                      <div>
+                        <p className="text-yellow-400 font-medium">Lista no vacía</p>
+                        <p className="text-yellow-400/80 text-sm mt-1">
+                          Esta lista contiene <span className="font-bold">{cardsInListToDelete} tarjeta(s)</span>.
+                          Para eliminarla, primero debes mover todas las tarjetas a otra lista o eliminarlas.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <div className="flex items-start">
+                      <span className="material-symbols-outlined text-blue-400 text-lg mr-2">info</span>
+                      <p className="text-blue-400 text-sm">
+                        La lista está vacía y puede ser eliminada de forma segura.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {deleteError && (
+                  <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <div className="flex items-start">
+                      <span className="material-symbols-outlined text-red-400 text-lg mr-2">error</span>
+                      <p className="text-red-400 text-sm">{deleteError}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-white/5 bg-[#111618]/50 flex justify-end space-x-3">
+                <Button
+                  onClick={closeDeleteModal}
+                  variant="outline"
+                  size="sm"
+                  className="px-4"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={confirmDeleteList}
+                  variant="danger"
+                  size="sm"
+                  className="px-4"
+                  disabled={cardsInListToDelete > 0}
+                  leftIcon={cardsInListToDelete === 0 ? <span className="material-symbols-outlined text-sm">delete</span> : undefined}
+                >
+                  {cardsInListToDelete > 0 ? 'Mover tarjetas primero' : 'Eliminar lista'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Card Modal */}
+      <CardModal
+        cardId={selectedCardId || ''}
+        isOpen={showCardModal}
+        onClose={() => setShowCardModal(false)}
+        onCardUpdated={handleCardUpdated}
+        onCardDeleted={handleCardDeleted}
+      />
+    </div>
+  );
+};
+
+// NavBar Component
+const NavBar: React.FC<{ user: any; logout: () => void; onBack: () => void }> = ({ user, logout, onBack }) => (
+  <nav className="bg-[#1c2327] border-b border-white/5">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-center h-16">
+        <div className="flex items-center">
+          <button
+            onClick={onBack}
+            className="mr-4 text-[#9db0b9] hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/5"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+          </button>
+          <div className="text-xl font-bold text-white">Board Manager</div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-[#9db0b9]">
+            Hola, <span className="font-medium text-white">{user?.name || user?.email}</span>
+          </div>
+          <Button
+            onClick={logout}
+            variant="danger"
+            size="sm"
+          >
+            Cerrar sesión
+          </Button>
+        </div>
+      </div>
+    </div>
+  </nav>
+);
+
+export default BoardDetailPage;
