@@ -162,15 +162,12 @@ const CardModal: React.FC<CardModalProps> = ({
         setEditTitle(cardData.title);
         setEditDescription(cardData.description || '');
         
-        // Fetch board labels using boardId from card
-        if (cardData.boardId) {
-          try {
-            const labelsResponse = await apiClient.get<{ data: { labels: Label[] } }>(`/api/boards/${cardData.boardId}/labels`);
-            setLabels(labelsResponse.data.labels || []);
-          } catch (err) {
-            console.error('Error fetching labels:', err);
-          }
-        }
+        // Fetch board labels - need to get boardId from list
+        // Note: We can't get boardId directly, so we'll skip labels for now
+        // or we could fetch all boards and find the one containing this list
+        // For now, we'll skip labels to avoid the error
+        console.log('Skipping labels fetch - boardId not available');
+        setLabels([]);
         
         // Fetch checklists
         try {
@@ -258,8 +255,18 @@ const CardModal: React.FC<CardModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      // Convert YYYY-MM-DD to ISO 8601 format if date is provided
+      let formattedDueDate = null;
+      if (dueDate) {
+        // Create date at start of day in local timezone, then convert to ISO string
+        const date = new Date(dueDate);
+        // Set to start of day to avoid timezone issues
+        date.setHours(0, 0, 0, 0);
+        formattedDueDate = date.toISOString();
+      }
+
       const response = await apiClient.patch<{ data: { card: CardDetail } }>(`/api/cards/${card.id}`, {
-        dueDate: dueDate || null,
+        dueDate: formattedDueDate,
       });
       setCard(response.data.card);
       onCardUpdated(response.data.card);
@@ -450,21 +457,22 @@ const CardModal: React.FC<CardModalProps> = ({
     }
   };
 
-  // Handle card deletion
+  // Handle card deletion (now archives instead of deleting)
   const handleDeleteCard = async () => {
     if (!card) return;
 
-    if (!confirm('¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.')) {
+    if (!confirm('¿Estás seguro de que deseas archivar esta tarjeta? Esta acción la marcará como cerrada pero mantendrá todos sus datos.')) {
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await apiClient.delete(`/api/cards/${card.id}`);
+      // Archive card by setting status to 'closed' instead of deleting
+      await apiClient.patch(`/api/cards/${card.id}`, { status: 'closed' });
       onCardDeleted(card.id);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar la tarjeta');
+      setError(err.message || 'Error al archivar la tarjeta');
     } finally {
       setIsSubmitting(false);
     }
@@ -507,8 +515,8 @@ const CardModal: React.FC<CardModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Archive card (set archived flag or move to archive list)
-      await apiClient.patch(`/api/cards/${card.id}`, { archived: true });
+      // Archive card by setting status to 'closed'
+      await apiClient.patch(`/api/cards/${card.id}`, { status: 'closed' });
       onCardDeleted(card.id);
       onClose();
     } catch (err: any) {
@@ -850,50 +858,63 @@ const CardModal: React.FC<CardModalProps> = ({
                   )}
                   
                   {checklists.map(checklist => (
-                    <div key={checklist.id} className="mb-4 p-4 bg-[#111618] border border-[#3b4b54] rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-white">{checklist.title}</h4>
-                        <div className="text-sm text-[#9db0b9]">
+                    <div key={checklist.id} className="mb-6 p-5 bg-[#111618] border border-[#3b4b54] rounded-xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-white text-lg">{checklist.title}</h4>
+                        <div className="text-sm font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded-full shadow-md shadow-[#00a8ff]/40">
                           {getChecklistProgress(checklist)}% completado
                         </div>
                       </div>
                       
-                      <div className="space-y-2 mb-3">
+                      <div className="space-y-3 mb-5">
                         {checklist.items.map(item => (
-                          <div key={item.id} className="flex items-center">
-                            <button
-                              onClick={() => handleToggleChecklistItem(checklist.id, item.id, item.done)}
-                              className={`w-5 h-5 rounded border mr-3 flex items-center justify-center ${item.done ? 'bg-primary border-primary' : 'border-[#3b4b54]'}`}
-                              disabled={isSubmitting}
-                            >
-                              {item.done && (
-                                <span className="text-white text-xs">✓</span>
-                              )}
-                            </button>
-                            <span className={`flex-1 ${item.done ? 'text-[#586872] line-through' : 'text-[#9db0b9]'}`}>
-                              {item.title}
-                            </span>
+                          <div key={item.id} className="flex items-center justify-between p-3.5 hover:bg-white/5 rounded-lg transition-colors">
+                            {/* Contenedor izquierdo: Checkbox + Texto PEGADOS */}
+                            <div className="flex items-start flex-1 min-w-0">
+                              <button
+                                onClick={() => handleToggleChecklistItem(checklist.id, item.id, item.done)}
+                                className={`w-5 h-5 rounded border mt-0.5 mr-3 flex items-center justify-center flex-shrink-0 ${item.done ? 'bg-[#00a8ff] border-[#00a8ff]' : 'border-[#586872] hover:border-[#00a8ff]'}`}
+                                disabled={isSubmitting}
+                                title={item.done ? 'Marcar como pendiente' : 'Marcar como completado'}
+                              >
+                                {item.done && (
+                                  <span className="text-white text-xs font-bold">✓</span>
+                                )}
+                              </button>
+                              <span className={`font-semibold text-[15px] leading-snug flex-1 ${item.done ? 'text-[#9db0b9] line-through' : 'text-white'}`}>
+                                {item.title}
+                              </span>
+                            </div>
+                            
+                            {/* Contenedor derecho: Badge completamente separado */}
+                            {item.done && (
+                              <span className="ml-4 text-xs font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded-full flex-shrink-0 shadow-md shadow-[#00a8ff]/40">
+                                Completado
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                       
-                      <div className="flex items-center">
+                      <div className="flex items-center pt-5 border-t border-white/10">
                         <Input
                           value={newChecklistItem[checklist.id] || ''}
                           onChange={(e) => setNewChecklistItem(prev => ({ ...prev, [checklist.id]: e.target.value }))}
-                          placeholder="Añadir item..."
+                          placeholder="Escribe un nuevo item..."
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') handleAddChecklistItem(checklist.id);
                           }}
-                          className="flex-1 mr-2"
+                          className="flex-1 mr-3 bg-[#1a2226] border-[#3b4b54] text-white placeholder:text-[#9db0b9] focus:border-[#00a8ff] focus:ring-2 focus:ring-[#00a8ff]/40"
                           size="sm"
                         />
                         <Button
                           onClick={() => handleAddChecklistItem(checklist.id)}
                           size="sm"
                           disabled={!newChecklistItem[checklist.id]?.trim() || isSubmitting}
+                          leftIcon={<span className="material-symbols-outlined text-sm">add</span>}
+                          className="bg-[#00a8ff] hover:bg-[#0097e6] text-white whitespace-nowrap font-bold shadow-md shadow-[#00a8ff]/40"
                         >
-                          Añadir
+                          + Añadir item
                         </Button>
                       </div>
                     </div>

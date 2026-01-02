@@ -56,6 +56,11 @@ const BoardDetailPage: React.FC = () => {
   // Card modal state
   const [showCardModal, setShowCardModal] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  
+  // Archived cards state
+  const [showArchivedCards, setShowArchivedCards] = useState(false);
+  const [archivedCards, setArchivedCards] = useState<Card[]>([]);
+  const [isLoadingArchived, setIsLoadingArchived] = useState(false);
 
   const fetchBoardData = useCallback(async () => {
     if (!id) return;
@@ -64,14 +69,20 @@ const BoardDetailPage: React.FC = () => {
     setError(null);
     
     try {
-      // Fetch board details (includes lists)
-      const boardResponse = await apiClient.get<{ data: { board: Board & { lists: List[] } } }>(`/api/boards/${id}`);
+      // Fetch board details
+      const boardResponse = await apiClient.get<{ data: { board: Board } }>(`/api/boards/${id}`);
       const boardData = boardResponse.data.board;
       setBoard(boardData);
-      setLists(boardData.lists || []);
+      
+      // Fetch lists for this board - using the lists endpoint that filters archived lists
+      const listsResponse = await apiClient.get<{ data: { lists: List[] } }>(`/api/lists/boards/${id}/lists`);
+      setLists(listsResponse.data.lists || []);
       
       // Fetch cards for this board - using the correct route based on backend implementation
-      const cardsResponse = await apiClient.get<{ data: { cards: Card[] } }>(`/api/cards/boards/${id}/cards`);
+      // Only fetch cards with status 'open' (not archived/closed)
+      const cardsResponse = await apiClient.get<{ data: { cards: Card[] } }>(`/api/cards/boards/${id}/cards`, {
+        params: { status: 'open' }
+      });
       setCards(cardsResponse.data.cards || []);
       
     } catch (err: any) {
@@ -90,12 +101,13 @@ const BoardDetailPage: React.FC = () => {
     if (!newListTitle.trim() || !id) return;
     
     try {
-      const response = await apiClient.post<{ data: List }>(`/api/lists/boards/${id}/lists`, {
-        name: newListTitle,  // Changed from 'title' to 'name' to match validation schema
-        position: lists.length,  // Changed from 'order' to 'position' to match validation schema
+      const response = await apiClient.post<{ data: { list: List } }>(`/api/lists/boards/${id}/lists`, {
+        name: newListTitle,
       });
       
-      setLists(prev => [...prev, response.data]);
+      // The backend response structure is { data: { list: List } }
+      const newList = response.data.list;
+      setLists(prev => [...prev, newList]);
       setNewListTitle('');
       setIsCreatingList(false);
       setError(null); // Clear any previous errors
@@ -138,25 +150,18 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  // Handle list deletion
-  const handleDeleteList = async (listId: string) => {
+  // Handle list archiving (instead of deletion)
+  const handleArchiveList = async (listId: string) => {
     try {
-      await apiClient.delete(`/api/lists/${listId}`);
+      await apiClient.patch(`/api/lists/${listId}/archive`);
       setLists(prev => prev.filter(list => list.id !== listId));
-      // Also remove cards from this list
+      // Also remove cards from this list from active view
       setCards(prev => prev.filter(card => card.listId !== listId));
       return true;
     } catch (err: any) {
-      // Check if it's the "cannot delete list with cards" error
-      if (err.response?.data?.message?.includes('Cannot delete list with cards')) {
-        const errorMsg = 'No puedes eliminar una lista que contiene tarjetas. Mueve las tarjetas primero a otra lista.';
-        setError(errorMsg);
-        throw new Error(errorMsg);
-      } else {
-        const errorMsg = err.response?.data?.message || err.message || 'Error al eliminar la lista';
-        setError(errorMsg);
-        throw new Error(errorMsg);
-      }
+      const errorMsg = err.response?.data?.message || err.message || 'Error al archivar la lista';
+      setError(errorMsg);
+      throw new Error(errorMsg);
     }
   };
 
@@ -177,30 +182,31 @@ const BoardDetailPage: React.FC = () => {
     setDeleteError(null);
   };
 
-  // Confirm list deletion
-  const confirmDeleteList = async () => {
+  // Confirm list archiving
+  const confirmArchiveList = async () => {
     if (!listToDelete) return;
     
     try {
-      await handleDeleteList(listToDelete.id);
+      await handleArchiveList(listToDelete.id);
       closeDeleteModal();
     } catch (err: any) {
-      setDeleteError(err.message || 'Error al eliminar la lista');
+      setDeleteError(err.message || 'Error al archivar la lista');
     }
   };
 
   // Handle card creation
   const handleCreateCard = async (listId: string, title: string) => {
     try {
-      const response = await apiClient.post<{ data: Card }>(`/api/cards/lists/${listId}/cards`, {
+      const response = await apiClient.post<{ data: { card: Card } }>(`/api/cards/lists/${listId}/cards`, {
         title,
-        order: cards.filter(card => card.listId === listId).length,
         priority: 'P2', // Default value from validation schema
         module: 'other', // Default value from validation schema
         riskLevel: 'med', // Default value from validation schema
       });
       
-      setCards(prev => [...prev, response.data]);
+      // The backend response structure is { data: { card: Card } }
+      const newCard = response.data.card;
+      setCards(prev => [...prev, newCard]);
     } catch (err: any) {
       setError(err.message || 'Error al crear la tarjeta');
       throw err;
@@ -256,6 +262,56 @@ const BoardDetailPage: React.FC = () => {
   const handleCardDeleted = (cardId: string) => {
     setCards(prev => prev.filter(card => card.id !== cardId));
   };
+
+  // Load archived cards
+  const loadArchivedCards = async () => {
+    if (!id || !showArchivedCards) return;
+    
+    setIsLoadingArchived(true);
+    try {
+      const response = await apiClient.get<{ data: { cards: Card[] } }>(`/api/cards/boards/${id}/cards`, {
+        params: { status: 'closed' }
+      });
+      setArchivedCards(response.data.cards || []);
+    } catch (err: any) {
+      console.error('Error loading archived cards:', err);
+      setError(err.message || 'Error al cargar las tarjetas archivadas');
+    } finally {
+      setIsLoadingArchived(false);
+    }
+  };
+
+  // Restore archived card
+  const handleRestoreCard = async (cardId: string) => {
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, { status: 'open' });
+      
+      // Remove from archived cards
+      setArchivedCards(prev => prev.filter(card => card.id !== cardId));
+      
+      // Refresh active cards
+      fetchBoardData();
+      
+      // Show success message
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Error al restaurar la tarjeta');
+    }
+  };
+
+  // Toggle archived cards view
+  const toggleArchivedCards = () => {
+    setShowArchivedCards(!showArchivedCards);
+  };
+
+  // Load archived cards when toggled
+  useEffect(() => {
+    if (showArchivedCards) {
+      loadArchivedCards();
+    } else {
+      setArchivedCards([]);
+    }
+  }, [showArchivedCards, id]);
 
   // Handle drag end for lists and cards
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -598,6 +654,93 @@ const BoardDetailPage: React.FC = () => {
             )}
           </div>
         </DndProvider>
+
+        {/* Archived Cards Section */}
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center">
+                <span className="material-symbols-outlined text-lg mr-2">archive</span>
+                Tarjetas Archivadas
+              </h2>
+              <p className="text-[#9db0b9] text-sm mt-1">
+                Tarjetas que han sido archivadas (status: 'closed'). Puedes restaurarlas cuando lo necesites.
+              </p>
+            </div>
+            <Button
+              onClick={toggleArchivedCards}
+              variant="secondary"
+              leftIcon={
+                <span className="material-symbols-outlined text-sm">
+                  {showArchivedCards ? 'visibility_off' : 'visibility'}
+                </span>
+              }
+            >
+              {showArchivedCards ? 'Ocultar archivadas' : 'Mostrar archivadas'}
+            </Button>
+          </div>
+
+          {showArchivedCards && (
+            <div className="bg-[#111618] border border-[#3b4b54] rounded-xl p-6">
+              {isLoadingArchived ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <p className="ml-3 text-[#9db0b9]">Cargando tarjetas archivadas...</p>
+                </div>
+              ) : archivedCards.length > 0 ? (
+                <div className="space-y-4">
+                  {archivedCards.map(card => (
+                    <div key={card.id} className="flex items-center justify-between p-4 bg-[#1a2226] border border-[#3b4b54] rounded-lg hover:border-primary/30 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center">
+                          <span className="material-symbols-outlined text-[#9db0b9] mr-3">description</span>
+                          <div>
+                            <h4 className="font-medium text-white">{card.title}</h4>
+                            {card.description && (
+                              <p className="text-sm text-[#9db0b9] mt-1 line-clamp-2">{card.description}</p>
+                            )}
+                            {card.dueDate && (
+                              <p className="text-xs text-[#586872] mt-1">
+                                Vencimiento: {new Date(card.dueDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Button
+                          onClick={() => handleRestoreCard(card.id)}
+                          size="sm"
+                          variant="outline"
+                          leftIcon={<span className="material-symbols-outlined text-sm">restore</span>}
+                        >
+                          Restaurar
+                        </Button>
+                        <button
+                          onClick={() => handleCardClick(card.id)}
+                          className="text-[#9db0b9] hover:text-white p-2 rounded-full hover:bg-white/5 transition-colors"
+                          title="Ver detalles"
+                        >
+                          <span className="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-16 h-16 text-[#3b4b54] mb-4">
+                    <span className="material-symbols-outlined text-4xl">archive</span>
+                  </div>
+                  <h3 className="text-lg font-medium text-white mb-2">No hay tarjetas archivadas</h3>
+                  <p className="text-[#9db0b9] max-w-md mx-auto">
+                    Las tarjetas que archives aparecerán aquí. Puedes restaurarlas en cualquier momento.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Confirmation Modal */}
@@ -677,14 +820,14 @@ const BoardDetailPage: React.FC = () => {
                   Cancelar
                 </Button>
                 <Button
-                  onClick={confirmDeleteList}
+                  onClick={confirmArchiveList}
                   variant="danger"
                   size="sm"
                   className="px-4"
                   disabled={cardsInListToDelete > 0}
-                  leftIcon={cardsInListToDelete === 0 ? <span className="material-symbols-outlined text-sm">delete</span> : undefined}
+                  leftIcon={<span className="material-symbols-outlined text-sm">archive</span>}
                 >
-                  {cardsInListToDelete > 0 ? 'Mover tarjetas primero' : 'Eliminar lista'}
+                  {cardsInListToDelete > 0 ? 'Mover tarjetas primero' : 'Archivar lista'}
                 </Button>
               </div>
             </div>
