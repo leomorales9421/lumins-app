@@ -67,8 +67,8 @@ export const BoardsPage: React.FC = () => {
 
   const handleCreateBoard = async (boardData: CreateBoardRequest) => {
     try {
-      const response = await apiClient.post<{ data: Board }>('/api/boards', boardData);
-      const newBoard = response.data;
+      const response = await apiClient.post<{ data: { board: Board } }>('/api/boards', boardData);
+      const newBoard = response.data.board;
       setBoards(prev => [newBoard, ...prev]);
       navigate(`/boards/${newBoard.id}`);
     } catch (err: any) {

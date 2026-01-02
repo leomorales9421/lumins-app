@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
@@ -434,12 +435,34 @@ const BoardDetailPage: React.FC = () => {
       <div className="min-h-screen bg-background-dark">
         <NavBar user={user} logout={logout} onBack={handleBackToBoards} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-center h-64">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center h-64"
+          >
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-[#9db0b9]">Cargando tablero...</p>
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/20 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-6 text-[#9db0b9] text-lg font-medium"
+              >
+                Cargando tablero...
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-2 text-[#586872] text-sm"
+              >
+                Preparando tu espacio de trabajo
+              </motion.p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     );
