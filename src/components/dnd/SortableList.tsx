@@ -91,12 +91,16 @@ export const SortableList: React.FC<SortableListProps> = ({
           setDroppableRef(node);
         }}
         style={style}
-        className={`flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border ${isOver ? 'border-primary/50' : 'border-white/5'} rounded-2xl p-4 ${isDragging ? 'shadow-2xl shadow-primary/20' : ''}`}
+        className={`flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border ${isOver ? 'border-primary/50' : 'border-white/5'} rounded-2xl overflow-hidden ${isDragging ? 'shadow-2xl shadow-primary/20' : ''}`}
         data-type="list"
         data-list-id={list.id}
       >
-        {/* List Header with Drag Handle */}
-        <div className="flex justify-between items-center mb-4">
+        {/* Gradient Top Bar */}
+        <div className="h-1 bg-gradient-to-r from-primary via-blue-500 to-purple-500"></div>
+        
+        <div className="p-4">
+          {/* List Header with Drag Handle */}
+          <div className="flex justify-between items-center mb-4">
           <div className="flex items-center flex-1">
             <button
               {...attributes}
@@ -163,58 +167,59 @@ export const SortableList: React.FC<SortableListProps> = ({
           {children}
         </div>
       
-      {/* Create Card Form */}
-      {isCreating && (
-        <div className="mb-3">
-          <Input
-            value={newCardTitle}
-            onChange={(e) => setNewCardTitle(e.target.value)}
-            placeholder="Título de la tarjeta..."
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !isSubmitting) handleCreateCard();
-              if (e.key === 'Escape') {
-                setNewCardTitle('');
-                setIsCreating(false);
-              }
-            }}
-            disabled={isSubmitting}
-            autoFocus
-            className="mb-2"
-          />
-          <div className="flex space-x-2">
-            <Button
-              onClick={handleCreateCard}
-              isLoading={isSubmitting}
-              disabled={isSubmitting || !newCardTitle.trim()}
-              size="sm"
-            >
-              Añadir
-            </Button>
-            <Button
-              onClick={() => {
-                setNewCardTitle('');
-                setIsCreating(false);
+        {/* Create Card Form */}
+        {isCreating && (
+          <div className="mb-3">
+            <Input
+              value={newCardTitle}
+              onChange={(e) => setNewCardTitle(e.target.value)}
+              placeholder="Título de la tarjeta..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isSubmitting) handleCreateCard();
+                if (e.key === 'Escape') {
+                  setNewCardTitle('');
+                  setIsCreating(false);
+                }
               }}
-              variant="outline"
-              size="sm"
               disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
+              autoFocus
+              className="mb-2"
+            />
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleCreateCard}
+                isLoading={isSubmitting}
+                disabled={isSubmitting || !newCardTitle.trim()}
+                size="sm"
+              >
+                Añadir
+              </Button>
+              <Button
+                onClick={() => {
+                  setNewCardTitle('');
+                  setIsCreating(false);
+                }}
+                variant="outline"
+                size="sm"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </Button>
+            </div>
           </div>
+        )}
+        
+        {/* Add Card Button (when not creating) */}
+        {!isCreating && (
+          <button
+            onClick={() => setIsCreating(true)}
+            className="w-full text-left p-3 text-[#9db0b9] hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center"
+          >
+            <span className="material-symbols-outlined text-sm mr-2">add</span>
+            Añadir tarjeta
+          </button>
+        )}
         </div>
-      )}
-      
-      {/* Add Card Button (when not creating) */}
-      {!isCreating && (
-        <button
-          onClick={() => setIsCreating(true)}
-          className="w-full text-left p-3 text-[#9db0b9] hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center"
-        >
-          <span className="material-symbols-outlined text-sm mr-2">add</span>
-          Añadir tarjeta
-        </button>
-      )}
       </div>
     </SortableContext>
   );

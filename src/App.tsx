@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider, NotificationContainer } from './components/NotificationProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 import LoginPage from './pages/LoginPage';
@@ -11,29 +12,32 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <PageTransitionWrapper>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <BoardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/boards/:id"
-              element={
-                <ProtectedRoute>
-                  <BoardDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/app" replace />} />
-            <Route path="*" element={<Navigate to="/app" replace />} />
-          </Routes>
-        </PageTransitionWrapper>
+        <NotificationProvider>
+          <PageTransitionWrapper>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/app"
+                element={
+                  <ProtectedRoute>
+                    <BoardsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/boards/:id"
+                element={
+                  <ProtectedRoute>
+                    <BoardDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/app" replace />} />
+              <Route path="*" element={<Navigate to="/app" replace />} />
+            </Routes>
+            <NotificationContainer />
+          </PageTransitionWrapper>
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );

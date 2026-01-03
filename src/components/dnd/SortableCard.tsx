@@ -93,11 +93,15 @@ export const SortableCard: React.FC<SortableCardProps> = ({
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-[#111618] rounded-lg p-4 border border-[#3b4b54] hover:border-primary/30 cursor-pointer transition-all card-hover ${isDragging ? 'shadow-2xl shadow-primary/20 rotate-1' : ''}`}
+      className={`bg-[#111618] rounded-lg border border-[#3b4b54] hover:border-primary/30 cursor-pointer transition-all card-hover overflow-hidden ${isDragging ? 'shadow-2xl shadow-primary/20 rotate-1' : ''}`}
       onClick={onClick}
     >
-      {/* Card Header with Drag Handle */}
-      <div className="flex justify-between items-start mb-2">
+      {/* Subtle Gradient Top Bar */}
+      <div className="h-0.5 bg-gradient-to-r from-primary/50 via-blue-400/50 to-purple-400/50"></div>
+      
+      <div className="p-4">
+        {/* Card Header with Drag Handle */}
+        <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
           {isEditing ? (
             <input
@@ -199,6 +203,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

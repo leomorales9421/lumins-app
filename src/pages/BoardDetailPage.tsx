@@ -9,6 +9,7 @@ import { DndProvider } from '../components/dnd/DndProvider';
 import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard } from '../components/dnd/SortableCard';
 import CardModal from '../components/CardModal';
+import BoardMetrics from '../components/BoardMetrics';
 import type { CardDetail } from '../components/CardModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
@@ -59,6 +60,9 @@ const BoardDetailPage: React.FC = () => {
   const [showArchivedCards, setShowArchivedCards] = useState(false);
   const [archivedCards, setArchivedCards] = useState<Card[]>([]);
   const [isLoadingArchived, setIsLoadingArchived] = useState(false);
+  
+  // Tab state for switching between lists and metrics
+  const [activeTab, setActiveTab] = useState<'lists' | 'metrics'>('lists');
 
   const fetchBoardData = useCallback(async () => {
     if (!id) return;
@@ -601,6 +605,34 @@ const BoardDetailPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Tabs for switching between lists and metrics */}
+        <div className="mb-6 border-b border-white/10">
+          <div className="flex space-x-1">
+            <button
+              onClick={() => setActiveTab('lists')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                activeTab === 'lists'
+                  ? 'bg-[#1c2327] text-white border-b-2 border-primary'
+                  : 'text-[#9db0b9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg mr-2 align-middle">view_list</span>
+              Listas
+            </button>
+            <button
+              onClick={() => setActiveTab('metrics')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                activeTab === 'metrics'
+                  ? 'bg-[#1c2327] text-white border-b-2 border-primary'
+                  : 'text-[#9db0b9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg mr-2 align-middle">analytics</span>
+              Métricas
+            </button>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
             <div className="flex items-center justify-between">
@@ -620,89 +652,95 @@ const BoardDetailPage: React.FC = () => {
           </div>
         )}
 
-        <DndProvider
-          items={listIds}
-          onDragEnd={handleDragEnd}
-          onDragStart={handleDragStart}
-          activeId={activeDragId}
-        >
-          <div className="flex space-x-6 overflow-x-auto pb-6">
-            {lists.sort((a, b) => a.position - b.position).map((list) => {
-              const listCards = cardsByList[list.id] || [];
-              const cardIds = listCards.map(card => card.id);
+        {activeTab === 'lists' ? (
+          <DndProvider
+            items={listIds}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            activeId={activeDragId}
+          >
+            <div className="flex space-x-6 overflow-x-auto pb-6">
+              {lists.sort((a, b) => a.position - b.position).map((list) => {
+                const listCards = cardsByList[list.id] || [];
+                const cardIds = listCards.map(card => card.id);
+                
+                return (
+                  <SortableList
+                    key={list.id}
+                    list={list}
+                    cardIds={cardIds}
+                    onRename={handleRenameList}
+                    onDelete={() => openDeleteModal(list)}
+                    onCreateCard={handleCreateCard}
+                  >
+                    {listCards.map((card) => (
+                      <SortableCard
+                        key={card.id}
+                        card={card}
+                        onRename={handleRenameCard}
+                        onDelete={handleDeleteCard}
+                        onClick={() => handleCardClick(card.id)}
+                      />
+                    ))}
+                  </SortableList>
+                );
+              })}
               
-              return (
-                <SortableList
-                  key={list.id}
-                  list={list}
-                  cardIds={cardIds}
-                  onRename={handleRenameList}
-                  onDelete={() => openDeleteModal(list)}
-                  onCreateCard={handleCreateCard}
-                >
-                  {listCards.map((card) => (
-                    <SortableCard
-                      key={card.id}
-                      card={card}
-                      onRename={handleRenameCard}
-                      onDelete={handleDeleteCard}
-                      onClick={() => handleCardClick(card.id)}
+              {isCreatingList ? (
+                <div className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4">
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      value={newListTitle}
+                      onChange={(e) => setNewListTitle(e.target.value)}
+                      placeholder="Título de la lista..."
+                      className="w-full px-4 py-2 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872]"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleCreateList();
+                        if (e.key === 'Escape') {
+                          setNewListTitle('');
+                          setIsCreatingList(false);
+                        }
+                      }}
                     />
-                  ))}
-                </SortableList>
-              );
-            })}
-            
-            {isCreatingList ? (
-              <div className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4">
-                <div className="mb-4">
-                  <input
-                    type="text"
-                    value={newListTitle}
-                    onChange={(e) => setNewListTitle(e.target.value)}
-                    placeholder="Título de la lista..."
-                    className="w-full px-4 py-2 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872]"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleCreateList();
-                      if (e.key === 'Escape') {
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleCreateList}
+                      disabled={!newListTitle.trim()}
+                      size="sm"
+                    >
+                      Crear lista
+                    </Button>
+                    <Button
+                      onClick={() => {
                         setNewListTitle('');
                         setIsCreatingList(false);
-                      }
-                    }}
-                  />
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={handleCreateList}
-                    disabled={!newListTitle.trim()}
-                    size="sm"
-                  >
-                    Crear lista
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setNewListTitle('');
-                      setIsCreatingList(false);
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsCreatingList(true)}
-                className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-dashed border-[#3b4b54] hover:border-primary/50 rounded-2xl p-4 text-[#9db0b9] hover:text-white transition-colors flex items-center justify-center"
-              >
-                <span className="material-symbols-outlined text-lg mr-2">add</span>
-                Añadir lista
-              </button>
-            )}
+              ) : (
+                <button
+                  onClick={() => setIsCreatingList(true)}
+                  className="flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border border-dashed border-[#3b4b54] hover:border-primary/50 rounded-2xl p-4 text-[#9db0b9] hover:text-white transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-lg mr-2">add</span>
+                  Añadir lista
+                </button>
+              )}
+            </div>
+          </DndProvider>
+        ) : (
+          <div className="bg-gradient-to-br from-[#1c2327] to-[#111618] border border-white/5 rounded-2xl overflow-hidden">
+            {id && <BoardMetrics boardId={id} />}
           </div>
-        </DndProvider>
+        )}
 
         <div className="mt-12 pt-8 border-t border-white/10">
           <div className="flex items-center justify-between mb-6">
