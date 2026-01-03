@@ -6,6 +6,13 @@ export interface Board {
   createdAt?: string;
   updatedAt?: string;
   starred?: boolean;
+  ownerId?: string;
+  _count?: {
+    lists?: number;
+    cards?: number;
+    labels?: number;
+    members?: number;
+  };
 }
 
 export interface BoardListResponse {

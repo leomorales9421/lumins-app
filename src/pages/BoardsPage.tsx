@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import BoardCard from '../components/BoardCard';
 import CreateBoardModal from '../components/CreateBoardModal';
+import DeleteBoardModal from '../components/DeleteBoardModal';
 import type { Board, BoardListResponse, CreateBoardRequest } from '../types/board';
 
 export const BoardsPage: React.FC = () => {
@@ -15,6 +16,17 @@ export const BoardsPage: React.FC = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'starred' | 'recent'>('all');
+  
+  // Delete board state
+  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteCounts, setDeleteCounts] = useState<{
+    lists: number;
+    cards: number;
+    labels: number;
+    members: number;
+  } | null>(null);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +106,50 @@ export const BoardsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteBoard = (boardId: string) => {
+    const board = boards.find(b => b.id === boardId);
+    if (board) {
+      setBoardToDelete(board);
+      setIsDeleteModalOpen(true);
+      
+      // Get counts for the modal (simulate from existing data)
+      const counts = {
+        lists: board._count?.lists || 0,
+        cards: board._count?.cards || 0,
+        labels: board._count?.labels || 0,
+        members: board._count?.members || 0,
+      };
+      setDeleteCounts(counts);
+    }
+  };
+
+  const confirmDeleteBoard = async () => {
+    if (!boardToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      // Call API to delete board
+      const response = await apiClient.delete(`/api/boards/${boardToDelete.id}`);
+      
+      // Remove from local state
+      setBoards(prev => prev.filter(board => board.id !== boardToDelete.id));
+      
+      // Close modal and reset state
+      setIsDeleteModalOpen(false);
+      setBoardToDelete(null);
+      setDeleteCounts(null);
+      
+      // Show success message (optional)
+      console.log('Board deleted successfully:', response.data);
+      
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al eliminar el tablero');
+      console.error('Error deleting board:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -113,9 +169,14 @@ export const BoardsPage: React.FC = () => {
     fetchBoards();
   };
 
+  // Check if user is admin (owner of the board)
+  const isUserAdmin = (board: Board) => {
+    return board.ownerId === user?.id;
+  };
+
   if (isLoading && boards.length === 0) {
     return (
-      <div className="min-h-screen bg-background-dark">
+      <div className="min-h-screen bg-gradient-to-br from-[#0d1117] to-[#1c2327]">
         <NavBar user={user} logout={logout} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-center h-64">
@@ -130,7 +191,7 @@ export const BoardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark">
+    <div className="min-h-screen bg-gradient-to-br from-[#0d1117] to-[#1c2327]">
       <NavBar user={user} logout={logout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,19 +208,19 @@ export const BoardsPage: React.FC = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'all' ? 'bg-primary text-white' : 'bg-[#111618] text-[#9db0b9] hover:text-white border border-[#3b4b54]'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'all' ? 'bg-primary text-white' : 'bg-white/5 text-[#9db0b9] hover:text-white border border-white/10'}`}
             >
               Todos
             </button>
             <button
               onClick={() => setActiveFilter('starred')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'starred' ? 'bg-primary text-white' : 'bg-[#111618] text-[#9db0b9] hover:text-white border border-[#3b4b54]'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'starred' ? 'bg-primary text-white' : 'bg-white/5 text-[#9db0b9] hover:text-white border border-white/10'}`}
             >
               Favoritos
             </button>
             <button
               onClick={() => setActiveFilter('recent')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'recent' ? 'bg-primary text-white' : 'bg-[#111618] text-[#9db0b9] hover:text-white border border-[#3b4b54]'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === 'recent' ? 'bg-primary text-white' : 'bg-white/5 text-[#9db0b9] hover:text-white border border-white/10'}`}
             >
               Recientes
             </button>
@@ -172,7 +233,7 @@ export const BoardsPage: React.FC = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Buscar tableros..."
-                className="w-full sm:w-64 px-4 py-2 pl-10 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872]"
+                className="w-full sm:w-64 px-4 py-2 pl-10 border border-white/10 bg-white/5 text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#6d7f88]"
               />
               <svg className="absolute left-3 top-2.5 w-5 h-5 text-[#9db0b9]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -215,12 +276,14 @@ export const BoardsPage: React.FC = () => {
                 key={board.id}
                 board={board}
                 onStarToggle={handleStarToggle}
+                onDelete={handleDeleteBoard}
+                isAdmin={isUserAdmin(board)}
               />
             ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="mx-auto w-24 h-24 text-[#3b4b54] mb-4">
+            <div className="mx-auto w-24 h-24 text-[#6d7f88] mb-4">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
               </svg>
@@ -246,7 +309,7 @@ export const BoardsPage: React.FC = () => {
 
         {/* Stats */}
         {boards.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-white/5">
+          <div className="mt-12 pt-8 border-t border-white/10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[#1c2327]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
                 <div className="flex items-center">
@@ -309,13 +372,26 @@ export const BoardsPage: React.FC = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={handleCreateBoard}
       />
+
+      <DeleteBoardModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setBoardToDelete(null);
+          setDeleteCounts(null);
+        }}
+        onConfirm={confirmDeleteBoard}
+        boardName={boardToDelete?.name || ''}
+        counts={deleteCounts}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
 
 // NavBar Component
 const NavBar: React.FC<{ user: any; logout: () => void }> = ({ user, logout }) => (
-  <nav className="bg-[#1c2327] border-b border-white/5">
+  <nav className="bg-[#1c2327] border-b border-white/10">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center h-16">
         <div className="flex items-center">
