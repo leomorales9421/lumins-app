@@ -738,8 +738,8 @@ const CardModal: React.FC<CardModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Labels */}
-                <div>
+                {/* Labels - Ocultado temporalmente */}
+                {/* <div>
                   <h3 className="font-semibold text-white flex items-center mb-3">
                     <span className="material-symbols-outlined text-lg mr-2">label</span>
                     Etiquetas
@@ -772,10 +772,10 @@ const CardModal: React.FC<CardModalProps> = ({
                       No hay etiquetas disponibles en este tablero.
                     </p>
                   )}
-                </div>
+                </div> */}
                 
-                {/* Assignees */}
-                <div>
+                {/* Assignees - Ocultado temporalmente */}
+                {/* <div>
                   <h3 className="font-semibold text-white flex items-center mb-3">
                     <span className="material-symbols-outlined text-lg mr-2">person</span>
                     Asignados
@@ -805,7 +805,7 @@ const CardModal: React.FC<CardModalProps> = ({
                   <div className="text-sm text-[#9db0b9]">
                     <p>Haz clic en un miembro para asignarlo o desasignarlo de esta tarjeta.</p>
                   </div>
-                </div>
+                </div> */}
                 
                 {/* Checklists */}
                 <div>
