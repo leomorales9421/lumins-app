@@ -26,20 +26,78 @@
 
   /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(122, 90, 248, 0.1);
+    background: rgba(122, 90, 248, 0.05);
     border-radius: 9999px;
   }
 
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(122, 90, 248, 0.3);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(122, 90, 248, 0.2);
+    background: rgba(122, 90, 248, 0.5);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* TipTap Placeholder & Editor Styles */
+  .prose-mirror-container p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #806F9B;
+    pointer-events: none;
+    height: 0;
+  }
+
+  .prose-mirror-container {
+    @apply outline-none;
+  }
+
+  .prose-mirror-container h1 {
+    @apply text-2xl font-black text-zinc-900 mt-4 mb-2 tracking-tight;
+  }
+
+  .prose-mirror-container h2 {
+    @apply text-xl font-extrabold text-zinc-900 mt-4 mb-2 tracking-tight;
+  }
+
+  .prose-mirror-container p {
+    @apply text-[#806F9B] text-sm leading-relaxed mb-2;
+  }
+
+  .prose-mirror-container ul {
+    @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#806F9B];
+  }
+
+  .prose-mirror-container ol {
+    @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#806F9B];
+  }
+
+  .prose-mirror-container blockquote {
+    @apply border-l-4 border-[#7A5AF8] pl-4 italic text-[#806F9B] bg-[#F3E8FF]/50 p-2 rounded-r-lg my-2;
+  }
+
+  .prose-mirror-container pre {
+    @apply bg-zinc-900 text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto;
+  }
+
+  .prose-mirror-container code {
+    @apply bg-purple-100 text-[#7A5AF8] px-1.5 py-0.5 rounded-md text-xs font-mono;
+  }
+
+  .prose-mirror-container a {
+    @apply text-[#7A5AF8] underline hover:text-[#E91E63] transition-colors cursor-pointer;
+  }
+
+  .prose-mirror-container img {
+    @apply rounded-xl max-w-full h-auto my-6 border-2 border-[#E9D5FF]/50 shadow-lg mx-auto block;
   }
 }

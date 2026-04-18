@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard } from '../components/dnd/SortableCard';
-import CardModal from '../components/CardModal';
+import CardDetailModal from '../components/CardDetailModal';
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +33,8 @@ const BoardDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
+  const [isAddingList, setIsAddingList] = useState(false);
+  const [newListTitle, setNewListTitle] = useState('');
 
   const fetchBoard = useCallback(async () => {
     if (!id) return;
@@ -80,6 +82,40 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
+  const handleAddList = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newListTitle.trim() || !id) return;
+    try {
+      await apiClient.post(`/api/lists/boards/${id}/lists`, { 
+        name: newListTitle.trim(),
+        position: (lists.length + 1) * 1000
+      });
+      setNewListTitle('');
+      setIsAddingList(false);
+      fetchBoard();
+    } catch (err) {
+      console.error('Error adding list:', err);
+    }
+  };
+
+  const handleUpdateList = async (listId: string, name: string) => {
+    try {
+      await apiClient.patch(`/api/lists/${listId}`, { name });
+      fetchBoard();
+    } catch (err) {
+      console.error('Error updating list:', err);
+    }
+  };
+
+  const handleDeleteList = async (listId: string) => {
+    try {
+      await apiClient.delete(`/api/lists/${listId}`);
+      fetchBoard();
+    } catch (err) {
+      console.error('Error deleting list:', err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F3E8FF] flex flex-col items-center justify-center font-sans">
@@ -118,14 +154,14 @@ const BoardDetailPage: React.FC = () => {
         </header>
 
         {/* DND Canvas expanded */}
-        <main className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar p-12">
+        <main className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar">
           <DndContext 
             sensors={sensors} 
             collisionDetection={closestCorners} 
             onDragStart={handleDragStart} 
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-10 h-full items-start">
+            <div className="flex gap-5 h-full items-start p-12 min-w-max">
               <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
                 {lists.map((list) => (
                   <SortableList 
@@ -133,14 +169,44 @@ const BoardDetailPage: React.FC = () => {
                     list={list} 
                     onCardClick={setSelectedCardId}
                     onAddCard={handleAddCard}
+                    onUpdateList={handleUpdateList}
+                    onDeleteList={handleDeleteList}
                   />
                 ))}
               </SortableContext>
               
-              <button className="min-w-[340px] h-[120px] bg-white/40 hover:bg-white border-2 border-dashed border-[#7A5AF8]/20 rounded-2xl flex items-center justify-center gap-4 text-[#7A5AF8]/40 font-black uppercase tracking-widest text-xs transition-all hover:border-[#7A5AF8] hover:text-[#7A5AF8] group flex-shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                Nueva Lista
-              </button>
+              {isAddingList ? (
+                <form onSubmit={handleAddList} className="min-w-[340px] bg-white rounded-2xl p-4 shadow-soft border border-[#7A5AF8]/10 h-fit">
+                  <input
+                    autoFocus
+                    placeholder="Nombre de la lista..."
+                    value={newListTitle}
+                    onChange={(e) => setNewListTitle(e.target.value)}
+                    className="w-full bg-[#F3E8FF] rounded-xl p-3 text-sm font-bold text-zinc-900 outline-none placeholder:text-[#806F9B]/50 mb-3"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button type="submit" size="sm" className="bg-[#7A5AF8]">Añadir lista</Button>
+                    <button 
+                      type="button" 
+                      onClick={() => setIsAddingList(false)}
+                      className="text-zinc-400 hover:text-zinc-600 p-2 transition-colors"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button 
+                  onClick={() => setIsAddingList(true)}
+                  className="min-w-[340px] h-[100px] bg-white/40 hover:bg-white border-2 border-dashed border-[#7A5AF8]/20 rounded-2xl flex items-center justify-center gap-4 text-[#7A5AF8]/40 font-black uppercase tracking-widest text-xs transition-all hover:border-[#7A5AF8] hover:text-[#7A5AF8] group flex-shrink-0"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                  Nueva Lista
+                </button>
+              )}
+
+              {/* Spacer to prevent sticking to the right edge */}
+              <div className="w-24 flex-shrink-0" />
             </div>
 
             <DragOverlay>
@@ -154,11 +220,16 @@ const BoardDetailPage: React.FC = () => {
         </main>
       </div>
 
-      <CardModal
+      <CardDetailModal
         isOpen={!!selectedCardId}
         onClose={() => setSelectedCardId(null)}
         cardId={selectedCardId}
+        boardId={id}
         onUpdate={fetchBoard}
+        initialData={selectedCardId ? {
+          title: board.lists.flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
+          listName: board.lists.find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
+        } : undefined}
       />
     </div>
   );

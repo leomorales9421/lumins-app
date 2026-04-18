@@ -43,21 +43,19 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
       `}
     >
       <div className="flex flex-col gap-4">
-        {/* Card Header: Tags (Manrope Labels) */}
-        <div className="flex flex-wrap gap-2">
-           {card.labels && card.labels.length > 0 ? (
-             card.labels.map((label, idx) => (
-               <span 
-                 key={idx} 
-                 className="px-2.5 py-1 rounded-md bg-[#7A5AF8]/10 text-[#7A5AF8] text-[9px] font-extrabold uppercase tracking-widest"
-               >
-                 {label.name}
-               </span>
-             ))
-           ) : (
-             <div className="h-1 w-8 bg-[#F3E8FF] rounded-full" />
-           )}
-        </div>
+        {/* Card Header: Labels (Vibrant Matte Mini Bars) */}
+        {card.labels && card.labels.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {card.labels.map((item: any, idx: number) => (
+              <div 
+                key={item.label?.id || idx} 
+                title={item.label?.name}
+                style={{ backgroundColor: item.label?.color }}
+                className="w-10 h-2 rounded-full cursor-help shadow-sm transition-transform hover:scale-110"
+              />
+            ))}
+          </div>
+        )}
 
         {/* Card Title (Manrope Body) */}
         <h4 className="text-sm font-bold text-[#100B26] leading-relaxed group-hover:text-[#7A5AF8] transition-colors">
@@ -77,8 +75,22 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
               </div>
            </div>
 
-           <div className="w-6 h-6 rounded-md bg-[#F3E8FF] flex items-center justify-center text-[9px] font-black text-[#7A5AF8] border border-white shadow-sm">
-              {card.members && card.members[0] ? card.members[0].name[0] : 'U'}
+           <div className="flex -space-x-1 items-center">
+             {card.assignees && card.assignees.length > 0 ? (
+               card.assignees.map((assignee: any, idx: number) => (
+                 <div 
+                   key={assignee.user.id || idx}
+                   title={assignee.user.name}
+                   className="w-6 h-6 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm ring-1 ring-purple-50 transition-transform hover:scale-110 hover:z-10 cursor-help"
+                 >
+                   {assignee.user.name ? assignee.user.name[0].toUpperCase() : 'U'}
+                 </div>
+               ))
+             ) : (
+               <div className="w-6 h-6 rounded-md bg-[#F3E8FF] flex items-center justify-center text-[9px] font-black text-[#7A5AF8] border border-white shadow-sm">
+                 U
+               </div>
+             )}
            </div>
         </div>
       </div>
