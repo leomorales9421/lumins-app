@@ -13,51 +13,44 @@ const Input: React.FC<InputProps> = ({
   leftIcon,
   rightIcon,
   className = '',
-  id,
   ...props
 }) => {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
-
   return (
-    <div className="flex flex-col gap-2 group">
+    <div className="flex flex-col gap-2.5 w-full">
       {label && (
-        <label htmlFor={inputId} className="text-white text-sm font-medium leading-normal">
+        <label className="text-sm font-black text-[#6e45e2] uppercase tracking-wider ml-1">
           {label}
         </label>
       )}
-      
-      <div className="relative flex items-center">
+      <div className="relative flex items-center group">
         {leftIcon && (
-          <span className="absolute left-3 text-[#9db0b9] group-focus-within:text-primary transition-colors duration-200">
+          <div className="absolute left-4 text-[#6e45e2]/60 group-focus-within:text-[#6e45e2] transition-colors scale-110">
             {leftIcon}
-          </span>
+          </div>
         )}
-        
         <input
-          id={inputId}
           className={`
-            form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg 
-            text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 
-            border ${error ? 'border-red-500' : 'border-[#3b4b54]'} 
-            bg-[#111618] focus:border-primary h-11 
-            placeholder:text-[#586872] 
-            ${leftIcon ? 'pl-10' : 'pl-4'} 
-            ${rightIcon ? 'pr-10' : 'pr-4'} 
-            text-sm font-normal leading-normal transition-all duration-200
+            w-full h-12 bg-[#f3e5f5] border-none rounded-md px-5 py-3 
+            text-sm font-bold text-zinc-700 placeholder:text-[#6e45e2]/30
+            focus:outline-none focus:ring-2 focus:ring-[#6e45e2]/20
+            transition-all duration-200
+            ${leftIcon ? 'pl-12' : ''}
+            ${rightIcon ? 'pr-12' : ''}
+            ${error ? 'ring-2 ring-red-500/50' : ''}
             ${className}
           `}
           {...props}
         />
-        
         {rightIcon && (
-          <span className="absolute right-3 text-[#9db0b9] group-focus-within:text-primary transition-colors duration-200">
+          <div className="absolute right-4 text-zinc-500 scale-110">
             {rightIcon}
-          </span>
+          </div>
         )}
       </div>
-      
       {error && (
-        <p className="text-red-400 text-xs mt-1">{error}</p>
+        <span className="text-xs font-black text-red-500 uppercase tracking-widest ml-1 animate-fade-in">
+          {error}
+        </span>
       )}
     </div>
   );

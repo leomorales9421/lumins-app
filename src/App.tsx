@@ -4,9 +4,8 @@ import { NotificationProvider, NotificationContainer } from './components/Notifi
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 import LoginPage from './pages/LoginPage';
-import { BoardsPage } from './pages/BoardsPage';
+import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
-import './App.css';
 
 function App() {
   return (

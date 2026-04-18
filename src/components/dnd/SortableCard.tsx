@@ -1,21 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Card } from '../../pages/BoardDetailPage';
+import type { Card } from '../../types/board';
 
 interface SortableCardProps {
   card: Card;
-  onRename: (cardId: string, newTitle: string) => Promise<void>;
-  onDelete: (cardId: string) => Promise<void>;
-  onClick?: () => void;
+  onClick: () => void;
 }
 
-export const SortableCard: React.FC<SortableCardProps> = ({
-  card,
-  onRename,
-  onDelete,
-  onClick,
-}) => {
+export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => {
   const {
     attributes,
     listeners,
@@ -23,68 +16,17 @@ export const SortableCard: React.FC<SortableCardProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: card.id,
     data: {
       type: 'card',
-      cardId: card.id,
-      listId: card.listId,
-    }
+      card,
+    },
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(card.title);
-  const [isDeleting, setIsDeleting] = useState(false);
-
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const handleRename = async () => {
-    if (editTitle.trim() && editTitle !== card.title) {
-      await onRename(card.id, editTitle);
-    }
-    setIsEditing(false);
-  };
-
-  const handleDelete = async () => {
-    if (isDeleting) return;
-    
-    setIsDeleting(true);
-    try {
-      await onDelete(card.id);
-    } catch (error) {
-      console.error('Error deleting card:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const getLabelColor = (label: any): string => {
-    const colors = [
-      '#4F46E5', // Indigo
-      '#10B981', // Emerald
-      '#F59E0B', // Amber
-      '#EF4444', // Red
-      '#8B5CF6', // Violet
-      '#06B6D4', // Cyan
-    ];
-    
-    // Handle both string labels and object labels
-    let labelString: string;
-    if (typeof label === 'string') {
-      labelString = label;
-    } else if (label && typeof label === 'object') {
-      // Try to get name property from label object
-      labelString = label.name || label.title || label.id || JSON.stringify(label);
-    } else {
-      labelString = String(label || '');
-    }
-    
-    const hash = labelString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return colors[hash % colors.length];
   };
 
   return (
@@ -93,117 +35,52 @@ export const SortableCard: React.FC<SortableCardProps> = ({
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-[#111618] rounded-lg border border-[#3b4b54] hover:border-primary/30 cursor-pointer transition-all card-hover overflow-hidden ${isDragging ? 'shadow-2xl shadow-primary/20 rotate-1' : ''}`}
       onClick={onClick}
+      className={`
+        bg-white p-5 rounded-xl shadow-soft border border-[#7A5AF8]/5 cursor-grab active:cursor-grabbing
+        group hover:border-[#7A5AF8]/30 hover:shadow-heavy transition-all duration-300
+        ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] shadow-2xl scale-105 z-50' : ''}
+      `}
     >
-      {/* Subtle Gradient Top Bar */}
-      <div className="h-0.5 bg-gradient-to-r from-primary/50 via-blue-400/50 to-purple-400/50"></div>
-      
-      <div className="p-4">
-        {/* Card Header with Drag Handle */}
-        <div className="flex justify-between items-start mb-2">
-        <div className="flex-1">
-          {isEditing ? (
-            <input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onBlur={handleRename}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleRename();
-                if (e.key === 'Escape') {
-                  setEditTitle(card.title);
-                  setIsEditing(false);
-                }
-              }}
-              autoFocus
-              className="w-full px-2 py-1 bg-[#1c2327] text-white border border-primary/50 rounded text-sm font-medium outline-none"
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <div className="flex items-center">
-              <button
-                className="mr-2 text-[#9db0b9] hover:text-white cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/5"
-                title="Arrastrar para mover"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="material-symbols-outlined text-sm">drag_handle</span>
-              </button>
-              <h4 
-                className="font-medium text-white cursor-pointer hover:text-primary transition-colors flex-1"
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
-              >
-                {card.title}
-              </h4>
-            </div>
-          )}
+      <div className="flex flex-col gap-4">
+        {/* Card Header: Tags (Manrope Labels) */}
+        <div className="flex flex-wrap gap-2">
+           {card.labels && card.labels.length > 0 ? (
+             card.labels.map((label, idx) => (
+               <span 
+                 key={idx} 
+                 className="px-2.5 py-1 rounded-md bg-[#7A5AF8]/10 text-[#7A5AF8] text-[9px] font-extrabold uppercase tracking-widest"
+               >
+                 {label.name}
+               </span>
+             ))
+           ) : (
+             <div className="h-1 w-8 bg-[#F3E8FF] rounded-full" />
+           )}
         </div>
-        
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete();
-          }}
-          className="text-[#9db0b9] hover:text-red-400 p-1 rounded hover:bg-red-500/10 ml-2"
-          title="Eliminar tarjeta"
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <span className="material-symbols-outlined text-sm">close</span>
-          )}
-        </button>
-      </div>
-      
-      {/* Card Description */}
-      {card.description && !isEditing && (
-        <p className="text-sm text-[#9db0b9] mb-3 line-clamp-2">
-          {card.description}
-        </p>
-      )}
-      
-      {/* Card Metadata */}
-      <div className="flex items-center justify-between">
-        {card.dueDate && (
-          <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            {new Date(card.dueDate).toLocaleDateString()}
-          </span>
-        )}
-        
-        {card.labels && card.labels.length > 0 && (
-          <div className="flex space-x-1">
-            {card.labels.slice(0, 2).map((label, idx) => {
-              // Extract label text for title
-              let labelText = '';
-              if (typeof label === 'string') {
-                labelText = label;
-              } else if (label && typeof label === 'object') {
-                labelText = label.name || label.title || label.id || '';
-              }
-              
-              return (
-                <span
-                  key={idx}
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: getLabelColor(label) }}
-                  title={labelText}
-                />
-              );
-            })}
-            {card.labels.length > 2 && (
-              <span className="text-xs text-[#9db0b9]">
-                +{card.labels.length - 2}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+
+        {/* Card Title (Manrope Body) */}
+        <h4 className="text-sm font-bold text-[#100B26] leading-relaxed group-hover:text-[#7A5AF8] transition-colors">
+          {card.title}
+        </h4>
+
+        {/* Card Footer: Metadata (Neutral Colors) */}
+        <div className="flex items-center justify-between mt-1">
+           <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] font-black text-[#806F9B]/60">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {card.commentsCount || 0}
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-black text-[#806F9B]/60">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                {card.attachmentsCount || 0}
+              </div>
+           </div>
+
+           <div className="w-6 h-6 rounded-md bg-[#F3E8FF] flex items-center justify-center text-[9px] font-black text-[#7A5AF8] border border-white shadow-sm">
+              {card.members && card.members[0] ? card.members[0].name[0] : 'U'}
+           </div>
+        </div>
       </div>
     </div>
   );

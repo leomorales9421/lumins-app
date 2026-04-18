@@ -1,119 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    @apply antialiased text-zinc-900 bg-[#F3E8FF] font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-extrabold tracking-tight;
+  }
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
+@layer components {
+  /* Identity Graph Standard Cards */
+  .brand-card {
+    @apply bg-white rounded-xl shadow-soft border border-brand-primary/5;
+  }
 
-* {
-  box-sizing: border-box;
-}
+  .brand-input {
+    @apply w-full h-12 bg-white border border-brand-primary/10 rounded-md px-5 text-sm font-medium focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none;
+  }
 
-/* Custom scrollbar for better aesthetics */
-::-webkit-scrollbar {
-  width: 8px;
-}
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-::-webkit-scrollbar-track {
-  background: #111618;
-}
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: #3b4b54;
-  border-radius: 4px;
-}
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(122, 90, 248, 0.1);
+    border-radius: 9999px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #13a4ec;
-}
-
-/* Selection styles */
-::selection {
-  background: rgba(19, 164, 236, 0.3);
-  color: white;
-}
-
-/* Material icons size adjustments */
-.material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
-}
-
-/* Glassmorphism utility classes */
-.glass {
-  background: rgba(28, 35, 39, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.glass-light {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(135deg, #13a4ec 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Card hover effects */
-.card-hover {
-  transition: all 0.2s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Button press effect */
-.btn-press:active {
-  transform: scale(0.98);
-}
-
-/* Line clamp utilities */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.line-clamp-2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.line-clamp-3 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(122, 90, 248, 0.2);
+  }
 }

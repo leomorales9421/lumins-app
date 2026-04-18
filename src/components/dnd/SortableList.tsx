@@ -1,31 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { useDroppable } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import React from 'react';
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { List } from '../../pages/BoardDetailPage';
-import type { Card } from '../../pages/BoardDetailPage';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
+import type { Card as CardType } from '../../types/board';
+import { SortableCard } from './SortableCard';
 
 interface SortableListProps {
-  list: List;
-  cardIds: string[];
-  children: React.ReactNode;
-  onRename: (listId: string, newTitle: string) => Promise<void>;
-  onDelete: (listId: string) => void | Promise<void>;
-  onCreateCard: (listId: string, title: string) => Promise<void>;
-  isCreatingCard?: boolean;
+  list: {
+    id: string;
+    title: string;
+    cards?: CardType[];
+  };
+  onCardClick: (cardId: string) => void;
 }
 
-export const SortableList: React.FC<SortableListProps> = ({
-  list,
-  cardIds,
-  children,
-  onRename,
-  onDelete,
-  onCreateCard,
-}) => {
+export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick }) => {
+  const cards = list.cards || [];
+  
   const {
     attributes,
     listeners,
@@ -33,194 +23,69 @@ export const SortableList: React.FC<SortableListProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: list.id,
     data: {
       type: 'list',
-      listId: list.id,
-    }
+      list: { ...list, cards },
+    },
   });
-
-  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
-    id: `list-${list.id}`,
-    data: {
-      type: 'list',
-      listId: list.id,
-    }
-  });
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(list.name);
-  const [isCreating, setIsCreating] = useState(false);
-  const [newCardTitle, setNewCardTitle] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const handleRename = async () => {
-    if (editTitle.trim() && editTitle !== list.name) {
-      await onRename(list.id, editTitle);
-    }
-    setIsEditing(false);
-  };
-
-  const handleCreateCard = async () => {
-    if (!newCardTitle.trim()) return;
-    
-    setIsSubmitting(true);
-    try {
-      await onCreateCard(list.id, newCardTitle);
-      setNewCardTitle('');
-      setIsCreating(false);
-    } catch (error) {
-      console.error('Error creating card:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
-    <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
-      <div
-        ref={(node) => {
-          setNodeRef(node);
-          setDroppableRef(node);
-        }}
-        style={style}
-        className={`flex-shrink-0 w-80 bg-[#1c2327]/80 backdrop-blur-xl border ${isOver ? 'border-primary/50' : 'border-white/5'} rounded-2xl overflow-hidden ${isDragging ? 'shadow-2xl shadow-primary/20' : ''}`}
-        data-type="list"
-        data-list-id={list.id}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`
+        flex flex-col w-[340px] max-h-full bg-white/80 rounded-2xl border border-[#7A5AF8]/10 shadow-soft flex-shrink-0 transition-all
+        ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] z-50' : ''}
+      `}
+    >
+      {/* List Header: Identity Style */}
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="p-7 flex items-center justify-between cursor-grab active:cursor-grabbing group"
       >
-        {/* Gradient Top Bar */}
-        <div className="h-1 bg-gradient-to-r from-primary via-blue-500 to-purple-500"></div>
-        
-        <div className="p-4">
-          {/* List Header with Drag Handle */}
-          <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center flex-1">
-            <button
-              {...attributes}
-              {...listeners}
-              className="mr-2 text-[#9db0b9] hover:text-white cursor-grab active:cursor-grabbing p-1 rounded hover:bg-white/5"
-              title="Arrastrar para reordenar"
-            >
-              <span className="material-symbols-outlined text-lg">drag_handle</span>
-            </button>
-            
-            {isEditing ? (
-              <div className="flex-1">
-                <Input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  onBlur={handleRename}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleRename();
-                    if (e.key === 'Escape') {
-                      setEditTitle(list.name);
-                      setIsEditing(false);
-                    }
-                  }}
-                  autoFocus
-                  className="text-white"
-                />
-              </div>
-            ) : (
-              <h3 
-                className="font-semibold text-white cursor-pointer hover:text-primary transition-colors flex-1 truncate max-w-[180px]"
-                onDoubleClick={() => setIsEditing(true)}
-                title={list.name}
-              >
-                {list.name}
-              </h3>
-            )}
-          </div>
-          
-          <div className="flex items-center space-x-1">
-            <span className="text-sm text-[#9db0b9] bg-[#111618] px-2 py-1 rounded">
-              {React.Children.count(children)}
-            </span>
-            
-            <button
-              onClick={() => setIsCreating(!isCreating)}
-              className="text-[#9db0b9] hover:text-white p-1 rounded hover:bg-white/5"
-              title="Añadir tarjeta"
-            >
-              <span className="material-symbols-outlined text-sm">add</span>
-            </button>
-            
-            <button
-              onClick={() => onDelete(list.id)}
-              className="text-[#9db0b9] hover:text-red-400 p-1 rounded hover:bg-red-500/10"
-              title="Eliminar lista"
-            >
-              <span className="material-symbols-outlined text-sm">delete</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-4">
+           <div className="w-1.5 h-6 bg-gradient-to-b from-[#7A5AF8] to-[#E91E63] rounded-full" />
+           <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest truncate max-w-[180px]">
+             {list.title}
+           </h3>
+           <span className="px-3 py-1 rounded-md bg-[#7A5AF8]/5 text-[#7A5AF8] text-[10px] font-black">
+             {cards.length}
+           </span>
         </div>
         
-        {/* Cards Container */}
-        <div className="space-y-3 mb-4">
-          {children}
-        </div>
-      
-        {/* Create Card Form */}
-        {isCreating && (
-          <div className="mb-3">
-            <Input
-              value={newCardTitle}
-              onChange={(e) => setNewCardTitle(e.target.value)}
-              placeholder="Título de la tarjeta..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !isSubmitting) handleCreateCard();
-                if (e.key === 'Escape') {
-                  setNewCardTitle('');
-                  setIsCreating(false);
-                }
-              }}
-              disabled={isSubmitting}
-              autoFocus
-              className="mb-2"
-            />
-            <div className="flex space-x-2">
-              <Button
-                onClick={handleCreateCard}
-                isLoading={isSubmitting}
-                disabled={isSubmitting || !newCardTitle.trim()}
-                size="sm"
-              >
-                Añadir
-              </Button>
-              <Button
-                onClick={() => {
-                  setNewCardTitle('');
-                  setIsCreating(false);
-                }}
-                variant="outline"
-                size="sm"
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {/* Add Card Button (when not creating) */}
-        {!isCreating && (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="w-full text-left p-3 text-[#9db0b9] hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center"
-          >
-            <span className="material-symbols-outlined text-sm mr-2">add</span>
-            Añadir tarjeta
-          </button>
-        )}
-        </div>
+        <button className="text-zinc-300 hover:text-[#7A5AF8] transition-colors p-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
       </div>
-    </SortableContext>
+
+      {/* Cards Area: Manrope Labels */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-6 flex flex-col gap-4 min-h-[100px]">
+        <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          {cards.map((card) => (
+            <SortableCard 
+              key={card.id} 
+              card={card} 
+              onClick={() => onCardClick(card.id)} 
+            />
+          ))}
+        </SortableContext>
+      </div>
+
+      {/* Add Card Footer */}
+      <div className="p-5 mt-auto">
+        <button className="w-full h-12 rounded-xl bg-white border border-zinc-100 text-[#7A5AF8] text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Añadir Despliegue
+        </button>
+      </div>
+    </div>
   );
 };

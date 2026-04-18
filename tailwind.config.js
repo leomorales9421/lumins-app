@@ -1,6 +1,7 @@
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 /** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: "class",
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,35 +9,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#13a4ec",
-        "background-light": "#f6f7f8",
-        "background-dark": "#101c22",
+        // Identity Graph Colors
+        'brand-primary': '#7A5AF8',
+        'brand-secondary': '#E91E63',
+        'brand-tertiary': '#FF8A80',
+        'brand-neutral': '#806F9B',
+        'brand-bg': '#F3E8FF', // Soft lilac background from identity
+        
+        // Semantic aliases
+        'vibrant-purple': '#7A5AF8',
+        'vibrant-pink': '#E91E63',
+        'soft-purple': '#F3E8FF',
       },
       fontFamily: {
-        "display": ["Inter", "sans-serif"],
-        "sans": ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "sans-serif"],
+        // Manrope is the official font from Identity Graph
+        sans: ['Manrope', ...defaultTheme.fontFamily.sans],
       },
       borderRadius: {
-        "DEFAULT": "0.25rem",
-        "lg": "0.5rem",
-        "xl": "0.75rem",
-        "full": "9999px",
+        'md': '12px',
+        'xl': '16px',
+        '2xl': '24px',
       },
-      animation: {
-        "float": "float 10s ease-in-out infinite",
-        "float-delayed": "float 12s ease-in-out infinite reverse",
-      },
-      keyframes: {
-        float: {
-          "0%": { transform: "translate(0px, 0px) scale(1)" },
-          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
-          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
-          "100%": { transform: "translate(0px, 0px) scale(1)" },
-        },
-      },
-      backdropBlur: {
-        'xs': '2px',
-      },
+      boxShadow: {
+        'soft': '0 8px 30px rgba(122, 90, 248, 0.08)',
+        'heavy': '0 20px 50px rgba(122, 90, 248, 0.15)',
+      }
     },
   },
   plugins: [],

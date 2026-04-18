@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'glass' | 'elevated';
+  variant?: 'default' | 'vibrant' | 'glass' | 'white';
   hoverable?: boolean;
 }
 
@@ -12,15 +12,25 @@ const Card: React.FC<CardProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'rounded-2xl border transition-all duration-200';
+  const baseClasses = 'rounded-md transition-all duration-300 overflow-hidden';
   
   const variantClasses = {
-    default: 'bg-[#1c2327]/80 backdrop-blur-xl border-white/5 shadow-2xl',
-    glass: 'glass border-white/5',
-    elevated: 'bg-[#1c2327] border-[#3b4b54] shadow-lg',
+    // Replicating Login Style: Clean White Surface
+    default: 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] text-zinc-900',
+    
+    // Pro Glassmorphism
+    glass: 'bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]',
+    
+    // Vibrant Header-like
+    vibrant: 'bg-gradient-to-br from-[#6e45e2] to-[#ff9a9e] text-white shadow-lg',
+    
+    // White alias
+    white: 'bg-white border border-zinc-100 shadow-sm text-zinc-900',
   };
 
-  const hoverClasses = hoverable ? 'hover:border-primary/30 hover:shadow-2xl card-hover' : '';
+  const hoverClasses = hoverable 
+    ? 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:-translate-y-1' 
+    : '';
 
   return (
     <div
@@ -37,7 +47,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = '',
   ...props
 }) => (
-  <div className={`px-6 py-4 border-b border-white/5 ${className}`} {...props}>
+  <div className={`px-6 py-4 border-b border-zinc-50 bg-zinc-50/30 ${className}`} {...props}>
     {children}
   </div>
 );
@@ -48,16 +58,6 @@ export const CardBody: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => (
   <div className={`px-6 py-4 ${className}`} {...props}>
-    {children}
-  </div>
-);
-
-export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
-  children,
-  className = '',
-  ...props
-}) => (
-  <div className={`px-6 py-4 border-t border-white/5 ${className}`} {...props}>
     {children}
   </div>
 );
