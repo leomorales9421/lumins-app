@@ -1,170 +1,262 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { CreateBoardRequest } from '../types/board';
-import Button from './ui/Button';
-import Input from './ui/Input';
+import { X, Lock, Users, ChevronDown } from 'lucide-react';
+import apiClient from '../lib/api-client';
+
+interface Workspace {
+  id: string;
+  name: string;
+}
 
 interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (boardData: CreateBoardRequest) => Promise<void>;
+  onBoardCreated: () => void;
+  workspaces?: Workspace[];
 }
 
-const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, onCreate }) => {
-  const [formData, setFormData] = useState<CreateBoardRequest>({
-    name: '',
-    description: '',
-    visibility: 'private',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+interface CreateBoardPayload {
+  name: string;
+  workspaceId: string;
+  visibility: 'private' | 'team';
+  description?: string;
+}
 
-  if (!isOpen) return null;
+const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onBoardCreated,
+  workspaces = []
+}) => {
+  const [name, setName] = useState('');
+  const [workspaceId, setWorkspaceId] = useState('');
+
+  // Update workspaceId when workspaces change or modal opens
+  React.useEffect(() => {
+    if (isOpen && workspaces.length > 0 && !workspaceId) {
+      setWorkspaceId(workspaces[0].id);
+    }
+  }, [isOpen, workspaces, workspaceId]);
+  const [visibility, setVisibility] = useState<'private' | 'team'>('private');
+  const [description, setDescription] = useState('');
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) return;
+
+    setIsLoading(true);
     setError('');
 
-    if (!formData.name.trim()) {
-      setError('El nombre del tablero es requerido');
-      return;
-    }
-
-    setIsSubmitting(true);
     try {
-      await onCreate(formData);
+      const payload: CreateBoardPayload = {
+        name,
+        workspaceId,
+        visibility,
+        description: description.trim() || undefined
+      };
+
+      // Simulating API call as per plan
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      await apiClient.post('/api/boards', payload);
+      
+      onBoardCreated();
       handleClose();
     } catch (err: any) {
-      setError(err.message || 'Error al crear el tablero');
+      setError(err.response?.data?.message || 'Error al crear el tablero');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({ name: '', description: '', visibility: 'private' });
+    setName('');
+    setWorkspaceId(workspaces[0]?.id || '');
+    setVisibility('private');
+    setDescription('');
+    setIsDescriptionExpanded(false);
     setError('');
     onClose();
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Backdrop */}
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+          />
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="w-full max-w-lg bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
+          >
+            {/* Decorative Orb */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#F3E8FF] blur-[60px] opacity-50 pointer-events-none -mr-20 -mt-20" />
 
-        {/* Modal Content */}
-        <div className="inline-block align-bottom bg-[#1c2327]/90 backdrop-blur-xl border border-white/5 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className="px-6 pt-6 pb-4">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-white">
-                Crear nuevo tablero
-              </h3>
-              <button
+            {/* Header */}
+            <div className="flex justify-between items-center mb-10">
+              <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Crear nuevo tablero</h2>
+              <button 
                 onClick={handleClose}
-                className="text-[#9db0b9] hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
+                <X size={24} strokeWidth={3} />
               </button>
             </div>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <Input
-                  label="Nombre del tablero *"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Ej: Proyecto Marketing"
-                  disabled={isSubmitting}
-                  autoFocus
-                  leftIcon={
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                  }
-                />
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="description" className="text-white text-sm font-medium leading-normal">
-                    Descripción (opcional)
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none placeholder:text-[#586872] transition-all duration-200"
-                    placeholder="Describe el propósito de este tablero..."
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="visibility" className="text-white text-sm font-medium leading-normal">
-                    Visibilidad
-                  </label>
-                  <select
-                    id="visibility"
-                    name="visibility"
-                    value={formData.visibility}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all duration-200"
-                    disabled={isSubmitting}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Workspace Selection */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                  Espacio de Trabajo
+                </label>
+                <div className="relative">
+                  <select 
+                    value={workspaceId}
+                    onChange={(e) => setWorkspaceId(e.target.value)}
+                    className="w-full h-14 bg-[#F3E8FF] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 appearance-none transition-all"
                   >
-                    <option value="private">Privado (solo tú y miembros invitados)</option>
-                    <option value="team">Equipo (todos los miembros del equipo)</option>
-                    <option value="public">Público (cualquiera con el enlace)</option>
+                    {workspaces.map(ws => (
+                      <option key={ws.id} value={ws.id}>{ws.name}</option>
+                    ))}
                   </select>
-                  <p className="mt-2 text-sm text-[#9db0b9]">
-                    {formData.visibility === 'private' && 'Solo tú y los miembros que invites podrán ver este tablero.'}
-                    {formData.visibility === 'team' && 'Todos los miembros de tu equipo podrán ver y editar este tablero.'}
-                    {formData.visibility === 'public' && 'Cualquiera con el enlace podrá ver este tablero.'}
-                  </p>
+                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-[#7A5AF8] pointer-events-none" size={20} strokeWidth={3} />
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end space-x-3">
-                <Button
+              {/* Board Name */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                  Nombre del Tablero *
+                </label>
+                <input 
+                  type="text"
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ej: Lanzamiento Q4"
+                  className="w-full h-14 bg-[#F3E8FF] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30"
+                  required
+                />
+              </div>
+
+              {/* Visibility Cards */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                  Privacidad
+                </label>
+                <div className="flex gap-4">
+                  <div 
+                    onClick={() => setVisibility('private')}
+                    className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
+                      visibility === 'private' 
+                        ? 'border-[#7A5AF8] bg-[#F3E8FF] shadow-sm' 
+                        : 'border-zinc-100 bg-white hover:border-zinc-200'
+                    }`}
+                  >
+                    <Lock size={20} className={visibility === 'private' ? 'text-[#7A5AF8]' : 'text-zinc-400'} strokeWidth={3} />
+                    <div className="mt-3">
+                      <div className="font-extrabold text-zinc-900 text-sm">Privado</div>
+                      <div className="text-[10px] text-[#806F9B] font-bold mt-1 leading-tight">Solo tú y invitados</div>
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => setVisibility('team')}
+                    className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
+                      visibility === 'team' 
+                        ? 'border-[#7A5AF8] bg-[#F3E8FF] shadow-sm' 
+                        : 'border-zinc-100 bg-white hover:border-zinc-200'
+                    }`}
+                  >
+                    <Users size={20} className={visibility === 'team' ? 'text-[#7A5AF8]' : 'text-zinc-400'} strokeWidth={3} />
+                    <div className="mt-3">
+                      <div className="font-extrabold text-zinc-900 text-sm">Equipo</div>
+                      <div className="text-[10px] text-[#806F9B] font-bold mt-1 leading-tight">Todo el equipo</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description Toggle/Field */}
+              <div className="space-y-3">
+                {!isDescriptionExpanded ? (
+                  <button 
+                    type="button"
+                    onClick={() => setIsDescriptionExpanded(true)}
+                    className="text-[#7A5AF8] text-sm font-bold hover:underline ml-1 transition-all"
+                  >
+                    + Añadir descripción (opcional)
+                  </button>
+                ) : (
+                  <div className="space-y-3 animate-fade-in">
+                    <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                      Descripción (Opcional)
+                    </label>
+                    <textarea 
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="¿De qué trata este proyecto?"
+                      className="w-full bg-[#F3E8FF] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30 resize-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest text-center py-3 rounded-[12px]">
+                  {error}
+                </div>
+              )}
+
+              {/* Footer Actions */}
+              <div className="mt-10 flex justify-end items-center gap-6">
+                <button 
                   type="button"
                   onClick={handleClose}
-                  variant="outline"
-                  disabled={isSubmitting}
+                  className="text-[#806F9B] font-bold text-sm hover:text-zinc-900 transition-colors"
                 >
                   Cancelar
-                </Button>
-                <Button
+                </button>
+                <button 
                   type="submit"
-                  isLoading={isSubmitting}
-                  disabled={isSubmitting}
+                  disabled={isLoading || !name.trim()}
+                  className={`
+                    h-14 px-10 rounded-[12px] font-black text-white transition-all relative overflow-hidden
+                    ${isLoading || !name.trim() 
+                      ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
+                      : 'bg-gradient-to-r from-[#7A5AF8] to-[#E91E63] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                    }
+                  `}
                 >
-                  {isSubmitting ? 'Creando...' : 'Crear tablero'}
-                </Button>
+                  {isLoading ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      <span>CREANDO...</span>
+                    </div>
+                  ) : (
+                    'CREAR TABLERO'
+                  )}
+                </button>
               </div>
             </form>
-          </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 

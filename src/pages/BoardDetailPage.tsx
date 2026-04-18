@@ -71,6 +71,15 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
+  const handleAddCard = async (listId: string, title: string) => {
+    try {
+      await apiClient.post(`/api/cards/lists/${listId}/cards`, { title });
+      fetchBoard();
+    } catch (err) {
+      console.error('Error adding card:', err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F3E8FF] flex flex-col items-center justify-center font-sans">
@@ -123,6 +132,7 @@ const BoardDetailPage: React.FC = () => {
                     key={list.id} 
                     list={list} 
                     onCardClick={setSelectedCardId}
+                    onAddCard={handleAddCard}
                   />
                 ))}
               </SortableContext>
