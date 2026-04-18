@@ -59,7 +59,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       ref={setNodeRef}
       style={style}
       className={`
-        flex flex-col w-[340px] max-h-full bg-white/80 rounded-2xl border border-[#7A5AF8]/10 shadow-soft flex-shrink-0 transition-all
+        h-fit max-h-full flex flex-col w-[340px] bg-white/80 rounded-2xl border border-[#7A5AF8]/10 shadow-soft flex-shrink-0 transition-all
         ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] z-50' : ''}
       `}
     >
@@ -67,7 +67,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       <div 
         {...attributes} 
         {...listeners} 
-        className="p-5 flex items-center justify-between cursor-grab active:cursor-grabbing group"
+        className="p-4 pb-2 flex items-center justify-between cursor-grab active:cursor-grabbing group"
       >
         <div className="flex items-center gap-3">
            <div className="w-1.5 h-6 bg-gradient-to-b from-[#7A5AF8] to-[#E91E63] rounded-full" />
@@ -84,8 +84,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         </button>
       </div>
 
-      {/* Cards Area: Gap-2 and overflow-y-auto */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-2 flex flex-col gap-2 min-h-[50px]">
+      {/* Cards Area: Body with internal scroll */}
+      <div className="overflow-y-auto flex flex-col gap-2 min-h-0 custom-scrollbar px-4">
         <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
             <SortableCard 
@@ -97,8 +97,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         </SortableContext>
       </div>
 
-      {/* Quick Card Creation: Footer Interactivo */}
-      <div className="p-4 mt-auto">
+      {/* Quick Card Creation: Footer */}
+      <div className="p-4 pt-2">
         {isAddingCard ? (
           <form onSubmit={handleAddCard} className="flex flex-col gap-2">
             <textarea
@@ -134,10 +134,10 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         ) : (
           <button 
             onClick={() => setIsAddingCard(true)}
-            className="text-[#806F9B] text-sm font-bold w-full text-left p-2 rounded-lg hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors flex items-center gap-2"
+            className="text-[#806F9B] text-sm font-bold w-full text-left p-2 rounded-lg hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors flex items-center gap-2 group"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            + Añadir tarjeta
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><path d="M12 5v14M5 12h14"/></svg>
+            Añadir tarjeta
           </button>
         )}
       </div>
