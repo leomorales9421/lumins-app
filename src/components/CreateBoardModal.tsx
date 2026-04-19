@@ -13,6 +13,7 @@ interface CreateBoardModalProps {
   onClose: () => void;
   onBoardCreated: () => void;
   workspaces?: Workspace[];
+  defaultWorkspaceId?: string;
 }
 
 interface CreateBoardPayload {
@@ -26,16 +27,21 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
   isOpen, 
   onClose, 
   onBoardCreated,
-  workspaces = []
+  workspaces = [],
+  defaultWorkspaceId
 }) => {
   const [name, setName] = useState('');
   const [workspaceId, setWorkspaceId] = useState('');
 
   React.useEffect(() => {
-    if (isOpen && workspaces.length > 0 && !workspaceId) {
-      setWorkspaceId(workspaces[0].id);
+    if (isOpen && workspaces.length > 0) {
+      if (defaultWorkspaceId) {
+        setWorkspaceId(defaultWorkspaceId);
+      } else if (!workspaceId) {
+        setWorkspaceId(workspaces[0].id);
+      }
     }
-  }, [isOpen, workspaces, workspaceId]);
+  }, [isOpen, workspaces, workspaceId, defaultWorkspaceId]);
 
   const [visibility, setVisibility] = useState<'private' | 'team'>('private');
   const [description, setDescription] = useState('');

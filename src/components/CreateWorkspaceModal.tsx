@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/api-client';
 
 interface CreateWorkspaceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onWorkspaceCreated: () => void;
+  onWorkspaceCreated: (workspace: any) => void;
 }
 
 const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({ 
@@ -14,6 +15,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
   onClose, 
   onWorkspaceCreated 
 }) => {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -28,15 +30,28 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
     setError('');
 
     try {
-      await apiClient.post('/api/workspaces', {
+      // response is the data object: { success: boolean, data: { workspace: any }, message: string }
+      const response = await apiClient.post<any>('/api/workspaces', {
         name,
         description: description.trim() || undefined
       });
       
-      onWorkspaceCreated();
+      const newWorkspace = response.data.workspace;
+      
+      if (!newWorkspace) {
+        throw new Error('No se recibió el nuevo espacio desde el servidor');
+      }
+
+      onWorkspaceCreated(newWorkspace);
       handleClose();
+      
+      // Redirect to the new workspace dashboard
+      navigate(`/w/${newWorkspace.id}/dashboard`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear el espacio de trabajo');
+      console.error('Error creating workspace:', err);
+      // If apiClient.post fails, err is likely an AxiosError or similar
+      const message = err.response?.data?.message || err.message || 'Error al crear el espacio de trabajo';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +75,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           />
 
           {/* Modal Content */}
@@ -68,11 +83,8 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white rounded-2xl shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
+            className="w-full max-w-lg bg-white rounded-[24px] shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
           >
-            {/* Decorative Element */}
-            <div className="absolute top-0 right-0 w-32 h-32 " />
-
             {/* Header */}
             <div className="flex justify-between items-start mb-10">
               <div className="flex items-center gap-4">
@@ -154,7 +166,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                     h-10 px-10 rounded-[12px] font-bold text-white transition-all relative overflow-hidden
                     ${isLoading || !name.trim() 
                       ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                      : 'bg-[#7A5AF8] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                      : 'bg-[#6C5DD3] hover:shadow-[0_8px_16px_-6px_rgba(108,93,211,0.4)] active:scale-[0.98]'
                     }
                   `}
                 >

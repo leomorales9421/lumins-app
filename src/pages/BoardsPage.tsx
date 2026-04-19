@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
 import Button from '../components/ui/Button';
-import NavBar from '../components/layout/NavBar';
 import BoardCard from '../components/BoardCard';
-import CreateBoardModal from '../components/CreateBoardModal';
-import CreateWorkspaceModal from '../components/CreateWorkspaceModal';
 import InviteMembersModal from '../components/InviteMembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Users, Filter, ChevronDown, Layout } from 'lucide-react';
+import { Users, Filter, ChevronDown, Layout } from 'lucide-react';
 
 const BoardsPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string }[]>([]);
 
@@ -33,25 +31,39 @@ const BoardsPage: React.FC = () => {
   const fetchBoards = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get<{ data: { boards: Board[] } }>('/api/boards');
+      const url = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
+      const response = await apiClient.get<{ data: { boards: Board[] } }>(url);
       setBoards(response.data.boards || []);
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [workspaceId]);
 
   useEffect(() => { 
     fetchBoards(); 
     fetchWorkspaces();
   }, [fetchBoards, fetchWorkspaces]);
 
+  // Listen for board creation to refresh
+  useEffect(() => {
+    const handleRefresh = () => fetchBoards();
+    window.addEventListener('board-created', handleRefresh);
+    return () => window.removeEventListener('board-created', handleRefresh);
+  }, [fetchBoards]);
+
+  useEffect(() => {
+    if (!isLoading && !workspaceId && workspaces.length > 0) {
+      const lastId = localStorage.getItem('lastActiveWorkspaceId');
+      const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
+      navigate(`/w/${targetId}/dashboard`, { replace: true });
+    }
+  }, [isLoading, workspaceId, workspaces, navigate]);
+
   return (
-    <div className="min-h-screen bg-[#F0F1F3] flex flex-col font-sans">
-      <NavBar user={user} logout={logout} />
-      
-      <main className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar">
+    <div className="flex-1 flex flex-col font-sans">
+      <main className="flex-1 p-6 md:p-12">
         <div className="max-w-[1400px] mx-auto w-full">
           
           {isLoading ? (
@@ -59,7 +71,10 @@ const BoardsPage: React.FC = () => {
               <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
             </div>
           ) : workspaces.length === 0 ? (
-            <WorkspaceEmptyState onCreateClick={() => setShowCreateWorkspaceModal(true)} />
+            <WorkspaceEmptyState onCreateClick={() => {
+              // Trigger global workspace creation
+              window.dispatchEvent(new CustomEvent('open-create-workspace'));
+            }} />
           ) : (
             <>
               {/* Header: ClickUp Style */}
@@ -87,14 +102,6 @@ const BoardsPage: React.FC = () => {
                         Miembros
                       </button>
                    </div>
-
-                   <Button 
-                     onClick={() => setShowCreateModal(true)}
-                     className="bg-[#7A5AF8] text-white h-10 px-5 rounded-lg shadow-sm hover:bg-[#694de3] transition-all"
-                     leftIcon={<Plus size={18} strokeWidth={2.5} />}
-                   >
-                     Nuevo Proyecto
-                   </Button>
                 </div>
               </div>
 
@@ -107,7 +114,7 @@ const BoardsPage: React.FC = () => {
                    <h3 className="text-lg font-bold text-[#1A1A2E]">No hay proyectos activos</h3>
                    <p className="text-[#6B7280] mb-6">Comienza creando tu primer tablero para organizar el trabajo.</p>
                    <Button 
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
                     variant="outlined"
                     className="border-[#E8E9EC] text-[#374151] hover:border-[#7A5AF8] hover:text-[#7A5AF8]"
                    >
@@ -148,22 +155,6 @@ const BoardsPage: React.FC = () => {
           )}
         </div>
       </main>
-
-      <CreateBoardModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onBoardCreated={fetchBoards}
-        workspaces={workspaces}
-      />
-
-      <CreateWorkspaceModal 
-        isOpen={showCreateWorkspaceModal}
-        onClose={() => setShowCreateWorkspaceModal(false)}
-        onWorkspaceCreated={() => {
-          fetchWorkspaces();
-          fetchBoards();
-        }}
-      />
 
       {workspaces.length > 0 && (
         <InviteMembersModal 

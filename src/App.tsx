@@ -8,6 +8,8 @@ import RegisterPage from './pages/RegisterPage';
 import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
 
+import MainLayout from './components/layout/MainLayout';
+
 function App() {
   return (
     <Router>
@@ -17,14 +19,29 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              
               <Route
                 path="/app"
                 element={
                   <ProtectedRoute>
-                    <BoardsPage />
+                    <MainLayout>
+                      <BoardsPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
+              
+              <Route
+                path="/w/:workspaceId/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <BoardsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/boards/:id"
                 element={

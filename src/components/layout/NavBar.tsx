@@ -1,10 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Layout, Search, Bell, LogOut, ChevronDown } from 'lucide-react';
+import { Layout, Search, Bell, ChevronDown } from 'lucide-react';
+import GlobalCreateMenu from './GlobalCreateMenu';
 
 interface NavBarProps {
   user: any;
   logout: () => void;
+  onCreateBoard: () => void;
+  onCreateWorkspace: () => void;
+  canCreateBoard: boolean;
 }
 
 const NavLink: React.FC<{ to: string; label: string; active?: boolean }> = ({ to, label, active }) => (
@@ -18,7 +22,13 @@ const NavLink: React.FC<{ to: string; label: string; active?: boolean }> = ({ to
   </Link>
 );
 
-const NavBar: React.FC<NavBarProps> = ({ user, logout }) => {
+const NavBar: React.FC<NavBarProps> = ({ 
+  user, 
+  logout, 
+  onCreateBoard, 
+  onCreateWorkspace,
+  canCreateBoard
+}) => {
   const location = useLocation();
 
   return (
@@ -38,6 +48,15 @@ const NavBar: React.FC<NavBarProps> = ({ user, logout }) => {
            <NavLink to="/app" label="Tableros" active={location.pathname === '/app'} />
            <NavLink to="#" label="Calendario" />
            <NavLink to="#" label="Actividad" />
+        </div>
+
+        {/* Universal Action Button */}
+        <div className="ml-2">
+          <GlobalCreateMenu 
+            onCreateBoard={onCreateBoard}
+            onCreateWorkspace={onCreateWorkspace}
+            canCreateBoard={canCreateBoard}
+          />
         </div>
 
         {/* Search Bar */}

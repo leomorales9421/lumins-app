@@ -16,7 +16,8 @@ import {
 
 interface SmartPopoverProps {
   trigger: React.ReactNode;
-  content: React.ReactNode;
+  content?: React.ReactNode;
+  children?: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
   placement?: 'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end';
@@ -25,6 +26,7 @@ interface SmartPopoverProps {
 const SmartPopover: React.FC<SmartPopoverProps> = ({
   trigger,
   content,
+  children,
   isOpen,
   onClose,
   placement = 'bottom',
@@ -74,7 +76,7 @@ const SmartPopover: React.FC<SmartPopoverProps> = ({
               {...getFloatingProps()}
               className="z-[9999] outline-none flex flex-col"
             >
-              {content}
+              {content || children}
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
