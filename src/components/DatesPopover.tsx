@@ -48,7 +48,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[320px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[320px] bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button onClick={onClose} className="p-1 text-[#806F9B] hover:bg-slate-50 rounded-md transition-colors">
@@ -61,11 +61,11 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       </div>
 
       {/* Calendario */}
-      <div className="p-4 border-b border-purple-50 flex justify-center bg-white">
+      <div className="p-4 border-b border-[#E8E9EC] flex justify-center bg-white">
         <style>{`
           .rdp-root {
             --rdp-accent-color: #7A5AF8;
-            --rdp-range_middle-background-color: #F3E8FF;
+            --rdp-range_middle-background-color: #E8E9EC;
             --rdp-range_middle-color: #7A5AF8;
             --rdp-range_start-background-color: #7A5AF8;
             --rdp-range_end-background-color: #7A5AF8;
@@ -79,7 +79,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             color: white !important;
           }
           .rdp-range_middle .rdp-day_button {
-            background-color: #F3E8FF !important;
+            background-color: #F0F1F3 !important;
             color: #7A5AF8 !important;
             border-radius: 0 !important;
           }
@@ -92,7 +92,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             border-bottom-left-radius: 0 !important;
           }
           .rdp-day_button:hover:not([disabled]) {
-            background-color: #F3E8FF !important;
+            background-color: #F0F1F3 !important;
             color: #7A5AF8 !important;
           }
           .rdp-head_cell {
@@ -136,7 +136,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
               disabled={!hasStartDate}
               placeholder="D/M/AAAA"
               value={range?.from ? format(range.from, 'd/M/yyyy') : ''}
-              className={`bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-full outline-none transition-all ${!hasStartDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/50'}`}
+              className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-full outline-none transition-all ${!hasStartDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
             />
           </div>
         </div>
@@ -157,13 +157,13 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
                 value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
-                className={`bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-full outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/50'}`}
+                className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-full outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
               />
               <input 
                 type="text"
                 disabled={!hasDueDate}
                 defaultValue="12:00"
-                className={`bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/50'}`}
+                className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
               />
             </div>
           </div>
@@ -174,7 +174,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       <div className="px-4 pb-4 pt-2 flex flex-col gap-2">
         <button 
           onClick={handleSave}
-          className="w-full bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg shadow-purple-100"
+          className="w-full bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg "
         >
           Guardar
         </button>

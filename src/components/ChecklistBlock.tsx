@@ -54,7 +54,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
       {/* Progress Bar */}
       <div className="flex items-center gap-3 mb-4">
         <span className="text-xs font-bold text-[#806F9B] w-8 text-right">{progress}%</span>
-        <div className="flex-1 h-2 bg-[#F3E8FF] rounded-full overflow-hidden shadow-inner">
+        <div className="flex-1 h-2 bg-[#E8E9EC] rounded-full overflow-hidden shadow-inner">
           <div 
             className={`h-full rounded-full transition-all duration-500 ease-out ${
               progress === 100 ? 'bg-emerald-500' : 'bg-[#7A5AF8]'
@@ -115,13 +115,13 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                   setIsAddingItem(false);
                 }
               }}
-              className="w-full bg-[#F3E8FF] border-none rounded-lg p-3 text-sm text-zinc-900 placeholder:text-[#806F9B]/60 outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all resize-none shadow-sm"
+              className="w-full bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-3 text-sm text-[#1A1A2E] placeholder:text-[#9CA3AF] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all resize-none shadow-sm"
               rows={2}
             />
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#6949d6] transition-colors shadow-lg shadow-purple-100"
+                className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#6949d6] transition-colors shadow-lg "
               >
                 Añadir
               </button>
@@ -137,7 +137,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
         ) : (
           <button
             onClick={() => setIsAddingItem(true)}
-            className="text-sm font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF] px-4 py-2 rounded-lg transition-all flex items-center gap-2 group/btn"
+            className="text-sm font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7] px-4 py-2 rounded-lg transition-all flex items-center gap-2 group/btn"
           >
             <span className="text-lg leading-none group-hover/btn:scale-125 transition-transform">+</span>
             Añadir un elemento

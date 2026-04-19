@@ -32,6 +32,8 @@ import CardOptionsMenu from './CardOptionsMenu';
 import MoveCardPopover from './MoveCardPopover';
 import Popover from './ui/Popover';
 import SmartPopover from './SmartPopover';
+import CardModalSkeleton from './ui/CardModalSkeleton';
+
 
 interface Member {
   id: string;
@@ -142,10 +144,10 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   // Removed in favor of Radix UI internal handling
 
   // Fetch card details
-  const fetchCardDetails = useCallback(async () => {
+  const fetchCardDetails = useCallback(async (silent = false) => {
     if (!cardId) return;
     
-    setIsLoading(true);
+    if (!silent) setIsLoading(true);
     try {
       // Get card details
       const response = await apiClient.get<{ data: { card: any } }>(`/api/cards/${cardId}`);
@@ -324,7 +326,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     setIsSaving(true);
     try {
       await apiClient.post(`/api/cards/${cardId}/comments`, { content: text });
-      fetchCardDetails(); // Refresh to show new comment
+      fetchCardDetails(true); // Refresh silently to show new comment
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error adding comment:', err);
@@ -339,7 +341,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     setIsSaving(true);
     try {
       await apiClient.patch(`/api/comments/${commentId}`, { content: text });
-      fetchCardDetails(); // Refresh to show updated comment
+      fetchCardDetails(true); // Refresh silently to show updated comment
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating comment:', err);
@@ -352,7 +354,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     setIsSaving(true);
     try {
       await apiClient.delete(`/api/comments/${commentId}`);
-      fetchCardDetails(); // Refresh to remove deleted comment
+      fetchCardDetails(true); // Refresh silently to remove deleted comment
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting comment:', err);
@@ -575,7 +577,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       await apiClient.post(`/api/cards/${cardId}/attachments/file`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      await fetchCardDetails();
+      await fetchCardDetails(true);
       if (onUpdate) onUpdate();
       setActivePopover(null);
     } catch (err) {
@@ -596,7 +598,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     setIsUploading(true);
     try {
       await apiClient.post(`/api/cards/${cardId}/attachments/link`, { url, name });
-      await fetchCardDetails();
+      await fetchCardDetails(true);
       if (onUpdate) onUpdate();
       setActivePopover(null);
     } catch (err) {
@@ -610,7 +612,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     if (!confirm('¿Estás seguro de que quieres eliminar este adjunto?')) return;
     try {
       await apiClient.delete(`/api/attachments/${attachmentId}`);
-      await fetchCardDetails();
+      await fetchCardDetails(true);
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting attachment:', err);
@@ -658,27 +660,27 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         </div>
       )}
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-purple-900/20 backdrop-blur-md transition-opacity" 
+      <div
+        className="fixed inset-0 bg-[#1A1A2E]/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-modal overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
         
-        {/* Header (Top Navigation) */}
-        <div className="px-8 py-6 flex items-center justify-between border-b border-zinc-50 flex-shrink-0">
+        {/* Header */}
+        <div className="border-b border-[#F0F1F3] px-6 py-4 flex items-center justify-between flex-shrink-0 bg-white">
           <div className="flex items-center gap-2">
             <SmartPopover
               isOpen={activePopover === 'move'}
               onClose={() => setActivePopover(null)}
               placement="bottom-start"
               trigger={
-                <button 
+                <button
                   onClick={() => setActivePopover(activePopover === 'move' ? null : 'move')}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#F3E8FF] text-[#7A5AF8] rounded-[12px] font-bold text-sm hover:bg-purple-100 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-[#F4F5F7] text-[#374151] rounded-lg font-semibold text-[12px] hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors border border-[#E8E9EC]"
                 >
-                  En lista: <span className="text-[#7A5AF8]">{displayListName}</span>
+                  En lista: <span className="text-[#7A5AF8] font-bold">{displayListName}</span>
                   <ChevronDown size={16} />
                 </button>
               }
@@ -699,7 +701,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 />
               }
             />
-            {isSaving && <Loader2 size={16} className="text-[#7A5AF8] animate-spin" />}
+            {isSaving && <span className="text-[11px] font-semibold text-[#7A5AF8] animate-pulse">Guardando...</span>}
             {isUploading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold animate-pulse">
                 <Loader2 size={12} className="animate-spin" />
@@ -716,7 +718,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               trigger={
                 <button 
                   onClick={() => setActivePopover(activePopover === 'attachments' ? null : 'attachments')}
-                  className={`p-2 rounded-full transition-colors ${activePopover === 'attachments' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
+                  className={`p-2 rounded-lg transition-colors ${activePopover === 'attachments' ? 'bg-[#F4F5F7] text-[#7A5AF8]' : 'text-[#6B7280] hover:bg-[#F4F5F7] hover:text-[#1A1A2E]'}`}
                 >
                   <Paperclip size={20} />
                 </button>
@@ -736,7 +738,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               trigger={
                 <button 
                   onClick={() => setActivePopover(activePopover === 'options' ? null : 'options')}
-                  className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
+                  className={`p-2 rounded-lg transition-colors ${activePopover === 'options' ? 'bg-[#F4F5F7] text-[#7A5AF8]' : 'text-[#6B7280] hover:bg-[#F4F5F7] hover:text-[#1A1A2E]'}`}
                 >
                   <MoreHorizontal size={20} />
                 </button>
@@ -751,20 +753,23 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 />
               }
             />
-            <div className="w-px h-6 bg-zinc-200 mx-1" />
-            <button 
+            <div className="w-px h-5 bg-[#E8E9EC] mx-1" />
+            <button
               onClick={onClose}
-              className="p-2 text-[#806F9B] hover:bg-red-50 hover:text-red-500 rounded-full transition-colors"
+              className="p-2 text-[#6B7280] hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-8 pt-6 custom-scrollbar">
-          
-          {/* Card Title */}
+        {isLoading && !card ? (
+          <CardModalSkeleton />
+        ) : (
+          <div className="flex-1 overflow-y-auto p-6 pt-5 custom-scrollbar">
+            
+            {/* Card Title */}
           <div className="mb-8">
             <input 
               type="text"
@@ -772,7 +777,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               onChange={(e) => setEditTitle(e.target.value)}
               onBlur={handleUpdateTitle}
               onKeyDown={(e) => e.key === 'Enter' && handleUpdateTitle()}
-              className="w-full text-4xl font-black text-zinc-900 tracking-tighter outline-none focus:bg-[#F3E8FF] rounded-lg px-2 -ml-2 transition-colors border-none ring-0"
+              className="w-full text-3xl font-bold text-[#1A1A2E] tracking-tight outline-none focus:bg-[#F4F5F7] rounded-lg px-2 -ml-2 transition-colors border-none ring-0 placeholder:text-[#9CA3AF]"
               placeholder="Título de la tarjeta"
               disabled={isLoading}
             />
@@ -782,7 +787,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           <div className="flex flex-wrap items-center gap-8 mb-6">
             {selectedLabelIds.length > 0 && (
               <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Etiquetas</span>
+                <span className="cu-section-label">Etiquetas</span>
                 <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
                   {boardLabels.filter(l => selectedLabelIds.includes(l.id)).map(label => (
                     <div 
@@ -798,14 +803,14 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             )}
 
             <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Responsables</span>
+              <span className="cu-section-label">Responsables</span>
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(member => (
                     <div 
                       key={member.id}
                       title={member.name}
-                      className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm ring-1 ring-purple-50 transition-transform hover:scale-110 hover:z-10 cursor-help"
+                      className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 cursor-help"
                     >
                       {member.avatarUrl ? (
                         <img src={member.avatarUrl} alt={member.name} className="w-full h-full object-cover" />
@@ -821,7 +826,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'members_header' ? null : 'members_header')}
-                      className="w-8 h-8 rounded-full bg-slate-100 text-[#806F9B] flex items-center justify-center hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
+                      className="w-8 h-8 rounded-full bg-[#F4F5F7] border border-[#E8E9EC] text-[#6B7280] flex items-center justify-center hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
                     >
                       <span className="text-lg leading-none">+</span>
                     </button>
@@ -840,7 +845,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
             {(card?.startDate || card?.dueDate) && (
               <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Fechas</span>
+                <span className="cu-section-label">Fechas</span>
                 <div className="flex items-center gap-2">
                   <SmartPopover
                     isOpen={activePopover === 'dates_badge'}
@@ -848,7 +853,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     trigger={
                       <div 
                         onClick={() => setActivePopover(activePopover === 'dates_badge' ? null : 'dates_badge')}
-                        className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm cursor-pointer hover:bg-purple-100 transition-all border border-[#7A5AF8]/10"
+                        className="flex items-center gap-2 bg-[#F4F5F7] text-[#374151] px-3 py-1.5 rounded-lg font-semibold text-[12px] cursor-pointer hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all border border-[#E8E9EC]"
                       >
                         <Clock size={14} />
                         <span>
@@ -877,7 +882,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
             {(card?.priority || card?.riskLevel || card?.module) && (
               <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Propiedades</span>
+                <span className="cu-section-label">Propiedades</span>
                 <SmartPopover
                   isOpen={activePopover === 'properties'}
                   onClose={() => setActivePopover(null)}
@@ -918,7 +923,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       {card.module && (
                         <div 
                           onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm"
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F4F5F7] text-purple-600 border border-[#E8E9EC] flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm"
                         >
                           {card.module}
                         </div>
@@ -955,7 +960,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'add' ? null : 'add')}
-                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                      className="cu-action-btn flex items-center gap-2 px-4 py-2 rounded-lg"
                     >
                       <span className="text-lg leading-none">+</span> Añadir
                     </button>
@@ -1045,7 +1050,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
-                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
                     >
                       <Tag size={16} /> Etiquetas
                     </button>
@@ -1069,7 +1074,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
-                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
                     >
                       <Users size={16} /> Miembros
                     </button>
@@ -1090,7 +1095,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
                     >
                       <Clock size={16} /> Fechas
                     </button>
@@ -1108,7 +1113,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 
                 <button 
                   onClick={() => handleAddChecklist()}
-                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                  className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
                 >
                   <CheckSquare size={16} /> Checklist
                 </button>
@@ -1116,9 +1121,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
               {/* Description Section */}
               <div className="space-y-4">
-                <div className="flex items-center gap-3 text-zinc-900">
-                  <AlignLeft size={20} className="text-[#7A5AF8]" />
-                  <h3 className="text-lg font-extrabold tracking-tight">Descripción</h3>
+                <div className="flex items-center gap-2.5 text-[#1A1A2E]">
+                  <AlignLeft size={18} className="text-[#7A5AF8]" />
+                  <h3 className="text-[15px] font-bold tracking-tight">Descripción</h3>
                 </div>
                 
                 <RichTextEditor 
@@ -1166,8 +1171,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
+  </div>
   );
 };
 

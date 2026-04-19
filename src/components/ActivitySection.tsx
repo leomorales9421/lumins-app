@@ -70,7 +70,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#6948e5] active:scale-95 shadow-lg shadow-purple-100"
+                className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#6948e5] active:scale-95 shadow-sm"
               >
                 Guardar
               </button>
@@ -170,7 +170,7 @@ const ActivityFeedItem: React.FC<{
               </div>
             ) : (
               <>
-                <div className="w-full bg-white border border-purple-100 shadow-sm rounded-xl rounded-tl-none p-3 text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container is-comment-bubble">
+                <div className="w-full bg-white border border-[#E8E9EC] shadow-soft rounded-xl rounded-tl-none p-3 text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container is-comment-bubble">
                   <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
                 </div>
 
@@ -227,7 +227,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
         </div>
         <button 
           onClick={() => setShowAllActivity(!showAllActivity)}
-          className="text-xs font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF] px-2 py-1 rounded transition-colors cursor-pointer"
+          className="text-xs font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7] px-2 py-1 rounded transition-colors cursor-pointer"
         >
           {showAllActivity ? 'Ocultar detalles' : 'Mostrar detalles'}
         </button>
@@ -258,7 +258,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
           <button
             onClick={onLoadMore}
             disabled={isFetchingMore}
-            className="w-full bg-slate-50 text-[#806F9B] text-xs font-bold py-3 mt-4 rounded-xl hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-slate-50 text-[#806F9B] text-xs font-bold py-3 mt-4 rounded-xl hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors flex items-center justify-center gap-2"
           >
             {isFetchingMore ? (
               <>

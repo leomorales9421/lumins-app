@@ -86,7 +86,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   if (currentView === 'create' || currentView === 'edit') {
     const isEdit = currentView === 'edit';
     return (
-      <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+      <div className="w-72 bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button 
@@ -126,7 +126,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               placeholder="Ej: Frontend, Urgente..."
               value={labelName}
               onChange={(e) => setLabelName(e.target.value)}
-              className="bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all"
+              className="bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all"
             />
           </div>
 
@@ -154,7 +154,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <button 
               type="submit"
               disabled={!labelName.trim()}
-              className="flex-1 bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg shadow-purple-100 disabled:opacity-50 disabled:shadow-none"
+              className="flex-1 bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg  disabled:opacity-50 disabled:shadow-none"
             >
               {isEdit ? 'Guardar' : 'Crear'}
             </button>
@@ -174,7 +174,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   }
 
   return (
-    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-72 bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-extrabold text-[#806F9B] tracking-[0.1em] uppercase">
           Etiquetas
@@ -194,13 +194,13 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
           placeholder="Buscar etiquetas..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-[#F3E8FF] rounded-[8px] p-2 pl-8 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all"
+          className="bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 pl-8 text-sm text-[#1A1A2E] w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all"
         />
         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#806F9B]" />
       </div>
 
       {/* Lista de Etiquetas */}
-      <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent custom-scrollbar">
+      <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#D1D5DB] scrollbar-track-transparent custom-scrollbar">
         {filteredLabels.map((label) => (
           <div key={label.id} className="flex items-center gap-2 group">
             <input 
@@ -236,14 +236,14 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
       </div>
 
       {/* Footer */}
-      <hr className="border-purple-50 my-3" />
+      <hr className="border-[#E8E9EC] my-3" />
       <button 
         onClick={() => {
           setLabelName('');
           setLabelColor(PRESET_COLORS[0]);
           setCurrentView('create');
         }}
-        className="w-full text-left text-sm font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF] p-2 rounded-lg transition-colors"
+        className="w-full text-left text-sm font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7] p-2 rounded-md transition-colors"
       >
         Crear una etiqueta nueva
       </button>

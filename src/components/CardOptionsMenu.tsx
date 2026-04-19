@@ -57,11 +57,11 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   };
 
   return (
-    <div className="w-56 bg-white rounded-[12px] shadow-[0_10px_40px_-10px_rgba(122,90,248,0.2)] border border-purple-50 flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+    <div className="w-56 bg-white rounded-[12px] shadow-dropdown border border-[#E8E9EC] flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
       {/* Join / Leave */}
       <button 
         onClick={handleJoinClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
       >
         {isJoined ? (
           <>
@@ -79,7 +79,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       {/* Share */}
       <button 
         onClick={handleShareClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
       >
         {copied ? (
           <>
@@ -95,7 +95,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       </button>
 
       {/* Divider */}
-      <hr className="border-purple-50 my-1 mx-2" />
+      <hr className="border-[#E8E9EC] my-1 mx-2" />
 
       {/* Archive */}
       <button 

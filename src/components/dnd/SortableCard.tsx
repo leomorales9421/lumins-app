@@ -11,6 +11,20 @@ interface SortableCardProps {
   onClick: () => void;
 }
 
+const PRIORITY_BORDER: Record<string, string> = {
+  P0: 'priority-p0',
+  P1: 'priority-p1',
+  P2: 'priority-p2',
+  P3: 'priority-p3',
+};
+
+const PRIORITY_DOT: Record<string, string> = {
+  P0: '#EF4444',
+  P1: '#F97316',
+  P2: '#EAB308',
+  P3: '#94A3B8',
+};
+
 export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => {
   const {
     attributes,
@@ -21,10 +35,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
     isDragging,
   } = useSortable({
     id: card.id,
-    data: {
-      type: 'card',
-      card,
-    },
+    data: { type: 'card', card },
   });
 
   const style = {
@@ -32,12 +43,13 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
     transition,
   };
 
-  // Calculate checklist progress
   const checklistItems = card.checklists?.flatMap(cl => cl.items) || [];
   const totalItems = checklistItems.length;
   const doneItems = checklistItems.filter(i => i.done).length;
+  const checklistPct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
 
   const isOverdue = card.dueDate ? new Date(card.dueDate) < new Date() : false;
+  const priorityClass = card.priority ? PRIORITY_BORDER[card.priority] : '';
 
   return (
     <div
@@ -46,140 +58,132 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className={`
-        bg-white p-5 rounded-xl border border-[#7A5AF8]/5 cursor-grab active:cursor-grabbing
-        group hover:border-[#7A5AF8]/30 hover:shadow-heavy transition-all duration-300
-        ${isDragging ? 'rotate-2 scale-105 shadow-xl border-[#7A5AF8] z-50 bg-white' : 'shadow-sm'}
+      className={`cu-card ${priorityClass} cursor-grab active:cursor-grabbing group
+        ${isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50' : ''}
       `}
     >
-      <div className="flex flex-col gap-4">
-        {/* Card Header: Labels (Vibrant Matte Mini Bars) */}
+      <div className="px-3 pt-3 pb-2.5 flex flex-col gap-2.5">
+
+        {/* Labels */}
         {card.labels && card.labels.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1">
             {card.labels.map((item: any, idx: number) => (
-              <div 
-                key={item.label?.id || idx} 
+              <span
+                key={item.label?.id || idx}
                 title={item.label?.name}
                 style={{ backgroundColor: item.label?.color }}
-                className="w-10 h-2 rounded-full cursor-help shadow-sm transition-transform hover:scale-110"
-              />
+                className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold text-white leading-tight"
+              >
+                {item.label?.name || ''}
+              </span>
             ))}
           </div>
         )}
 
-        {/* Card Title (Manrope Body) */}
-        <h4 className="text-sm font-bold text-[#100B26] leading-relaxed group-hover:text-[#7A5AF8] transition-colors">
+        {/* Title */}
+        <p className="text-[13px] font-semibold text-[#1A1A2E] leading-snug group-hover:text-[#7A5AF8] transition-colors">
           {card.title}
-        </h4>
+        </p>
 
-        {/* Card Footer: Metadata (Vibrant Matte Style) */}
-        <div className="flex items-center justify-between mt-1">
-           <div className="flex items-center flex-wrap gap-x-4 gap-y-2">
-              {/* Due Date Badge */}
-              {card.dueDate && (
-                <div 
-                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md transition-all ${
-                    isOverdue 
-                      ? 'bg-red-500 text-white shadow-sm' 
-                      : 'text-[#806F9B] hover:bg-slate-50 hover:text-[#7A5AF8]'
-                  }`}
-                  title={isOverdue ? 'Vencido' : 'Fecha de vencimiento'}
-                >
-                  <Clock size={12} strokeWidth={3} />
-                  <span>{format(parseISO(card.dueDate), 'd MMM', { locale: es })}</span>
+        {/* Checklist progress bar */}
+        {totalItems > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-1 bg-[#F0F1F3] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#7A5AF8]'}`}
+                style={{ width: `${checklistPct}%` }}
+              />
+            </div>
+            <span className={`text-[10px] font-bold ${doneItems === totalItems ? 'text-emerald-600' : 'text-[#6B7280]'}`}>
+              {checklistPct}%
+            </span>
+          </div>
+        )}
+
+        {/* Footer: metadata */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 flex-wrap">
+
+            {/* Due date */}
+            {card.dueDate && (
+              <span
+                className={`flex items-center gap-1 text-[11px] font-medium rounded-md px-1.5 py-0.5 ${
+                  isOverdue
+                    ? 'bg-red-50 text-red-600'
+                    : 'text-[#6B7280]'
+                }`}
+                title={isOverdue ? 'Vencido' : 'Fecha de vencimiento'}
+              >
+                <Clock size={11} strokeWidth={2.5} />
+                {format(parseISO(card.dueDate), 'd MMM', { locale: es })}
+              </span>
+            )}
+
+            {/* Comments */}
+            {(card._count?.comments || 0) > 0 && (
+              <span className="flex items-center gap-1 text-[11px] font-medium text-[#6B7280]" title="Comentarios">
+                <MessageSquare size={11} strokeWidth={2.5} />
+                {card._count?.comments}
+              </span>
+            )}
+
+            {/* Attachments */}
+            {(card._count?.attachments || 0) > 0 && (
+              <span className="flex items-center gap-1 text-[11px] font-medium text-[#6B7280]" title="Adjuntos">
+                <Paperclip size={11} strokeWidth={2.5} />
+                {card._count?.attachments}
+              </span>
+            )}
+
+            {/* Checklist count */}
+            {totalItems > 0 && (
+              <span
+                className={`flex items-center gap-1 text-[11px] font-medium ${doneItems === totalItems ? 'text-emerald-600' : 'text-[#6B7280]'}`}
+                title="Checklist"
+              >
+                <CheckSquare size={11} strokeWidth={2.5} />
+                {doneItems}/{totalItems}
+              </span>
+            )}
+
+            {/* Description indicator */}
+            {card.description && (
+              <span className="text-[#9CA3AF]" title="Tiene descripción">
+                <AlignLeft size={11} strokeWidth={2.5} />
+              </span>
+            )}
+          </div>
+
+          {/* Right: Priority dot + Assignees */}
+          <div className="flex items-center gap-1.5">
+            {/* Priority dot */}
+            {card.priority && (
+              <span
+                title={`Prioridad ${card.priority}`}
+                style={{ backgroundColor: PRIORITY_DOT[card.priority] || '#94A3B8' }}
+                className="w-2 h-2 rounded-full flex-shrink-0"
+              />
+            )}
+
+            {/* Assignees */}
+            <div className="flex -space-x-1.5">
+              {card.assignees && card.assignees.length > 0 ? (
+                card.assignees.slice(0, 3).map((assignee: any, idx: number) => (
+                  <div
+                    key={assignee.user?.id || idx}
+                    title={assignee.user?.name}
+                    className="w-5 h-5 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[9px] font-bold border border-white shadow-sm"
+                  >
+                    {assignee.user?.name ? assignee.user.name[0].toUpperCase() : 'U'}
+                  </div>
+                ))
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-[#F0F1F3] border border-[#E8E9EC] flex items-center justify-center">
+                  <Eye size={9} className="text-[#9CA3AF]" strokeWidth={2.5} />
                 </div>
               )}
-
-              {/* Watching (Mock) */}
-              <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B] hover:text-[#7A5AF8] transition-colors cursor-help" title="Siguiendo">
-                <Eye size={12} strokeWidth={3} />
-              </div>
-
-              {/* Priority Badge */}
-              {card.priority && card.priority !== 'P3' && (
-                <div 
-                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md border shadow-sm transition-all ${
-                    card.priority === 'P0' ? 'bg-red-50 text-red-600 border-red-100' : 
-                    card.priority === 'P1' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
-                    'bg-amber-50 text-amber-600 border-amber-100'
-                  }`}
-                  title={`Prioridad: ${card.priority}`}
-                >
-                  <Zap size={10} strokeWidth={4} fill="currentColor" />
-                  <span>{card.priority}</span>
-                </div>
-              )}
-
-              {/* Risk Level Badge */}
-              {card.riskLevel && card.riskLevel !== 'low' && (
-                <div 
-                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md border shadow-sm transition-all ${
-                    card.riskLevel === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
-                    'bg-orange-50 text-orange-600 border-orange-100'
-                  }`}
-                  title={`Riesgo: ${card.riskLevel === 'high' ? 'ALTO' : 'MED'}`}
-                >
-                  <AlertCircle size={10} strokeWidth={4} />
-                  <span>{card.riskLevel === 'high' ? 'ALTO' : 'MED'}</span>
-                </div>
-              )}
-
-              {/* Description */}
-              {card.description && (
-                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Tiene descripción">
-                  <AlignLeft size={12} strokeWidth={3} />
-                </div>
-              )}
-
-              {/* Comments */}
-              {(card._count?.comments || 0) > 0 && (
-                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Comentarios">
-                  <MessageSquare size={12} strokeWidth={3} />
-                  <span>{card._count?.comments}</span>
-                </div>
-              )}
-
-              {/* Attachments */}
-              {(card._count?.attachments || 0) > 0 && (
-                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Adjuntos">
-                  <Paperclip size={12} strokeWidth={3} />
-                  <span>{card._count?.attachments}</span>
-                </div>
-              )}
-
-              {/* Checklist Progress */}
-              {totalItems > 0 && (
-                <div 
-                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black transition-colors ${
-                    doneItems === totalItems 
-                      ? 'bg-emerald-500 text-white shadow-sm' 
-                      : 'text-[#806F9B] hover:bg-slate-50'
-                  }`}
-                  title="Progreso de checklist"
-                >
-                  <CheckSquare size={12} strokeWidth={3} />
-                  <span>{doneItems}/{totalItems}</span>
-                </div>
-              )}
-           </div>
-
-           <div className="flex -space-x-1 items-center">
-             {card.assignees && card.assignees.length > 0 ? (
-               card.assignees.map((assignee: any, idx: number) => (
-                 <div 
-                   key={assignee.user.id || idx}
-                   title={assignee.user.name}
-                   className="w-6 h-6 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm ring-1 ring-purple-50 transition-transform hover:scale-110 hover:z-10 cursor-help"
-                 >
-                   {assignee.user.name ? assignee.user.name[0].toUpperCase() : 'U'}
-                 </div>
-               ))
-             ) : (
-               <div className="w-6 h-6 rounded-md bg-[#F3E8FF] flex items-center justify-center text-[9px] font-black text-[#7A5AF8] border border-white shadow-sm">
-                 U
-               </div>
-             )}
-           </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

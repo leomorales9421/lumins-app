@@ -39,7 +39,7 @@ export interface RichTextEditorRef {
   getHTML: () => string;
 }
 
-const Separator = () => <div className="w-px h-4 bg-purple-200 mx-1 self-center" />;
+const Separator = () => <div className="w-px h-4 bg-[#E8E9EC] mx-1 self-center" />;
 
 const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compact' }) => {
   if (!editor) {
@@ -67,7 +67,7 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
   }, [editor]);
 
   return (
-    <div className={`flex flex-wrap gap-1 p-2 border-b border-[#E9D5FF] bg-[#F3E8FF]/30 ${isCompact ? 'p-1' : 'p-2'}`}>
+    <div className={`flex flex-wrap gap-1 border-b border-[#E8E9EC] bg-[#F4F5F7] ${isCompact ? 'p-1' : 'p-2'}`}>
       {/* Grupo 1: Historia - Solo en default */}
       {!isCompact && (
         <>
@@ -417,7 +417,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     return (
       <div 
         onClick={() => setIsEditing(true)}
-        className="w-full bg-[#F3E8FF] rounded-[12px] p-3 text-sm text-[#806F9B] cursor-pointer hover:bg-[#EBDDFF] transition-all min-h-[44px] flex items-center"
+        className="w-full bg-[#F4F5F7] rounded-lg p-3 text-sm text-[#9CA3AF] cursor-pointer hover:bg-[#EAECF0] transition-all min-h-[44px] flex items-center border border-[#E8E9EC]"
       >
         {placeholder}
       </div>
@@ -428,7 +428,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     return (
       <div 
         onClick={() => setIsEditing(true)}
-        className="w-full bg-[#F3E8FF] rounded-[12px] p-6 text-zinc-700 cursor-pointer hover:bg-[#EBDDFF] transition-all min-h-[120px]"
+        className="w-full bg-[#F4F5F7] rounded-lg p-5 text-[#374151] cursor-pointer hover:bg-[#EAECF0] transition-all min-h-[100px] border border-[#E8E9EC]"
       >
         {initialContent ? (
           <div 
@@ -443,8 +443,8 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
   }
 
   return (
-    <div className={`flex flex-col w-full bg-[#F3E8FF] rounded-[12px] border border-transparent focus-within:ring-2 focus-within:ring-[#7A5AF8]/50 transition-all overflow-hidden shadow-sm relative ${
-      isCompact ? 'border-purple-100' : ''
+    <div className={`flex flex-col w-full bg-[#F4F5F7] rounded-lg border border-[#E8E9EC] focus-within:ring-2 focus-within:ring-[#7A5AF8]/15 focus-within:border-[#7A5AF8]/30 transition-all overflow-hidden relative ${
+      isCompact ? '' : ''
     }`}>
       {isUploading && (
         <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-50 flex items-center justify-center flex-col gap-2">
@@ -471,7 +471,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
       </div>
 
       {!hideFooter && (
-        <div className="p-3 flex items-center gap-2 border-t border-[#E9D5FF]/50 bg-[#F3E8FF]/20">
+        <div className="p-3 flex items-center gap-2 border-t border-[#E8E9EC] bg-[#F4F5F7]">
           <button
             onClick={handleSave}
             className="bg-[#7A5AF8] text-white font-bold text-sm px-4 py-2 rounded-[8px] hover:bg-[#694de3] transition-colors shadow-sm disabled:opacity-50"

@@ -60,7 +60,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
         {attachments.map((attachment) => (
           <div 
             key={attachment.id} 
-            className="group flex items-center gap-4 p-3 rounded-xl border border-purple-50 bg-white/50 hover:bg-white hover:shadow-lg hover:shadow-purple-500/5 transition-all mb-3 w-fit pr-10 relative overflow-hidden"
+            className="group flex items-center gap-4 p-3 rounded-xl border border-[#E8E9EC] bg-white hover:shadow-soft transition-all mb-3 w-fit pr-10 relative overflow-hidden"
           >
             {/* Glossy background effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />

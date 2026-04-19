@@ -115,14 +115,14 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
 
   if (isLoading) {
     return (
-      <div className="w-[320px] bg-white rounded-[16px] shadow-2xl border border-purple-50 p-8 flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#7A5AF8]" />
+      <div className="w-[320px] bg-white rounded-[16px] shadow-2xl border border-[#E8E9EC] p-8 flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#6B7280]" />
       </div>
     );
   }
 
   return (
-    <div className="w-[320px] bg-white rounded-[16px] shadow-2xl border border-purple-50 flex flex-col p-4 animate-in fade-in zoom-in duration-200">
+    <div className="w-[320px] bg-white rounded-[16px] shadow-2xl border border-[#E8E9EC] flex flex-col p-4 animate-in fade-in zoom-in duration-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 text-center">
@@ -140,7 +140,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
           <select
             value={selectedBoardId}
             onChange={(e) => setSelectedBoardId(e.target.value)}
-            className="appearance-none bg-[#F3E8FF] rounded-lg p-2.5 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 cursor-pointer"
+            className="appearance-none bg-[#F4F5F7] rounded-md p-2.5 text-sm text-[#1A1A2E] w-full outline-none border border-[#E8E9EC] focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 cursor-pointer"
           >
             {boards.map((b) => (
               <option key={b.id} value={b.id}>
@@ -148,7 +148,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
               </option>
             ))}
           </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#7A5AF8]" />
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7280]" />
         </div>
       </div>
 
@@ -160,7 +160,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
             <select
               value={selectedListId}
               onChange={(e) => setSelectedListId(e.target.value)}
-              className="appearance-none bg-[#F3E8FF] rounded-lg p-2.5 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 cursor-pointer"
+              className="appearance-none bg-[#F4F5F7] rounded-md p-2.5 text-sm text-[#1A1A2E] w-full outline-none border border-[#E8E9EC] focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 cursor-pointer"
             >
               {lists.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -168,7 +168,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
                 </option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#7A5AF8]" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7280]" />
           </div>
         </div>
 
@@ -178,7 +178,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
             <select
               value={selectedPosition}
               onChange={(e) => setSelectedPosition(Number(e.target.value))}
-              className="appearance-none bg-[#F3E8FF] rounded-lg p-2.5 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 cursor-pointer"
+              className="appearance-none bg-[#F4F5F7] rounded-md p-2.5 text-sm text-[#1A1A2E] w-full outline-none border border-[#E8E9EC] focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 cursor-pointer"
             >
               {positions.map((p) => (
                 <option key={p} value={p}>
@@ -186,7 +186,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
                 </option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#7A5AF8]" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7280]" />
           </div>
         </div>
       </div>

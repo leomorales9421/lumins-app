@@ -107,7 +107,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
               >
                 <X size={24} strokeWidth={3} />
               </button>
@@ -136,7 +136,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="nombre@empresa.com"
-                      className="w-full h-14 bg-[#F3E8FF] border-none rounded-[12px] pl-14 pr-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30"
+                      className="w-full h-14 bg-[#F4F5F7] border-none rounded-[12px] pl-14 pr-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                       required
                     />
                   </div>
@@ -154,7 +154,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                         onClick={() => setRole(r.id as Role)}
                         className={`p-4 rounded-[16px] border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${
                           role === r.id 
-                            ? 'border-[#7A5AF8] bg-[#F3E8FF] shadow-sm scale-[1.02]' 
+                            ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm scale-[1.02]' 
                             : 'border-zinc-100 bg-white hover:border-zinc-200'
                         }`}
                       >

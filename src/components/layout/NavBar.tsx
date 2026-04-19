@@ -10,7 +10,7 @@ const NavLink: React.FC<{ to: string; label: string; active?: boolean }> = ({ to
   <Link 
     to={to} 
     className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all
-      ${active ? 'bg-[#7A5AF8] text-white shadow-soft' : 'text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF]'}
+      ${active ? 'bg-[#7A5AF8] text-white shadow-soft' : 'text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7]'}
     `}
   >
     {label}
@@ -33,7 +33,7 @@ const NavBar: React.FC<NavBarProps> = ({ user, logout }) => {
         </Link>
 
         {/* TOP MENU: Migrated from Sidebar */}
-        <div className="hidden md:flex items-center gap-2 bg-[#F3E8FF]/50 p-1.5 rounded-2xl border border-[#7A5AF8]/5">
+        <div className="hidden md:flex items-center gap-2 bg-[#F4F5F7]/50 p-1.5 rounded-2xl border border-[#7A5AF8]/5">
            <NavLink to="/app" label="Dashboard" active={location.pathname === '/app'} />
            <NavLink to="#" label="Timeline" />
            <NavLink to="#" label="Resources" />

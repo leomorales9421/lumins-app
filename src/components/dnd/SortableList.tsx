@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react';
 import type { Card as CardType } from '../../types/board';
 import { SortableCard } from './SortableCard';
 
@@ -23,10 +24,10 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(list.name || list.title || '');
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  
+
   const menuRef = React.useRef<HTMLDivElement>(null);
   const cards = list.cards || [];
-  
+
   const {
     attributes,
     listeners,
@@ -38,10 +39,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
     active,
   } = useSortable({
     id: list.id,
-    data: {
-      type: 'list',
-      list: { ...list, cards },
-    },
+    data: { type: 'list', list: { ...list, cards } },
   });
 
   const isDraggingCardOver = isOver && active?.data.current?.type === 'card';
@@ -73,7 +71,6 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
     setIsEditingTitle(false);
   };
 
-  // Close menu when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -89,81 +86,84 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       ref={setNodeRef}
       style={style}
       className={`
-        h-fit max-h-full flex flex-col w-[340px] bg-white/80 rounded-2xl border border-[#7A5AF8]/10 shadow-soft flex-shrink-0 transition-all
-        ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] z-50' : ''}
-        ${isDraggingCardOver ? 'bg-purple-50/50 transition-colors' : ''}
+        cu-column h-fit max-h-full flex flex-col w-[300px] flex-shrink-0 transition-all
+        ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
+        ${isDraggingCardOver ? 'ring-2 ring-[#7A5AF8]/30 ring-offset-1' : ''}
       `}
     >
-      {/* List Header: Identity Style */}
-      <div 
-        {...attributes} 
-        {...listeners} 
-        className="p-4 pb-2 flex items-center justify-between cursor-grab active:cursor-grabbing group relative"
+      {/* Column Header */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cu-column-header px-3 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
       >
-        <div className="flex items-center gap-3 overflow-hidden flex-1">
-           <div className="w-1.5 h-6 bg-gradient-to-b from-[#7A5AF8] to-[#E91E63] rounded-full flex-shrink-0" />
-           {isEditingTitle ? (
-             <form onSubmit={handleUpdateTitle} className="flex-1">
-               <input
-                 autoFocus
-                 className="w-full bg-[#F3E8FF] rounded-md px-2 py-0.5 text-sm font-extrabold text-zinc-900 outline-none ring-2 ring-[#7A5AF8]/30"
-                 value={editTitle}
-                 onChange={(e) => setEditTitle(e.target.value)}
-                 onBlur={() => setIsEditingTitle(false)}
-               />
-             </form>
-           ) : (
-             <h3 
-               className="font-extrabold text-zinc-900 text-sm truncate max-w-[180px] cursor-text"
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setIsEditingTitle(true);
-               }}
-             >
-               {list.name || list.title}
-             </h3>
-           )}
-           <div className="w-5 h-5 flex items-center justify-center rounded-full bg-[#7A5AF8]/5 text-[#7A5AF8] text-[10px] font-black flex-shrink-0">
-             {cards.length}
-           </div>
+        <div className="flex items-center gap-2 flex-1 overflow-hidden">
+          {isEditingTitle ? (
+            <form onSubmit={handleUpdateTitle} className="flex-1">
+              <input
+                autoFocus
+                className="cu-input w-full px-2 py-1 text-sm font-semibold"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onBlur={handleUpdateTitle}
+              />
+            </form>
+          ) : (
+            <h3
+              className="font-semibold text-[#1A1A2E] text-[13px] truncate cursor-text hover:text-[#7A5AF8] transition-colors"
+              onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
+            >
+              {list.name || list.title}
+            </h3>
+          )}
+          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#F0F1F3] text-[#6B7280] text-[10px] font-bold">
+            {cards.length}
+          </span>
         </div>
-        
-        <div className="relative" ref={menuRef}>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(!isMenuOpen);
-            }}
-            className="text-slate-400 hover:text-zinc-700 transition-colors p-1 rounded-lg hover:bg-[#F3E8FF]"
+
+        <div className="flex items-center gap-0.5 flex-shrink-0" ref={menuRef}>
+          {/* Quick add card */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsAddingCard(true); }}
+            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-[#F0F1F3] transition-colors"
+            title="Añadir tarjeta"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            <Plus size={15} strokeWidth={2.5} />
+          </button>
+
+          {/* Column options */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#1A1A2E] hover:bg-[#F0F1F3] transition-colors"
+          >
+            <MoreHorizontal size={15} strokeWidth={2.5} />
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-zinc-100 py-2 z-[100]">
+            <div className="absolute right-0 top-full mt-1 w-44 cu-dropdown py-1 z-[100]">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditingTitle(true);
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[12px] font-medium text-[#374151] hover:bg-[#F4F5F7] flex items-center gap-2"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <Pencil size={13} strokeWidth={2.5} className="text-[#9CA3AF]" />
                 Editar nombre
               </button>
-              <div className="h-px bg-zinc-100 my-1 mx-2" />
+              <div className="h-px bg-[#F0F1F3] my-0.5 mx-2" />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onDeleteList && window.confirm('¿Estás seguro de que quieres eliminar esta lista?')) {
+                  if (onDeleteList && window.confirm('¿Eliminar esta lista?')) {
                     onDeleteList(list.id);
                   }
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[12px] font-medium text-red-500 hover:bg-red-50 flex items-center gap-2"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                <Trash2 size={13} strokeWidth={2.5} />
                 Eliminar lista
               </button>
             </div>
@@ -171,27 +171,27 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         </div>
       </div>
 
-      {/* Cards Area: Body with internal scroll */}
-      <div className="overflow-y-auto flex flex-col gap-2 min-h-0 custom-scrollbar px-4">
+      {/* Cards */}
+      <div className="overflow-y-auto flex flex-col gap-1.5 min-h-0 cu-scrollbar px-2 py-1.5">
         <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
-            <SortableCard 
-              key={card.id} 
-              card={card} 
-              onClick={() => onCardClick(card.id)} 
+            <SortableCard
+              key={card.id}
+              card={card}
+              onClick={() => onCardClick(card.id)}
             />
           ))}
         </SortableContext>
       </div>
 
-      {/* Quick Card Creation: Footer */}
-      <div className="p-4 pt-2">
+      {/* Footer: Add card */}
+      <div className="px-2 pt-0.5 pb-2">
         {isAddingCard ? (
-          <form onSubmit={handleAddCard} className="flex flex-col gap-2">
+          <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-[#F4F5F7] rounded-lg border border-[#E8E9EC]">
             <textarea
               autoFocus
               rows={2}
-              placeholder="Escribe un título para esta tarjeta..."
+              placeholder="Nombre de la tarjeta..."
               value={newCardTitle}
               onChange={(e) => setNewCardTitle(e.target.value)}
               onKeyDown={(e) => {
@@ -199,31 +199,32 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                   e.preventDefault();
                   handleAddCard(e);
                 }
+                if (e.key === 'Escape') handleCancel();
               }}
-              className="bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 outline-none w-full placeholder:text-[#806F9B]/50"
+              className="bg-white border border-[#E8E9EC] rounded-md px-2.5 py-2 text-[13px] text-[#1A1A2E] outline-none w-full resize-none placeholder:text-[#9CA3AF] focus:border-[#7A5AF8] focus:ring-2 focus:ring-[#7A5AF8]/10"
             />
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#7A5AF8] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#6949d6] transition-colors"
+                className="bg-[#7A5AF8] text-white px-3 py-1.5 rounded-md text-[12px] font-semibold hover:bg-[#6949d6] transition-colors"
               >
                 Añadir
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="text-zinc-400 hover:text-zinc-600 p-1 transition-colors"
+                className="text-[#6B7280] hover:text-[#1A1A2E] p-1 transition-colors text-[12px] font-medium"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                Cancelar
               </button>
             </div>
           </form>
         ) : (
-          <button 
+          <button
             onClick={() => setIsAddingCard(true)}
-            className="text-[#806F9B] text-sm font-bold w-full text-left p-2 rounded-lg hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors flex items-center gap-2 group"
+            className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-[#F0F1F3] transition-all text-[12px] font-medium group"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><path d="M12 5v14M5 12h14"/></svg>
+            <Plus size={14} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
             Añadir tarjeta
           </button>
         )}

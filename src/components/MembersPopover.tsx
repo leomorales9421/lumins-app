@@ -35,7 +35,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
   const uniqueMembers = Array.from(new Map(filteredMembers.map(m => [m.id, m])).values());
 
   return (
-    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-72 bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header Dinámico */}
       <div className="flex items-center justify-between p-4 pb-2">
         {onBack ? (
@@ -69,7 +69,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             placeholder="Buscar miembros..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-[#F3E8FF] rounded-[8px] p-2 pl-8 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#806F9B]/60"
+            className="bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 pl-8 text-sm text-[#1A1A2E] w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#806F9B]/60"
           />
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#806F9B]" />
         </div>
@@ -88,11 +88,11 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             <button
               key={member.id}
               onClick={() => onToggleMember(member.id)}
-              className="flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors hover:bg-[#F3E8FF] group w-full text-left"
+              className="flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors hover:bg-[#F4F5F7] group w-full text-left"
             >
               <div className="flex items-center">
                 {/* Avatar */}
-                <div className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-sm shadow-purple-100 ring-2 ring-white">
+                <div className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-sm  ring-2 ring-white">
                   {member.avatarUrl ? (
                     <img src={member.avatarUrl} alt={member.name} className="w-full h-full object-cover" />
                   ) : (

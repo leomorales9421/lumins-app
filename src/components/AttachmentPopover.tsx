@@ -26,7 +26,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
   };
 
   return (
-    <div className="w-[340px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[340px] bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-[10px] tracking-[0.4em] font-black text-[#806F9B] uppercase">
@@ -51,7 +51,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         
         <button 
           onClick={() => fileInputRef.current?.click()}
-          className="w-full bg-[#F3E8FF] text-[#7A5AF8] font-bold py-3 rounded-xl hover:bg-purple-200 transition-all cursor-pointer text-sm text-center border border-dashed border-purple-300 flex flex-col items-center gap-1 group"
+          className="w-full bg-[#F4F5F7] text-[#7A5AF8] font-bold py-3 rounded-xl hover:bg-[#EAECF0] transition-all cursor-pointer text-sm text-center border border-dashed border-[#D1D5DB] flex flex-col items-center gap-1 group"
         >
           <Upload size={18} className="group-hover:-translate-y-0.5 transition-transform" />
           <span>Elige un archivo</span>
@@ -64,7 +64,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         />
       </div>
 
-      <hr className="border-purple-50 my-6" />
+      <hr className="border-[#E8E9EC] my-6" />
 
       {/* Section 2: External Link */}
       <div className="space-y-4">
@@ -79,7 +79,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
               placeholder="https://..."
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              className="bg-[#F3E8FF] rounded-xl py-2.5 pl-9 pr-3 text-sm w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all font-medium text-zinc-800"
+              className="bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg py-2.5 pl-9 pr-3 text-sm w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all font-medium text-zinc-800"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
             placeholder="Nombre del enlace"
             value={linkName}
             onChange={(e) => setLinkName(e.target.value)}
-            className="bg-[#F3E8FF] rounded-xl py-2.5 px-3 text-sm w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all font-medium text-zinc-800"
+            className="bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg py-2.5 px-3 text-sm w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all font-medium text-zinc-800"
           />
         </div>
       </div>
@@ -109,7 +109,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         <button 
           onClick={handleInsertLink}
           disabled={!linkUrl.trim()}
-          className="bg-[#7A5AF8] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-purple-200 hover:bg-[#6948e5] transition-all disabled:opacity-50 active:scale-95"
+          className="bg-[#7A5AF8] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg  hover:bg-[#6948e5] transition-all disabled:opacity-50 active:scale-95"
         >
           Insertar
         </button>

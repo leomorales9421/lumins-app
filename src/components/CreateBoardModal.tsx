@@ -103,14 +103,14 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             className="w-full max-w-lg bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
           >
             {/* Decorative Orb */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#F3E8FF] blur-[60px] opacity-50 pointer-events-none -mr-20 -mt-20" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#F4F5F7] blur-[60px] opacity-50 pointer-events-none -mr-20 -mt-20" />
 
             {/* Header */}
             <div className="flex justify-between items-center mb-10">
               <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Crear nuevo tablero</h2>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
               >
                 <X size={24} strokeWidth={3} />
               </button>
@@ -126,7 +126,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   <select 
                     value={workspaceId}
                     onChange={(e) => setWorkspaceId(e.target.value)}
-                    className="w-full h-14 bg-[#F3E8FF] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 appearance-none transition-all"
+                    className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 appearance-none transition-all"
                   >
                     {workspaces.map(ws => (
                       <option key={ws.id} value={ws.id}>{ws.name}</option>
@@ -147,7 +147,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Lanzamiento Q4"
-                  className="w-full h-14 bg-[#F3E8FF] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30"
+                  className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                   required
                 />
               </div>
@@ -162,7 +162,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                     onClick={() => setVisibility('private')}
                     className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
                       visibility === 'private' 
-                        ? 'border-[#7A5AF8] bg-[#F3E8FF] shadow-sm' 
+                        ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
                         : 'border-zinc-100 bg-white hover:border-zinc-200'
                     }`}
                   >
@@ -177,7 +177,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                     onClick={() => setVisibility('team')}
                     className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
                       visibility === 'team' 
-                        ? 'border-[#7A5AF8] bg-[#F3E8FF] shadow-sm' 
+                        ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
                         : 'border-zinc-100 bg-white hover:border-zinc-200'
                     }`}
                   >
@@ -210,7 +210,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="¿De qué trata este proyecto?"
-                      className="w-full bg-[#F3E8FF] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30 resize-none"
+                      className="w-full bg-[#F4F5F7] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
                     />
                   </div>
                 )}

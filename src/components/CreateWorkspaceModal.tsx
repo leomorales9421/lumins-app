@@ -71,19 +71,19 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             className="w-full max-w-lg bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
           >
             {/* Decorative Element */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#F3E8FF] blur-[40px] opacity-60 pointer-events-none -mr-10 -mt-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#F4F5F7] blur-[40px] opacity-60 pointer-events-none -mr-10 -mt-10" />
 
             {/* Header */}
             <div className="flex justify-between items-start mb-10">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#F3E8FF] rounded-xl flex items-center justify-center text-[#7A5AF8]">
+                <div className="w-12 h-12 bg-[#F4F5F7] rounded-xl flex items-center justify-center text-[#7A5AF8]">
                   <Building2 size={24} strokeWidth={3} />
                 </div>
                 <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Nuevo Espacio</h2>
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
               >
                 <X size={24} strokeWidth={3} />
               </button>
@@ -101,7 +101,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Marketing HQ o Luminous Global"
-                  className="w-full h-14 bg-[#F3E8FF] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30"
+                  className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                   required
                 />
               </div>
@@ -126,7 +126,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Define el propósito de este equipo..."
-                      className="w-full bg-[#F3E8FF] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all placeholder:text-[#7A5AF8]/30 resize-none"
+                      className="w-full bg-[#F4F5F7] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
                     />
                   </div>
                 )}

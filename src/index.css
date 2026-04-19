@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,16 +6,151 @@
 
 @layer base {
   body {
-    @apply antialiased text-zinc-900 bg-[#F3E8FF] font-sans;
+    @apply antialiased text-[#1A1A2E] bg-[#F0F1F3] font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-extrabold tracking-tight;
+    @apply font-bold tracking-tight;
   }
 }
 
 @layer components {
-  /* Identity Graph Standard Cards */
+  /* ============================================================
+     CLICKUP-INSPIRED DESIGN SYSTEM
+     ============================================================ */
+
+  /* Board canvas background */
+  .cu-board-bg {
+    background: #F0F1F3;
+  }
+
+  /* Column container */
+  .cu-column {
+    background: #FFFFFF;
+    border: 1px solid #E8E9EC;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* Column header separator */
+  .cu-column-header {
+    border-bottom: 1px solid #F0F1F3;
+  }
+
+  /* Individual task card */
+  .cu-card {
+    background: #FFFFFF;
+    border: 1px solid #E8E9EC;
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .cu-card:hover {
+    border-color: #C4B5FD;
+    box-shadow: 0 4px 12px rgba(122, 90, 248, 0.10), 0 1px 3px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+  }
+
+  /* Priority left-border indicators */
+  .cu-card.priority-p0 { border-left: 3px solid #EF4444; }
+  .cu-card.priority-p1 { border-left: 3px solid #F97316; }
+  .cu-card.priority-p2 { border-left: 3px solid #EAB308; }
+  .cu-card.priority-p3 { border-left: 3px solid #94A3B8; }
+
+  /* Add list ghost button */
+  .cu-add-list-btn {
+    background: rgba(255,255,255,0.60);
+    border: 1.5px dashed #CBD5E1;
+    border-radius: 10px;
+    transition: all 0.18s ease;
+  }
+  .cu-add-list-btn:hover {
+    background: #FFFFFF;
+    border-color: #7A5AF8;
+    box-shadow: 0 1px 3px rgba(122,90,248,0.12);
+  }
+
+  /* Action pill buttons (inside modal sidebar) */
+  .cu-action-btn {
+    background: #F4F5F7;
+    border: 1px solid #E8E9EC;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.8125rem;
+  }
+  .cu-action-btn:hover {
+    background: #EDE9FE;
+    border-color: #C4B5FD;
+    color: #7A5AF8;
+  }
+
+  /* Section heading inside modal */
+  .cu-section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9CA3AF;
+  }
+
+  /* Inputs */
+  .cu-input {
+    background: #F4F5F7;
+    border: 1px solid #E8E9EC;
+    border-radius: 8px;
+    color: #1A1A2E;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .cu-input::placeholder { color: #9CA3AF; }
+  .cu-input:focus {
+    background: #FFFFFF;
+    border-color: #7A5AF8;
+    box-shadow: 0 0 0 3px rgba(122,90,248,0.12);
+  }
+
+  /* Board header */
+  .cu-board-header {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E8E9EC;
+    box-shadow: 0 1px 0 #E8E9EC;
+  }
+
+  /* Dropdown menu */
+  .cu-dropdown {
+    background: #FFFFFF;
+    border: 1px solid #E8E9EC;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  /* Standard Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+  /* Thin scrollbar for column cards */
+  .cu-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+  .cu-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .cu-scrollbar::-webkit-scrollbar-thumb {
+    background: #E5E7EB;
+    border-radius: 9999px;
+  }
+  .cu-scrollbar::-webkit-scrollbar-thumb:hover { background: #C4B5FD; }
+
+  /* Thin variant for activity */
+  .activity-feed-container {
+    scrollbar-width: thin;
+    scrollbar-color: #E2E8F0 transparent;
+  }
+
+  /* Standard card styles */
   .brand-card {
     @apply bg-white rounded-xl shadow-soft border border-brand-primary/5;
   }
@@ -24,117 +159,30 @@
     @apply w-full h-12 bg-white border border-brand-primary/10 rounded-md px-5 text-sm font-medium focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none;
   }
 
-  /* Custom Scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(122, 90, 248, 0.05);
-    border-radius: 9999px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(122, 90, 248, 0.3);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(122, 90, 248, 0.5);
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-
-  /* TipTap Placeholder & Editor Styles */
+  /* TipTap Editor */
   .prose-mirror-container p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
-    color: #806F9B;
+    color: #9CA3AF;
     pointer-events: none;
     height: 0;
   }
-
-  .prose-mirror-container {
-    @apply outline-none;
-  }
-
-  .prose-mirror-container h1 {
-    @apply text-2xl font-black text-zinc-900 mt-4 mb-2 tracking-tight;
-  }
-
-  .prose-mirror-container h2 {
-    @apply text-xl font-extrabold text-zinc-900 mt-4 mb-2 tracking-tight;
-  }
-
-  .prose-mirror-container p {
-    @apply text-[#806F9B] text-sm leading-relaxed mb-2;
-  }
-
-  .prose-mirror-container ul {
-    @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#806F9B];
-  }
-
-  .prose-mirror-container ol {
-    @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#806F9B];
-  }
-
-  .prose-mirror-container blockquote {
-    @apply border-l-4 border-[#7A5AF8] pl-4 italic text-[#806F9B] bg-[#F3E8FF]/50 p-2 rounded-r-lg my-2;
-  }
-
-  .prose-mirror-container pre {
-    @apply bg-zinc-900 text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto;
-  }
-
-  .prose-mirror-container code {
-    @apply bg-purple-100 text-[#7A5AF8] px-1.5 py-0.5 rounded-md text-xs font-mono;
-  }
-
-  .prose-mirror-container a {
-    @apply text-[#7A5AF8] underline hover:text-[#E91E63] transition-colors cursor-pointer;
-  }
-
-  .prose-mirror-container img {
-    @apply rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 shadow-md transition-all;
-  }
-
-  /* Specific styles for rich text in comment bubbles */
-  .prose-mirror-container p {
-    @apply mb-1 last:mb-0;
-  }
-
+  .prose-mirror-container { @apply outline-none; }
+  .prose-mirror-container h1 { @apply text-2xl font-black text-[#1A1A2E] mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container h2 { @apply text-xl font-extrabold text-[#1A1A2E] mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container p { @apply text-[#4B5563] text-sm leading-relaxed mb-2; }
+  .prose-mirror-container ul { @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
+  .prose-mirror-container ol { @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
+  .prose-mirror-container blockquote { @apply border-l-4 border-[#7A5AF8] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r-lg my-2; }
+  .prose-mirror-container pre { @apply bg-[#1A1A2E] text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto; }
+  .prose-mirror-container code { @apply bg-violet-50 text-[#7A5AF8] px-1.5 py-0.5 rounded-md text-xs font-mono; }
+  .prose-mirror-container a { @apply text-[#7A5AF8] underline hover:text-violet-700 transition-colors cursor-pointer; }
+  .prose-mirror-container img { @apply rounded-xl max-w-full h-auto my-4 border border-[#E8E9EC] shadow-sm; }
+  .prose-mirror-container p { @apply mb-1 last:mb-0; }
   .prose-mirror-container.is-comment-bubble img {
     max-width: 100%;
     border-radius: 8px;
     margin-top: 8px;
     display: block;
-  }
-
-  /* Custom Scrollbar Vibrant Matte */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #E2E8F0;
-    border-radius: 10px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #CBD5E1;
-  }
-
-  /* Thin variant for activity */
-  .activity-feed-container {
-    scrollbar-width: thin;
-    scrollbar-color: #E2E8F0 transparent;
   }
 }

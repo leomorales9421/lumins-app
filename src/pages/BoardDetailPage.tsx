@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
-import Button from '../components/ui/Button';
+
 import NavBar from '../components/layout/NavBar';
 import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
 import { 
@@ -301,8 +301,8 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F3E8FF] flex flex-col items-center justify-center font-sans">
-        <div className="w-12 h-12 border-4 border-[#7A5AF8]/20 border-t-[#7A5AF8] rounded-full animate-spin" />
+      <div className="min-h-screen cu-board-bg flex flex-col items-center justify-center font-sans">
+        <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
       </div>
     );
   }
@@ -310,38 +310,38 @@ const BoardDetailPage: React.FC = () => {
   if (!board) return null;
 
   return (
-    <div className="h-screen flex flex-col bg-[#F3E8FF] font-sans">
+    <div className="h-screen flex flex-col cu-board-bg font-sans">
       <NavBar user={user} logout={logout} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         
         {/* Simplified Top Header Area */}
-        <header className="bg-white border-b border-zinc-100 px-12 py-10 flex items-center justify-between flex-shrink-0 shadow-soft relative z-10">
-           <div className="flex items-center gap-10">
-             <button onClick={() => navigate('/app')} className="w-12 h-12 bg-[#F3E8FF] rounded-xl text-[#7A5AF8] flex items-center justify-center transition-all hover:bg-[#e9d5ff]">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <header className="cu-board-header px-8 py-4 flex items-center justify-between flex-shrink-0 relative z-10">
+           <div className="flex items-center gap-6">
+             <button
+               onClick={() => navigate('/app')}
+               className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#7A5AF8] transition-colors text-sm font-medium"
+             >
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+               Tableros
              </button>
-             <div className="flex flex-col gap-1">
-                                 <div className="flex items-center gap-4">
-                    <h1 className="text-4xl font-black text-zinc-900 tracking-tighter">{board.name}</h1>
-                    {isSaving && (
-                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#7A5AF8]/10 border border-[#7A5AF8]/20 animate-pulse">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#7A5AF8]" />
-                        <span className="text-[10px] font-bold text-[#7A5AF8] uppercase tracking-wider">Sincronizando...</span>
-                      </div>
-                    )}
-                 </div>
-
-                <div className="flex items-center gap-3">
-                   <div className="w-2 h-2 rounded-full bg-[#7A5AF8] animate-pulse" />
-                   <span className="text-[10px] font-black text-[#7A5AF8] uppercase tracking-[0.4em]">Unidad Estratégica Activa</span>
-                </div>
+             <span className="text-[#D1D5DB]">/</span>
+             <div className="flex items-center gap-3">
+               <div className="w-6 h-6 rounded-md bg-[#7A5AF8] flex-shrink-0" />
+               <div className="flex items-center gap-2">
+                 <h1 className="text-[15px] font-bold text-[#1A1A2E]">{board.name}</h1>
+                 {isSaving && (
+                   <span className="text-[10px] font-semibold text-[#7A5AF8] bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full animate-pulse">
+                     Guardando...
+                   </span>
+                 )}
+               </div>
              </div>
            </div>
 
-           <div className="flex items-center gap-4">
-              <Button variant="outlined" size="sm" className="h-11 px-6 border-zinc-100 text-zinc-400">Miembros</Button>
-              <Button variant="primary" size="sm" className="h-11 px-8 bg-[#7A5AF8]">Configuración</Button>
+           <div className="flex items-center gap-2">
+              <button className="h-8 px-4 rounded-lg text-[#6B7280] text-[13px] font-semibold border border-[#E8E9EC] bg-white hover:border-[#7A5AF8] hover:text-[#7A5AF8] transition-all">Miembros</button>
+              <button className="h-8 px-4 rounded-lg text-white text-[13px] font-semibold bg-[#7A5AF8] hover:bg-[#6949d6] transition-all shadow-sm">Configuración</button>
            </div>
         </header>
 
@@ -354,7 +354,7 @@ const BoardDetailPage: React.FC = () => {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-5 h-full items-start p-12 min-w-max">
+            <div className="flex gap-4 h-full items-start p-6 min-w-max">
               <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
                 {lists.map((list) => (
                   <SortableList 
@@ -369,32 +369,32 @@ const BoardDetailPage: React.FC = () => {
               </SortableContext>
               
               {isAddingList ? (
-                <form onSubmit={handleAddList} className="min-w-[340px] bg-white rounded-2xl p-4 shadow-soft border border-[#7A5AF8]/10 h-fit">
+                <form onSubmit={handleAddList} className="min-w-[300px] bg-white rounded-lg border border-[#E8E9EC] p-3 h-fit shadow-soft">
                   <input
                     autoFocus
                     placeholder="Nombre de la lista..."
                     value={newListTitle}
                     onChange={(e) => setNewListTitle(e.target.value)}
-                    className="w-full bg-[#F3E8FF] rounded-xl p-3 text-sm font-bold text-zinc-900 outline-none placeholder:text-[#806F9B]/50 mb-3"
+                    className="w-full cu-input px-2.5 py-2 text-[13px] font-medium mb-2"
                   />
                   <div className="flex items-center gap-2">
-                    <Button type="submit" size="sm" className="bg-[#7A5AF8]">Añadir lista</Button>
-                    <button 
-                      type="button" 
+                    <button type="submit" className="bg-[#7A5AF8] hover:bg-[#6949d6] text-white text-[12px] font-semibold px-3 py-1.5 rounded-md transition-colors">Añadir lista</button>
+                    <button
+                      type="button"
                       onClick={() => setIsAddingList(false)}
-                      className="text-zinc-400 hover:text-zinc-600 p-2 transition-colors"
+                      className="text-[#6B7280] hover:text-[#1A1A2E] text-[12px] font-medium transition-colors"
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      Cancelar
                     </button>
                   </div>
                 </form>
               ) : (
-                <button 
+                <button
                   onClick={() => setIsAddingList(true)}
-                  className="min-w-[340px] h-[100px] bg-white/40 hover:bg-white border-2 border-dashed border-[#7A5AF8]/20 rounded-2xl flex items-center justify-center gap-4 text-[#7A5AF8]/40 font-black uppercase tracking-widest text-xs transition-all hover:border-[#7A5AF8] hover:text-[#7A5AF8] group flex-shrink-0"
+                  className="cu-add-list-btn min-w-[300px] h-[72px] flex items-center justify-center gap-2 text-[#9CA3AF] hover:text-[#7A5AF8] font-semibold text-[13px] flex-shrink-0"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                  Nueva Lista
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                  Añadir lista
                 </button>
               )}
 

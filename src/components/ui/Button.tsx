@@ -22,7 +22,7 @@ const Button: React.FC<ButtonProps> = ({
   const variantClasses = {
     // Exact colors from Identity Graph
     primary: 'bg-[#7A5AF8] text-white shadow-soft hover:bg-[#6a4ae7]',
-    secondary: 'bg-[#F3E8FF] text-[#7A5AF8] hover:bg-[#e9d5ff]',
+    secondary: 'bg-[#F4F5F7] text-[#374151] border border-[#E8E9EC] hover:bg-[#EAECF0] hover:text-[#7A5AF8]',
     inverted: 'bg-[#100B26] text-white hover:bg-[#000000]', // Inverted look from guide
     outlined: 'bg-transparent border-2 border-zinc-200 text-zinc-600 hover:border-[#7A5AF8] hover:text-[#7A5AF8]',
     danger: 'bg-[#E91E63] text-white hover:bg-[#d81b60] shadow-soft',

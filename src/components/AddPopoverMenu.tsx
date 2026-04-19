@@ -62,9 +62,9 @@ const MENU_OPTIONS: MenuOption[] = [
 
 const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption }) => {
   return (
-    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-72 bg-white rounded-xl shadow-dropdown border border-[#E8E9EC] flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
-      <div className="relative border-b border-purple-50 py-3">
+      <div className="relative border-b border-[#F0F1F3] py-3">
         <h3 className="text-center text-xs font-extrabold text-[#806F9B] tracking-[0.1em] uppercase">
           Añadir a la tarjeta
         </h3>
@@ -86,7 +86,7 @@ const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption
               onClick={() => {
                 onSelectOption(option.id);
               }}
-              className="w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-[#F3E8FF] group cursor-pointer border-b border-zinc-50 last:border-0"
+              className="w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-[#F4F5F7] group cursor-pointer border-b border-[#F0F1F3] last:border-0"
             >
               <div className="bg-slate-50 text-[#806F9B] p-2 rounded-lg group-hover:bg-white group-hover:text-[#7A5AF8] transition-colors">
                 <Icon size={18} />
