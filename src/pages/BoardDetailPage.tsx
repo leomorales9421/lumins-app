@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
@@ -27,6 +27,7 @@ const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [board, setBoard] = useState<Board | null>(null);
   const [lists, setLists] = useState<List[]>([]);
@@ -41,7 +42,13 @@ const BoardDetailPage: React.FC = () => {
     try {
       const response = await apiClient.get<{ data: { board: Board } }>(`/api/boards/${id}`);
       setBoard(response.data.board);
-      setLists(response.data.board.lists || []);
+      
+      // Filter out archived (closed) cards
+      const filteredLists = (response.data.board.lists || []).map(list => ({
+        ...list,
+        cards: (list.cards || []).filter(card => card.status === 'open')
+      }));
+      setLists(filteredLists);
     } catch (err) {
       navigate('/app');
     } finally {
@@ -50,6 +57,22 @@ const BoardDetailPage: React.FC = () => {
   }, [id, navigate]);
 
   useEffect(() => { fetchBoard(); }, [fetchBoard]);
+
+  // Handle opening card from URL on initial load
+  useEffect(() => {
+    const cardId = searchParams.get('cardId');
+    if (cardId) {
+      setSelectedCardId(cardId);
+    }
+  }, [searchParams]);
+
+  const handleCloseModal = () => {
+    setSelectedCardId(null);
+    // Remove cardId from URL when closing modal
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('cardId');
+    setSearchParams(newParams, { replace: true });
+  };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -222,7 +245,7 @@ const BoardDetailPage: React.FC = () => {
 
       <CardDetailModal
         isOpen={!!selectedCardId}
-        onClose={() => setSelectedCardId(null)}
+        onClose={handleCloseModal}
         cardId={selectedCardId}
         boardId={id}
         onUpdate={fetchBoard}

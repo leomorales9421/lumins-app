@@ -10,7 +10,8 @@ import {
   MessageSquare,
   ChevronDown,
   Loader2,
-  Users
+  Users,
+  Zap
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import RichTextEditor from './RichTextEditor';
@@ -26,6 +27,8 @@ import ActivitySection from './ActivitySection';
 import type { ActivityItem } from '../types/activity';
 import AttachmentsSection from './AttachmentsSection';
 import AttachmentPopover from './AttachmentPopover';
+import PropertiesPopover from './PropertiesPopover';
+import CardOptionsMenu from './CardOptionsMenu';
 
 interface Member {
   id: string;
@@ -54,6 +57,9 @@ interface CardData {
   assignees?: Member[];
   startDate?: string;
   dueDate?: string;
+  priority?: 'P0' | 'P1' | 'P2' | 'P3' | null;
+  riskLevel?: 'low' | 'med' | 'high' | null;
+  module?: string | null;
 }
 
 // ActivityItem interface is now imported from ../types/activity
@@ -90,7 +96,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | null>(null);
+  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>([]);
@@ -163,7 +169,10 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         listName: initialData?.listName || 'Lista',
         description: cardData.description || '',
         attachments: cardData.attachments || [],
-        labels: normalizedLabels
+        labels: normalizedLabels,
+        priority: cardData.priority,
+        riskLevel: cardData.riskLevel,
+        module: cardData.module
       };
       
       setCard(mappedCard);
@@ -492,7 +501,43 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const handleRemoveDates = async () => {
     await handleUpdateDates({ startDate: null, dueDate: null });
   };
+
+  const handleArchiveCard = async () => {
+    if (!cardId) return;
+    setIsSaving(true);
+    try {
+      // According to schema, status 'closed' is used for archiving
+      await apiClient.patch(`/api/cards/${cardId}`, { status: 'closed' });
+      if (onUpdate) onUpdate();
+      onClose(); // Close modal after archiving
+    } catch (err) {
+      console.error('Error archiving card:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
+  const handleUpdateProperties = async (properties: { priority?: string | null; riskLevel?: string | null; module?: string | null }) => {
+    if (!cardId) return;
+    
+    // Optimistic update
+    if (card) {
+      setCard({
+        ...card,
+        ...properties as any
+      });
+    }
+
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, properties);
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error updating properties:', err);
+      // Rollback on error
+      fetchCardDetails();
+    }
+  };
+
   const handleFileUpload = async (file: File) => {
     if (!file || !cardId) return;
 
@@ -623,9 +668,26 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             >
               <Paperclip size={20} />
             </button>
-            <button className="p-2 text-[#806F9B] hover:bg-zinc-100 rounded-full transition-colors">
-              <MoreHorizontal size={20} />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setActivePopover(activePopover === 'options' ? null : 'options')}
+                className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
+              >
+                <MoreHorizontal size={20} />
+              </button>
+              
+              {activePopover === 'options' && (
+                <div className="absolute right-0 mt-2 top-full" ref={popoverRef}>
+                  <CardOptionsMenu 
+                    cardId={cardId || ''}
+                    assignedMemberIds={assignedMemberIds}
+                    onToggleJoin={handleToggleMember}
+                    onArchive={handleArchiveCard}
+                    onClose={() => setActivePopover(null)}
+                  />
+                </div>
+              )}
+            </div>
             <div className="w-px h-6 bg-zinc-200 mx-1" />
             <button 
               onClick={onClose}
@@ -720,6 +782,54 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 </div>
               </div>
             )}
+
+            {(card?.priority || card?.riskLevel || card?.module) && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Propiedades</span>
+                <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                  {card.priority && card.priority !== 'P3' && (
+                    <div 
+                      onClick={() => setActivePopover('properties')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
+                        ${card.priority === 'P0' ? 'bg-red-50 text-red-600 border-red-100' : 
+                          card.priority === 'P1' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                          'bg-amber-50 text-amber-600 border-amber-100'}`}
+                    >
+                      <Zap size={12} fill="currentColor" />
+                      {card.priority === 'P0' ? 'P0 - Crítica' : card.priority === 'P1' ? 'P1 - Alta' : 'P2 - Media'}
+                    </div>
+                  )}
+                  {card.priority === 'P3' && (
+                    <div 
+                      onClick={() => setActivePopover('properties')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 text-slate-500 border border-slate-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+                    >
+                      <Zap size={12} />
+                      P3 - Baja
+                    </div>
+                  )}
+                  {card.riskLevel && (
+                    <div 
+                      onClick={() => setActivePopover('properties')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
+                        ${card.riskLevel === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
+                          card.riskLevel === 'med' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                          'bg-emerald-50 text-emerald-600 border-emerald-100'}`}
+                    >
+                      Riesgo {card.riskLevel === 'high' ? 'Alto' : card.riskLevel === 'med' ? 'Medio' : 'Bajo'}
+                    </div>
+                  )}
+                  {card.module && (
+                    <div 
+                      onClick={() => setActivePopover('properties')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm"
+                    >
+                      {card.module}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Grid Layout */}
@@ -757,6 +867,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                             setActivePopover('dates');
                           } else if (option === 'attachment') {
                             setActivePopover('attachments');
+                          } else if (option === 'properties') {
+                            setActivePopover('properties');
                           } else {
                             // Add logic for other options here
                             console.log('Selected:', option);
@@ -837,10 +949,26 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     >
                       <DatesPopover 
                         onClose={() => setActivePopover(null)}
-                        startDate={card?.startDate || null}
-                        dueDate={card?.dueDate || null}
-                        onSaveDates={handleUpdateDates}
-                        onRemoveDates={handleRemoveDates}
+                        onUpdate={handleUpdateDates}
+                        onRemove={handleRemoveDates}
+                        initialStartDate={card?.startDate}
+                        initialDueDate={card?.dueDate}
+                      />
+                    </div>
+                  )}
+
+                  {activePopover === 'properties' && (
+                    <div 
+                      ref={popoverRef}
+                      className="absolute top-full left-0 mt-2 z-[110]"
+                    >
+                      <PropertiesPopover 
+                        onClose={() => setActivePopover(null)}
+                        onBack={() => setActivePopover('add')}
+                        currentPriority={card?.priority}
+                        currentRiskLevel={card?.riskLevel}
+                        currentModule={card?.module}
+                        onUpdate={handleUpdateProperties}
                       />
                     </div>
                   )}

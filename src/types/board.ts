@@ -6,9 +6,9 @@ export interface Card {
   listId: string;
   boardId: string;
   status: 'open' | 'closed';
-  priority?: 'low' | 'medium' | 'high';
-  dueDate?: string;
-  startDate?: string;
+  priority?: 'P0' | 'P1' | 'P2' | 'P3' | null;
+  riskLevel?: 'low' | 'med' | 'high' | null;
+  module?: string | null;
   createdAt?: string;
   updatedAt?: string;
   labels?: Array<{ id: string; name: string; color: string }>;
