@@ -16,20 +16,25 @@ const BoardsPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string }[]>([]);
 
   const fetchWorkspaces = useCallback(async () => {
+    setIsLoadingWorkspaces(true);
     try {
       const response = await apiClient.get<{ data: { workspaces: { id: string, name: string }[] } }>('/api/workspaces');
       setWorkspaces(response.data.workspaces || []);
     } catch (err) {
       console.error('Failed to fetch workspaces', err);
+    } finally {
+      setIsLoadingWorkspaces(false);
     }
   }, []);
 
   const fetchBoards = useCallback(async () => {
     setIsLoading(true);
+    setBoards([]); // Clear old boards to prevent "vistas viejas"
     try {
       const url = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
       const response = await apiClient.get<{ data: { boards: Board[] } }>(url);
@@ -66,7 +71,7 @@ const BoardsPage: React.FC = () => {
       <main className="flex-1 p-6 md:p-12">
         <div className="max-w-[1400px] mx-auto w-full">
           
-          {isLoading ? (
+          {(isLoading || isLoadingWorkspaces) ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
               <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
             </div>

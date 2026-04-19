@@ -160,7 +160,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
           </div>
           <div className="flex-1 text-left">
             <p className="text-[13px] font-bold text-slate-900 truncate">
-              {currentWorkspace?.name || 'Cargando...'}
+              {currentWorkspace?.name || 'Sin Espacios'}
             </p>
           </div>
           <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />

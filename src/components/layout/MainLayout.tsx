@@ -42,6 +42,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     fetchWorkspaces();
+    
+    window.addEventListener('workspace-changed', fetchWorkspaces);
+    return () => window.removeEventListener('workspace-changed', fetchWorkspaces);
   }, [fetchWorkspaces]);
 
   // Event listeners for global triggers
