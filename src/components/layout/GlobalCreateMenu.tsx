@@ -31,22 +31,22 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
   };
 
   const menuContent = (
-    <div className="w-64 bg-white rounded-2xl shadow-2xl border border-zinc-100 p-2 z-50 animate-in fade-in zoom-in duration-200">
+    <div className="w-64 bg-white rounded-lg shadow-2xl border border-zinc-100 p-2 z-50 animate-in fade-in zoom-in duration-200">
       {/* Nuevo Tablero */}
       <button
         disabled={!canCreateBoard}
         onClick={handleCreateBoard}
-        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group/item
+        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left group/item
           ${canCreateBoard 
             ? 'hover:bg-purple-50 cursor-pointer' 
             : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
       >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors
           ${canCreateBoard ? 'bg-purple-100 text-[#6C5DD3]' : 'bg-zinc-100 text-zinc-400'}
         `}>
-          <Layout size={20} strokeWidth={2.5} />
+          <Layout size={18} strokeWidth={2.5} />
         </div>
         <div className="flex-1">
           <h4 className="text-sm font-bold text-zinc-900 group-hover/item:text-[#6C5DD3] transition-colors">Tablero</h4>
@@ -55,15 +55,15 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
         <ChevronRight size={14} className="text-zinc-300 group-hover/item:text-[#6C5DD3] group-hover/item:translate-x-0.5 transition-all" />
       </button>
 
-      <hr className="my-2 border-zinc-50" />
+      <hr className="my-1.5 border-zinc-100" />
 
       {/* Nuevo Espacio de Trabajo */}
       <button
         onClick={handleCreateWorkspace}
-        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all text-left group/item"
+        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-all text-left group/item"
       >
-        <div className="w-10 h-10 bg-zinc-100 text-zinc-500 rounded-xl flex items-center justify-center group-hover/item:bg-zinc-200 transition-colors">
-          <Briefcase size={20} strokeWidth={2.5} />
+        <div className="w-9 h-9 bg-zinc-100 text-zinc-500 rounded-lg flex items-center justify-center group-hover/item:bg-zinc-200 transition-colors">
+          <Briefcase size={18} strokeWidth={2.5} />
         </div>
         <div className="flex-1">
           <h4 className="text-sm font-bold text-zinc-900">Espacio de Trabajo</h4>
@@ -81,9 +81,9 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
       trigger={
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#6C5DD3] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-purple-200 hover:bg-[#5244b5] transition-all flex items-center gap-2 group"
+          className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-md shadow-purple-200/60 hover:bg-[#5244b5] transition-all flex items-center gap-1.5"
         >
-          <Plus size={18} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-300`} />
+          <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200`} />
           <span>Nuevo</span>
         </button>
       }

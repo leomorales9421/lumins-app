@@ -12,6 +12,7 @@ import MembersPage from './pages/MembersPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import WorkspaceActivityPage from './pages/WorkspaceActivityPage';
+import WorkspaceCalendarPage from './pages/WorkspaceCalendarPage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -67,6 +68,17 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <WorkspaceActivityPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/w/:workspaceId/calendar"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <WorkspaceCalendarPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
