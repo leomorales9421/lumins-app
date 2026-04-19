@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
 import InvitePage from './pages/InvitePage';
+import MembersPage from './pages/MembersPage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -39,6 +40,17 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <BoardsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/w/:workspaceId/members"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <MembersPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

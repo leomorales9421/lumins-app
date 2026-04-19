@@ -8,6 +8,7 @@ import {
   Activity,
   Plus
 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
 
 interface SidebarProps {
@@ -31,6 +32,8 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string }
 );
 
 const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace }) => {
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+
   return (
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-[calc(100vh-64px)] sticky top-16">
       <div className="p-4 flex flex-col gap-8 h-full">
@@ -48,10 +51,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace }) => {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-2 mb-3">
             Principal
           </p>
-          <SidebarItem to="/app" icon={<Layout size={18} />} label="Tableros" />
+          <SidebarItem 
+            to={workspaceId ? `/w/${workspaceId}/dashboard` : "/app"} 
+            icon={<Layout size={18} />} 
+            label="Tableros" 
+          />
           <SidebarItem to="/calendar" icon={<Calendar size={18} />} label="Calendario" />
           <SidebarItem to="/activity" icon={<Activity size={18} />} label="Actividad" />
-          <SidebarItem to="/members" icon={<Users size={18} />} label="Miembros" />
+          <SidebarItem 
+            to={workspaceId ? `/w/${workspaceId}/members` : "/members"} 
+            icon={<Users size={18} />} 
+            label="Miembros" 
+          />
         </div>
 
         {/* Settings/Bottom Section */}
