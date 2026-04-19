@@ -62,7 +62,7 @@ const MENU_OPTIONS: MenuOption[] = [
 
 const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption }) => {
   return (
-    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="relative border-b border-purple-50 py-3">
         <h3 className="text-center text-xs font-extrabold text-[#806F9B] tracking-[0.1em] uppercase">

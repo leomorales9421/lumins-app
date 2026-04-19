@@ -31,6 +31,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   variant?: 'default' | 'compact';
   hideFooter?: boolean;
+  onCancel?: () => void;
 }
 
 export interface RichTextEditorRef {
@@ -267,7 +268,8 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
   cardId,
   placeholder = 'Añadir una descripción más detallada...',
   variant = 'default',
-  hideFooter = false
+  hideFooter = false,
+  onCancel
 }, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -405,6 +407,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
       editor.commands.setContent(initialContent);
       setHasUnsavedChanges(false);
       setIsEditing(false);
+      if (onCancel) onCancel();
     }
   };
 

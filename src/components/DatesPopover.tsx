@@ -47,7 +47,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[320px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 overflow-hidden">
+    <div className="w-[320px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button onClick={onClose} className="p-1 text-[#806F9B] hover:bg-slate-50 rounded-md transition-colors">

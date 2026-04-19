@@ -30,6 +30,7 @@ import AttachmentPopover from './AttachmentPopover';
 import PropertiesPopover from './PropertiesPopover';
 import CardOptionsMenu from './CardOptionsMenu';
 import Popover from './ui/Popover';
+import SmartPopover from './SmartPopover';
 
 interface Member {
   id: string;
@@ -685,24 +686,28 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             >
               <Paperclip size={20} />
             </button>
-            <Popover
+            <SmartPopover
+              isOpen={activePopover === 'options'}
+              onClose={() => setActivePopover(null)}
+              placement="bottom-end"
               trigger={
-                <button className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}>
+                <button 
+                  onClick={() => setActivePopover(activePopover === 'options' ? null : 'options')}
+                  className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
+                >
                   <MoreHorizontal size={20} />
                 </button>
               }
-              open={activePopover === 'options'}
-              onOpenChange={(open) => setActivePopover(open ? 'options' : null)}
-              align="end"
-            >
-              <CardOptionsMenu 
-                cardId={cardId || ''}
-                assignedMemberIds={assignedMemberIds}
-                onToggleJoin={handleToggleMember}
-                onArchive={handleArchiveCard}
-                onClose={() => setActivePopover(null)}
-              />
-            </Popover>
+              content={
+                <CardOptionsMenu 
+                  cardId={cardId || ''}
+                  assignedMemberIds={assignedMemberIds}
+                  onToggleJoin={handleToggleMember}
+                  onArchive={handleArchiveCard}
+                  onClose={() => setActivePopover(null)}
+                />
+              }
+            />
             <div className="w-px h-6 bg-zinc-200 mx-1" />
             <button 
               onClick={onClose}
@@ -780,20 +785,35 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Fechas</span>
                 <div className="flex items-center gap-2">
-                  <div 
-                    onClick={() => setActivePopover('dates')}
-                    className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm cursor-pointer hover:bg-purple-100 transition-all border border-[#7A5AF8]/10"
-                  >
-                    <Clock size={14} />
-                    <span>
-                      {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
-                      {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
-                      {card.dueDate && new Date(card.dueDate) < new Date() && (
-                        <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
-                      )}
-                    </span>
-                    <ChevronDown size={14} className="ml-1 opacity-50" />
-                  </div>
+                  <SmartPopover
+                    isOpen={activePopover === 'dates'}
+                    onClose={() => setActivePopover(null)}
+                    trigger={
+                      <div 
+                        onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
+                        className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm cursor-pointer hover:bg-purple-100 transition-all border border-[#7A5AF8]/10"
+                      >
+                        <Clock size={14} />
+                        <span>
+                          {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
+                          {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
+                          {card.dueDate && new Date(card.dueDate) < new Date() && (
+                            <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
+                          )}
+                        </span>
+                        <ChevronDown size={14} className="ml-1 opacity-50" />
+                      </div>
+                    }
+                    content={
+                      <DatesPopover 
+                        onClose={() => setActivePopover(null)}
+                        onSaveDates={handleUpdateDates}
+                        onRemoveDates={handleRemoveDates}
+                        startDate={card?.startDate || null}
+                        dueDate={card?.dueDate || null}
+                      />
+                    }
+                  />
                 </div>
               </div>
             )}
@@ -801,48 +821,64 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             {(card?.priority || card?.riskLevel || card?.module) && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Propiedades</span>
-                <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
-                  {card.priority && card.priority !== 'P3' && (
-                    <div 
-                      onClick={() => setActivePopover('properties')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
-                        ${card.priority === 'P0' ? 'bg-red-50 text-red-600 border-red-100' : 
-                          card.priority === 'P1' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
-                          'bg-amber-50 text-amber-600 border-amber-100'}`}
-                    >
-                      <Zap size={12} fill="currentColor" />
-                      {card.priority === 'P0' ? 'P0 - Crítica' : card.priority === 'P1' ? 'P1 - Alta' : 'P2 - Media'}
+                <SmartPopover
+                  isOpen={activePopover === 'properties'}
+                  onClose={() => setActivePopover(null)}
+                  trigger={
+                    <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                      {card.priority && card.priority !== 'P3' && (
+                        <div 
+                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
+                            ${card.priority === 'P0' ? 'bg-red-50 text-red-600 border-red-100' : 
+                              card.priority === 'P1' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                              'bg-amber-50 text-orange-600 border-amber-100'}`}
+                        >
+                          <Zap size={12} fill="currentColor" />
+                          {card.priority === 'P0' ? 'P0 - Crítica' : card.priority === 'P1' ? 'P1 - Alta' : 'P2 - Media'}
+                        </div>
+                      )}
+                      {card.priority === 'P3' && (
+                        <div 
+                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 text-slate-500 border border-slate-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+                        >
+                          <Zap size={12} />
+                          P3 - Baja
+                        </div>
+                      )}
+                      {card.riskLevel && (
+                        <div 
+                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
+                            ${card.riskLevel === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
+                              card.riskLevel === 'med' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                              'bg-emerald-50 text-emerald-600 border-emerald-100'}`}
+                        >
+                          Riesgo {card.riskLevel === 'high' ? 'Alto' : card.riskLevel === 'med' ? 'Medio' : 'Bajo'}
+                        </div>
+                      )}
+                      {card.module && (
+                        <div 
+                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm"
+                        >
+                          {card.module}
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {card.priority === 'P3' && (
-                    <div 
-                      onClick={() => setActivePopover('properties')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 text-slate-500 border border-slate-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
-                    >
-                      <Zap size={12} />
-                      P3 - Baja
-                    </div>
-                  )}
-                  {card.riskLevel && (
-                    <div 
-                      onClick={() => setActivePopover('properties')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm border
-                        ${card.riskLevel === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
-                          card.riskLevel === 'med' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
-                          'bg-emerald-50 text-emerald-600 border-emerald-100'}`}
-                    >
-                      Riesgo {card.riskLevel === 'high' ? 'Alto' : card.riskLevel === 'med' ? 'Medio' : 'Bajo'}
-                    </div>
-                  )}
-                  {card.module && (
-                    <div 
-                      onClick={() => setActivePopover('properties')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 shadow-sm"
-                    >
-                      {card.module}
-                    </div>
-                  )}
-                </div>
+                  }
+                  content={
+                    <PropertiesPopover 
+                      onClose={() => setActivePopover(null)}
+                      onBack={() => setActivePopover(null)}
+                      currentPriority={card?.priority}
+                      currentRiskLevel={card?.riskLevel}
+                      currentModule={card?.module}
+                      onUpdate={handleUpdateProperties}
+                    />
+                  }
+                />
               </div>
             )}
           </div>
@@ -855,50 +891,109 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               
               {/* Quick Actions Bar */}
               <div className="flex flex-wrap gap-3 relative">
-                <Popover
+                <SmartPopover
+                  isOpen={activePopover === 'add' || activePopover === 'attachments_main' || activePopover === 'labels_main' || activePopover === 'members_main' || activePopover === 'dates_main' || activePopover === 'properties_main'}
+                  onClose={() => setActivePopover(null)}
+                  placement="bottom-start"
                   trigger={
-                    <button className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm">
+                    <button 
+                      onClick={() => setActivePopover(activePopover === 'add' ? null : 'add')}
+                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                    >
                       <span className="text-lg leading-none">+</span> Añadir
                     </button>
                   }
-                  open={activePopover === 'add' || activePopover === 'attachments' || activePopover === 'labels' || activePopover === 'members' || activePopover === 'dates' || activePopover === 'properties'}
-                  onOpenChange={(open) => !open && setActivePopover(null)}
-                  align="start"
-                >
-                  {activePopover === 'add' && (
-                    <AddPopoverMenu 
-                      onClose={() => setActivePopover(null)} 
-                      onSelectOption={(option) => {
-                        if (option === 'labels') {
-                          setActivePopover('labels');
-                        } else if (option === 'members') {
-                          setActivePopover('members');
-                        } else if (option === 'checklist') {
-                          handleAddChecklist();
-                          setActivePopover(null);
-                        } else if (option === 'dates') {
-                          setActivePopover('dates');
-                        } else if (option === 'attachment') {
-                          setActivePopover('attachments');
-                        } else if (option === 'properties') {
-                          setActivePopover('properties');
-                        } else {
-                          console.log('Selected:', option);
-                          setActivePopover(null);
-                        }
-                      }} 
-                    />
-                  )}
+                  content={
+                    <>
+                      {activePopover === 'add' && (
+                        <AddPopoverMenu 
+                          onClose={() => setActivePopover(null)} 
+                          onSelectOption={(option) => {
+                            if (option === 'labels') {
+                              setActivePopover('labels_main');
+                            } else if (option === 'members') {
+                              setActivePopover('members_main');
+                            } else if (option === 'checklist') {
+                              handleAddChecklist();
+                              setActivePopover(null);
+                            } else if (option === 'dates') {
+                              setActivePopover('dates_main');
+                            } else if (option === 'attachment') {
+                              setActivePopover('attachments_main');
+                            } else if (option === 'properties') {
+                              setActivePopover('properties_main');
+                            } else {
+                              setActivePopover(null);
+                            }
+                          }} 
+                        />
+                      )}
 
-                  {activePopover === 'attachments' && (
-                    <AttachmentPopover 
-                      onClose={() => setActivePopover(null)}
-                      onUploadFile={handleFileUpload}
-                      onAttachLink={handleAttachLink}
-                    />
-                  )}
+                      {activePopover === 'attachments_main' && (
+                        <AttachmentPopover 
+                          onClose={() => setActivePopover(null)}
+                          onUploadFile={handleFileUpload}
+                          onAttachLink={handleAttachLink}
+                        />
+                      )}
 
-                  {activePopover === 'labels' && (
+                      {activePopover === 'labels_main' && (
+                        <LabelsPopover 
+                          onClose={() => setActivePopover(null)}
+                          selectedLabelIds={selectedLabelIds}
+                          labels={boardLabels}
+                          onToggleLabel={handleToggleLabel}
+                          onEditLabel={handleEditLabel}
+                          onCreateLabel={handleCreateLabel}
+                          onDeleteLabel={handleDeleteLabel}
+                        />
+                      )}
+
+                      {activePopover === 'members_main' && (
+                        <MembersPopover 
+                          onClose={() => setActivePopover(null)}
+                          boardMembers={boardMembers}
+                          assignedMemberIds={assignedMemberIds}
+                          onToggleMember={handleToggleMember}
+                        />
+                      )}
+
+                      {activePopover === 'dates_main' && (
+                        <DatesPopover 
+                          onClose={() => setActivePopover(null)}
+                          onSaveDates={handleUpdateDates}
+                          onRemoveDates={handleRemoveDates}
+                          startDate={card?.startDate || null}
+                          dueDate={card?.dueDate || null}
+                        />
+                      )}
+
+                      {activePopover === 'properties_main' && (
+                        <PropertiesPopover 
+                          onClose={() => setActivePopover(null)}
+                          onBack={() => setActivePopover('add')}
+                          currentPriority={card?.priority}
+                          currentRiskLevel={card?.riskLevel}
+                          currentModule={card?.module}
+                          onUpdate={handleUpdateProperties}
+                        />
+                      )}
+                    </>
+                  }
+                />
+
+                <SmartPopover
+                  isOpen={activePopover === 'labels'}
+                  onClose={() => setActivePopover(null)}
+                  trigger={
+                    <button 
+                      onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
+                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                    >
+                      <Tag size={16} /> Etiquetas
+                    </button>
+                  }
+                  content={
                     <LabelsPopover 
                       onClose={() => setActivePopover(null)}
                       selectedLabelIds={selectedLabelIds}
@@ -908,18 +1003,42 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       onCreateLabel={handleCreateLabel}
                       onDeleteLabel={handleDeleteLabel}
                     />
-                  )}
+                  }
+                />
 
-                  {activePopover === 'members' && (
+                <SmartPopover
+                  isOpen={activePopover === 'members'}
+                  onClose={() => setActivePopover(null)}
+                  trigger={
+                    <button 
+                      onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
+                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                    >
+                      <Users size={16} /> Miembros
+                    </button>
+                  }
+                  content={
                     <MembersPopover 
                       onClose={() => setActivePopover(null)}
                       boardMembers={boardMembers}
                       assignedMemberIds={assignedMemberIds}
                       onToggleMember={handleToggleMember}
                     />
-                  )}
+                  }
+                />
 
-                  {activePopover === 'dates' && (
+                <SmartPopover
+                  isOpen={activePopover === 'dates'}
+                  onClose={() => setActivePopover(null)}
+                  trigger={
+                    <button 
+                      onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
+                      className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                    >
+                      <Clock size={16} /> Fechas
+                    </button>
+                  }
+                  content={
                     <DatesPopover 
                       onClose={() => setActivePopover(null)}
                       onSaveDates={handleUpdateDates}
@@ -927,37 +1046,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       startDate={card?.startDate || null}
                       dueDate={card?.dueDate || null}
                     />
-                  )}
-
-                  {activePopover === 'properties' && (
-                    <PropertiesPopover 
-                      onClose={() => setActivePopover(null)}
-                      onBack={() => setActivePopover('add')}
-                      currentPriority={card?.priority}
-                      currentRiskLevel={card?.riskLevel}
-                      currentModule={card?.module}
-                      onUpdate={handleUpdateProperties}
-                    />
-                  )}
-                </Popover>
-                <button 
-                  onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
-                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
-                >
-                  <Tag size={16} /> Etiquetas
-                </button>
-                <button 
-                  onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
-                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
-                >
-                  <Users size={16} /> Miembros
-                </button>
-                <button 
-                  onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
-                >
-                  <Clock size={16} /> Fechas
-                </button>
+                  }
+                />
+                
                 <button 
                   onClick={() => handleAddChecklist()}
                   className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"

@@ -26,7 +26,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
   };
 
   return (
-    <div className="w-[340px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col p-4 animate-in fade-in zoom-in duration-200">
+    <div className="w-[340px] bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-[10px] tracking-[0.4em] font-black text-[#806F9B] uppercase">

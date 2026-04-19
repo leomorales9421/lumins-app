@@ -164,14 +164,9 @@ const ActivityFeedItem: React.FC<{
                   variant="compact"
                   initialContent={item.content || ''}
                   onSave={handleUpdate}
+                  onCancel={handleCancelEdit}
                   onUploadSuccess={() => {}} 
                 />
-                <button
-                  onClick={handleCancelEdit}
-                  className="text-[#806F9B] hover:text-zinc-900 text-xs font-bold px-2 py-1.5 transition-colors mt-1"
-                >
-                  Cancelar
-                </button>
               </div>
             ) : (
               <>

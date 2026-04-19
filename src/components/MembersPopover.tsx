@@ -35,7 +35,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
   const uniqueMembers = Array.from(new Map(filteredMembers.map(m => [m.id, m])).values());
 
   return (
-    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 overflow-hidden">
+    <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header Dinámico */}
       <div className="flex items-center justify-between p-4 pb-2">
         {onBack ? (
