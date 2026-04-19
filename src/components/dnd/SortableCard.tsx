@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
+import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock, Zap, AlertCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Card } from '../../types/board';
@@ -94,6 +94,35 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
               <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B] hover:text-[#7A5AF8] transition-colors cursor-help" title="Siguiendo">
                 <Eye size={12} strokeWidth={3} />
               </div>
+
+              {/* Priority Badge */}
+              {card.priority && card.priority !== 'P3' && (
+                <div 
+                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md border shadow-sm transition-all ${
+                    card.priority === 'P0' ? 'bg-red-50 text-red-600 border-red-100' : 
+                    card.priority === 'P1' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                    'bg-amber-50 text-amber-600 border-amber-100'
+                  }`}
+                  title={`Prioridad: ${card.priority}`}
+                >
+                  <Zap size={10} strokeWidth={4} fill="currentColor" />
+                  <span>{card.priority}</span>
+                </div>
+              )}
+
+              {/* Risk Level Badge */}
+              {card.riskLevel && card.riskLevel !== 'low' && (
+                <div 
+                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md border shadow-sm transition-all ${
+                    card.riskLevel === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
+                    'bg-orange-50 text-orange-600 border-orange-100'
+                  }`}
+                  title={`Riesgo: ${card.riskLevel === 'high' ? 'ALTO' : 'MED'}`}
+                >
+                  <AlertCircle size={10} strokeWidth={4} />
+                  <span>{card.riskLevel === 'high' ? 'ALTO' : 'MED'}</span>
+                </div>
+              )}
 
               {/* Description */}
               {card.description && (

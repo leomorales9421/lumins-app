@@ -11,5 +11,7 @@ export type ActivityItem = {
   };
   content?: string; // Solo para comentarios
   action?: string; // Ej: "ha movido esta tarjeta a En proceso" (Solo para eventos)
+  commentId?: string; // ID real del comentario (si aplica)
+  comment?: { id: string }; // Relación con el comentario
   createdAt: string | Date;
 }

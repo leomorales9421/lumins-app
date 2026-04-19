@@ -111,7 +111,8 @@ const ActivityFeedItem: React.FC<{
 
   const handleUpdate = (newHtml: string) => {
     if (newHtml && newHtml !== item.content) {
-      onUpdate?.(item.id, newHtml);
+      const targetId = item.comment?.id || item.commentId || item.id;
+      onUpdate?.(targetId, newHtml);
     }
     setIsEditing(false);
   };
@@ -122,7 +123,8 @@ const ActivityFeedItem: React.FC<{
 
   const handleDelete = () => {
     if (window.confirm('¿Eliminar este comentario?')) {
-      onDelete?.(item.id);
+      const targetId = item.comment?.id || item.commentId || item.id;
+      onDelete?.(targetId);
     }
   };
 

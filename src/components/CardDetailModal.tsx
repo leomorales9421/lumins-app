@@ -206,6 +206,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           },
           content: item.type === 'COMMENT' ? item.description : undefined,
           action: item.type !== 'COMMENT' ? (item.description || (item.fromList && item.toList ? `ha movido esta tarjeta de ${item.fromList.name} a ${item.toList.name}` : 'ha realizado una acción')) : undefined,
+          commentId: item.commentId,
+          comment: item.comment,
           createdAt: item.createdAt
         }));
 
@@ -254,6 +256,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         },
         content: item.type === 'COMMENT' ? item.description : undefined,
         action: item.type !== 'COMMENT' ? (item.description || (item.fromList && item.toList ? `ha movido esta tarjeta de ${item.fromList.name} a ${item.toList.name}` : 'ha realizado una acción')) : undefined,
+        commentId: item.commentId,
+        comment: item.comment,
         createdAt: item.createdAt
       }));
 
@@ -949,10 +953,10 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     >
                       <DatesPopover 
                         onClose={() => setActivePopover(null)}
-                        onUpdate={handleUpdateDates}
-                        onRemove={handleRemoveDates}
-                        initialStartDate={card?.startDate}
-                        initialDueDate={card?.dueDate}
+                        onSaveDates={handleUpdateDates}
+                        onRemoveDates={handleRemoveDates}
+                        startDate={card?.startDate || null}
+                        dueDate={card?.dueDate || null}
                       />
                     </div>
                   )}
