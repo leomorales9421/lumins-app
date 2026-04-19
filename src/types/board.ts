@@ -8,12 +8,22 @@ export interface Card {
   status: 'open' | 'closed';
   priority?: 'low' | 'medium' | 'high';
   dueDate?: string;
+  startDate?: string;
   createdAt?: string;
   updatedAt?: string;
   labels?: Array<{ id: string; name: string; color: string }>;
   commentsCount?: number;
   attachmentsCount?: number;
   assignees?: Array<{ user: { id: string; name: string; email: string } }>;
+  checklists?: Array<{
+    id: string;
+    items: Array<{ id: string; done: boolean }>;
+  }>;
+  _count?: {
+    comments: number;
+    checklists: number;
+    attachments: number;
+  };
 }
 
 export interface List {
@@ -66,4 +76,17 @@ export interface UpdateBoardRequest {
   name?: string;
   description?: string;
   visibility?: 'private' | 'team' | 'public';
+}
+
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  done: boolean;
+  position: number;
+}
+
+export interface Checklist {
+  id: string;
+  title: string;
+  items: ChecklistItem[];
 }

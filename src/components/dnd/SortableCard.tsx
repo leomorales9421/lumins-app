@@ -1,6 +1,9 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { Card } from '../../types/board';
 
 interface SortableCardProps {
@@ -28,6 +31,13 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
     transform: CSS.Translate.toString(transform),
     transition,
   };
+
+  // Calculate checklist progress
+  const checklistItems = card.checklists?.flatMap(cl => cl.items) || [];
+  const totalItems = checklistItems.length;
+  const doneItems = checklistItems.filter(i => i.done).length;
+
+  const isOverdue = card.dueDate ? new Date(card.dueDate) < new Date() : false;
 
   return (
     <div
@@ -62,17 +72,66 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
           {card.title}
         </h4>
 
-        {/* Card Footer: Metadata (Neutral Colors) */}
+        {/* Card Footer: Metadata (Vibrant Matte Style) */}
         <div className="flex items-center justify-between mt-1">
-           <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-[10px] font-black text-[#806F9B]/60">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                {card.commentsCount || 0}
+           <div className="flex items-center flex-wrap gap-x-4 gap-y-2">
+              {/* Due Date Badge */}
+              {card.dueDate && (
+                <div 
+                  className={`flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md transition-all ${
+                    isOverdue 
+                      ? 'bg-red-500 text-white shadow-sm' 
+                      : 'text-[#806F9B] hover:bg-slate-50 hover:text-[#7A5AF8]'
+                  }`}
+                  title={isOverdue ? 'Vencido' : 'Fecha de vencimiento'}
+                >
+                  <Clock size={12} strokeWidth={3} />
+                  <span>{format(parseISO(card.dueDate), 'd MMM', { locale: es })}</span>
+                </div>
+              )}
+
+              {/* Watching (Mock) */}
+              <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B] hover:text-[#7A5AF8] transition-colors cursor-help" title="Siguiendo">
+                <Eye size={12} strokeWidth={3} />
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-black text-[#806F9B]/60">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                {card.attachmentsCount || 0}
-              </div>
+
+              {/* Description */}
+              {card.description && (
+                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Tiene descripción">
+                  <AlignLeft size={12} strokeWidth={3} />
+                </div>
+              )}
+
+              {/* Comments */}
+              {(card._count?.comments || 0) > 0 && (
+                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Comentarios">
+                  <MessageSquare size={12} strokeWidth={3} />
+                  <span>{card._count?.comments}</span>
+                </div>
+              )}
+
+              {/* Attachments */}
+              {(card._count?.attachments || 0) > 0 && (
+                <div className="flex items-center gap-1 text-[10px] font-black text-[#806F9B]" title="Adjuntos">
+                  <Paperclip size={12} strokeWidth={3} />
+                  <span>{card._count?.attachments}</span>
+                </div>
+              )}
+
+              {/* Checklist Progress */}
+              {totalItems > 0 && (
+                <div 
+                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black transition-colors ${
+                    doneItems === totalItems 
+                      ? 'bg-emerald-500 text-white shadow-sm' 
+                      : 'text-[#806F9B] hover:bg-slate-50'
+                  }`}
+                  title="Progreso de checklist"
+                >
+                  <CheckSquare size={12} strokeWidth={3} />
+                  <span>{doneItems}/{totalItems}</span>
+                </div>
+              )}
            </div>
 
            <div className="flex -space-x-1 items-center">

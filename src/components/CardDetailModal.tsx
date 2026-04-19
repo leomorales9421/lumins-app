@@ -17,6 +17,15 @@ import RichTextEditor from './RichTextEditor';
 import AddPopoverMenu from './AddPopoverMenu';
 import LabelsPopover from './LabelsPopover';
 import MembersPopover from './MembersPopover';
+import ChecklistBlock from './ChecklistBlock';
+import DatesPopover from './DatesPopover';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import type { Checklist } from '../types/board';
+import ActivitySection from './ActivitySection';
+import type { ActivityItem } from '../types/activity';
+import AttachmentsSection from './AttachmentsSection';
+import AttachmentPopover from './AttachmentPopover';
 
 interface Member {
   id: string;
@@ -43,15 +52,11 @@ interface CardData {
   attachments?: Attachment[];
   labels?: { id: string; name: string; color: string }[];
   assignees?: Member[];
+  startDate?: string;
+  dueDate?: string;
 }
 
-interface ActivityItem {
-  id: string;
-  user: { name: string; initials: string };
-  action: string;
-  time: string;
-  type: 'comment' | 'system';
-}
+// ActivityItem interface is now imported from ../types/activity
 
 interface CardDetailModalProps {
   isOpen: boolean;
@@ -82,12 +87,16 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | null>(null);
+  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>([]);
   const [boardMembers, setBoardMembers] = useState<Member[]>([]);
   const [assignedMemberIds, setAssignedMemberIds] = useState<string[]>([]);
+  const [checklists, setChecklists] = useState<Checklist[]>([]);
+  const checklistsEndRef = React.useRef<HTMLDivElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Fetch board labels
   useEffect(() => {
@@ -159,31 +168,48 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setAssignedMemberIds(cardData.assignees?.map((a: any) => a.user.id) || []);
       setEditTitle(cardData.title);
       setEditDescription(cardData.description || '');
+      
+      if (cardData.startDate || cardData.dueDate) {
+        setCard(prev => prev ? { 
+          ...prev, 
+          startDate: cardData.startDate, 
+          dueDate: cardData.dueDate 
+        } : null);
+      }
 
       // Get comments and map to activity
       try {
         const commentsResponse = await apiClient.get<{ data: { comments: any[] } }>(`/api/cards/${cardId}/comments`);
         const commentActivities: ActivityItem[] = commentsResponse.data.comments.map(c => ({
           id: c.id,
+          type: 'COMMENT',
           user: { 
-            name: c.author.name || 'Usuario', 
-            initials: (c.author.name || 'U').charAt(0).toUpperCase() 
+            name: c.author?.name || 'Usuario', 
+            avatarUrl: c.author?.avatarUrl,
+            initials: (c.author?.name || 'U').charAt(0).toUpperCase() 
           },
-          action: 'comentó:',
-          time: new Date(c.createdAt).toLocaleDateString(),
-          type: 'comment' as const
+          content: c.body,
+          createdAt: c.createdAt
         }));
         
-        // Add a mock "system" activity for creation
-        const systemActivity: ActivityItem = {
-          id: 'system-1',
-          user: { name: 'Sistema', initials: 'S' },
-          action: 'ha creado esta tarjeta',
-          time: 'Recientemente',
-          type: 'system'
-        };
+        // Map real system events from cardData.events
+        const eventActivities: ActivityItem[] = cardData.events?.map((e: any) => ({
+          id: e.id,
+          type: 'SYSTEM_EVENT',
+          user: { 
+            name: e.user?.name || 'Sistema', 
+            avatarUrl: e.user?.avatarUrl,
+            initials: (e.user?.name || 'S').charAt(0).toUpperCase() 
+          },
+          action: e.description || (e.fromList && e.toList ? `ha movido esta tarjeta de ${e.fromList.name} a ${e.toList.name}` : 'ha realizado una acción'),
+          createdAt: e.createdAt
+        })) || [];
 
-        setActivities([systemActivity, ...commentActivities]);
+        const allActivities = [...eventActivities, ...commentActivities].sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        
+        setActivities(allActivities);
       } catch (err) {
         console.error('Error fetching comments:', err);
       }
@@ -195,14 +221,32 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   }, [cardId, initialData]);
 
+  const fetchChecklists = useCallback(async () => {
+    if (!cardId) return;
+    try {
+      const response = await apiClient.get<{ data: { checklists: any[] } }>(`/api/cards/${cardId}/checklists`);
+      setChecklists(response.data.checklists);
+    } catch (err) {
+      console.error('Error fetching checklists:', err);
+    }
+  }, [cardId]);
+
   useEffect(() => {
     if (isOpen && cardId) {
       fetchCardDetails();
+      fetchChecklists();
     } else {
       setCard(null);
       setActivities([]);
     }
-  }, [isOpen, cardId, fetchCardDetails]);
+  }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
+
+  // Autoscroll to new checklist
+  useEffect(() => {
+    if (checklists.length > 0) {
+      checklistsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [checklists.length]);
 
   // Handle updates
   const handleUpdateTitle = async () => {
@@ -241,15 +285,14 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   };
 
-  const handleAddComment = async () => {
-    if (!cardId || !comment.trim()) return;
+  const handleAddComment = async (text: string) => {
+    if (!cardId || !text.trim()) return;
     
     setIsSaving(true);
     try {
-      await apiClient.post(`/api/cards/${cardId}/comments`, { body: comment });
-      setComment('');
-      setIsCommentFocused(false);
+      await apiClient.post(`/api/cards/${cardId}/comments`, { body: text });
       fetchCardDetails(); // Refresh to show new comment
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error adding comment:', err);
     } finally {
@@ -307,6 +350,168 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   };
 
+  const handleAddChecklist = async (title: string = 'Checklist') => {
+    if (!cardId) return;
+    setIsSaving(true);
+    try {
+      await apiClient.post(`/api/cards/${cardId}/checklists`, { title });
+      await fetchChecklists();
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error creating checklist:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteChecklist = async (id: string) => {
+    try {
+      await apiClient.delete(`/api/checklists/${id}`);
+      setChecklists(prev => prev.filter(cl => cl.id !== id));
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error deleting checklist:', err);
+    }
+  };
+
+  const handleAddChecklistItem = async (checklistId: string, title: string) => {
+    try {
+      await apiClient.post(`/api/checklists/${checklistId}/items`, { title });
+      await fetchChecklists();
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error adding checklist item:', err);
+    }
+  };
+
+  const handleToggleChecklistItem = async (itemId: string, done: boolean) => {
+    try {
+      // Optimistic update
+      setChecklists(prev => prev.map(cl => ({
+        ...cl,
+        items: cl.items.map(item => item.id === itemId ? { ...item, done } : item)
+      })));
+      await apiClient.patch(`/api/checklist-items/${itemId}`, { done });
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error toggling checklist item:', err);
+      await fetchChecklists(); // Rollback on error
+    }
+  };
+
+  const handleDeleteChecklistItem = async (itemId: string) => {
+    try {
+      await apiClient.delete(`/api/checklist-items/${itemId}`);
+      await fetchChecklists();
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error deleting checklist item:', err);
+    }
+  };
+
+  const handleUpdateDates = async (dates: { startDate: string | null, dueDate: string | null }) => {
+    if (!cardId) return;
+    setIsSaving(true);
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, {
+        startDate: dates.startDate,
+        dueDate: dates.dueDate
+      });
+      if (card) {
+        setCard({
+          ...card,
+          startDate: dates.startDate || undefined,
+          dueDate: dates.dueDate || undefined
+        });
+      }
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error updating dates:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRemoveDates = async () => {
+    await handleUpdateDates({ startDate: null, dueDate: null });
+  };
+  
+  const handleFileUpload = async (file: File) => {
+    if (!file || !cardId) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('El archivo es demasiado grande (máx 10MB)');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setIsUploading(true);
+    try {
+      await apiClient.post(`/api/cards/${cardId}/attachments/file`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      await fetchCardDetails();
+      if (onUpdate) onUpdate();
+      setActivePopover(null);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileUpload(file);
+  };
+
+  const handleAttachLink = async (url: string, name: string) => {
+    if (!cardId) return;
+
+    setIsUploading(true);
+    try {
+      await apiClient.post(`/api/cards/${cardId}/attachments/link`, { url, name });
+      await fetchCardDetails();
+      if (onUpdate) onUpdate();
+      setActivePopover(null);
+    } catch (err) {
+      console.error('Error attaching link:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileDelete = async (attachmentId: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este adjunto?')) return;
+    try {
+      await apiClient.delete(`/api/attachments/${attachmentId}`);
+      await fetchCardDetails();
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error deleting attachment:', err);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileUpload(file);
+  };
+
   if (!isOpen) return null;
 
   // Use initial data if full card isn't loaded yet
@@ -314,7 +519,21 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const displayListName = card?.listName || initialData?.listName || '...';
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay hint */}
+      {isDragging && (
+        <div className="absolute inset-0 z-[110] bg-[#7A5AF8]/20 backdrop-blur-sm flex items-center justify-center pointer-events-none border-4 border-dashed border-[#7A5AF8] rounded-[24px] m-4">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce">
+            <Paperclip size={48} className="text-[#7A5AF8]" />
+            <p className="text-xl font-black text-zinc-900">Suelta para adjuntar</p>
+          </div>
+        </div>
+      )}
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-purple-900/20 backdrop-blur-md transition-opacity" 
@@ -332,10 +551,19 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               <ChevronDown size={16} />
             </button>
             {isSaving && <Loader2 size={16} className="text-[#7A5AF8] animate-spin" />}
+            {isUploading && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold animate-pulse">
+                <Loader2 size={12} className="animate-spin" />
+                Subiendo...
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="p-2 text-[#806F9B] hover:bg-zinc-100 rounded-full transition-colors">
+            <button 
+              onClick={() => setActivePopover('attachments')}
+              className="p-2 text-[#806F9B] hover:bg-zinc-100 rounded-full transition-colors"
+            >
               <Paperclip size={20} />
             </button>
             <button className="p-2 text-[#806F9B] hover:bg-zinc-100 rounded-full transition-colors">
@@ -413,6 +641,28 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 </button>
               </div>
             </div>
+
+            {(card?.startDate || card?.dueDate) && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Fechas</span>
+                <div className="flex items-center gap-2">
+                  <div 
+                    onClick={() => setActivePopover('dates')}
+                    className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm cursor-pointer hover:bg-purple-100 transition-all border border-[#7A5AF8]/10"
+                  >
+                    <Clock size={14} />
+                    <span>
+                      {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
+                      {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
+                      {card.dueDate && new Date(card.dueDate) < new Date() && (
+                        <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
+                      )}
+                    </span>
+                    <ChevronDown size={14} className="ml-1 opacity-50" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Grid Layout */}
@@ -443,12 +693,32 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                             setActivePopover('labels');
                           } else if (option === 'members') {
                             setActivePopover('members');
+                          } else if (option === 'checklist') {
+                            handleAddChecklist();
+                            setActivePopover(null);
+                          } else if (option === 'dates') {
+                            setActivePopover('dates');
+                          } else if (option === 'attachment') {
+                            setActivePopover('attachments');
                           } else {
                             // Add logic for other options here
                             console.log('Selected:', option);
                             setActivePopover(null);
                           }
                         }} 
+                      />
+                    </div>
+                  )}
+
+                  {activePopover === 'attachments' && (
+                    <div 
+                      ref={popoverRef}
+                      className="absolute top-full left-0 mt-2 z-[110]"
+                    >
+                      <AttachmentPopover 
+                        onClose={() => setActivePopover(null)}
+                        onUploadFile={handleFileUpload}
+                        onAttachLink={handleAttachLink}
                       />
                     </div>
                   )}
@@ -495,10 +765,33 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 >
                   <Users size={16} /> Miembros
                 </button>
-                <button className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm">
-                  <Clock size={16} /> Fechas
-                </button>
-                <button className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm">
+                 <div className="relative">
+                  <button 
+                    onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
+                    className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                  >
+                    <Clock size={16} /> Fechas
+                  </button>
+
+                  {activePopover === 'dates' && (
+                    <div 
+                      ref={popoverRef}
+                      className="absolute top-full left-0 mt-2 z-[110]"
+                    >
+                      <DatesPopover 
+                        onClose={() => setActivePopover(null)}
+                        startDate={card?.startDate || null}
+                        dueDate={card?.dueDate || null}
+                        onSaveDates={handleUpdateDates}
+                        onRemoveDates={handleRemoveDates}
+                      />
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={() => handleAddChecklist()}
+                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                >
                   <CheckSquare size={16} /> Checklist
                 </button>
               </div>
@@ -518,48 +811,25 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 />
               </div>
 
-              {/* Attachments Section */}
-              {(card?.attachments && card.attachments.length > 0) && (
-                <div className="space-y-4 pt-4">
-                  <div className="flex items-center gap-3 text-zinc-900">
-                    <Paperclip size={20} className="text-[#7A5AF8]" />
-                    <h3 className="text-lg font-extrabold tracking-tight">Adjuntos</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {card.attachments.map((attachment) => (
-                      <div key={attachment.id} className="group relative flex gap-4 p-3 bg-zinc-50 rounded-[16px] border border-zinc-100 hover:border-[#7A5AF8]/30 transition-all hover:shadow-md">
-                        <div className="w-24 h-20 bg-zinc-200 rounded-[12px] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                          {attachment.mime?.startsWith('image/') ? (
-                            <img src={attachment.url} alt={attachment.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Paperclip size={24} className="text-zinc-400" />
-                          )}
-                        </div>
-                        <div className="flex flex-col justify-center min-w-0">
-                          <p className="text-sm font-bold text-zinc-900 truncate pr-6">{attachment.name}</p>
-                          <p className="text-[11px] text-[#806F9B] mt-1 uppercase font-black tracking-wider">
-                            {new Date(attachment.createdAt).toLocaleDateString()}
-                          </p>
-                          <div className="flex gap-3 mt-2">
-                            <a 
-                              href={attachment.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-xs font-bold text-[#7A5AF8] hover:underline"
-                            >
-                              Ver
-                            </a>
-                            <button className="text-xs font-bold text-red-500 hover:underline">
-                              Eliminar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Checklists Section */}
+              {checklists.map((checklist) => (
+                <ChecklistBlock
+                  key={checklist.id}
+                  checklist={checklist}
+                  onAddItem={handleAddChecklistItem}
+                  onToggleItem={handleToggleChecklistItem}
+                  onDeleteItem={handleDeleteChecklistItem}
+                  onDeleteChecklist={handleDeleteChecklist}
+                  onUpdateItemTitle={(itemId, title) => console.log('Update title', itemId, title)}
+                />
+              ))}
+
+              <div ref={checklistsEndRef} />
+
+              <AttachmentsSection 
+                attachments={card?.attachments || []} 
+                onDelete={handleFileDelete}
+              />
             </div>
 
             {/* RIGHT COLUMN: Activity & Comments */}
@@ -574,71 +844,13 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 </button>
               </div>
 
-              {/* Comment Box */}
-              <div className="space-y-3">
-                <div className="relative">
-                  <textarea 
-                    rows={isCommentFocused ? 3 : 2}
-                    placeholder="Escribe un comentario..."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    onFocus={() => setIsCommentFocused(true)}
-                    className="w-full bg-[#F3E8FF] border-none rounded-[12px] p-4 text-zinc-900 placeholder:text-[#806F9B] outline-none focus:ring-2 focus:ring-[#7A5AF8]/20 transition-all resize-none"
-                    disabled={isLoading || isSaving}
-                  />
-                  {isCommentFocused && (
-                    <div className="flex items-center gap-2 mt-2 animate-in slide-in-from-top-2 duration-200">
-                      <button 
-                        className="bg-[#7A5AF8] text-white font-bold text-sm px-6 py-2 rounded-[10px] hover:bg-[#6948e5] transition-colors shadow-lg shadow-purple-200 flex items-center gap-2 disabled:opacity-50"
-                        onClick={handleAddComment}
-                        disabled={!comment.trim() || isSaving}
-                      >
-                        {isSaving && <Loader2 size={14} className="animate-spin" />}
-                        Guardar
-                      </button>
-                      <button 
-                        className="text-[#806F9B] font-bold text-sm px-4 py-2 hover:text-zinc-900 transition-colors"
-                        onClick={() => {
-                          setIsCommentFocused(false);
-                          setComment('');
-                        }}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {/* Activity Component */}
+              <ActivitySection 
+                activities={activities} 
+                onAddComment={handleAddComment}
+                isLoading={isSaving}
+              />
 
-              {/* Activity Feed */}
-              <div className="space-y-6 pt-2">
-                <div className="text-[10px] tracking-[0.4em] font-black text-[#806F9B] uppercase border-b border-zinc-100 pb-2">
-                  Historial Reciente
-                </div>
-                
-                {isLoading && activities.length === 0 ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 size={24} className="text-[#7A5AF8] animate-spin" />
-                  </div>
-                ) : (
-                  <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    {activities.map((activity) => (
-                      <div key={activity.id} className="flex gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 bg-[#7A5AF8] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-100">
-                          {activity.user.initials}
-                        </div>
-                        <div className="flex flex-col">
-                          <p className="text-sm leading-tight text-zinc-600">
-                            <span className="font-bold text-zinc-900 mr-1">{activity.user.name}</span>
-                            {activity.action}
-                          </p>
-                          <span className="text-xs text-[#806F9B] mt-1 font-medium">{activity.time}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
 
             </div>
           </div>
