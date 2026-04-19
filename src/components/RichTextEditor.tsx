@@ -3,6 +3,9 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import LinkPopover from './LinkPopover';
 import { 
   Bold, 
   Italic, 
@@ -48,17 +51,6 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
   }
 
   const isCompact = variant === 'compact';
-
-  const setLink = useCallback(() => {
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL', previousUrl);
-    if (url === null) return;
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
 
   const addImage = useCallback(() => {
     const url = window.prompt('URL de la imagen');
@@ -234,17 +226,21 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
       {/* Grupo 5: Extras */}
       <div className="flex gap-1">
         {!isCompact && (
-          <button
-            onClick={setLink}
-            className={`p-1.5 rounded-md transition-colors ${
-              editor.isActive('link') 
-                ? 'bg-white text-[#7A5AF8] shadow-sm' 
-                : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-            }`}
-            title="Insertar enlace"
-          >
-            <LinkIcon size={16} />
-          </button>
+          <LinkPopover
+            editor={editor}
+            trigger={
+              <button
+                className={`p-1.5 rounded-md transition-colors ${
+                  editor.isActive('link') 
+                    ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                    : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+                }`}
+                title="Insertar enlace"
+              >
+                <LinkIcon size={16} />
+              </button>
+            }
+          />
         )}
         <button
           onClick={addImage}
@@ -321,19 +317,19 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'text-[#7A5AF8] underline hover:text-[#E91E63] transition-colors cursor-pointer',
-          },
+      StarterKit,
+      Underline,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-[#6C5DD3] underline hover:text-[#5244b5] transition-colors cursor-pointer',
         },
       }),
       Image.configure({
         inline: true,
         allowBase64: false,
         HTMLAttributes: {
-          class: 'rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 shadow-md',
+          class: 'rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 shadow-md block mx-auto',
         },
       }),
       Placeholder.configure({
@@ -343,7 +339,9 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     content: initialContent,
     autofocus: autoFocus,
     onUpdate: ({ editor }) => {
-      setHasUnsavedChanges(editor.getHTML() !== initialContent);
+      // Usar un pequeño retraso o normalización si es necesario, 
+      // pero por ahora simplemente comparamos.
+      setHasUnsavedChanges(true); 
     },
     editorProps: {
       attributes: {
@@ -478,10 +476,10 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
         <div className="p-3 flex items-center gap-2 border-t border-[#E8E9EC] bg-[#F4F5F7]">
           <button
             onClick={handleSave}
+            disabled={isUploading || (isEditing && !hasUnsavedChanges)}
             className="bg-[#7A5AF8] text-white font-bold text-sm px-4 py-2 rounded-[8px] hover:bg-[#694de3] transition-colors shadow-sm disabled:opacity-50"
-            disabled={isUploading}
           >
-            Guardar
+            {isEditing ? 'Guardar' : 'Comentar'}
           </button>
           <button
             onClick={handleCancel}

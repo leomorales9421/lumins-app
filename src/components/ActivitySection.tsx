@@ -17,12 +17,13 @@ interface ActivitySectionProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   isFetchingMore?: boolean;
+  cardId?: string;
 }
 
 /**
  * Component for adding new comments with rich text support.
  */
-const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?: boolean }> = ({ onAddComment, isLoading }) => {
+const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?: boolean, cardId?: string }> = ({ onAddComment, isLoading, cardId }) => {
   const [isFocused, setIsFocused] = useState(false);
   const editorRef = useRef<RichTextEditorRef>(null);
 
@@ -56,6 +57,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
           initialContent=""
           onSave={() => {}} 
           placeholder="Escribe un comentario o pega una imagen..."
+          cardId={cardId}
         />
         
         <AnimatePresence>
@@ -95,7 +97,8 @@ const ActivityFeedItem: React.FC<{
   item: ActivityItem;
   onUpdate?: (id: string, content: string) => void;
   onDelete?: (id: string) => void;
-}> = ({ item, onUpdate, onDelete }) => {
+  cardId?: string;
+}> = ({ item, onUpdate, onDelete, cardId }) => {
   const { user: currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   
@@ -143,57 +146,53 @@ const ActivityFeedItem: React.FC<{
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col items-start">
-        {isSystem ? (
-          <div className="flex flex-col">
-            <p className="text-sm leading-tight">
-              <span className="font-bold text-zinc-900">{item.user.name}</span>{' '}
-              <span className="text-[#806F9B]">{item.action || 'ha realizado una acción'}</span>
+        <div className="w-full flex flex-col items-start">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-bold text-zinc-900 tracking-tight">{item.user.name}</span>
+            <span className="text-[11px] text-[#806F9B]">{relativeDate}</span>
+          </div>
+          
+          {isSystem ? (
+            <p className="text-sm text-[#806F9B]">
+              {item.action || 'ha realizado una acción'}
             </p>
-            <span className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">{relativeDate}</span>
-          </div>
-        ) : (
-          <div className="w-full flex flex-col items-start">
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-sm font-bold text-zinc-900">{item.user.name}</span>
-              <span className="text-xs text-[#806F9B] truncate">{relativeDate}</span>
+          ) : isEditing ? (
+            <div className="w-full mt-1">
+              <RichTextEditor
+                variant="compact"
+                initialContent={item.content || ''}
+                onSave={handleUpdate}
+                onCancel={handleCancelEdit}
+                onUploadSuccess={() => {}} 
+                alwaysEditing
+                cardId={cardId}
+              />
             </div>
-            
-            {isEditing ? (
-              <div className="w-full">
-                <RichTextEditor
-                  variant="compact"
-                  initialContent={item.content || ''}
-                  onSave={handleUpdate}
-                  onCancel={handleCancelEdit}
-                  onUploadSuccess={() => {}} 
-                />
+          ) : (
+            <>
+              <div className="text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container">
+                <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
               </div>
-            ) : (
-              <>
-                <div className="w-full bg-white border border-[#E8E9EC] shadow-soft rounded-xl rounded-tl-none p-3 text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container is-comment-bubble">
-                  <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
-                </div>
 
-                {canManage && (
-                  <div className="flex items-center gap-3 mt-1.5 pl-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => setIsEditing(true)}
-                      className="text-[11px] font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:underline cursor-pointer transition-colors"
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      onClick={handleDelete}
-                      className="text-[11px] font-bold text-[#806F9B] hover:text-[#E91E63] hover:underline cursor-pointer transition-colors"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+              {canManage && (
+                <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="text-[11px] font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:underline cursor-pointer transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button 
+                    onClick={handleDelete}
+                    className="text-[11px] font-bold text-[#806F9B] hover:text-[#E91E63] hover:underline cursor-pointer transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -210,7 +209,8 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
   isLoading,
   hasMore,
   onLoadMore,
-  isFetchingMore
+  isFetchingMore,
+  cardId
 }) => {
   const [showAllActivity, setShowAllActivity] = useState(true);
 
@@ -233,7 +233,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
         </button>
       </div>
 
-      <CommentInput onAddComment={onAddComment} isLoading={isLoading} />
+      <CommentInput onAddComment={onAddComment} isLoading={isLoading} cardId={cardId} />
       
       <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar space-y-1">
         <AnimatePresence mode="popLayout">
@@ -249,6 +249,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
                 item={item} 
                 onUpdate={onUpdateComment}
                 onDelete={onDeleteComment}
+                cardId={cardId}
               />
             </motion.div>
           ))}

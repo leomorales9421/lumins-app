@@ -343,7 +343,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     
     setIsSaving(true);
     try {
-      await apiClient.patch(`/api/comments/${commentId}`, { content: text });
+      await apiClient.put(`/api/comments/${commentId}`, { content: text });
       fetchCardDetails(true); // Refresh silently to show updated comment
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -1220,6 +1220,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 hasMore={hasMoreActivities}
                 onLoadMore={handleLoadMoreActivities}
                 isFetchingMore={isFetchingMoreActivity}
+                cardId={cardId || ''}
               />
             </div>
           </div>
