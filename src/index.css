@@ -98,6 +98,43 @@
   }
 
   .prose-mirror-container img {
-    @apply rounded-xl max-w-full h-auto my-6 border-2 border-[#E9D5FF]/50 shadow-lg mx-auto block;
+    @apply rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 shadow-md transition-all;
+  }
+
+  /* Specific styles for rich text in comment bubbles */
+  .prose-mirror-container p {
+    @apply mb-1 last:mb-0;
+  }
+
+  .prose-mirror-container.is-comment-bubble img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* Custom Scrollbar Vibrant Matte */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #CBD5E1;
+  }
+
+  /* Thin variant for activity */
+  .activity-feed-container {
+    scrollbar-width: thin;
+    scrollbar-color: #E2E8F0 transparent;
   }
 }

@@ -2,49 +2,60 @@ import React, { useState, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Loader2 } from 'lucide-react';
 import type { ActivityItem } from '../types/activity';
+import { useAuth } from '../contexts/AuthContext';
+import RichTextEditor from './RichTextEditor';
+import type { RichTextEditorRef } from './RichTextEditor';
 
 interface ActivitySectionProps {
   activities: ActivityItem[];
   onAddComment: (text: string) => void;
+  onUpdateComment?: (commentId: string, newContent: string) => void;
+  onDeleteComment?: (commentId: string) => void;
   isLoading?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isFetchingMore?: boolean;
 }
 
 /**
- * Component for adding new comments with interactive states.
+ * Component for adding new comments with rich text support.
  */
 const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?: boolean }> = ({ onAddComment, isLoading }) => {
-  const [comment, setComment] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<RichTextEditorRef>(null);
 
   const handleSave = () => {
-    if (comment.trim()) {
-      onAddComment(comment);
-      setComment('');
+    const html = editorRef.current?.getHTML();
+    const hasText = html && html.replace(/<[^>]*>/g, '').trim().length > 0;
+    const hasImage = html && html.includes('<img');
+    
+    if (hasText || hasImage) {
+      onAddComment(html || '');
+      editorRef.current?.clearContent();
       setIsFocused(false);
     }
   };
 
   const handleCancel = () => {
-    setComment('');
+    editorRef.current?.clearContent();
     setIsFocused(false);
   };
 
   return (
-    <div className="space-y-3">
-      <div className="relative">
-        <textarea
-          ref={textareaRef}
-          rows={isFocused ? 3 : 2}
-          placeholder="Escribe un comentario..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          className={`w-full bg-[#F3E8FF] rounded-xl p-3 text-sm text-zinc-900 outline-none placeholder:text-[#806F9B] transition-all resize-none
-            ${isFocused ? 'min-h-[80px] ring-2 ring-[#7A5AF8]/50 bg-white shadow-sm' : ''}
-          `}
-          disabled={isLoading}
+    <div className="space-y-3 mb-8">
+      <div 
+        className="relative"
+        onFocus={() => setIsFocused(true)}
+      >
+        <RichTextEditor
+          ref={editorRef}
+          variant="compact"
+          hideFooter={true}
+          initialContent=""
+          onSave={() => {}} 
+          placeholder="Escribe un comentario o pega una imagen..."
         />
         
         <AnimatePresence>
@@ -58,7 +69,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
             >
               <button
                 onClick={handleSave}
-                disabled={!comment.trim() || isLoading}
+                disabled={isLoading}
                 className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#6948e5] active:scale-95 shadow-lg shadow-purple-100"
               >
                 Guardar
@@ -80,16 +91,43 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
 /**
  * Component for a single activity feed item (comment or system event).
  */
-const ActivityFeedItem: React.FC<{ item: ActivityItem }> = ({ item }) => {
-  const isSystem = item.type === 'SYSTEM_EVENT';
+const ActivityFeedItem: React.FC<{ 
+  item: ActivityItem;
+  onUpdate?: (id: string, content: string) => void;
+  onDelete?: (id: string) => void;
+}> = ({ item, onUpdate, onDelete }) => {
+  const { user: currentUser } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   
-  // Safe date parsing
+  const isSystem = item.type === 'SYSTEM_EVENT';
+  const isComment = item.type === 'COMMENT';
+  const canManage = isComment && currentUser?.id === item.user.id;
+  
+  // Safe date parsing and formatting
   const dateObj = typeof item.createdAt === 'string' ? new Date(item.createdAt) : item.createdAt;
-  const relativeDate = formatDistanceToNow(dateObj, { addSuffix: true, locale: es });
+  let relativeDate = formatDistanceToNow(dateObj, { addSuffix: true, locale: es });
+  
+  relativeDate = relativeDate.replace('alrededor de ', '').replace('casi ', '');
+
+  const handleUpdate = (newHtml: string) => {
+    if (newHtml && newHtml !== item.content) {
+      onUpdate?.(item.id, newHtml);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('¿Eliminar este comentario?')) {
+      onDelete?.(item.id);
+    }
+  };
 
   return (
     <div className="flex items-start gap-3 mb-6 relative group">
-      {/* Avatar */}
       <div 
         className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm ring-2 ring-white
           ${isSystem ? 'bg-slate-200 text-slate-600' : 'bg-[#7A5AF8]'}
@@ -98,40 +136,65 @@ const ActivityFeedItem: React.FC<{ item: ActivityItem }> = ({ item }) => {
         {item.user.avatarUrl ? (
           <img src={item.user.avatarUrl} alt={item.user.name} className="w-full h-full rounded-full object-cover" />
         ) : (
-          item.user.initials
+          (item.user.name || 'U').charAt(0).toUpperCase()
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex flex-col items-start">
         {isSystem ? (
           <div className="flex flex-col">
             <p className="text-sm leading-tight">
               <span className="font-bold text-zinc-900">{item.user.name}</span>{' '}
-              <span className="text-[#806F9B]">{item.action}</span>
+              <span className="text-[#806F9B]">{item.action || 'ha realizado una acción'}</span>
             </p>
             <span className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">{relativeDate}</span>
           </div>
         ) : (
-          <div className="flex flex-col">
-            <div className="flex items-baseline">
-              <span className="font-bold text-zinc-900 text-sm">{item.user.name}</span>
-              <span className="text-[11px] font-medium text-[#806F9B] ml-2">{relativeDate}</span>
+          <div className="w-full flex flex-col items-start">
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-sm font-bold text-zinc-900">{item.user.name}</span>
+              <span className="text-xs text-[#806F9B] truncate">{relativeDate}</span>
             </div>
             
-            {/* Comment Bubble */}
-            <div className="bg-white border border-purple-50 shadow-sm rounded-lg rounded-tl-none p-3 mt-1 text-sm text-zinc-800 leading-relaxed max-w-full break-words relative">
-              {item.content}
-            </div>
+            {isEditing ? (
+              <div className="w-full">
+                <RichTextEditor
+                  variant="compact"
+                  initialContent={item.content || ''}
+                  onSave={handleUpdate}
+                  onUploadSuccess={() => {}} 
+                />
+                <button
+                  onClick={handleCancelEdit}
+                  className="text-[#806F9B] hover:text-zinc-900 text-xs font-bold px-2 py-1.5 transition-colors mt-1"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-full bg-white border border-purple-100 shadow-sm rounded-xl rounded-tl-none p-3 text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container is-comment-bubble">
+                  <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
+                </div>
 
-            {/* Actions (Hover) */}
-            <div className="opacity-0 group-hover:opacity-100 transition-all flex gap-4 mt-1 pl-1">
-              <button className="text-[10px] font-bold text-[#806F9B] hover:text-[#7A5AF8] cursor-pointer transition-colors">
-                Editar
-              </button>
-              <button className="text-[10px] font-bold text-[#806F9B] hover:text-[#7A5AF8] cursor-pointer transition-colors">
-                Eliminar
-              </button>
-            </div>
+                {canManage && (
+                  <div className="flex items-center gap-3 mt-1.5 pl-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      className="text-[11px] font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:underline cursor-pointer transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={handleDelete}
+                      className="text-[11px] font-bold text-[#806F9B] hover:text-[#E91E63] hover:underline cursor-pointer transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -142,14 +205,42 @@ const ActivityFeedItem: React.FC<{ item: ActivityItem }> = ({ item }) => {
 /**
  * Main ActivitySection component.
  */
-export const ActivitySection: React.FC<ActivitySectionProps> = ({ activities, onAddComment, isLoading }) => {
+export const ActivitySection: React.FC<ActivitySectionProps> = ({ 
+  activities, 
+  onAddComment, 
+  onUpdateComment,
+  onDeleteComment,
+  isLoading,
+  hasMore,
+  onLoadMore,
+  isFetchingMore
+}) => {
+  const [showAllActivity, setShowAllActivity] = useState(true);
+
+  const filteredActivities = showAllActivity 
+    ? activities 
+    : activities.filter(item => item.type === 'COMMENT');
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3 text-zinc-900">
+          <MessageSquare size={20} className="text-[#7A5AF8]" />
+          <h3 className="text-lg font-extrabold tracking-tight">Actividad</h3>
+        </div>
+        <button 
+          onClick={() => setShowAllActivity(!showAllActivity)}
+          className="text-xs font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF] px-2 py-1 rounded transition-colors cursor-pointer"
+        >
+          {showAllActivity ? 'Ocultar detalles' : 'Mostrar detalles'}
+        </button>
+      </div>
+
       <CommentInput onAddComment={onAddComment} isLoading={isLoading} />
       
-      <div className="mt-8 space-y-1">
+      <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar space-y-1">
         <AnimatePresence mode="popLayout">
-          {activities.map((item) => (
+          {filteredActivities.map((item) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, x: -10 }}
@@ -157,12 +248,33 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({ activities, on
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <ActivityFeedItem item={item} />
+              <ActivityFeedItem 
+                item={item} 
+                onUpdate={onUpdateComment}
+                onDelete={onDeleteComment}
+              />
             </motion.div>
           ))}
         </AnimatePresence>
         
-        {activities.length === 0 && (
+        {hasMore && (
+          <button
+            onClick={onLoadMore}
+            disabled={isFetchingMore}
+            className="w-full bg-slate-50 text-[#806F9B] text-xs font-bold py-3 mt-4 rounded-xl hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-colors flex items-center justify-center gap-2"
+          >
+            {isFetchingMore ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Cargando...
+              </>
+            ) : (
+              'Cargar actividad anterior'
+            )}
+          </button>
+        )}
+
+        {filteredActivities.length === 0 && (
           <div className="py-10 text-center">
             <p className="text-sm text-[#806F9B] italic">No hay actividad todavía.</p>
           </div>

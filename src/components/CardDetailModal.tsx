@@ -81,6 +81,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 }) => {
   const [card, setCard] = useState<CardData | null>(null);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [activityPage, setActivityPage] = useState(1);
+  const [hasMoreActivities, setHasMoreActivities] = useState(false);
+  const [isFetchingMoreActivity, setIsFetchingMoreActivity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isCommentFocused, setIsCommentFocused] = useState(false);
@@ -177,41 +180,31 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         } : null);
       }
 
-      // Get comments and map to activity
+      // Get initial activity feed
       try {
-        const commentsResponse = await apiClient.get<{ data: { comments: any[] } }>(`/api/cards/${cardId}/comments`);
-        const commentActivities: ActivityItem[] = commentsResponse.data.comments.map(c => ({
-          id: c.id,
-          type: 'COMMENT',
-          user: { 
-            name: c.author?.name || 'Usuario', 
-            avatarUrl: c.author?.avatarUrl,
-            initials: (c.author?.name || 'U').charAt(0).toUpperCase() 
+        const feedRes = await apiClient.get<{ 
+          data: { feed: any[], hasMore: boolean, totalCount: number } 
+        }>(`/api/cards/${cardId}/feed?page=1&limit=15`);
+        
+        const mappedFeed: ActivityItem[] = feedRes.data.feed.map(item => ({
+          id: item.id,
+          type: item.type === 'COMMENT' ? 'COMMENT' : 'SYSTEM_EVENT',
+          user: {
+            id: item.user.id,
+            name: item.user.name,
+            avatarUrl: item.user.avatarUrl,
+            initials: (item.user.name || 'U').charAt(0).toUpperCase()
           },
-          content: c.body,
-          createdAt: c.createdAt
+          content: item.type === 'COMMENT' ? item.description : undefined,
+          action: item.type !== 'COMMENT' ? (item.description || (item.fromList && item.toList ? `ha movido esta tarjeta de ${item.fromList.name} a ${item.toList.name}` : 'ha realizado una acción')) : undefined,
+          createdAt: item.createdAt
         }));
-        
-        // Map real system events from cardData.events
-        const eventActivities: ActivityItem[] = cardData.events?.map((e: any) => ({
-          id: e.id,
-          type: 'SYSTEM_EVENT',
-          user: { 
-            name: e.user?.name || 'Sistema', 
-            avatarUrl: e.user?.avatarUrl,
-            initials: (e.user?.name || 'S').charAt(0).toUpperCase() 
-          },
-          action: e.description || (e.fromList && e.toList ? `ha movido esta tarjeta de ${e.fromList.name} a ${e.toList.name}` : 'ha realizado una acción'),
-          createdAt: e.createdAt
-        })) || [];
 
-        const allActivities = [...eventActivities, ...commentActivities].sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        
-        setActivities(allActivities);
+        setActivities(mappedFeed);
+        setHasMoreActivities(feedRes.data.hasMore);
+        setActivityPage(1);
       } catch (err) {
-        console.error('Error fetching comments:', err);
+        console.error('Error fetching activity feed:', err);
       }
 
     } catch (err) {
@@ -231,6 +224,40 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   }, [cardId]);
 
+  const handleLoadMoreActivities = async () => {
+    if (!cardId || isFetchingMoreActivity || !hasMoreActivities) return;
+
+    setIsFetchingMoreActivity(true);
+    try {
+      const nextPage = activityPage + 1;
+      const response = await apiClient.get<{ 
+        data: { feed: any[], hasMore: boolean } 
+      }>(`/api/cards/${cardId}/feed?page=${nextPage}&limit=15`);
+      
+      const newActivities: ActivityItem[] = response.data.feed.map(item => ({
+        id: item.id,
+        type: item.type === 'COMMENT' ? 'COMMENT' : 'SYSTEM_EVENT',
+        user: {
+          id: item.user.id,
+          name: item.user.name,
+          avatarUrl: item.user.avatarUrl,
+          initials: (item.user.name || 'U').charAt(0).toUpperCase()
+        },
+        content: item.type === 'COMMENT' ? item.description : undefined,
+        action: item.type !== 'COMMENT' ? (item.description || (item.fromList && item.toList ? `ha movido esta tarjeta de ${item.fromList.name} a ${item.toList.name}` : 'ha realizado una acción')) : undefined,
+        createdAt: item.createdAt
+      }));
+
+      setActivities(prev => [...prev, ...newActivities]);
+      setHasMoreActivities(response.data.hasMore);
+      setActivityPage(nextPage);
+    } catch (err) {
+      console.error('Error loading more activity:', err);
+    } finally {
+      setIsFetchingMoreActivity(false);
+    }
+  };
+
   useEffect(() => {
     if (isOpen && cardId) {
       fetchCardDetails();
@@ -238,6 +265,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     } else {
       setCard(null);
       setActivities([]);
+      setActivityPage(1);
+      setHasMoreActivities(false);
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
 
@@ -290,11 +319,39 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     
     setIsSaving(true);
     try {
-      await apiClient.post(`/api/cards/${cardId}/comments`, { body: text });
+      await apiClient.post(`/api/cards/${cardId}/comments`, { content: text });
       fetchCardDetails(); // Refresh to show new comment
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error adding comment:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateComment = async (commentId: string, text: string) => {
+    if (!text.trim()) return;
+    
+    setIsSaving(true);
+    try {
+      await apiClient.patch(`/api/comments/${commentId}`, { content: text });
+      fetchCardDetails(); // Refresh to show updated comment
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error updating comment:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    setIsSaving(true);
+    try {
+      await apiClient.delete(`/api/comments/${commentId}`);
+      fetchCardDetails(); // Refresh to remove deleted comment
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error deleting comment:', err);
     } finally {
       setIsSaving(false);
     }
@@ -834,24 +891,17 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
             {/* RIGHT COLUMN: Activity & Comments */}
             <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-zinc-900">
-                  <MessageSquare size={20} className="text-[#7A5AF8]" />
-                  <h3 className="text-lg font-extrabold tracking-tight">Actividad</h3>
-                </div>
-                <button className="text-xs font-bold text-[#806F9B] hover:text-[#7A5AF8] transition-colors">
-                  Ocultar detalles
-                </button>
-              </div>
-
               {/* Activity Component */}
               <ActivitySection 
                 activities={activities} 
                 onAddComment={handleAddComment}
+                onUpdateComment={handleUpdateComment}
+                onDeleteComment={handleDeleteComment}
                 isLoading={isSaving}
+                hasMore={hasMoreActivities}
+                onLoadMore={handleLoadMoreActivities}
+                isFetchingMore={isFetchingMoreActivity}
               />
-
-
             </div>
           </div>
         </div>

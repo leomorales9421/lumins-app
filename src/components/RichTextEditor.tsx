@@ -29,14 +29,23 @@ interface RichTextEditorProps {
   onUploadSuccess?: (attachment: any) => void;
   cardId?: string;
   placeholder?: string;
+  variant?: 'default' | 'compact';
+  hideFooter?: boolean;
+}
+
+export interface RichTextEditorRef {
+  clearContent: () => void;
+  getHTML: () => string;
 }
 
 const Separator = () => <div className="w-px h-4 bg-purple-200 mx-1 self-center" />;
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compact' }) => {
   if (!editor) {
     return null;
   }
+
+  const isCompact = variant === 'compact';
 
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
@@ -57,56 +66,62 @@ const MenuBar = ({ editor }: { editor: any }) => {
   }, [editor]);
 
   return (
-    <div className="flex flex-wrap gap-1 p-2 border-b border-[#E9D5FF] bg-[#F3E8FF]/30">
-      {/* Grupo 1: Historia */}
-      <div className="flex gap-1">
-        <button
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          className="p-1.5 rounded-md text-[#806F9B] hover:bg-white hover:text-[#7A5AF8] transition-colors disabled:opacity-30"
-          title="Deshacer"
-        >
-          <Undo size={16} />
-        </button>
-        <button
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          className="p-1.5 rounded-md text-[#806F9B] hover:bg-white hover:text-[#7A5AF8] transition-colors disabled:opacity-30"
-          title="Rehacer"
-        >
-          <Redo size={16} />
-        </button>
-      </div>
+    <div className={`flex flex-wrap gap-1 p-2 border-b border-[#E9D5FF] bg-[#F3E8FF]/30 ${isCompact ? 'p-1' : 'p-2'}`}>
+      {/* Grupo 1: Historia - Solo en default */}
+      {!isCompact && (
+        <>
+          <div className="flex gap-1">
+            <button
+              onClick={() => editor.chain().focus().undo().run()}
+              disabled={!editor.can().undo()}
+              className="p-1.5 rounded-md text-[#806F9B] hover:bg-white hover:text-[#7A5AF8] transition-colors disabled:opacity-30"
+              title="Deshacer"
+            >
+              <Undo size={16} />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().redo().run()}
+              disabled={!editor.can().redo()}
+              className="p-1.5 rounded-md text-[#806F9B] hover:bg-white hover:text-[#7A5AF8] transition-colors disabled:opacity-30"
+              title="Rehacer"
+            >
+              <Redo size={16} />
+            </button>
+          </div>
+          <Separator />
+        </>
+      )}
 
-      <Separator />
-
-      {/* Grupo 2: Títulos */}
-      <div className="flex gap-1">
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('heading', { level: 1 }) 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Título 1"
-        >
-          <Heading1 size={16} />
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('heading', { level: 2 }) 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Título 2"
-        >
-          <Heading2 size={16} />
-        </button>
-      </div>
-
-      <Separator />
+      {/* Grupo 2: Títulos - Solo en default */}
+      {!isCompact && (
+        <>
+          <div className="flex gap-1">
+            <button
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+              className={`p-1.5 rounded-md transition-colors ${
+                editor.isActive('heading', { level: 1 }) 
+                  ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                  : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+              }`}
+              title="Título 1"
+            >
+              <Heading1 size={16} />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              className={`p-1.5 rounded-md transition-colors ${
+                editor.isActive('heading', { level: 2 }) 
+                  ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                  : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+              }`}
+              title="Título 2"
+            >
+              <Heading2 size={16} />
+            </button>
+          </div>
+          <Separator />
+        </>
+      )}
 
       {/* Grupo 3: Formato Base */}
       <div className="flex gap-1">
@@ -132,28 +147,32 @@ const MenuBar = ({ editor }: { editor: any }) => {
         >
           <Italic size={16} />
         </button>
-        <button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('underline') 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Subrayado"
-        >
-          <UnderlineIcon size={16} />
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('strike') 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Tachado"
-        >
-          <Strikethrough size={16} />
-        </button>
+        {!isCompact && (
+          <>
+            <button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`p-1.5 rounded-md transition-colors ${
+                editor.isActive('underline') 
+                  ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                  : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+              }`}
+              title="Subrayado"
+            >
+              <UnderlineIcon size={16} />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={`p-1.5 rounded-md transition-colors ${
+                editor.isActive('strike') 
+                ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+              }`}
+              title="Tachado"
+            >
+              <Strikethrough size={16} />
+            </button>
+          </>
+        )}
       </div>
 
       <Separator />
@@ -193,34 +212,38 @@ const MenuBar = ({ editor }: { editor: any }) => {
         >
           <Code size={16} />
         </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('blockquote') 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Cita"
-        >
-          <Quote size={16} />
-        </button>
+        {!isCompact && (
+          <button
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={`p-1.5 rounded-md transition-colors ${
+              editor.isActive('blockquote') 
+                ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+            }`}
+            title="Cita"
+          >
+            <Quote size={16} />
+          </button>
+        )}
       </div>
 
       <Separator />
 
       {/* Grupo 5: Extras */}
       <div className="flex gap-1">
-        <button
-          onClick={setLink}
-          className={`p-1.5 rounded-md transition-colors ${
-            editor.isActive('link') 
-              ? 'bg-white text-[#7A5AF8] shadow-sm' 
-              : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
-          }`}
-          title="Insertar enlace"
-        >
-          <LinkIcon size={16} />
-        </button>
+        {!isCompact && (
+          <button
+            onClick={setLink}
+            className={`p-1.5 rounded-md transition-colors ${
+              editor.isActive('link') 
+                ? 'bg-white text-[#7A5AF8] shadow-sm' 
+                : 'text-[#806F9B] hover:bg-white hover:text-[#7A5AF8]'
+            }`}
+            title="Insertar enlace"
+          >
+            <LinkIcon size={16} />
+          </button>
+        )}
         <button
           onClick={addImage}
           className={`p-1.5 rounded-md transition-colors ${
@@ -237,16 +260,19 @@ const MenuBar = ({ editor }: { editor: any }) => {
   );
 };
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(({ 
   initialContent, 
   onSave,
   onUploadSuccess,
   cardId,
-  placeholder = 'Añadir una descripción más detallada...'
-}) => {
+  placeholder = 'Añadir una descripción más detallada...',
+  variant = 'default',
+  hideFooter = false
+}, ref) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const isCompact = variant === 'compact';
 
   const uploadImage = async (file: File, view: any, pos?: number) => {
     setIsUploading(true);
@@ -257,7 +283,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
       formData.append('file', file);
 
-      // El baseURL ya incluye /api en algunos casos, pero aquí usamos la ruta completa desde el proxy
       const response = await apiClient.post<{ success: boolean; url: string; attachment?: any }>('/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -277,7 +302,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         view.dispatch(tr);
 
-        // Notify parent about the new attachment
         if (onUploadSuccess && response.attachment) {
           onUploadSuccess(response.attachment);
         }
@@ -293,8 +317,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // En esta versión, Link y Underline ya vienen en StarterKit
-        // @ts-ignore - Dependiendo de la versión exacta puede variar el esquema de config
         link: {
           openOnClick: false,
           HTMLAttributes: {
@@ -319,7 +341,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose-mirror-container focus:outline-none min-h-[120px] p-4 text-zinc-900',
+        class: `prose-mirror-container focus:outline-none text-zinc-900 ${
+          isCompact ? 'min-h-[60px] p-2' : 'min-h-[120px] p-4'
+        }`,
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);
@@ -348,6 +372,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
   });
 
+  React.useImperativeHandle(ref, () => ({
+    clearContent: () => {
+      if (editor) {
+        editor.commands.clearContent();
+        setHasUnsavedChanges(false);
+      }
+    },
+    getHTML: () => {
+      return editor ? editor.getHTML() : '';
+    }
+  }));
+
   useEffect(() => {
     if (editor && initialContent !== editor.getHTML() && !isEditing) {
       editor.commands.setContent(initialContent);
@@ -372,7 +408,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
-  if (!isEditing) {
+  const showAsInput = isCompact && !isEditing;
+
+  if (showAsInput && !initialContent) {
+    return (
+      <div 
+        onClick={() => setIsEditing(true)}
+        className="w-full bg-[#F3E8FF] rounded-[12px] p-3 text-sm text-[#806F9B] cursor-pointer hover:bg-[#EBDDFF] transition-all min-h-[44px] flex items-center"
+      >
+        {placeholder}
+      </div>
+    );
+  }
+
+  if (!isEditing && variant === 'default') {
     return (
       <div 
         onClick={() => setIsEditing(true)}
@@ -391,47 +440,55 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }
 
   return (
-    <div className="flex flex-col w-full bg-[#F3E8FF] rounded-[12px] border border-transparent focus-within:ring-2 focus-within:ring-[#7A5AF8]/50 transition-all overflow-hidden shadow-sm relative">
+    <div className={`flex flex-col w-full bg-[#F3E8FF] rounded-[12px] border border-transparent focus-within:ring-2 focus-within:ring-[#7A5AF8]/50 transition-all overflow-hidden shadow-sm relative ${
+      isCompact ? 'border-purple-100' : ''
+    }`}>
       {isUploading && (
         <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-50 flex items-center justify-center flex-col gap-2">
-          <Loader2 size={32} className="text-[#7A5AF8] animate-spin" />
-          <span className="text-[#7A5AF8] font-bold text-sm">Subiendo imagen...</span>
+          <Loader2 size={isCompact ? 24 : 32} className="text-[#7A5AF8] animate-spin" />
+          <span className="text-[#7A5AF8] font-bold text-xs">Subiendo...</span>
         </div>
       )}
       
-      {hasUnsavedChanges && (
+      {hasUnsavedChanges && !isCompact && (
         <div className="bg-[#FFFBEB] border-b border-[#FEF3C7] px-4 py-2 flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
           <AlertCircle size={14} className="text-[#D97706]" />
           <span className="text-[10px] font-black text-[#B45309] uppercase tracking-[0.1em]">
-            Tienes cambios sin guardar en esta descripción
+            Tienes cambios sin guardar
           </span>
         </div>
       )}
       
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} variant={variant} />
       
-      <div className="flex-1 overflow-y-auto max-h-[400px] custom-scrollbar">
+      <div className={`flex-1 overflow-y-auto custom-scrollbar ${
+        isCompact ? 'max-h-[200px]' : 'max-h-[400px]'
+      }`}>
         <EditorContent editor={editor} />
       </div>
 
-      <div className="p-3 flex items-center gap-2 border-t border-[#E9D5FF]/50 bg-[#F3E8FF]/20">
-        <button
-          onClick={handleSave}
-          className="bg-[#7A5AF8] text-white font-bold text-sm px-4 py-2 rounded-[8px] hover:bg-[#694de3] transition-colors shadow-sm disabled:opacity-50"
-          disabled={isUploading}
-        >
-          Guardar
-        </button>
-        <button
-          onClick={handleCancel}
-          className="text-[#806F9B] font-bold text-sm px-4 py-2 hover:text-zinc-900 transition-colors"
-          disabled={isUploading}
-        >
-          Cancelar
-        </button>
-      </div>
+      {!hideFooter && (
+        <div className="p-3 flex items-center gap-2 border-t border-[#E9D5FF]/50 bg-[#F3E8FF]/20">
+          <button
+            onClick={handleSave}
+            className="bg-[#7A5AF8] text-white font-bold text-sm px-4 py-2 rounded-[8px] hover:bg-[#694de3] transition-colors shadow-sm disabled:opacity-50"
+            disabled={isUploading}
+          >
+            Guardar
+          </button>
+          <button
+            onClick={handleCancel}
+            className="text-[#806F9B] font-bold text-sm px-4 py-2 hover:text-zinc-900 transition-colors"
+            disabled={isUploading}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
     </div>
   );
-};
+});
+
+RichTextEditor.displayName = 'RichTextEditor';
 
 export default RichTextEditor;
