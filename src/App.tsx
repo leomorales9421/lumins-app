@@ -9,6 +9,9 @@ import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
 import InvitePage from './pages/InvitePage';
 import MembersPage from './pages/MembersPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import WorkspaceActivityPage from './pages/WorkspaceActivityPage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -21,6 +24,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/invite" element={<InvitePage />} />
               
               <Route
@@ -51,6 +56,17 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <MembersPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/w/:workspaceId/activity"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <WorkspaceActivityPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

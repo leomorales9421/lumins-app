@@ -155,23 +155,18 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
         <button 
           onClick={() => setIsOpen(!isOpen)}
           title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
-          className={`flex items-center gap-3 p-2 rounded-xl bg-[#F4F6F9] hover:bg-[#E5EAF2] border border-zinc-200 transition-all group
-            ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full'}
-          `}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-2 mt-4 rounded-xl hover:bg-slate-50 transition-all group w-full`}
         >
           <div className="w-8 h-8 rounded-lg bg-[#7A5AF8] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
             {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
           </div>
-          {!isCollapsed && (
-            <>
-              <div className="flex-1 text-left overflow-hidden">
-                <p className="text-[13px] font-bold text-slate-900 truncate">
-                  {currentWorkspace?.name || 'Sin Espacios'}
-                </p>
-              </div>
-              <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
-            </>
-          )}
+          
+          <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-3'}`}>
+            <span className="text-sm font-bold text-zinc-900 truncate">
+              {currentWorkspace?.name || 'Sin Espacios'}
+            </span>
+            <ChevronDown size={16} className="text-zinc-500 min-w-[16px]" />
+          </div>
         </button>
       }
       content={popoverContent}
