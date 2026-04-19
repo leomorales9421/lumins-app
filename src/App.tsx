@@ -4,6 +4,7 @@ import { NotificationProvider, NotificationContainer } from './components/Notifi
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
 
@@ -15,6 +16,7 @@ function App() {
           <PageTransitionWrapper>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
               <Route
                 path="/app"
                 element={

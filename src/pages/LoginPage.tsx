@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import { Layout, Shield, Globe } from 'lucide-react';
@@ -126,7 +126,7 @@ const LoginPage: React.FC = () => {
 
           <div className="mt-12 text-center md:text-left">
              <p className="text-sm text-[#6B7280] font-medium">
-                ¿No tienes una cuenta? <a href="#" className="text-[#7A5AF8] font-bold hover:underline">Regístrate gratis</a>
+                ¿No tienes una cuenta? <Link to="/register" className="text-[#7A5AF8] font-bold hover:underline">Regístrate gratis</Link>
              </p>
           </div>
         </div>

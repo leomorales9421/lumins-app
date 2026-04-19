@@ -1,0 +1,190 @@
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import Button from '../components/ui/Button';
+import { Layout, Shield } from 'lucide-react';
+
+const RegisterPage: React.FC = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      const fullName = `${firstName} ${lastName}`.trim();
+      await register(fullName, email, password);
+      navigate('/app');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#F0F1F3] font-sans">
+      <div className="w-full max-w-[1000px] min-h-[650px] bg-white rounded-2xl shadow-modal flex overflow-hidden animate-in fade-in zoom-in duration-300">
+        
+        {/* LEFT PANEL: Modern Professional Sidebar (v8.0) */}
+        <div className="hidden md:flex flex-1 bg-[#6C5DD3] p-16 flex-col justify-between text-white relative">
+           <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg">
+                 <Layout size={24} className="text-white" />
+              </div>
+              <span className="text-xl font-bold tracking-tight">Luminous</span>
+           </div>
+
+           <div className="relative z-10">
+              <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight">
+                Empieza a <br/> iluminar tus <br/> proyectos.
+              </h1>
+              <p className="text-lg text-white/80 font-medium max-w-sm leading-relaxed">
+                Regístrate gratis y toma el control total de tus tableros.
+              </p>
+           </div>
+
+           <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4 text-white/70">
+                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                    <Shield size={16} />
+                 </div>
+                 <span className="text-sm font-medium">Seguridad de nivel empresarial</span>
+              </div>
+              <div className="h-px w-16 bg-white/20" />
+              <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/50">v8.0 Luminous Edition</div>
+           </div>
+        </div>
+
+        {/* RIGHT PANEL: Registration Form */}
+        <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
+          <div className="mb-8 text-center md:text-left">
+             <h2 className="text-2xl font-bold text-[#1A1A2E] mb-2">Crear cuenta</h2>
+             <p className="text-[#6B7280] font-medium">Únete a la plataforma de gestión más avanzada</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-[450px] mx-auto md:mx-0">
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-2 flex-1">
+                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Nombre</label>
+                <input 
+                  type="text" 
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  placeholder="ej. Leonardo"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2 flex-1">
+                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Apellido</label>
+                <input 
+                  type="text" 
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  placeholder="ej. Morales"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+               <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Email</label>
+               <input 
+                 type="email" 
+                 value={email}
+                 onChange={(e) => setEmail(e.target.value)}
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 placeholder="correo@ejemplo.com"
+                 required
+               />
+            </div>
+
+            <div className="flex flex-col gap-2">
+               <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Contraseña</label>
+               <input 
+                 type="password" 
+                 value={password}
+                 onChange={(e) => setPassword(e.target.value)}
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 placeholder="••••••••"
+                 required
+               />
+            </div>
+
+            <div className="flex flex-col gap-2">
+               <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Confirmar Contraseña</label>
+               <input 
+                 type="password" 
+                 value={confirmPassword}
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 placeholder="••••••••"
+                 required
+               />
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 animate-in fade-in slide-in-from-top-1">
+                 <span className="text-xs font-bold">{error}</span>
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              isLoading={isSubmitting}
+              className="mt-2 h-11 bg-[#6C5DD3] text-white text-sm font-bold rounded-[12px] hover:bg-[#5a4cb3] transition-all shadow-lg shadow-purple-200 active:scale-[0.98]"
+            >
+              {isSubmitting ? 'Creando cuenta...' : 'Registrarse'}
+            </Button>
+
+            <div className="flex items-center gap-4 py-1">
+               <div className="h-px flex-1 bg-[#F0F1F3]" />
+               <span className="text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest">o continúa con</span>
+               <div className="h-px flex-1 bg-[#F0F1F3]" />
+            </div>
+
+            <button 
+              type="button"
+              className="h-11 bg-white border border-zinc-200 rounded-[12px] text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
+            >
+               <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.51 6.16-4.51z" fill="#EA4335"/>
+               </svg>
+               Registrarse con Google
+            </button>
+          </form>
+
+          <div className="mt-8 text-center md:text-left">
+             <p className="text-sm text-[#6B7280] font-medium">
+                ¿Ya tienes cuenta? <Link to="/login" className="text-[#6C5DD3] font-bold hover:underline">Inicia sesión</Link>
+             </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;
