@@ -241,7 +241,7 @@ const BoardDetailPage: React.FC = () => {
         // INTER-LIST: Use single move (backend handles WIP limits and audit logs)
         const newIndexInList = cardsInTarget.findIndex(c => c.id === activeId);
         await apiClient.post(`/api/cards/${activeId}/move`, {
-          sourceListId: originalContainer, 
+          destinationBoardId: id,
           destinationListId: overContainer,
           newPosition: (Math.max(0, newIndexInList) + 1) * 1000
         });

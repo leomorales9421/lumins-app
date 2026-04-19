@@ -533,9 +533,9 @@ const CardModal: React.FC<CardModalProps> = ({
     setIsSubmitting(true);
     try {
       await apiClient.post(`/api/cards/${card.id}/move`, {
-        cardId: card.id,
-        targetListId,
-        targetPosition: 0,
+        destinationBoardId: card.boardId,
+        destinationListId: targetListId,
+        newPosition: 0,
       });
       
       // Refresh card data

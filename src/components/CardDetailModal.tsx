@@ -29,6 +29,7 @@ import AttachmentsSection from './AttachmentsSection';
 import AttachmentPopover from './AttachmentPopover';
 import PropertiesPopover from './PropertiesPopover';
 import CardOptionsMenu from './CardOptionsMenu';
+import MoveCardPopover from './MoveCardPopover';
 import Popover from './ui/Popover';
 import SmartPopover from './SmartPopover';
 
@@ -53,6 +54,7 @@ interface CardData {
   id: string;
   title: string;
   listName: string;
+  listId: string;
   description?: string;
   attachments?: Attachment[];
   labels?: { id: string; name: string; color: string }[];
@@ -98,7 +100,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | null>(null);
+  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>([]);
@@ -154,7 +156,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       const mappedCard: CardData = {
         id: cardData.id,
         title: cardData.title,
-        listName: initialData?.listName || 'Lista',
+        listName: cardData.list?.name || initialData?.listName || 'Lista',
+        listId: cardData.listId,
         description: cardData.description || '',
         attachments: cardData.attachments || [],
         labels: normalizedLabels,
@@ -666,10 +669,36 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         {/* Header (Top Navigation) */}
         <div className="px-8 py-6 flex items-center justify-between border-b border-zinc-50 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#F3E8FF] text-[#7A5AF8] rounded-[12px] font-bold text-sm hover:bg-purple-100 transition-colors">
-              En lista: <span className="text-[#7A5AF8]">{displayListName}</span>
-              <ChevronDown size={16} />
-            </button>
+            <SmartPopover
+              isOpen={activePopover === 'move'}
+              onClose={() => setActivePopover(null)}
+              placement="bottom-start"
+              trigger={
+                <button 
+                  onClick={() => setActivePopover(activePopover === 'move' ? null : 'move')}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#F3E8FF] text-[#7A5AF8] rounded-[12px] font-bold text-sm hover:bg-purple-100 transition-colors"
+                >
+                  En lista: <span className="text-[#7A5AF8]">{displayListName}</span>
+                  <ChevronDown size={16} />
+                </button>
+              }
+              content={
+                <MoveCardPopover 
+                  cardId={cardId || ''}
+                  currentBoardId={boardId || ''}
+                  currentListId={card?.listId || ''}
+                  onClose={() => setActivePopover(null)}
+                  onMoveSuccess={(movedToAnotherBoard) => {
+                    if (onUpdate) onUpdate();
+                    if (movedToAnotherBoard) {
+                      onClose(); // Close modal if moved to another board
+                    } else {
+                      fetchCardDetails(); // Just refresh if same board
+                    }
+                  }}
+                />
+              }
+            />
             {isSaving && <Loader2 size={16} className="text-[#7A5AF8] animate-spin" />}
             {isUploading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold animate-pulse">

@@ -21,13 +21,14 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   onSaveDates,
   onRemoveDates,
 }) => {
-  const [range, setRange] = useState<DateRange | undefined>({
-    from: initialStartDate ? parseISO(initialStartDate) : undefined,
-    to: initialDueDate ? parseISO(initialDueDate) : undefined,
+  const [range, setRange] = useState<DateRange | undefined>(() => {
+    const from = initialStartDate ? parseISO(initialStartDate) : (initialDueDate ? parseISO(initialDueDate) : undefined);
+    const to = (initialStartDate && initialDueDate) ? parseISO(initialDueDate) : undefined;
+    return { from, to };
   });
 
   const [hasStartDate, setHasStartDate] = useState(!!initialStartDate);
-  const [hasDueDate, setHasDueDate] = useState(!!initialDueDate || true);
+  const [hasDueDate, setHasDueDate] = useState(initialDueDate ? true : !initialStartDate);
 
   const handleRangeSelect = (newRange: DateRange | undefined) => {
     setRange(newRange);
@@ -114,6 +115,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
           onSelect={handleRangeSelect}
           locale={es}
           className="m-0"
+          defaultMonth={range?.from || range?.to || new Date()}
         />
       </div>
 
@@ -154,7 +156,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
                 readOnly
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
-                value={range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && hasDueDate ? format(range.from, 'd/M/yyyy') : '')}
+                value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
                 className={`bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-full outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/50'}`}
               />
               <input 
