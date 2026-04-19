@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Users, ChevronDown } from 'lucide-react';
+import { X, Lock, Users, ChevronDown, Layout } from 'lucide-react';
 import apiClient from '../lib/api-client';
 
 interface Workspace {
@@ -31,12 +31,12 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
   const [name, setName] = useState('');
   const [workspaceId, setWorkspaceId] = useState('');
 
-  // Update workspaceId when workspaces change or modal opens
   React.useEffect(() => {
     if (isOpen && workspaces.length > 0 && !workspaceId) {
       setWorkspaceId(workspaces[0].id);
     }
   }, [isOpen, workspaces, workspaceId]);
+
   const [visibility, setVisibility] = useState<'private' | 'team'>('private');
   const [description, setDescription] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -58,9 +58,6 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
         description: description.trim() || undefined
       };
 
-      // Simulating API call as per plan
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       await apiClient.post('/api/boards', payload);
       
       onBoardCreated();
@@ -86,59 +83,59 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#1A1A2E]/40 backdrop-blur-sm"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
+            className="w-full max-w-lg bg-white rounded-2xl shadow-modal p-8 relative overflow-hidden z-10 border border-[#E8E9EC]"
           >
-            {/* Decorative Orb */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#F4F5F7] blur-[60px] opacity-50 pointer-events-none -mr-20 -mt-20" />
-
             {/* Header */}
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Crear nuevo tablero</h2>
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-[#F4F5F7] rounded-xl flex items-center justify-center text-[#7A5AF8]">
+                    <Layout size={20} strokeWidth={2.5} />
+                 </div>
+                 <h2 className="text-xl font-bold text-[#1A1A2E] tracking-tight">Nuevo proyecto</h2>
+              </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
+                className="p-2 text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] rounded-lg transition-colors"
               >
-                <X size={24} strokeWidth={3} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Workspace Selection */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
                   Espacio de Trabajo
                 </label>
                 <div className="relative">
                   <select 
                     value={workspaceId}
                     onChange={(e) => setWorkspaceId(e.target.value)}
-                    className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 appearance-none transition-all"
+                    className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 appearance-none transition-all"
                   >
                     {workspaces.map(ws => (
                       <option key={ws.id} value={ws.id}>{ws.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-[#7A5AF8] pointer-events-none" size={20} strokeWidth={3} />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" size={16} />
                 </div>
               </div>
 
               {/* Board Name */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
                   Nombre del Tablero *
                 </label>
                 <input 
@@ -146,88 +143,88 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Lanzamiento Q4"
-                  className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                  placeholder="Ej: Plan de Marketing 2026"
+                  className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                   required
                 />
               </div>
 
-              {/* Visibility Cards */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
-                  Privacidad
+              {/* Visibility Options */}
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                  Visibilidad
                 </label>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <div 
                     onClick={() => setVisibility('private')}
-                    className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
+                    className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${
                       visibility === 'private' 
                         ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
-                        : 'border-zinc-100 bg-white hover:border-zinc-200'
+                        : 'border-[#E8E9EC] bg-white hover:border-[#D1D5DB]'
                     }`}
                   >
-                    <Lock size={20} className={visibility === 'private' ? 'text-[#7A5AF8]' : 'text-zinc-400'} strokeWidth={3} />
-                    <div className="mt-3">
-                      <div className="font-extrabold text-zinc-900 text-sm">Privado</div>
-                      <div className="text-[10px] text-[#806F9B] font-bold mt-1 leading-tight">Solo tú y invitados</div>
+                    <Lock size={18} className={visibility === 'private' ? 'text-[#7A5AF8]' : 'text-[#9CA3AF]'} />
+                    <div className="mt-2">
+                      <div className="font-bold text-[#1A1A2E] text-[13px]">Privado</div>
+                      <div className="text-[11px] text-[#6B7280] font-medium leading-tight">Solo tú y invitados</div>
                     </div>
                   </div>
 
                   <div 
                     onClick={() => setVisibility('team')}
-                    className={`flex-1 p-5 rounded-[16px] border-2 cursor-pointer transition-all ${
+                    className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${
                       visibility === 'team' 
                         ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
-                        : 'border-zinc-100 bg-white hover:border-zinc-200'
+                        : 'border-[#E8E9EC] bg-white hover:border-[#D1D5DB]'
                     }`}
                   >
-                    <Users size={20} className={visibility === 'team' ? 'text-[#7A5AF8]' : 'text-zinc-400'} strokeWidth={3} />
-                    <div className="mt-3">
-                      <div className="font-extrabold text-zinc-900 text-sm">Equipo</div>
-                      <div className="text-[10px] text-[#806F9B] font-bold mt-1 leading-tight">Todo el equipo</div>
+                    <Users size={18} className={visibility === 'team' ? 'text-[#7A5AF8]' : 'text-[#9CA3AF]'} />
+                    <div className="mt-2">
+                      <div className="font-bold text-[#1A1A2E] text-[13px]">Equipo</div>
+                      <div className="text-[11px] text-[#6B7280] font-medium leading-tight">Todo el equipo</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Description Toggle/Field */}
-              <div className="space-y-3">
+              {/* Description */}
+              <div className="space-y-2">
                 {!isDescriptionExpanded ? (
                   <button 
                     type="button"
                     onClick={() => setIsDescriptionExpanded(true)}
-                    className="text-[#7A5AF8] text-sm font-bold hover:underline ml-1 transition-all"
+                    className="text-[#7A5AF8] text-[13px] font-bold hover:underline ml-1"
                   >
                     + Añadir descripción (opcional)
                   </button>
                 ) : (
-                  <div className="space-y-3 animate-fade-in">
-                    <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
-                      Descripción (Opcional)
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                    <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                      Descripción
                     </label>
                     <textarea 
                       rows={3}
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="¿De qué trata este proyecto?"
-                      className="w-full bg-[#F4F5F7] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
+                      placeholder="Breve descripción del proyecto..."
+                      className="w-full bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg p-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
                     />
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest text-center py-3 rounded-[12px]">
+                <div className="bg-red-50 text-red-600 text-xs font-bold p-3 rounded-lg border border-red-100">
                   {error}
                 </div>
               )}
 
               {/* Footer Actions */}
-              <div className="mt-10 flex justify-end items-center gap-6">
+              <div className="mt-8 flex justify-end items-center gap-4">
                 <button 
                   type="button"
                   onClick={handleClose}
-                  className="text-[#806F9B] font-bold text-sm hover:text-zinc-900 transition-colors"
+                  className="text-[#6B7280] font-bold text-sm hover:text-[#1A1A2E] transition-colors"
                 >
                   Cancelar
                 </button>
@@ -235,21 +232,14 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-14 px-10 rounded-[12px] font-black text-white transition-all relative overflow-hidden
+                    h-10 px-6 rounded-lg font-bold text-white transition-all shadow-sm
                     ${isLoading || !name.trim() 
-                      ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                      : 'bg-gradient-to-r from-[#7A5AF8] to-[#E91E63] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                      ? 'bg-[#E8E9EC] cursor-not-allowed text-[#9CA3AF]' 
+                      : 'bg-[#7A5AF8] hover:bg-[#694de3] active:scale-[0.98]'
                     }
                   `}
                 >
-                  {isLoading ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      <span>CREANDO...</span>
-                    </div>
-                  ) : (
-                    'CREAR TABLERO'
-                  )}
+                  {isLoading ? 'Creando...' : 'Crear tablero'}
                 </button>
               </div>
             </form>

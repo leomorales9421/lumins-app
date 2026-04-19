@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Layout, Search, Bell, LogOut, ChevronDown } from 'lucide-react';
 
 interface NavBarProps {
   user: any;
@@ -9,8 +10,8 @@ interface NavBarProps {
 const NavLink: React.FC<{ to: string; label: string; active?: boolean }> = ({ to, label, active }) => (
   <Link 
     to={to} 
-    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all
-      ${active ? 'bg-[#7A5AF8] text-white shadow-soft' : 'text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7]'}
+    className={`px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all
+      ${active ? 'bg-[#F4F5F7] text-[#7A5AF8]' : 'text-[#6B7280] hover:text-[#1A1A2E] hover:bg-[#F4F5F7]'}
     `}
   >
     {label}
@@ -21,50 +22,54 @@ const NavBar: React.FC<NavBarProps> = ({ user, logout }) => {
   const location = useLocation();
 
   return (
-    <nav className="h-[90px] bg-white border-b border-zinc-100 flex items-center px-10 z-50 relative">
-      <div className="w-full flex justify-between items-center gap-10">
+    <nav className="h-16 bg-white border-b border-[#E8E9EC] flex items-center px-6 z-50 sticky top-0">
+      <div className="w-full flex justify-between items-center gap-8">
         
         {/* Brand/Logo */}
-        <Link to="/app" className="text-2xl font-black tracking-tighter text-zinc-900 flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#7A5AF8] rounded-xl flex items-center justify-center shadow-lg">
-             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+        <Link to="/app" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 bg-[#7A5AF8] rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+             <Layout size={18} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="hidden lg:block uppercase tracking-widest text-lg">Lumins</span>
+          <span className="hidden lg:block font-bold text-lg text-[#1A1A2E] tracking-tight">Luminous</span>
         </Link>
 
-        {/* TOP MENU: Migrated from Sidebar */}
-        <div className="hidden md:flex items-center gap-2 bg-[#F4F5F7]/50 p-1.5 rounded-2xl border border-[#7A5AF8]/5">
-           <NavLink to="/app" label="Dashboard" active={location.pathname === '/app'} />
-           <NavLink to="#" label="Timeline" />
-           <NavLink to="#" label="Resources" />
-           <NavLink to="#" label="Insights" />
+        {/* Menu Links */}
+        <div className="hidden md:flex items-center gap-1">
+           <NavLink to="/app" label="Tableros" active={location.pathname === '/app'} />
+           <NavLink to="#" label="Calendario" />
+           <NavLink to="#" label="Actividad" />
         </div>
 
-        {/* Search Bar (Condensed) */}
-        <div className="flex-1 max-w-[400px]">
-          <div className="relative flex items-center group">
-            <div className="absolute left-5 text-[#806F9B]/50">
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            </div>
+        {/* Search Bar */}
+        <div className="flex-1 max-w-md hidden sm:block">
+          <div className="relative flex items-center">
+            <Search size={16} className="absolute left-3 text-[#9CA3AF]" />
             <input 
               type="text"
-              placeholder="Search projects..."
-              className="w-full h-11 bg-zinc-50 rounded-xl pl-12 pr-6 text-xs font-bold text-zinc-700 placeholder:text-[#806F9B]/40 focus:outline-none focus:ring-2 focus:ring-[#7A5AF8]/20 transition-all border border-transparent focus:border-[#7A5AF8]/10"
+              placeholder="Buscar proyectos o tareas..."
+              className="w-full h-9 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg pl-10 pr-4 text-[13px] font-medium text-[#1A1A2E] placeholder:text-[#9CA3AF] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all"
             />
           </div>
         </div>
 
-        {/* Top Nav Actions */}
-        <div className="flex items-center gap-6">
-          <button className="text-[#806F9B]/60 hover:text-[#7A5AF8] transition-colors relative">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <div className="absolute top-0 right-0 w-2 h-2 bg-[#E91E63] rounded-full border-2 border-white" />
+        {/* Profile & Notifications */}
+        <div className="flex items-center gap-4">
+          <button className="p-2 text-[#6B7280] hover:text-[#1A1A2E] hover:bg-[#F4F5F7] rounded-lg transition-all relative">
+            <Bell size={20} />
+            <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
           </button>
           
-          <div className="flex items-center gap-4 group cursor-pointer border-l border-zinc-100 pl-6" onClick={logout}>
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-soft border-2 border-white group-hover:border-[#7A5AF8] transition-all">
-               <img src={`https://i.pravatar.cc/100?u=${user?.email}`} alt="user" />
+          <div className="h-8 w-px bg-[#E8E9EC] mx-1" />
+
+          <div className="flex items-center gap-3 pl-1 group cursor-pointer" onClick={logout}>
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-[#E8E9EC] group-hover:border-[#7A5AF8] transition-all shadow-sm">
+               <img src={`https://i.pravatar.cc/100?u=${user?.email}`} alt="user avatar" className="w-full h-full object-cover" />
             </div>
+            <div className="hidden lg:flex flex-col text-left">
+               <span className="text-[12px] font-bold text-[#1A1A2E] leading-tight">{user?.name || 'Usuario'}</span>
+               <span className="text-[10px] font-medium text-[#9CA3AF] leading-tight">Admin</span>
+            </div>
+            <ChevronDown size={14} className="text-[#9CA3AF] group-hover:text-[#1A1A2E] transition-colors" />
           </div>
         </div>
 

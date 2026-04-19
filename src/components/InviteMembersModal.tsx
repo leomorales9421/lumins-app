@@ -95,12 +95,12 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-xl bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
+            className="w-full max-w-xl bg-white rounded-2xl shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-8">
               <div className="space-y-1">
-                <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Invitar al equipo</h2>
+                <h2 className="text-3xl font-bold text-zinc-900 tracking-tighter">Invitar al equipo</h2>
                 <p className="text-[#806F9B] font-medium text-sm">
                   Añade colaboradores a <span className="text-[#7A5AF8] font-bold">{workspaceName}</span>
                 </p>
@@ -118,7 +118,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Mail size={40} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-2xl font-black text-zinc-900 tracking-tighter">¡Invitación Enviada!</h3>
+                <h3 className="text-2xl font-bold text-zinc-900 tracking-tighter">¡Invitación Enviada!</h3>
                 <p className="text-zinc-500">Hemos enviado un correo a {email}.</p>
               </div>
             ) : (
@@ -136,7 +136,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="nombre@empresa.com"
-                      className="w-full h-14 bg-[#F4F5F7] border-none rounded-[12px] pl-14 pr-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                      className="w-full h-10 bg-[#F4F5F7] border-none rounded-[12px] pl-14 pr-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                       required
                     />
                   </div>
@@ -162,7 +162,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                           {r.icon}
                         </div>
                         <div className="space-y-1">
-                          <div className="font-black text-zinc-900 text-xs uppercase tracking-wider">{r.title}</div>
+                          <div className="font-bold text-zinc-900 text-xs uppercase tracking-wider">{r.title}</div>
                           <div className="text-[9px] text-[#806F9B] font-bold leading-tight line-clamp-2">{r.desc}</div>
                         </div>
                       </div>
@@ -171,7 +171,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest text-center py-3 rounded-[12px]">
+                  <div className="bg-red-50 text-red-500 text-[10px] font-bold uppercase tracking-widest text-center py-3 rounded-[12px]">
                     {error}
                   </div>
                 )}
@@ -189,10 +189,10 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                     type="submit"
                     disabled={isLoading || !email.trim()}
                     className={`
-                      h-14 px-10 rounded-[12px] font-black text-white transition-all relative overflow-hidden
+                      h-10 px-10 rounded-[12px] font-bold text-white transition-all relative overflow-hidden
                       ${isLoading || !email.trim() 
                         ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                        : 'bg-gradient-to-r from-[#7A5AF8] to-[#E91E63] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                        : 'bg-[#7A5AF8] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
                       }
                     `}
                   >

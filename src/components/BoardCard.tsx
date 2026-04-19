@@ -1,7 +1,8 @@
 import React from 'react';
 import type { Board } from '../types/board';
 import { useNavigate } from 'react-router-dom';
-import Card from './ui/Card';
+import { Layout, MoreHorizontal, Calendar, Users } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BoardCardProps {
   board: Board;
@@ -9,65 +10,77 @@ interface BoardCardProps {
 
 const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
-    <Card
+    <div
       onClick={() => navigate(`/boards/${board.id}`)}
-      variant="default"
-      className="group flex flex-col cursor-pointer h-[360px] rounded-xl bg-white border border-[#7A5AF8]/5 transition-all duration-300 hover:shadow-heavy hover:-translate-y-1.5"
+      className="group flex flex-col cursor-pointer bg-white border border-[#E8E9EC] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
     >
-      <div className="flex flex-col flex-1 p-8">
+      <div className="p-5 flex flex-col flex-1">
         
-        {/* Status Label (From Identity Graph) */}
-        <div className="flex justify-between items-center mb-8">
-          <span className="px-3 py-1.5 rounded-md bg-[#F3E8FF] text-[#7A5AF8] text-[10px] font-extrabold uppercase tracking-[0.2em]">
-            {board.visibility === 'public' ? 'Estratégico' : 'Privado'}
+        {/* Header: Visibility Badge & Options */}
+        <div className="flex justify-between items-center mb-4">
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+            board.visibility === 'public' 
+              ? 'bg-[#F4F5F7] text-[#6B7280]' 
+              : 'bg-amber-50 text-amber-600'
+          }`}>
+            {board.visibility === 'public' ? 'Público' : 'Privado'}
           </span>
-          <div className="w-8 h-8 rounded-md bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-[#7A5AF8]/5 group-hover:text-[#7A5AF8] transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
-          </div>
+          <button className="p-1 rounded text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] transition-colors">
+            <MoreHorizontal size={16} />
+          </button>
         </div>
 
-        {/* Content (Manrope Headlines) */}
-        <div className="flex flex-col gap-3 mb-8">
-          <h3 className="text-2xl font-extrabold text-[#100B26] tracking-tight group-hover:text-[#7A5AF8] transition-colors leading-tight font-sans">
-            {board.name}
-          </h3>
-          <p className="text-sm font-medium text-[#806F9B] truncate leading-relaxed">
-            {board.description || 'Despliegue operativo alineado con la identidad de marca v7.0.'}
+        {/* Content */}
+        <div className="flex flex-col gap-1.5 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#F4F5F7] text-[#7A5AF8] flex items-center justify-center group-hover:bg-[#7A5AF8] group-hover:text-white transition-all">
+               <Layout size={18} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[16px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#7A5AF8] transition-colors truncate">
+              {board.name}
+            </h3>
+          </div>
+          <p className="text-[13px] font-medium text-[#6B7280] line-clamp-2 leading-snug pl-10">
+            {board.description || 'Sin descripción disponible.'}
           </p>
         </div>
 
-        {/* Progress Bar (Using Primary/Secondary colors) */}
-        <div className="mt-auto mb-6">
-           <div className="flex justify-between items-center mb-2.5">
-              <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Ejecución</span>
-              <span className="text-[10px] font-black text-[#7A5AF8] tracking-widest">72%</span>
+        {/* Progress Bar */}
+        <div className="mt-auto mb-5 pl-10">
+           <div className="flex justify-between items-center mb-1.5">
+              <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">Progreso</span>
+              <span className="text-[10px] font-bold text-[#7A5AF8]">45%</span>
            </div>
-           <div className="h-2 w-full bg-[#F3E8FF] rounded-full overflow-hidden">
-              <div className="h-full bg-[#7A5AF8] w-[72%] rounded-full transition-all duration-1000 group-hover:bg-gradient-to-r group-hover:from-[#7A5AF8] group-hover:to-[#E91E63]" />
+           <div className="h-1.5 w-full bg-[#F4F5F7] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#7A5AF8] rounded-full transition-all duration-500" 
+                style={{ width: '45%' }}
+              />
            </div>
         </div>
 
-        {/* Footer (Manrope Labels) */}
-        <div className="pt-6 flex items-center justify-between border-t border-zinc-50">
-          <div className="flex -space-x-3">
-             <div className="w-8 h-8 rounded-md bg-[#7A5AF8] flex items-center justify-center text-[10px] font-black text-white border-2 border-white shadow-sm">
-               M
+        {/* Footer */}
+        <div className="pt-4 flex items-center justify-between border-t border-[#F0F1F3]">
+          <div className="flex -space-x-2">
+             <div className="w-7 h-7 rounded-full bg-[#7A5AF8] flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-sm">
+               {user?.name?.[0] || 'U'}
              </div>
-             <div className="w-8 h-8 rounded-md bg-[#E91E63] flex items-center justify-center text-[10px] font-black text-white border-2 border-white shadow-sm">
-               P
+             <div className="w-7 h-7 rounded-full bg-[#EAECF0] flex items-center justify-center text-[#9CA3AF] border-2 border-white shadow-sm">
+               <Users size={12} />
              </div>
           </div>
           
-          <div className="flex items-center gap-2 text-[#806F9B]">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/></svg>
-             <span className="text-[10px] font-black uppercase tracking-widest">Q3 2026</span>
+          <div className="flex items-center gap-1.5 text-[#9CA3AF]">
+             <Calendar size={14} />
+             <span className="text-[11px] font-bold">2026</span>
           </div>
         </div>
 
       </div>
-    </Card>
+    </div>
   );
 };
 

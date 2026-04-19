@@ -68,10 +68,10 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white rounded-[24px] shadow-[0_20px_40px_-15px_rgba(122,90,248,0.2)] p-10 relative overflow-hidden z-10"
+            className="w-full max-w-lg bg-white rounded-2xl shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
           >
             {/* Decorative Element */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#F4F5F7] blur-[40px] opacity-60 pointer-events-none -mr-10 -mt-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 " />
 
             {/* Header */}
             <div className="flex justify-between items-start mb-10">
@@ -79,7 +79,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                 <div className="w-12 h-12 bg-[#F4F5F7] rounded-xl flex items-center justify-center text-[#7A5AF8]">
                   <Building2 size={24} strokeWidth={3} />
                 </div>
-                <h2 className="text-3xl font-black text-zinc-900 tracking-tighter">Nuevo Espacio</h2>
+                <h2 className="text-3xl font-bold text-zinc-900 tracking-tighter">Nuevo Espacio</h2>
               </div>
               <button 
                 onClick={handleClose}
@@ -101,7 +101,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Marketing HQ o Luminous Global"
-                  className="w-full h-14 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-10 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
                   required
                 />
               </div>
@@ -133,7 +133,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest text-center py-3 rounded-[12px]">
+                <div className="bg-red-50 text-red-500 text-[10px] font-bold uppercase tracking-widest text-center py-3 rounded-[12px]">
                   {error}
                 </div>
               )}
@@ -151,10 +151,10 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-14 px-10 rounded-[12px] font-black text-white transition-all relative overflow-hidden
+                    h-10 px-10 rounded-[12px] font-bold text-white transition-all relative overflow-hidden
                     ${isLoading || !name.trim() 
                       ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                      : 'bg-gradient-to-r from-[#7A5AF8] to-[#E91E63] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                      : 'bg-[#7A5AF8] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
                     }
                   `}
                 >
