@@ -56,7 +56,7 @@ const MembersPage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 p-6 md:p-12 font-sans max-w-[1400px] mx-auto w-full">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="flex flex-col gap-1">

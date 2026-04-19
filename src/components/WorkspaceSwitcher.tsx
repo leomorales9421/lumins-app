@@ -14,9 +14,10 @@ interface Workspace {
 
 interface WorkspaceSwitcherProps {
   onCreateClick: () => void;
+  isCollapsed?: boolean;
 }
 
-const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) => {
+const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, isCollapsed }) => {
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -81,7 +82,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
 
   if (isLoading) {
     return (
-      <div className="w-full h-12 bg-white/5 animate-pulse rounded-xl" />
+      <div className={`w-full ${isCollapsed ? 'h-8 w-8' : 'h-12'} bg-white/5 animate-pulse rounded-xl`} />
     );
   }
 
@@ -153,17 +154,24 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
       trigger={
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center gap-3 p-2 rounded-xl bg-[#F4F6F9] hover:bg-[#E5EAF2] border border-zinc-200 transition-all group"
+          title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
+          className={`flex items-center gap-3 p-2 rounded-xl bg-[#F4F6F9] hover:bg-[#E5EAF2] border border-zinc-200 transition-all group
+            ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full'}
+          `}
         >
-          <div className="w-8 h-8 rounded-lg bg-[#7A5AF8] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-[#7A5AF8] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
             {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
           </div>
-          <div className="flex-1 text-left">
-            <p className="text-[13px] font-bold text-slate-900 truncate">
-              {currentWorkspace?.name || 'Sin Espacios'}
-            </p>
-          </div>
-          <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+          {!isCollapsed && (
+            <>
+              <div className="flex-1 text-left overflow-hidden">
+                <p className="text-[13px] font-bold text-slate-900 truncate">
+                  {currentWorkspace?.name || 'Sin Espacios'}
+                </p>
+              </div>
+              <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+            </>
+          )}
         </button>
       }
       content={popoverContent}

@@ -68,8 +68,8 @@ const BoardsPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col font-sans">
-      <main className="flex-1 p-6 md:p-12">
-        <div className="max-w-[1400px] mx-auto w-full">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10">
+        <div className="max-w-[1600px] mx-auto w-full">
           
           {(isLoading || isLoadingWorkspaces) ? (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
@@ -83,7 +83,7 @@ const BoardsPage: React.FC = () => {
           ) : (
             <>
               {/* Header: ClickUp Style */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div className="flex flex-col gap-1">
                    <div className="flex items-center gap-2 text-[#7A5AF8] mb-1">
                       <Layout size={18} strokeWidth={2.5} />
@@ -127,7 +127,7 @@ const BoardsPage: React.FC = () => {
                    </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-12">
                   <AnimatePresence mode="popLayout">
                     {boards.map((board, index) => (
                       <motion.div
