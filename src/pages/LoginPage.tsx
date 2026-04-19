@@ -18,7 +18,9 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      navigate('/app');
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect') || '/app';
+      navigate(redirect);
     } catch (err: any) {
       setError('Credenciales incorrectas');
     } finally {

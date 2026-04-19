@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import BoardsPage from './pages/BoardsPage';
 import BoardDetailPage from './pages/BoardDetailPage';
+import InvitePage from './pages/InvitePage';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -19,6 +20,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/invite" element={<InvitePage />} />
               
               <Route
                 path="/app"

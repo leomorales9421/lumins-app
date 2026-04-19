@@ -1,40 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, ShieldCheck, User, Users } from 'lucide-react';
+import { X, Mail, ShieldCheck, User, Users, Plus, Trash2, Layout, ClipboardList, Check } from 'lucide-react';
 import apiClient from '../lib/api-client';
 
 interface InviteMembersModalProps {
   isOpen: boolean;
   onClose: () => void;
-  workspaceId: string;
-  workspaceName: string;
+  workspaceId?: string; // Optional now as we can select multiple
+  workspaceName?: string;
 }
 
 type Role = 'ADMIN' | 'MEMBER' | 'GUEST';
 
+interface InviteRow {
+  email: string;
+  role: Role;
+}
+
 const InviteMembersModal: React.FC<InviteMembersModalProps> = ({ 
   isOpen, 
   onClose, 
-  workspaceId,
-  workspaceName
+  workspaceId: initialWorkspaceId,
+  workspaceName: initialWorkspaceName
 }) => {
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState<Role>('MEMBER');
+  const [invites, setInvites] = useState<InviteRow[]>([{ email: '', role: 'MEMBER' }]);
+  const [activeTab, setActiveTab] = useState<'workspaces' | 'boards'>('workspaces');
+  const [selectedWorkspaces, setSelectedWorkspaces] = useState<string[]>(initialWorkspaceId ? [initialWorkspaceId] : []);
+  const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
+  
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [boards, setBoards] = useState<any[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
+
+  const fetchData = async () => {
+    setIsFetching(true);
+    try {
+      const [wsRes, boardsRes] = await Promise.all([
+        apiClient.get('/api/workspaces'),
+        apiClient.get('/api/boards')
+      ]);
+      setWorkspaces(wsRes?.data?.workspaces || []);
+      setBoards(boardsRes?.data?.boards || []);
+    } catch (err) {
+      console.error('Error fetching data for invite modal:', err);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const addInviteRow = () => {
+    setInvites([...invites, { email: '', role: 'MEMBER' }]);
+  };
+
+  const removeInviteRow = (index: number) => {
+    if (invites.length > 1) {
+      const newInvites = [...invites];
+      newInvites.splice(index, 1);
+      setInvites(newInvites);
+    }
+  };
+
+  const updateInviteRow = (index: number, field: keyof InviteRow, value: string) => {
+    const newInvites = [...invites];
+    newInvites[index] = { ...newInvites[index], [field]: value };
+    setInvites(newInvites);
+  };
+
+  const toggleWorkspace = (id: string) => {
+    setSelectedWorkspaces(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleBoard = (id: string) => {
+    setSelectedBoards(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !workspaceId) return;
+    
+    const validInvites = invites.filter(i => i.email.trim() !== '');
+    if (validInvites.length === 0) {
+      setError('Por favor añade al menos un email válido.');
+      return;
+    }
+
+    if (selectedWorkspaces.length === 0 && selectedBoards.length === 0) {
+      setError('Selecciona al menos un espacio o tablero de destino.');
+      return;
+    }
 
     setIsLoading(true);
     setError('');
 
     try {
-      await apiClient.post(`/api/workspaces/${workspaceId}/invite`, {
-        email: email.trim(),
-        role
+      await apiClient.post('/api/workspaces/bulk/invites', {
+        invites: validInvites,
+        destinations: {
+          workspaces: selectedWorkspaces,
+          boards: selectedBoards
+        }
       });
       
       setSuccess(true);
@@ -42,40 +119,20 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
         handleClose();
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al enviar la invitación');
+      setError(err.response?.data?.message || 'Error al enviar las invitaciones');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setEmail('');
-    setRole('MEMBER');
+    setInvites([{ email: '', role: 'MEMBER' }]);
+    setSelectedWorkspaces(initialWorkspaceId ? [initialWorkspaceId] : []);
+    setSelectedBoards([]);
     setError('');
     setSuccess(false);
     onClose();
   };
-
-  const roles = [
-    { 
-      id: 'ADMIN', 
-      title: 'Admin', 
-      desc: 'Acceso total y gestión.',
-      icon: <ShieldCheck size={20} /> 
-    },
-    { 
-      id: 'MEMBER', 
-      title: 'Miembro', 
-      desc: 'Crea y edita contenido.',
-      icon: <Users size={20} /> 
-    },
-    { 
-      id: 'GUEST', 
-      title: 'Invitado', 
-      desc: 'Solo lectura o asignados.',
-      icon: <User size={20} /> 
-    }
-  ];
 
   return (
     <AnimatePresence>
@@ -95,21 +152,21 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-xl bg-white rounded-2xl shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
+            className="w-[600px] bg-white rounded-2xl shadow-2xl p-6 relative overflow-hidden z-10"
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex justify-between items-start mb-6">
               <div className="space-y-1">
-                <h2 className="text-3xl font-bold text-zinc-900 tracking-tighter">Invitar al equipo</h2>
-                <p className="text-[#806F9B] font-medium text-sm">
-                  Añade colaboradores a <span className="text-[#7A5AF8] font-bold">{workspaceName}</span>
+                <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Invitar al equipo</h2>
+                <p className="text-sm text-zinc-500">
+                  Añade colaboradores y define sus niveles de acceso.
                 </p>
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
+                className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 transition-all"
               >
-                <X size={24} strokeWidth={3} />
+                <X size={20} />
               </button>
             </div>
 
@@ -118,85 +175,173 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Mail size={40} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-2xl font-bold text-zinc-900 tracking-tighter">¡Invitación Enviada!</h3>
-                <p className="text-zinc-500">Hemos enviado un correo a {email}.</p>
+                <h3 className="text-2xl font-bold text-zinc-900 tracking-tighter">¡Invitaciones Enviadas!</h3>
+                <p className="text-zinc-500">Hemos enviado los correos de invitación.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Email Input */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
-                    Email del Invitado *
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[#7A5AF8]/40" size={20} strokeWidth={3} />
-                    <input 
-                      type="email"
-                      autoFocus
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nombre@empresa.com"
-                      className="w-full h-10 bg-[#F4F5F7] border-none rounded-[12px] pl-14 pr-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Role Selection */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
-                    Rol en el Espacio
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {roles.map((r) => (
-                      <div 
-                        key={r.id}
-                        onClick={() => setRole(r.id as Role)}
-                        className={`p-4 rounded-[16px] border-2 cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${
-                          role === r.id 
-                            ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm scale-[1.02]' 
-                            : 'border-zinc-100 bg-white hover:border-zinc-200'
-                        }`}
-                      >
-                        <div className={role === r.id ? 'text-[#7A5AF8]' : 'text-zinc-400'}>
-                          {r.icon}
+              <form onSubmit={handleSubmit}>
+                {/* Section 1: Who are you inviting? */}
+                <div className="space-y-3 mb-6">
+                  <div className="max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                    {invites.map((invite, index) => (
+                      <div key={index} className="flex items-center gap-3 mb-3">
+                        <div className="flex-1">
+                          <input 
+                            type="email"
+                            value={invite.email}
+                            onChange={(e) => updateInviteRow(index, 'email', e.target.value)}
+                            placeholder="nombre@empresa.com"
+                            className="w-full bg-[#F4F6F9] rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:bg-white transition-all"
+                            required
+                          />
                         </div>
-                        <div className="space-y-1">
-                          <div className="font-bold text-zinc-900 text-xs uppercase tracking-wider">{r.title}</div>
-                          <div className="text-[9px] text-[#806F9B] font-bold leading-tight line-clamp-2">{r.desc}</div>
+                        <div className="w-36">
+                          <select 
+                            value={invite.role}
+                            onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
+                            className="w-full bg-slate-50 text-zinc-700 rounded-lg p-2 text-sm font-medium border border-zinc-200 outline-none cursor-pointer"
+                          >
+                            <option value="ADMIN">Admin</option>
+                            <option value="MEMBER">Miembro</option>
+                            <option value="GUEST">Invitado</option>
+                          </select>
                         </div>
+                        {invites.length > 1 && (
+                          <button 
+                            type="button"
+                            onClick={() => removeInviteRow(index)}
+                            className="text-zinc-400 hover:text-rose-500 transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
                       </div>
                     ))}
+                  </div>
+                  
+                  <button 
+                    type="button"
+                    onClick={addInviteRow}
+                    className="text-[#6C5DD3] text-sm font-bold mt-2 hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <Plus size={16} />
+                    Añadir otro
+                  </button>
+                </div>
+
+                {/* Section 2: Destinations */}
+                <div className="mt-8">
+                  <h3 className="text-xs font-bold text-zinc-700 mb-3 uppercase tracking-wider">Asignar a...</h3>
+                  
+                  {/* Tabs */}
+                  <div className="flex p-1 bg-[#F4F6F9] rounded-lg w-fit mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('workspaces')}
+                      className={`px-4 py-1.5 rounded-md text-sm transition-all ${
+                        activeTab === 'workspaces' 
+                          ? 'bg-white shadow-sm text-zinc-900 font-bold' 
+                          : 'text-zinc-500 hover:text-zinc-700'
+                      }`}
+                    >
+                      Espacios de trabajo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('boards')}
+                      className={`px-4 py-1.5 rounded-md text-sm transition-all ${
+                        activeTab === 'boards' 
+                          ? 'bg-white shadow-sm text-zinc-900 font-bold' 
+                          : 'text-zinc-500 hover:text-zinc-700'
+                      }`}
+                    >
+                      Tableros específicos
+                    </button>
+                  </div>
+
+                  {/* Multi-Select List */}
+                  <div className="max-h-40 overflow-y-auto border border-zinc-100 rounded-xl p-2 custom-scrollbar">
+                    {activeTab === 'workspaces' ? (
+                      <div className="space-y-1">
+                        {workspaces.map((ws) => (
+                          <div 
+                            key={ws.id}
+                            onClick={() => toggleWorkspace(ws.id)}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                          >
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                              selectedWorkspaces.includes(ws.id) 
+                                ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                                : 'border-zinc-300'
+                            }`}>
+                              {selectedWorkspaces.includes(ws.id) && <Check size={14} strokeWidth={3} />}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Layout size={16} className="text-zinc-400" />
+                              <span className="text-sm text-zinc-700 font-medium">{ws.name}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {workspaces.length === 0 && !isFetching && (
+                          <div className="text-center py-4 text-zinc-400 text-sm">No se encontraron espacios.</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {boards.map((board) => (
+                          <div 
+                            key={board.id}
+                            onClick={() => toggleBoard(board.id)}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                          >
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                              selectedBoards.includes(board.id) 
+                                ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                                : 'border-zinc-300'
+                            }`}>
+                              {selectedBoards.includes(board.id) && <Check size={14} strokeWidth={3} />}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ClipboardList size={16} className="text-zinc-400" />
+                              <span className="text-sm text-zinc-700 font-medium">{board.name}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {boards.length === 0 && !isFetching && (
+                          <div className="text-center py-4 text-zinc-400 text-sm">No se encontraron tableros.</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 text-red-500 text-[10px] font-bold uppercase tracking-widest text-center py-3 rounded-[12px]">
+                  <div className="mt-4 text-rose-500 text-xs font-bold text-center">
                     {error}
                   </div>
                 )}
 
                 {/* Footer Actions */}
-                <div className="mt-10 flex justify-end items-center gap-6">
+                <div className="mt-8 flex justify-end items-center gap-3">
                   <button 
                     type="button"
                     onClick={handleClose}
-                    className="text-[#806F9B] font-bold text-sm hover:text-zinc-900 transition-colors"
+                    className="px-4 py-2 text-zinc-500 font-bold text-sm hover:text-zinc-900 transition-colors"
                   >
                     Cancelar
                   </button>
                   <button 
                     type="submit"
-                    disabled={isLoading || !email.trim()}
+                    disabled={isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)}
                     className={`
-                      h-10 px-10 rounded-[12px] font-bold text-white transition-all relative overflow-hidden
-                      ${isLoading || !email.trim() 
-                        ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                        : 'bg-[#7A5AF8] hover:shadow-[0_8px_16px_-6px_rgba(122,90,248,0.4)] active:scale-[0.98]'
+                      px-6 py-2 rounded-lg font-bold text-white transition-all
+                      ${isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)
+                        ? 'bg-zinc-200 cursor-not-allowed' 
+                        : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98]'
                       }
                     `}
                   >
-                    {isLoading ? 'ENVIANDO...' : 'ENVIAR INVITACIÓN'}
+                    {isLoading ? 'ENVIANDO...' : 'Enviar Invitaciones'}
                   </button>
                 </div>
               </form>

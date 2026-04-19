@@ -165,8 +165,8 @@ const BoardsPage: React.FC = () => {
         <InviteMembersModal 
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          workspaceId={workspaces[0].id}
-          workspaceName={workspaces[0].name}
+          workspaceId={workspaceId || workspaces[0].id}
+          workspaceName={workspaces.find(w => w.id === workspaceId)?.name || workspaces[0].name}
         />
       )}
     </div>

@@ -30,7 +30,9 @@ const RegisterPage: React.FC = () => {
     try {
       const fullName = `${firstName} ${lastName}`.trim();
       await register(fullName, email, password);
-      navigate('/app');
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect') || '/app';
+      navigate(redirect);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
     } finally {
