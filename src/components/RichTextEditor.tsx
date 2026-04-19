@@ -30,8 +30,9 @@ interface RichTextEditorProps {
   cardId?: string;
   placeholder?: string;
   variant?: 'default' | 'compact';
-  hideFooter?: boolean;
   onCancel?: () => void;
+  autoFocus?: boolean;
+  alwaysEditing?: boolean;
 }
 
 export interface RichTextEditorRef {
@@ -269,9 +270,11 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
   placeholder = 'Añadir una descripción más detallada...',
   variant = 'default',
   hideFooter = false,
-  onCancel
+  onCancel,
+  autoFocus = false,
+  alwaysEditing = false
 }, ref) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(alwaysEditing);
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isCompact = variant === 'compact';
@@ -338,6 +341,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
       }),
     ],
     content: initialContent,
+    autofocus: autoFocus,
     onUpdate: ({ editor }) => {
       setHasUnsavedChanges(editor.getHTML() !== initialContent);
     },

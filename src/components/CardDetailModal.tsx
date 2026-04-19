@@ -11,10 +11,11 @@ import {
   ChevronDown,
   Loader2,
   Users,
-  Zap
+  Zap,
+  Edit2
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
-import RichTextEditor from './RichTextEditor';
+import RichTextEditor, { type RichTextEditorRef } from './RichTextEditor';
 import AddPopoverMenu from './AddPopoverMenu';
 import LabelsPopover from './LabelsPopover';
 import MembersPopover from './MembersPopover';
@@ -104,6 +105,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [editDescription, setEditDescription] = useState('');
   const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
+  const editorRef = React.useRef<RichTextEditorRef>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>([]);
   const [boardMembers, setBoardMembers] = useState<Member[]>([]);
@@ -112,6 +114,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const checklistsEndRef = React.useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
 
   // Fetch board labels
   useEffect(() => {
@@ -960,7 +963,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'add' ? null : 'add')}
-                      className="cu-action-btn flex items-center gap-2 px-4 py-2 rounded-lg"
+                      className="cu-action-btn flex items-center justify-center gap-2 min-w-[125px] px-4 py-2.5 rounded-lg"
                     >
                       <span className="text-lg leading-none">+</span> Añadir
                     </button>
@@ -1050,7 +1053,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
-                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
+                      className="cu-action-btn flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded-lg"
                     >
                       <Tag size={16} /> Etiquetas
                     </button>
@@ -1074,7 +1077,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
-                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
+                      className="cu-action-btn flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded-lg"
                     >
                       <Users size={16} /> Miembros
                     </button>
@@ -1095,7 +1098,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                      className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
+                      className="cu-action-btn flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded-lg"
                     >
                       <Clock size={16} /> Fechas
                     </button>
@@ -1113,25 +1116,75 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 
                 <button 
                   onClick={() => handleAddChecklist()}
-                  className="cu-action-btn flex items-center gap-2 w-full px-3 py-2.5 rounded-lg"
+                  className="cu-action-btn flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded-lg"
                 >
                   <CheckSquare size={16} /> Checklist
                 </button>
               </div>
 
-              {/* Description Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2.5 text-[#1A1A2E]">
                   <AlignLeft size={18} className="text-[#7A5AF8]" />
                   <h3 className="text-[15px] font-bold tracking-tight">Descripción</h3>
                 </div>
                 
-                <RichTextEditor 
-                  initialContent={editDescription}
-                  onSave={(html) => handleUpdateDescription(html)}
-                  onUploadSuccess={() => fetchCardDetails()}
-                  cardId={cardId || undefined}
-                />
+                {!isEditingDescription ? (
+                  card?.description ? (
+                    <div 
+                      onClick={() => setIsEditingDescription(true)}
+                      className="w-full cursor-pointer group relative rounded-xl p-2 -ml-2 hover:bg-[#F4F6F9] transition-colors"
+                    >
+                      <Edit2 size={16} className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-zinc-400 transition-opacity" />
+                      <div 
+                        className="prose prose-sm prose-zinc max-w-none" 
+                        dangerouslySetInnerHTML={{ __html: card.description }} 
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => setIsEditingDescription(true)}
+                      className="w-full bg-[#F4F6F9] hover:bg-[#E5EAF2] rounded-xl p-4 cursor-pointer transition-colors border border-transparent hover:border-zinc-200"
+                    >
+                      <p className="text-sm text-zinc-500 font-medium">Añadir una descripción más detallada...</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="space-y-3">
+                    <RichTextEditor 
+                      ref={editorRef}
+                      initialContent={card?.description || ''}
+                      onSave={async (html) => {
+                        await handleUpdateDescription(html);
+                        setIsEditingDescription(false);
+                      }}
+                      onUploadSuccess={() => fetchCardDetails()}
+                      cardId={cardId || undefined}
+                      autoFocus={true}
+                      alwaysEditing={true}
+                      hideFooter={true}
+                    />
+                    <div className="flex items-center gap-2 mt-3">
+                      <button
+                        onClick={async () => {
+                          if (editorRef.current) {
+                            const html = editorRef.current.getHTML();
+                            await handleUpdateDescription(html);
+                            setIsEditingDescription(false);
+                          }
+                        }}
+                        className="bg-[#6C5DD3] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-[#5a4cb3] transition-colors"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        onClick={() => setIsEditingDescription(false)}
+                        className="text-zinc-500 hover:text-zinc-800 hover:bg-[#F4F6F9] px-3 py-2 rounded-lg text-sm font-bold transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Checklists Section */}
