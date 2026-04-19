@@ -7,10 +7,14 @@ interface User {
   email: string;
   name: string;
   role: string;
+  phone?: string;
+  avatarUrl?: string;
+  country?: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -119,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    setUser,
     isLoading,
     isAuthenticated,
     login,

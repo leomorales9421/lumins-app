@@ -15,6 +15,11 @@ import WorkspaceActivityPage from './pages/WorkspaceActivityPage';
 import WorkspaceCalendarPage from './pages/WorkspaceCalendarPage';
 
 import MainLayout from './components/layout/MainLayout';
+import SettingsPage from './pages/SettingsPage';
+import ProfileSettings from './pages/settings/ProfileSettings';
+import SecuritySettings from './pages/settings/SecuritySettings';
+import NotificationSettings from './pages/settings/NotificationSettings';
+import PreferenceSettings from './pages/settings/PreferenceSettings';
 
 function App() {
   return (
@@ -92,6 +97,24 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <SettingsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="profile" replace />} />
+                <Route path="profile" element={<ProfileSettings />} />
+                <Route path="security" element={<SecuritySettings />} />
+                <Route path="notifications" element={<NotificationSettings />} />
+                <Route path="preferences" element={<PreferenceSettings />} />
+              </Route>
+
               <Route path="/" element={<Navigate to="/app" replace />} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>

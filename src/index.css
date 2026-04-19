@@ -6,7 +6,11 @@
 
 @layer base {
   body {
-    @apply antialiased text-[#1A1A2E] bg-[#F0F1F3] font-sans;
+    @apply antialiased text-[#1A1A2E] bg-[#F0F1F3] font-sans transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-[#13151A] text-zinc-100;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -184,5 +188,57 @@
     border-radius: 8px;
     margin-top: 8px;
     display: block;
+  }
+
+  /* ============================================================
+     DARK MODE ENHANCEMENTS
+     ============================================================ */
+  .dark .bg-white {
+    background-color: #1C1F26 !important;
+  }
+  
+  .dark .border-zinc-200, 
+  .dark .border-slate-200,
+  .dark .border-zinc-100,
+  .dark .border-slate-100 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .dark .text-zinc-900,
+  .dark .text-slate-900 {
+    color: #FFFFFF !important;
+  }
+  
+  .dark .text-zinc-500,
+  .dark .text-slate-500,
+  .dark .text-zinc-400 {
+    color: #A1A1AA !important;
+  }
+
+  .dark .text-zinc-700 {
+    color: #D4D4D8 !important;
+  }
+  
+  .dark .bg-slate-50,
+  .dark .bg-[#F4F6F9] {
+    background-color: #252831 !important;
+  }
+
+  .dark .hover\:bg-slate-50:hover,
+  .dark .hover\:bg-zinc-50:hover {
+    background-color: #2D313C !important;
+  }
+
+  .dark input, 
+  .dark select, 
+  .dark textarea {
+    background-color: #252831 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+  }
+
+  .dark input:disabled {
+    background-color: #1C1F26 !important;
+    color: #71717A !important;
   }
 }

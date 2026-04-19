@@ -6,6 +6,7 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -15,6 +16,11 @@ module.exports = {
         'brand-tertiary': '#FF8A80',
         'brand-neutral': '#6B7280',
         'brand-bg': '#F0F1F3',
+
+        // Dark mode colors
+        'dark-bg': '#13151A',
+        'dark-surface': '#1C1F26',
+        'dark-border': 'rgba(255, 255, 255, 0.1)',
 
         // ClickUp-inspired semantic palette
         'cu-bg': '#F0F1F3',
