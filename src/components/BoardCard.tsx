@@ -12,6 +12,11 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // For now, if we don't have real progress data from the backend, 
+  // we default to 0% for new boards or calculate based on available info.
+  // In a real scenario, this would come from a 'progress' or 'stats' field in the API.
+  const progress = board._count?.cards === 0 ? 0 : 0; // Defaulting to 0 for now as we don't have 'closed' count in summary
+
   return (
     <div
       onClick={() => navigate(`/boards/${board.id}`)}
@@ -28,8 +33,11 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
           }`}>
             {board.visibility === 'public' ? 'Público' : 'Privado'}
           </span>
-          <button className="p-1 rounded text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] transition-colors">
-            <MoreHorizontal size={16} />
+          <button 
+            onClick={(e) => e.stopPropagation()}
+            className="p-1 rounded text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] transition-colors"
+          >
+            < MoreHorizontal size={16} />
           </button>
         </div>
 
@@ -52,12 +60,12 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         <div className="mt-auto mb-5 pl-10">
            <div className="flex justify-between items-center mb-1.5">
               <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">Progreso</span>
-              <span className="text-[10px] font-bold text-[#7A5AF8]">45%</span>
+              <span className="text-[10px] font-bold text-[#7A5AF8]">{progress}%</span>
            </div>
            <div className="h-1.5 w-full bg-[#F4F5F7] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#7A5AF8] rounded-full transition-all duration-500" 
-                style={{ width: '45%' }}
+                style={{ width: `${progress}%` }}
               />
            </div>
         </div>
@@ -75,7 +83,9 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
           
           <div className="flex items-center gap-1.5 text-[#9CA3AF]">
              <Calendar size={14} />
-             <span className="text-[11px] font-bold">2026</span>
+             <span className="text-[11px] font-bold">
+               {board.createdAt ? new Date(board.createdAt).getFullYear() : '2026'}
+             </span>
           </div>
         </div>
 

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, Check, Plus } from 'lucide-react';
+import { ChevronDown, Check, Plus, Trash2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import SmartPopover from './SmartPopover';
+import DeleteWorkspaceModal from './DeleteWorkspaceModal';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Workspace {
   id: string;
   name: string;
+  ownerId: string;
 }
 
 interface WorkspaceSwitcherProps {
@@ -19,6 +22,9 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<{ id: string, name: string } | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchWorkspaces = async () => {
@@ -33,6 +39,10 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
     };
 
     fetchWorkspaces();
+
+    const handleRefresh = () => fetchWorkspaces();
+    window.addEventListener('workspace-changed', handleRefresh);
+    return () => window.removeEventListener('workspace-changed', handleRefresh);
   }, []);
 
   const currentWorkspace = workspaces.find(w => w.id === workspaceId) || workspaces[0];
@@ -45,6 +55,13 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
 
   const handleCreate = () => {
     onCreateClick();
+    setIsOpen(false);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation();
+    setWorkspaceToDelete({ id, name });
+    setDeleteModalOpen(true);
     setIsOpen(false);
   };
 
@@ -77,25 +94,37 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
         
         <div className="space-y-1">
           {workspaces.map((workspace) => (
-            <button
-              key={workspace.id}
-              onClick={() => handleSwitch(workspace.id)}
-              className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${
-                workspace.id === workspaceId 
-                  ? 'bg-purple-50 text-purple-700' 
-                  : 'hover:bg-slate-50 text-slate-700'
-              }`}
-            >
-              <div className={`w-7 h-7 rounded-lg ${getColor(workspace.id)} flex items-center justify-center text-white text-[10px] font-bold`}>
-                {getInitials(workspace.name)}
-              </div>
-              <span className="flex-1 text-left text-[13px] font-bold truncate">
-                {workspace.name}
-              </span>
-              {workspace.id === workspaceId && (
-                <Check size={14} className="text-purple-600" />
+            <div key={workspace.id} className="relative group/item">
+              <button
+                onClick={() => handleSwitch(workspace.id)}
+                className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${
+                  workspace.id === workspaceId 
+                    ? 'bg-purple-50 text-purple-700' 
+                    : 'hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className={`w-7 h-7 rounded-lg ${getColor(workspace.id)} flex items-center justify-center text-white text-[10px] font-bold`}>
+                  {getInitials(workspace.name)}
+                </div>
+                <span className="flex-1 text-left text-[13px] font-bold truncate">
+                  {workspace.name}
+                </span>
+                {workspace.id === workspaceId && (
+                  <Check size={14} className="text-purple-600" />
+                )}
+              </button>
+              
+              {/* Delete button: only for owners */}
+              {workspace.ownerId === user?.id && (
+                <button
+                  onClick={(e) => handleDeleteClick(e, workspace.id, workspace.name)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 p-1.5 hover:bg-rose-50 text-rose-400 hover:text-rose-600 rounded-lg transition-all z-10"
+                  title="Eliminar espacio"
+                >
+                  <Trash2 size={14} />
+                </button>
               )}
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -117,6 +146,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
   );
 
   return (
+    <>
     <SmartPopover
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
@@ -138,6 +168,16 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick }) 
       }
       content={popoverContent}
     />
+    
+    {workspaceToDelete && (
+      <DeleteWorkspaceModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        workspaceId={workspaceToDelete.id}
+        workspaceName={workspaceToDelete.name}
+      />
+    )}
+  </>
   );
 };
 
