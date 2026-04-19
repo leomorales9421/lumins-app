@@ -29,6 +29,7 @@ import AttachmentsSection from './AttachmentsSection';
 import AttachmentPopover from './AttachmentPopover';
 import PropertiesPopover from './PropertiesPopover';
 import CardOptionsMenu from './CardOptionsMenu';
+import Popover from './ui/Popover';
 
 interface Member {
   id: string;
@@ -135,21 +136,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   }, [isOpen, boardId]);
 
   // Handle click outside to close popover
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        setActivePopover(null);
-      }
-    };
-
-    if (activePopover) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [activePopover]);
+  // Removed in favor of Radix UI internal handling
 
   // Fetch card details
   const fetchCardDetails = useCallback(async () => {
@@ -398,6 +385,32 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setBoardLabels(response.data.labels);
     } catch (err) {
       console.error('Error creating label:', err);
+    }
+  };
+
+  const handleEditLabel = async (labelId: string, name: string, color: string) => {
+    if (!boardId) return;
+    try {
+      await apiClient.patch(`/api/boards/${boardId}/labels/${labelId}`, { name, color });
+      // Refresh labels list
+      const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
+      setBoardLabels(response.data.labels);
+    } catch (err) {
+      console.error('Error editing label:', err);
+    }
+  };
+
+  const handleDeleteLabel = async (labelId: string) => {
+    if (!boardId) return;
+    try {
+      await apiClient.delete(`/api/boards/${boardId}/labels/${labelId}`);
+      // Update selected labels locally if it was selected
+      setSelectedLabelIds(prev => prev.filter(id => id !== labelId));
+      // Refresh labels list
+      const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
+      setBoardLabels(response.data.labels);
+    } catch (err) {
+      console.error('Error deleting label:', err);
     }
   };
 
@@ -672,26 +685,24 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             >
               <Paperclip size={20} />
             </button>
-            <div className="relative">
-              <button 
-                onClick={() => setActivePopover(activePopover === 'options' ? null : 'options')}
-                className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
-              >
-                <MoreHorizontal size={20} />
-              </button>
-              
-              {activePopover === 'options' && (
-                <div className="absolute right-0 mt-2 top-full" ref={popoverRef}>
-                  <CardOptionsMenu 
-                    cardId={cardId || ''}
-                    assignedMemberIds={assignedMemberIds}
-                    onToggleJoin={handleToggleMember}
-                    onArchive={handleArchiveCard}
-                    onClose={() => setActivePopover(null)}
-                  />
-                </div>
-              )}
-            </div>
+            <Popover
+              trigger={
+                <button className={`p-2 rounded-full transition-colors ${activePopover === 'options' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}>
+                  <MoreHorizontal size={20} />
+                </button>
+              }
+              open={activePopover === 'options'}
+              onOpenChange={(open) => setActivePopover(open ? 'options' : null)}
+              align="end"
+            >
+              <CardOptionsMenu 
+                cardId={cardId || ''}
+                assignedMemberIds={assignedMemberIds}
+                onToggleJoin={handleToggleMember}
+                onArchive={handleArchiveCard}
+                onClose={() => setActivePopover(null)}
+              />
+            </Popover>
             <div className="w-px h-6 bg-zinc-200 mx-1" />
             <button 
               onClick={onClose}
@@ -844,88 +855,91 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               
               {/* Quick Actions Bar */}
               <div className="flex flex-wrap gap-3 relative">
-                <div className="relative">
-                  <button 
-                    onClick={() => setActivePopover(activePopover === 'add' ? null : 'add')}
-                    className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
-                  >
-                    <span className="text-lg leading-none">+</span> Añadir
-                  </button>
-
+                <Popover
+                  trigger={
+                    <button className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm">
+                      <span className="text-lg leading-none">+</span> Añadir
+                    </button>
+                  }
+                  open={activePopover === 'add' || activePopover === 'attachments' || activePopover === 'labels' || activePopover === 'members' || activePopover === 'dates' || activePopover === 'properties'}
+                  onOpenChange={(open) => !open && setActivePopover(null)}
+                  align="start"
+                >
                   {activePopover === 'add' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <AddPopoverMenu 
-                        onClose={() => setActivePopover(null)} 
-                        onSelectOption={(option) => {
-                          if (option === 'labels') {
-                            setActivePopover('labels');
-                          } else if (option === 'members') {
-                            setActivePopover('members');
-                          } else if (option === 'checklist') {
-                            handleAddChecklist();
-                            setActivePopover(null);
-                          } else if (option === 'dates') {
-                            setActivePopover('dates');
-                          } else if (option === 'attachment') {
-                            setActivePopover('attachments');
-                          } else if (option === 'properties') {
-                            setActivePopover('properties');
-                          } else {
-                            // Add logic for other options here
-                            console.log('Selected:', option);
-                            setActivePopover(null);
-                          }
-                        }} 
-                      />
-                    </div>
+                    <AddPopoverMenu 
+                      onClose={() => setActivePopover(null)} 
+                      onSelectOption={(option) => {
+                        if (option === 'labels') {
+                          setActivePopover('labels');
+                        } else if (option === 'members') {
+                          setActivePopover('members');
+                        } else if (option === 'checklist') {
+                          handleAddChecklist();
+                          setActivePopover(null);
+                        } else if (option === 'dates') {
+                          setActivePopover('dates');
+                        } else if (option === 'attachment') {
+                          setActivePopover('attachments');
+                        } else if (option === 'properties') {
+                          setActivePopover('properties');
+                        } else {
+                          console.log('Selected:', option);
+                          setActivePopover(null);
+                        }
+                      }} 
+                    />
                   )}
 
                   {activePopover === 'attachments' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <AttachmentPopover 
-                        onClose={() => setActivePopover(null)}
-                        onUploadFile={handleFileUpload}
-                        onAttachLink={handleAttachLink}
-                      />
-                    </div>
+                    <AttachmentPopover 
+                      onClose={() => setActivePopover(null)}
+                      onUploadFile={handleFileUpload}
+                      onAttachLink={handleAttachLink}
+                    />
                   )}
 
                   {activePopover === 'labels' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <LabelsPopover 
-                        onClose={() => setActivePopover(null)}
-                        selectedLabelIds={selectedLabelIds}
-                        labels={boardLabels}
-                        onToggleLabel={handleToggleLabel}
-                        onEditLabel={(label) => console.log('Edit label:', label)}
-                        onCreateLabel={handleCreateLabel}
-                      />
-                    </div>
+                    <LabelsPopover 
+                      onClose={() => setActivePopover(null)}
+                      selectedLabelIds={selectedLabelIds}
+                      labels={boardLabels}
+                      onToggleLabel={handleToggleLabel}
+                      onEditLabel={handleEditLabel}
+                      onCreateLabel={handleCreateLabel}
+                      onDeleteLabel={handleDeleteLabel}
+                    />
                   )}
 
                   {activePopover === 'members' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <MembersPopover 
-                        onClose={() => setActivePopover(null)}
-                        boardMembers={boardMembers}
-                        assignedMemberIds={assignedMemberIds}
-                        onToggleMember={handleToggleMember}
-                      />
-                    </div>
+                    <MembersPopover 
+                      onClose={() => setActivePopover(null)}
+                      boardMembers={boardMembers}
+                      assignedMemberIds={assignedMemberIds}
+                      onToggleMember={handleToggleMember}
+                    />
                   )}
-                </div>
+
+                  {activePopover === 'dates' && (
+                    <DatesPopover 
+                      onClose={() => setActivePopover(null)}
+                      onSaveDates={handleUpdateDates}
+                      onRemoveDates={handleRemoveDates}
+                      startDate={card?.startDate || null}
+                      dueDate={card?.dueDate || null}
+                    />
+                  )}
+
+                  {activePopover === 'properties' && (
+                    <PropertiesPopover 
+                      onClose={() => setActivePopover(null)}
+                      onBack={() => setActivePopover('add')}
+                      currentPriority={card?.priority}
+                      currentRiskLevel={card?.riskLevel}
+                      currentModule={card?.module}
+                      onUpdate={handleUpdateProperties}
+                    />
+                  )}
+                </Popover>
                 <button 
                   onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
                   className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
@@ -938,45 +952,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 >
                   <Users size={16} /> Miembros
                 </button>
-                 <div className="relative">
-                  <button 
-                    onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                    className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
-                  >
-                    <Clock size={16} /> Fechas
-                  </button>
-
-                  {activePopover === 'dates' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <DatesPopover 
-                        onClose={() => setActivePopover(null)}
-                        onSaveDates={handleUpdateDates}
-                        onRemoveDates={handleRemoveDates}
-                        startDate={card?.startDate || null}
-                        dueDate={card?.dueDate || null}
-                      />
-                    </div>
-                  )}
-
-                  {activePopover === 'properties' && (
-                    <div 
-                      ref={popoverRef}
-                      className="absolute top-full left-0 mt-2 z-[110]"
-                    >
-                      <PropertiesPopover 
-                        onClose={() => setActivePopover(null)}
-                        onBack={() => setActivePopover('add')}
-                        currentPriority={card?.priority}
-                        currentRiskLevel={card?.riskLevel}
-                        currentModule={card?.module}
-                        onUpdate={handleUpdateProperties}
-                      />
-                    </div>
-                  )}
-                </div>
+                <button 
+                  onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
+                  className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"
+                >
+                  <Clock size={16} /> Fechas
+                </button>
                 <button 
                   onClick={() => handleAddChecklist()}
                   className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] font-bold text-sm px-4 py-2.5 rounded-[12px] hover:bg-[#7A5AF8] hover:text-white transition-all shadow-sm"

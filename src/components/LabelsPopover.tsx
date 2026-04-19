@@ -12,17 +12,24 @@ interface LabelsPopoverProps {
   selectedLabelIds: string[];
   labels: Label[];
   onToggleLabel: (id: string) => void;
-  onEditLabel: (label: Label) => void;
+  onEditLabel: (labelId: string, name: string, color: string) => void;
   onCreateLabel: (name: string, color: string) => void;
+  onDeleteLabel: (labelId: string) => void;
 }
 
 const PRESET_COLORS = [
-  '#10B981', // Emerald 500
-  '#F59E0B', // Amber 500
-  '#F97316', // Orange 500
-  '#E91E63', // Brand Pink / Crimson
-  '#7A5AF8', // Brand Purple
-  '#3B82F6', // Blue 500
+  // Fila 1: Tonos Oscuros Profundos
+  '#064E3B', '#451A03', '#78350F', '#7F1D1D', '#4C1D95',
+  // Fila 2: Tonos Tierra y Bosque
+  '#065F46', '#92400E', '#B45309', '#991B1B', '#6D28D9',
+  // Fila 3: Tonos Estándar Trello
+  '#10B981', '#D97706', '#F59E0B', '#EF4444', '#7A5AF8',
+  // Fila 4: Tonos Vibrantes
+  '#34D399', '#FBBF24', '#FB923C', '#F87171', '#A78BFA',
+  // Fila 5: Azules y Fríos
+  '#1E3A8A', '#134E4A', '#0891B2', '#1E40AF', '#374151',
+  // Fila 6: Tonos Pastel y Grises
+  '#60A5FA', '#22D3EE', '#A3E635', '#F472B6', '#9CA3AF',
 ];
 
 const LabelsPopover: React.FC<LabelsPopoverProps> = ({ 
@@ -31,14 +38,16 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   labels,
   onToggleLabel,
   onEditLabel,
-  onCreateLabel
+  onCreateLabel,
+  onDeleteLabel
 }) => {
-  const [currentView, setCurrentView] = useState<'list' | 'create'>('list');
+  const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit'>('list');
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   
-  // Create form state
-  const [newLabelName, setNewLabelName] = useState('');
-  const [newLabelColor, setNewLabelColor] = useState(PRESET_COLORS[0]);
+  // Form state
+  const [labelName, setLabelName] = useState('');
+  const [labelColor, setLabelColor] = useState(PRESET_COLORS[0]);
 
   const filteredLabels = labels.filter(label => 
     label.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -46,13 +55,36 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLabelName.trim()) return;
-    onCreateLabel(newLabelName, newLabelColor);
-    setNewLabelName('');
+    if (!labelName.trim()) return;
+    onCreateLabel(labelName, labelColor);
+    setLabelName('');
     setCurrentView('list');
   };
 
-  if (currentView === 'create') {
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLabel || !labelName.trim()) return;
+    onEditLabel(editingLabel.id, labelName, labelColor);
+    setCurrentView('list');
+  };
+
+  const openEditView = (label: Label) => {
+    setEditingLabel(label);
+    setLabelName(label.name);
+    setLabelColor(label.color);
+    setCurrentView('edit');
+  };
+
+  const handleDelete = () => {
+    if (!editingLabel) return;
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta? Se quitará de todas las tarjetas.')) {
+      onDeleteLabel(editingLabel.id);
+      setCurrentView('list');
+    }
+  };
+
+  if (currentView === 'create' || currentView === 'edit') {
+    const isEdit = currentView === 'edit';
     return (
       <div className="w-72 bg-white rounded-[16px] shadow-[0_20px_60px_-15px_rgba(122,90,248,0.3)] border border-purple-50 p-4 animate-in fade-in zoom-in duration-200">
         {/* Header */}
@@ -64,7 +96,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <ChevronLeft size={16} />
           </button>
           <h3 className="text-[10px] tracking-[0.4em] font-extrabold text-[#806F9B] uppercase">
-            Crear Etiqueta
+            {isEdit ? 'Editar Etiqueta' : 'Crear Etiqueta'}
           </h3>
           <button 
             onClick={onClose}
@@ -77,54 +109,65 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
         {/* Preview Area */}
         <div className="bg-slate-50 rounded-xl p-6 flex justify-center mb-4">
           <div 
-            style={{ backgroundColor: newLabelColor }}
+            style={{ backgroundColor: labelColor }}
             className="px-4 py-1.5 rounded-md text-sm font-bold text-white shadow-sm transition-all"
           >
-            {newLabelName || 'Nombre de etiqueta...'}
+            {labelName || 'Nombre de etiqueta...'}
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleCreateSubmit} className="space-y-4">
+        <form onSubmit={isEdit ? handleEditSubmit : handleCreateSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-zinc-900 mb-1">Título</label>
             <input 
               type="text"
               autoFocus
               placeholder="Ej: Frontend, Urgente..."
-              value={newLabelName}
-              onChange={(e) => setNewLabelName(e.target.value)}
+              value={labelName}
+              onChange={(e) => setLabelName(e.target.value)}
               className="bg-[#F3E8FF] rounded-lg p-2 text-sm text-zinc-900 w-full outline-none focus:ring-2 focus:ring-[#7A5AF8]/50 transition-all"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-zinc-900 mb-2">Selecciona un color</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-5 gap-2 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
               {PRESET_COLORS.map((color) => (
                 <button
                   key={color}
                   type="button"
-                  onClick={() => setNewLabelColor(color)}
+                  onClick={() => setLabelColor(color)}
                   style={{ backgroundColor: color }}
                   className={`
                     h-8 rounded-md transition-all flex items-center justify-center
-                    ${newLabelColor === color ? 'ring-2 ring-zinc-400 ring-offset-2 scale-110 shadow-md' : 'hover:opacity-80'}
+                    ${labelColor === color ? 'ring-2 ring-zinc-400 ring-offset-2 scale-110 shadow-md' : 'hover:opacity-80'}
                   `}
                 >
-                  {newLabelColor === color && <Check size={14} className="text-white" />}
+                  {labelColor === color && <Check size={14} className="text-white" />}
                 </button>
               ))}
             </div>
           </div>
 
-          <button 
-            type="submit"
-            disabled={!newLabelName.trim()}
-            className="w-full bg-[#7A5AF8] text-white font-bold py-2 rounded-lg mt-4 hover:bg-[#694de3] transition-colors shadow-lg shadow-purple-100 disabled:opacity-50 disabled:shadow-none"
-          >
-            Crear etiqueta
-          </button>
+          <div className="flex gap-2 pt-2">
+            <button 
+              type="submit"
+              disabled={!labelName.trim()}
+              className="flex-1 bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg shadow-purple-100 disabled:opacity-50 disabled:shadow-none"
+            >
+              {isEdit ? 'Guardar' : 'Crear'}
+            </button>
+            {isEdit && (
+              <button 
+                type="button"
+                onClick={handleDelete}
+                className="bg-rose-50 text-[#E91E63] px-4 rounded-lg font-bold hover:bg-rose-100 transition-colors"
+              >
+                Eliminar
+              </button>
+            )}
+          </div>
         </form>
       </div>
     );
@@ -157,7 +200,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
       </div>
 
       {/* Lista de Etiquetas */}
-      <div className="flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar">
+      <div className="flex flex-col gap-2 max-h-[240px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent custom-scrollbar">
         {filteredLabels.map((label) => (
           <div key={label.id} className="flex items-center gap-2 group">
             <input 
@@ -169,14 +212,14 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <div 
               onClick={() => onToggleLabel(label.id)}
               style={{ backgroundColor: label.color }}
-              className="flex-1 h-8 rounded-md flex items-center px-3 text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90"
+              className="flex-1 h-8 rounded-md flex items-center px-3 text-sm font-bold text-white cursor-pointer transition-opacity hover:opacity-90 overflow-hidden text-ellipsis whitespace-nowrap"
             >
               {label.name}
             </div>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                onEditLabel(label);
+                openEditView(label);
               }}
               className="text-slate-400 hover:text-zinc-700 p-1 transition-colors"
             >
@@ -195,7 +238,11 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
       {/* Footer */}
       <hr className="border-purple-50 my-3" />
       <button 
-        onClick={() => setCurrentView('create')}
+        onClick={() => {
+          setLabelName('');
+          setLabelColor(PRESET_COLORS[0]);
+          setCurrentView('create');
+        }}
         className="w-full text-left text-sm font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F3E8FF] p-2 rounded-lg transition-colors"
       >
         Crear una etiqueta nueva
