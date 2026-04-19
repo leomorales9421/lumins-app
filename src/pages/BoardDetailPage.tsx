@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
 import Button from '../components/ui/Button';
 import NavBar from '../components/layout/NavBar';
+import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
 import { 
   DndContext, 
   closestCorners, 
@@ -13,7 +14,7 @@ import {
   useSensors, 
   DragOverlay
 } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
 import { 
   SortableContext, 
   horizontalListSortingStrategy, 
@@ -36,6 +37,15 @@ const BoardDetailPage: React.FC = () => {
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
   const [isAddingList, setIsAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [originalContainer, setOriginalContainer] = useState<string | null>(null);
+  const { showError, showSuccess } = useNotificationHelpers();
+  const { logSuccess } = useStructuredLogger();
+  
+  const listsRef = useRef<List[]>(lists);
+  useEffect(() => {
+    listsRef.current = lists;
+  }, [lists]);
 
   const fetchBoard = useCallback(async () => {
     if (!id) return;
@@ -78,21 +88,171 @@ const BoardDetailPage: React.FC = () => {
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
+    const activeId = active.id as string;
+    const container = findContainer(activeId);
+    setOriginalContainer(container || null);
+    
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card);
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    setActiveCard(null);
+  const findContainer = (id: string) => {
+    const currentLists = listsRef.current;
+    if (currentLists.find((list) => list.id === id)) return id;
+    return currentLists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
-    if (active.id !== over.id) {
-       setLists((items) => {
-         const oldIndex = items.findIndex(l => l.id === active.id);
-         const newIndex = items.findIndex(l => l.id === over.id);
-         return arrayMove(items, oldIndex, newIndex);
-       });
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    if (!activeContainer || !overContainer || activeContainer === overContainer) {
+      return;
+    }
+
+    setLists((prev) => {
+      const activeList = prev.find((l) => l.id === activeContainer);
+      const overList = prev.find((l) => l.id === overContainer);
+
+      if (!activeList || !overList) return prev;
+
+      const activeItems = activeList.cards || [];
+      const overItems = overList.cards || [];
+      
+      const activeIndex = activeItems.findIndex((item) => item.id === activeId);
+      const overIndex = overItems.findIndex((item) => item.id === overId);
+
+      let newIndex;
+      if (prev.some(l => l.id === overId)) {
+        newIndex = overItems.length;
+      } else {
+        const isBelowLastItem = over && overIndex === overItems.length - 1;
+        const modifier = isBelowLastItem ? 1 : 0;
+        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length;
+      }
+
+      return prev.map((list) => {
+        if (list.id === activeContainer) {
+          return {
+            ...list,
+            cards: (list.cards || []).filter((item) => item.id !== activeId),
+          };
+        } else if (list.id === overContainer) {
+          const newCards = [...(list.cards || [])];
+          newCards.splice(newIndex, 0, activeItems[activeIndex]);
+          return {
+            ...list,
+            cards: newCards,
+          };
+        }
+        return list;
+      });
+    });
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveCard(null);
+
+    if (!over) {
+      setOriginalContainer(null);
+      return;
+    }
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    const activeType = active.data.current?.type;
+    
+    // CASE: REORDERING LISTS
+    if (activeType === 'list') {
+      if (activeId !== overId) {
+        const oldIndex = lists.findIndex((l) => l.id === activeId);
+        const newIndex = lists.findIndex((l) => l.id === overId);
+        const newListsOrder = arrayMove(lists, oldIndex, newIndex);
+        
+        setLists(newListsOrder);
+
+        try {
+          setIsSaving(true);
+          await apiClient.post(`/api/lists/boards/${id}/lists/reorder`, {
+            lists: newListsOrder.map((l, index) => ({ id: l.id, position: (index + 1) * 1000 }))
+          });
+        } catch (err) {
+          showError('Error', 'No se pudo guardar el nuevo orden de las listas');
+          fetchBoard();
+        } finally {
+          setIsSaving(false);
+        }
+      }
+      setOriginalContainer(null);
+      return;
+    }
+
+    // CASE: REORDERING CARDS
+    const currentLists = listsRef.current;
+    const overContainer = findContainer(overId);
+
+    if (!overContainer) {
+      setOriginalContainer(null);
+      return;
+    }
+
+    // Even if activeContainer === overContainer (due to handleDragOver), 
+    // we might need to sort within the target list
+    const activeList = currentLists.find((l) => l.id === overContainer);
+    if (!activeList) {
+      setOriginalContainer(null);
+      return;
+    }
+
+    const activeIndex = (activeList.cards || []).findIndex((c) => c.id === activeId);
+    const overIndex = (activeList.cards || []).findIndex((c) => c.id === overId);
+
+    let finalLists = currentLists;
+    if (activeId !== overId) {
+      finalLists = currentLists.map((list) => {
+        if (list.id === overContainer) {
+          return { ...list, cards: arrayMove(list.cards || [], activeIndex, overIndex) };
+        }
+        return list;
+      });
+      setLists(finalLists);
+    }
+
+    // SYNC WITH BACKEND
+    try {
+      setIsSaving(true);
+      const targetList = finalLists.find(l => l.id === overContainer);
+      const cardsInTarget = targetList?.cards || [];
+      
+      if (originalContainer === overContainer) {
+        // INTRA-LIST: Use bulk reorder to ensure all positions are unique and correct
+        await apiClient.post(`/api/cards/lists/${overContainer}/reorder`, {
+          cards: cardsInTarget.map((c, index) => ({ id: c.id, position: (index + 1) * 1000 }))
+        });
+      } else {
+        // INTER-LIST: Use single move (backend handles WIP limits and audit logs)
+        const newIndexInList = cardsInTarget.findIndex(c => c.id === activeId);
+        await apiClient.post(`/api/cards/${activeId}/move`, {
+          sourceListId: originalContainer, 
+          destinationListId: overContainer,
+          newPosition: (Math.max(0, newIndexInList) + 1) * 1000
+        });
+      }
+      logSuccess('Card moved', 'Sync complete');
+    } catch (err) {
+      showError('Error', 'No se pudo guardar el movimiento de la tarjeta');
+      fetchBoard();
+    } finally {
+      setIsSaving(false);
+      setOriginalContainer(null);
     }
   };
 
@@ -162,7 +322,16 @@ const BoardDetailPage: React.FC = () => {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
              </button>
              <div className="flex flex-col gap-1">
-                <h1 className="text-4xl font-black text-zinc-900 tracking-tighter">{board.name}</h1>
+                                 <div className="flex items-center gap-4">
+                    <h1 className="text-4xl font-black text-zinc-900 tracking-tighter">{board.name}</h1>
+                    {isSaving && (
+                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#7A5AF8]/10 border border-[#7A5AF8]/20 animate-pulse">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#7A5AF8]" />
+                        <span className="text-[10px] font-bold text-[#7A5AF8] uppercase tracking-wider">Sincronizando...</span>
+                      </div>
+                    )}
+                 </div>
+
                 <div className="flex items-center gap-3">
                    <div className="w-2 h-2 rounded-full bg-[#7A5AF8] animate-pulse" />
                    <span className="text-[10px] font-black text-[#7A5AF8] uppercase tracking-[0.4em]">Unidad Estratégica Activa</span>
@@ -182,6 +351,7 @@ const BoardDetailPage: React.FC = () => {
             sensors={sensors} 
             collisionDetection={closestCorners} 
             onDragStart={handleDragStart} 
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <div className="flex gap-5 h-full items-start p-12 min-w-max">
@@ -250,8 +420,8 @@ const BoardDetailPage: React.FC = () => {
         boardId={id}
         onUpdate={fetchBoard}
         initialData={selectedCardId ? {
-          title: board.lists.flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
-          listName: board.lists.find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
+          title: (board.lists || []).flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
+          listName: (board.lists || []).find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
         } : undefined}
       />
     </div>

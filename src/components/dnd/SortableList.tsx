@@ -34,6 +34,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
     transform,
     transition,
     isDragging,
+    isOver,
+    active,
   } = useSortable({
     id: list.id,
     data: {
@@ -41,6 +43,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       list: { ...list, cards },
     },
   });
+
+  const isDraggingCardOver = isOver && active?.data.current?.type === 'card';
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -87,6 +91,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       className={`
         h-fit max-h-full flex flex-col w-[340px] bg-white/80 rounded-2xl border border-[#7A5AF8]/10 shadow-soft flex-shrink-0 transition-all
         ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] z-50' : ''}
+        ${isDraggingCardOver ? 'bg-purple-50/50 transition-colors' : ''}
       `}
     >
       {/* List Header: Identity Style */}

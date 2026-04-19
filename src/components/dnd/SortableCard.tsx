@@ -47,9 +47,9 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
       {...listeners}
       onClick={onClick}
       className={`
-        bg-white p-5 rounded-xl shadow-soft border border-[#7A5AF8]/5 cursor-grab active:cursor-grabbing
+        bg-white p-5 rounded-xl border border-[#7A5AF8]/5 cursor-grab active:cursor-grabbing
         group hover:border-[#7A5AF8]/30 hover:shadow-heavy transition-all duration-300
-        ${isDragging ? 'opacity-50 ring-2 ring-[#7A5AF8] shadow-2xl scale-105 z-50' : ''}
+        ${isDragging ? 'rotate-2 scale-105 shadow-xl border-[#7A5AF8] z-50 bg-white' : 'shadow-sm'}
       `}
     >
       <div className="flex flex-col gap-4">
