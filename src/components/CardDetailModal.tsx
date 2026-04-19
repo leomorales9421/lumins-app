@@ -680,12 +680,26 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setActivePopover('attachments')}
-              className="p-2 text-[#806F9B] hover:bg-zinc-100 rounded-full transition-colors"
-            >
-              <Paperclip size={20} />
-            </button>
+            <SmartPopover
+              isOpen={activePopover === 'attachments'}
+              onClose={() => setActivePopover(null)}
+              placement="bottom-end"
+              trigger={
+                <button 
+                  onClick={() => setActivePopover(activePopover === 'attachments' ? null : 'attachments')}
+                  className={`p-2 rounded-full transition-colors ${activePopover === 'attachments' ? 'bg-[#F3E8FF] text-[#7A5AF8]' : 'text-[#806F9B] hover:bg-zinc-100'}`}
+                >
+                  <Paperclip size={20} />
+                </button>
+              }
+              content={
+                <AttachmentPopover 
+                  onClose={() => setActivePopover(null)}
+                  onUploadFile={handleFileUpload}
+                  onAttachLink={handleAttachLink}
+                />
+              }
+            />
             <SmartPopover
               isOpen={activePopover === 'options'}
               onClose={() => setActivePopover(null)}
@@ -772,12 +786,26 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     </div>
                   ))}
                 </div>
-                <button 
-                  onClick={() => setActivePopover('members')}
-                  className="w-8 h-8 rounded-full bg-slate-100 text-[#806F9B] flex items-center justify-center hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
-                >
-                  <span className="text-lg leading-none">+</span>
-                </button>
+                <SmartPopover
+                  isOpen={activePopover === 'members_header'}
+                  onClose={() => setActivePopover(null)}
+                  trigger={
+                    <button 
+                      onClick={() => setActivePopover(activePopover === 'members_header' ? null : 'members_header')}
+                      className="w-8 h-8 rounded-full bg-slate-100 text-[#806F9B] flex items-center justify-center hover:bg-[#F3E8FF] hover:text-[#7A5AF8] transition-all"
+                    >
+                      <span className="text-lg leading-none">+</span>
+                    </button>
+                  }
+                  content={
+                    <MembersPopover 
+                      onClose={() => setActivePopover(null)}
+                      boardMembers={boardMembers}
+                      assignedMemberIds={assignedMemberIds}
+                      onToggleMember={handleToggleMember}
+                    />
+                  }
+                />
               </div>
             </div>
 
