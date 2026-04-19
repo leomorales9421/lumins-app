@@ -814,11 +814,11 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 <span className="text-[10px] font-black text-[#806F9B] uppercase tracking-widest">Fechas</span>
                 <div className="flex items-center gap-2">
                   <SmartPopover
-                    isOpen={activePopover === 'dates'}
+                    isOpen={activePopover === 'dates_badge'}
                     onClose={() => setActivePopover(null)}
                     trigger={
                       <div 
-                        onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
+                        onClick={() => setActivePopover(activePopover === 'dates_badge' ? null : 'dates_badge')}
                         className="flex items-center gap-2 bg-[#F3E8FF] text-[#7A5AF8] px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm cursor-pointer hover:bg-purple-100 transition-all border border-[#7A5AF8]/10"
                       >
                         <Clock size={14} />
