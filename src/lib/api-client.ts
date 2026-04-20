@@ -8,7 +8,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'access_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 
 // Queue for requests waiting for token refresh
 let isRefreshing = false;
@@ -36,6 +35,7 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -114,18 +114,12 @@ class ApiClient {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
-  public getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  }
-
-  public setTokens(accessToken: string, refreshToken: string): void {
+  public setTokens(accessToken: string): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   }
 
   public clearTokens(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
   }
 
   public isAuthenticated(): boolean {
@@ -140,19 +134,13 @@ class ApiClient {
     }
 
     this.refreshPromise = new Promise(async (resolve, reject) => {
-      const refreshToken = this.getRefreshToken();
-      if (!refreshToken) {
-        reject(new Error('No refresh token available'));
-        return;
-      }
-
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-          refreshToken,
+        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, {
+          withCredentials: true
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-        this.setTokens(accessToken, newRefreshToken);
+        const { accessToken } = response.data.data;
+        this.setTokens(accessToken);
         resolve(accessToken);
       } catch (error) {
         this.clearTokens();

@@ -19,7 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -76,13 +76,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: {
           user: User;
           accessToken: string;
-          refreshToken: string;
         };
         message: string;
       }>('/api/auth/login', { email, password });
 
-      const { user, accessToken, refreshToken } = response.data;
-      apiClient.setTokens(accessToken, refreshToken);
+      const { user, accessToken } = response.data;
+      apiClient.setTokens(accessToken);
       setUser(user);
     } catch (error) {
       console.error('Login failed:', error);
@@ -99,13 +98,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: {
           user: User;
           accessToken: string;
-          refreshToken: string;
         };
         message: string;
       }>('/api/auth/register', { name, email, password });
 
-      const { user, accessToken, refreshToken } = response.data;
-      apiClient.setTokens(accessToken, refreshToken);
+      const { user, accessToken } = response.data;
+      apiClient.setTokens(accessToken);
       setUser(user);
     } catch (error) {
       console.error('Registration failed:', error);
@@ -115,10 +113,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    apiClient.clearTokens();
-    setUser(null);
-    window.location.href = '/login';
+  const logout = async () => {
+    try {
+      await apiClient.post('/api/auth/logout');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      apiClient.clearTokens();
+      setUser(null);
+      window.location.href = '/login';
+    }
   };
 
   const value: AuthContextType = {
