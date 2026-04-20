@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, X, ChevronLeft, Check } from 'lucide-react';
+import UserAvatar from './ui/UserAvatar';
 
 interface Member {
   id: string;
@@ -92,12 +93,13 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             >
               <div className="flex items-center">
                 {/* Avatar */}
-                <div className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-sm  ring-2 ring-white">
-                  {member.avatarUrl ? (
-                    <img src={member.avatarUrl} alt={member.name} className="w-full h-full object-cover" />
-                  ) : (
-                    member.initials
-                  )}
+                <div className="shrink-0">
+                  <UserAvatar 
+                    name={member.name} 
+                    avatarUrl={member.avatarUrl} 
+                    size="sm"
+                    className="ring-2 ring-white shadow-sm"
+                  />
                 </div>
                 {/* Nombre */}
                 <span className="text-sm font-bold text-zinc-900 ml-3 truncate max-w-[150px]">

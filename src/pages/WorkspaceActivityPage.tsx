@@ -21,6 +21,7 @@ import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import CardDetailModal from '../components/CardDetailModal';
+import UserAvatar from '../components/ui/UserAvatar';
 
 interface CardEvent {
   id: string;
@@ -236,12 +237,13 @@ const WorkspaceActivityPage: React.FC = () => {
                           onClick={() => setSelectedCard({ cardId: event.card.id, boardId: event.card.board.id })}
                           className="bg-white rounded-xl shadow-[0_2px_10px_rgba(108,93,211,0.03)] border border-zinc-100 p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer group hover:border-[#7A5AF8]/30"
                         >
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-50 to-white border border-zinc-100 flex items-center justify-center text-[#7A5AF8] font-bold text-xs shrink-0 overflow-hidden shadow-sm">
-                            {event.user.avatarUrl ? (
-                              <img src={event.user.avatarUrl} alt={event.user.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <User size={18} />
-                            )}
+                          <div className="shrink-0">
+                            <UserAvatar 
+                              name={event.user.name} 
+                              avatarUrl={event.user.avatarUrl} 
+                              size="sm"
+                              className="ring-1 ring-zinc-100 shadow-sm"
+                            />
                           </div>
                           
                           <div className="flex-1 min-w-0">

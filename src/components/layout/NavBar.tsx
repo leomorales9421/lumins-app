@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Layout, Search, Bell, MessageSquare } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
+import UserAvatar from '../ui/UserAvatar';
 
 interface NavBarProps {
   user: any;
@@ -63,18 +64,24 @@ const NavBar: React.FC<NavBarProps> = ({
 
           <div className="h-8 w-px bg-[#E8E9EC] mx-1" />
 
-          {/* User Profile Link */}
-          <Link 
-            to="/settings/profile" 
-            className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-lg transition-colors cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#E8E9EC] group-hover:border-[#7A5AF8] transition-all shadow-sm">
-               <img src={`https://i.pravatar.cc/100?u=${user?.email}`} alt="user avatar" className="w-full h-full object-cover" />
+          {/* User Profile */}
+          <div className="flex items-center gap-3 pl-3 border-l border-[#E8E9EC]">
+            <div className="flex flex-col items-end hidden sm:flex">
+              <span className="text-[13px] font-bold text-[#1A1A2E] leading-none">
+                {user?.name}
+              </span>
             </div>
-            <div className="hidden lg:flex flex-col text-left">
-               <span className="text-[12px] font-bold text-[#1A1A2E] leading-tight">{user?.name || 'Usuario'}</span>
-            </div>
-          </Link>
+            <Link 
+              to="/settings/profile"
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-sm hover:ring-2 hover:ring-[#7A5AF8]/20 transition-all cursor-pointer"
+            >
+              <UserAvatar 
+                name={user?.name || ''} 
+                avatarUrl={user?.avatarUrl} 
+                size="sm"
+              />
+            </Link>
+          </div>
         </div>
 
       </div>

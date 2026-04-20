@@ -83,9 +83,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         message: string;
       }>('/api/auth/login', { email, password });
 
-      const { user, accessToken } = response.data;
+      const { accessToken } = response.data;
       apiClient.setTokens(accessToken);
-      setUser(user);
+      await refreshUser();
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -105,9 +105,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         message: string;
       }>('/api/auth/register', { name, email, password });
 
-      const { user, accessToken } = response.data;
+      const { accessToken } = response.data;
       apiClient.setTokens(accessToken);
-      setUser(user);
+      await refreshUser();
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;

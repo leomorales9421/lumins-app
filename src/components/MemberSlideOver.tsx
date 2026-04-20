@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
 import Button from './ui/Button';
 import apiClient from '../lib/api-client';
+import UserAvatar from './ui/UserAvatar';
 
 interface MemberSlideOverProps {
   isOpen: boolean;
@@ -132,12 +133,12 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             {/* Header */}
             <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center text-[#7A5AF8] font-bold text-xl shadow-sm">
-                  {member?.user.avatarUrl ? (
-                    <img src={member.user.avatarUrl} alt={member.user.name} className="w-full h-full object-cover rounded-2xl" />
-                  ) : (
-                    <span>{member?.user.name.charAt(0).toUpperCase()}</span>
-                  )}
+                <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
+                  <UserAvatar 
+                    user={member?.user} 
+                    size="lg" 
+                    className="w-full h-full rounded-2xl" 
+                  />
                 </div>
                 <div>
                   <h2 className="font-bold text-slate-900 leading-tight">{member?.user.name}</h2>

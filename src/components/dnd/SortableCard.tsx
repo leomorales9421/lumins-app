@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock, Zap, AlertCircle } from 'lucide-react';
+import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Card } from '../../types/board';
+import UserAvatar from '../ui/UserAvatar';
 
 interface SortableCardProps {
   card: Card;
@@ -168,13 +169,17 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
             {/* Assignees */}
             <div className="flex -space-x-1.5">
               {card.assignees && card.assignees.length > 0 ? (
-                card.assignees.slice(0, 3).map((assignee: any, idx: number) => (
+                card.assignees.slice(0, 4).map((assignee: any, idx: number) => (
                   <div
-                    key={assignee.user?.id || idx}
+                    key={assignee.user?.id || `assignee-${idx}`}
                     title={assignee.user?.name}
-                    className="w-5 h-5 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[9px] font-bold border border-white shadow-sm"
+                    className="w-5 h-5 rounded-full border border-white shadow-sm transition-transform hover:scale-110"
                   >
-                    {assignee.user?.name ? assignee.user.name[0].toUpperCase() : 'U'}
+                    <UserAvatar 
+                      name={assignee.user?.name || 'Usuario'} 
+                      avatarUrl={assignee.user?.avatarUrl} 
+                      size="xs"
+                    />
                   </div>
                 ))
               ) : (

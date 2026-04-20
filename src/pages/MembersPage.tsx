@@ -9,6 +9,7 @@ import MemberSlideOver from '../components/MemberSlideOver';
 import { motion } from 'framer-motion';
 import type { WorkspaceMember } from '../types/workspace';
 import { Skeleton } from '../components/ui/Skeleton';
+import UserAvatar from '../components/ui/UserAvatar';
 
 const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -147,12 +148,12 @@ const MembersPage: React.FC = () => {
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-indigo-50 border border-white shadow-sm flex items-center justify-center text-[#7A5AF8] font-bold overflow-hidden">
-                      {member.user.avatarUrl ? (
-                        <img src={member.user.avatarUrl} alt={member.user.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{member.user.name.charAt(0).toUpperCase()}</span>
-                      )}
+                    <div className="w-10 h-10">
+                      <UserAvatar 
+                        user={member.user} 
+                        size="md" 
+                        className="w-full h-full" 
+                      />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-[#1A1A2E]">{member.user.name}</span>

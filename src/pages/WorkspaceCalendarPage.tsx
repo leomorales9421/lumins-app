@@ -24,6 +24,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import CardDetailModal from '../components/CardDetailModal';
 import { useNotificationHelpers } from '../components/NotificationProvider';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 interface CalendarEvent {
   id: string;
   title: string;
@@ -431,8 +433,12 @@ const WorkspaceCalendarPage: React.FC = () => {
                     {event.extendedProps.assignees?.[0] && (
                       <div className="shrink-0 relative group/avatar">
                         <img 
-                          src={event.extendedProps.assignees[0].avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.extendedProps.assignees[0].name)}&background=random`} 
-                          className="w-4 h-4 rounded-full ring-1 ring-white shadow-sm"
+                          src={event.extendedProps.assignees[0].avatarUrl 
+                            ? (event.extendedProps.assignees[0].avatarUrl.startsWith('http') 
+                                ? event.extendedProps.assignees[0].avatarUrl 
+                                : `${API_BASE_URL}${event.extendedProps.assignees[0].avatarUrl.startsWith('/') ? '' : '/'}${event.extendedProps.assignees[0].avatarUrl}`)
+                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(event.extendedProps.assignees[0].name)}&background=random`} 
+                          className="w-4 h-4 rounded-full ring-1 ring-white shadow-sm object-cover"
                           alt={event.extendedProps.assignees[0].name}
                         />
                         {event.extendedProps.assignees.length > 1 && (

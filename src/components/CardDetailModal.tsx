@@ -33,6 +33,7 @@ import CardOptionsMenu from './CardOptionsMenu';
 import MoveCardPopover from './MoveCardPopover';
 import Popover from './ui/Popover';
 import SmartPopover from './SmartPopover';
+import UserAvatar from './ui/UserAvatar';
 import CardModalSkeleton from './ui/CardModalSkeleton';
 
 
@@ -127,12 +128,16 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         ]);
         
         setBoardLabels(labelsRes.data.labels);
-        setBoardMembers(membersRes.data.members.map(m => ({
+        const mappedMembers = membersRes.data.members.map(m => ({
           id: m.user.id,
           name: m.user.name,
           email: m.user.email,
+          avatarUrl: m.user.avatarUrl,
           initials: (m.user.name || 'U').charAt(0).toUpperCase()
-        })));
+        }));
+        
+        console.log('[DEBUG] Mapped Members:', mappedMembers);
+        setBoardMembers(mappedMembers);
       } catch (err) {
         console.error('Error fetching board data:', err);
       }
@@ -173,7 +178,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       
       setCard(mappedCard);
       setSelectedLabelIds(normalizedLabels.map((l: any) => l.id));
-      setAssignedMemberIds(cardData.assignees?.map((a: any) => a.user.id) || []);
+      const assignedIds = cardData.assignees?.map((a: any) => a.user.id) || [];
+      console.log('[DEBUG] Assigned IDs:', assignedIds);
+      setAssignedMemberIds(assignedIds);
       setEditTitle(cardData.title);
       setEditDescription(cardData.description || '');
       
@@ -813,13 +820,13 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     <div 
                       key={member.id}
                       title={member.name}
-                      className="w-8 h-8 rounded-full bg-[#7A5AF8] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 cursor-help"
+                      className="w-8 h-8 rounded-full border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 cursor-help"
                     >
-                      {member.avatarUrl ? (
-                        <img src={member.avatarUrl} alt={member.name} className="w-full h-full object-cover" />
-                      ) : (
-                        member.initials
-                      )}
+                      <UserAvatar 
+                        name={member.name} 
+                        avatarUrl={member.avatarUrl} 
+                        size="sm"
+                      />
                     </div>
                   ))}
                 </div>

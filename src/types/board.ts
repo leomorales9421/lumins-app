@@ -14,7 +14,7 @@ export interface Card {
   labels?: Array<{ id: string; name: string; color: string }>;
   commentsCount?: number;
   attachmentsCount?: number;
-  assignees?: Array<{ user: { id: string; name: string; email: string } }>;
+  assignees?: Array<{ user: { id: string; name: string; email: string; avatarUrl?: string } }>;
   checklists?: Array<{
     id: string;
     items: Array<{ id: string; done: boolean }>;

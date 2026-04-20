@@ -3,6 +3,7 @@ import type { Board } from '../types/board';
 import { useNavigate } from 'react-router-dom';
 import { Layout, MoreHorizontal, Calendar, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import UserAvatar from './ui/UserAvatar';
 
 interface BoardCardProps {
   board: Board;
@@ -70,12 +71,13 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
            </div>
         </div>
 
-        {/* Footer */}
         <div className="pt-4 flex items-center justify-between border-t border-[#F0F1F3]">
           <div className="flex -space-x-2">
-             <div className="w-7 h-7 rounded-full bg-[#7A5AF8] flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-sm">
-               {user?.name?.[0] || 'U'}
-             </div>
+             <UserAvatar 
+               user={user} 
+               size="xs" 
+               className="border-2 border-white shadow-sm"
+             />
              <div className="w-7 h-7 rounded-full bg-[#EAECF0] flex items-center justify-center text-[#9CA3AF] border-2 border-white shadow-sm">
                <Users size={12} />
              </div>

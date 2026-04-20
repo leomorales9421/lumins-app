@@ -32,6 +32,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard } from '../components/dnd/SortableCard';
+import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
 import ManageBoardMembersModal from '../components/ManageBoardMembersModal';
 import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
@@ -432,11 +433,11 @@ const BoardDetailPage: React.FC = () => {
                 className="w-7 h-7 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shadow-sm"
                 title={member.user.name}
               >
-                {member.user.avatarUrl ? (
-                  <img src={member.user.avatarUrl} alt={member.user.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span>{member.user.name.charAt(0).toUpperCase()}</span>
-                )}
+                <UserAvatar 
+                  name={member.user.name} 
+                  avatarUrl={member.user.avatarUrl} 
+                  size="sm"
+                />
               </div>
             ))}
             {(board.members?.length || 0) > 3 && (
@@ -476,9 +477,11 @@ const BoardDetailPage: React.FC = () => {
                       onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
                       className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#7A5AF8] font-semibold bg-violet-50/50' : 'text-zinc-700'}`}
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#7A5AF8]/10 text-[#7A5AF8] flex items-center justify-center text-[10px] font-bold">
-                        {member.user.name.charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar 
+                        name={member.user.name} 
+                        avatarUrl={member.user.avatarUrl} 
+                        size="sm"
+                      />
                       {member.user.name}
                     </button>
                   ))}

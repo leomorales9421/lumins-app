@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import { Skeleton } from '../ui/Skeleton';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const LATAM_COUNTRIES = [
   { name: 'Argentina', code: 'AR', prefix: '+54' },
   { name: 'Bolivia', code: 'BO', prefix: '+591' },
@@ -34,7 +36,8 @@ const UserProfileForm: React.FC = () => {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    firstName: '',
+    lastName: '',
     email: user?.email || '',
     phone: user?.phone || '',
     country: user?.country || '',
@@ -43,8 +46,13 @@ const UserProfileForm: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      const nameParts = (user.name || '').trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
       setFormData({
-        name: user.name || '',
+        firstName,
+        lastName,
         email: user.email || '',
         phone: user.phone || '',
         country: user.country || '',
@@ -103,17 +111,26 @@ const UserProfileForm: React.FC = () => {
     }
 
     setAvatarUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setFormData(prev => ({ ...prev, avatarUrl: base64 }));
+    const uploadFormData = new FormData();
+    uploadFormData.append('avatar', file);
+
+    apiClient.patch<{ data: { avatarUrl: string } }>('/api/users/avatar', uploadFormData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    .then(response => {
+      const newAvatarUrl = (response.data as any).user.avatarUrl;
+      setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
+      // Actualizar el contexto de auth inmediatamente para que el NavBar y otros componentes se enteren
+      if (setUser && user) {
+        setUser({ ...user, avatarUrl: newAvatarUrl });
+      }
       setAvatarUploading(false);
-    };
-    reader.onerror = () => {
-      setAvatarError('Error al leer el archivo. Intenta de nuevo.');
+    })
+    .catch(err => {
+      console.error('Avatar upload failed', err);
+      setAvatarError('Error al subir la imagen. Intenta de nuevo.');
       setAvatarUploading(false);
-    };
-    reader.readAsDataURL(file);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,8 +138,9 @@ const UserProfileForm: React.FC = () => {
     setLoading(true);
     setSuccess(false);
     try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       const response = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', {
-        name: formData.name,
+        name: fullName,
         phone: formData.phone,
         country: formData.country,
         avatarUrl: formData.avatarUrl,
@@ -178,7 +196,15 @@ const UserProfileForm: React.FC = () => {
                 {avatarUploading ? (
                   <Loader2 size={28} className="animate-spin text-zinc-400" />
                 ) : formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  <img 
+                    src={formData.avatarUrl 
+                      ? (formData.avatarUrl.startsWith('http') || formData.avatarUrl.startsWith('data:') 
+                        ? formData.avatarUrl 
+                        : `${API_BASE_URL}${formData.avatarUrl.startsWith('/') ? '' : '/'}${formData.avatarUrl}`)
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=7A5AF8&color=fff`} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   <Camera size={32} className="text-zinc-400" />
                 )}
@@ -204,14 +230,26 @@ const UserProfileForm: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Nombre Completo</label>
+              <label className="text-sm font-bold text-zinc-700">Nombre</label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 className="w-full p-3 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
-                placeholder="Ej. Juan Pérez"
+                placeholder="Ej. Juan"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-700">Apellido</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full p-3 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
+                placeholder="Ej. Pérez"
               />
             </div>
 

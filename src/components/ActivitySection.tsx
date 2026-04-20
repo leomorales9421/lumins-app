@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Loader2 } from 'lucide-react';
 import type { ActivityItem } from '../types/activity';
+import UserAvatar from './ui/UserAvatar';
 import { useAuth } from '../contexts/AuthContext';
 import RichTextEditor from './RichTextEditor';
 import type { RichTextEditorRef } from './RichTextEditor';
@@ -133,16 +134,13 @@ const ActivityFeedItem: React.FC<{
 
   return (
     <div className="flex items-start gap-3 mb-6 relative group">
-      <div 
-        className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm ring-2 ring-white
-          ${isSystem ? 'bg-slate-200 text-slate-600' : 'bg-[#7A5AF8]'}
-        `}
-      >
-        {item.user.avatarUrl ? (
-          <img src={item.user.avatarUrl} alt={item.user.name} className="w-full h-full rounded-full object-cover" />
-        ) : (
-          (item.user.name || 'U').charAt(0).toUpperCase()
-        )}
+      <div className="shrink-0">
+        <UserAvatar 
+          name={item.user.name} 
+          avatarUrl={item.user.avatarUrl} 
+          size="sm"
+          className={`ring-2 ring-white shadow-sm ${isSystem ? 'opacity-70' : ''}`}
+        />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col items-start">
