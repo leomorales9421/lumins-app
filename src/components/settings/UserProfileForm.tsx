@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
+import { Skeleton } from '../ui/Skeleton';
 
 const LATAM_COUNTRIES = [
   { name: 'Argentina', code: 'AR', prefix: '+54' },
@@ -27,8 +28,11 @@ const LATAM_COUNTRIES = [
 ];
 
 const UserProfileForm: React.FC = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -72,30 +76,94 @@ const UserProfileForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // If country changed, update prefix if phone is empty or just a prefix
     if (name === 'country') {
       const country = LATAM_COUNTRIES.find(c => c.name === value);
       if (country && (!formData.phone || formData.phone.startsWith('+'))) {
-        setFormData(prev => ({ ...prev, phone: country.prefix }));
+        setFormData(prev => ({ ...prev, country: value, phone: country.prefix }));
       }
     }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarError('');
+
+    // Validate type
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      setAvatarError('Solo se permiten imágenes JPG, PNG, GIF o WebP.');
+      return;
+    }
+
+    // Validate size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError('La imagen no puede superar los 2MB.');
+      return;
+    }
+
+    setAvatarUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setFormData(prev => ({ ...prev, avatarUrl: base64 }));
+      setAvatarUploading(false);
+    };
+    reader.onerror = () => {
+      setAvatarError('Error al leer el archivo. Intenta de nuevo.');
+      setAvatarUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
     try {
-      const response = await apiClient.patch('/api/auth/me', formData);
+      const response = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', {
+        name: formData.name,
+        phone: formData.phone,
+        country: formData.country,
+        avatarUrl: formData.avatarUrl,
+      });
       if (setUser) {
-        setUser(response.data.data.user);
+        setUser(response.data.user);
       }
-      // Show success toast?
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error('Update profile failed', err);
     } finally {
       setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden p-8 space-y-6">
+        <Skeleton className="h-7 w-48 mb-6" />
+        <div className="flex items-center gap-6 mb-8">
+          <Skeleton className="w-24 h-24 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-40" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-11 w-full" />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end pt-6 border-t border-zinc-100">
+          <Skeleton className="h-11 w-36" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
@@ -107,20 +175,30 @@ const UserProfileForm: React.FC = () => {
           <div className="flex items-center gap-6 mb-8">
             <div className="relative group">
               <div className="w-24 h-24 rounded-full bg-[#F4F6F9] border-2 border-dashed border-zinc-300 flex items-center justify-center overflow-hidden">
-                {formData.avatarUrl ? (
+                {avatarUploading ? (
+                  <Loader2 size={28} className="animate-spin text-zinc-400" />
+                ) : formData.avatarUrl ? (
                   <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <Camera size={32} className="text-zinc-400" />
                 )}
               </div>
-              <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
-                <input type="file" className="hidden" accept="image/*" />
-                <span className="text-xs font-bold">Cambiar</span>
-              </label>
+              {!avatarUploading && (
+                <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleAvatarChange}
+                  />
+                  <span className="text-xs font-bold">Cambiar</span>
+                </label>
+              )}
             </div>
             <div>
               <p className="font-bold text-zinc-900">Tu Avatar</p>
               <p className="text-sm text-zinc-500">JPG, GIF o PNG. Máximo 2MB.</p>
+              {avatarError && <p className="text-xs text-red-500 mt-1">{avatarError}</p>}
             </div>
           </div>
 
@@ -179,10 +257,17 @@ const UserProfileForm: React.FC = () => {
             </div>
           </div>
 
+          {success && (
+            <div className="flex items-center gap-2 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg border border-green-100">
+              <CheckCircle2 size={16} />
+              ¡Perfil actualizado correctamente!
+            </div>
+          )}
+
           <div className="pt-6 border-t border-zinc-100 flex justify-end">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || avatarUploading}
               className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-purple-200 disabled:opacity-50"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}

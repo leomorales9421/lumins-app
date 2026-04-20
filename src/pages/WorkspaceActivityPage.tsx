@@ -11,7 +11,9 @@ import {
   ChevronDown,
   Activity,
   User,
-  Info
+  Info,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -54,6 +56,11 @@ const WorkspaceActivityPage: React.FC = () => {
   
   const [boards, setBoards] = useState<{id: string, name: string}[]>([]);
   const [members, setMembers] = useState<{id: string, name: string}[]>([]);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 20;
 
   const fetchActivity = useCallback(async () => {
     if (!workspaceId) return;
@@ -64,16 +71,21 @@ const WorkspaceActivityPage: React.FC = () => {
       if (filterUser) params.append('userId', filterUser);
       if (filterType) params.append('type', filterType);
       
-      const response = await apiClient.get<{ data: { activity: CardEvent[] } }>(
+      const skip = (currentPage - 1) * itemsPerPage;
+      params.append('limit', itemsPerPage.toString());
+      params.append('skip', skip.toString());
+      
+      const response = await apiClient.get<{ data: { activity: CardEvent[], total: number } }>(
         `/api/workspaces/${workspaceId}/activity?${params.toString()}`
       );
       setActivity(response.data.activity);
+      setTotalItems(response.data.total);
     } catch (err) {
       console.error('Failed to fetch activity', err);
     } finally {
       setIsLoading(false);
     }
-  }, [workspaceId, filterBoard, filterUser, filterType]);
+  }, [workspaceId, filterBoard, filterUser, filterType, currentPage]);
 
   const fetchFiltersData = useCallback(async () => {
     if (!workspaceId) return;
@@ -94,6 +106,13 @@ const WorkspaceActivityPage: React.FC = () => {
   useEffect(() => {
     fetchFiltersData();
   }, [fetchFiltersData]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterBoard, filterUser, filterType]);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -261,6 +280,64 @@ const WorkspaceActivityPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Pagination UI */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm mt-8">
+                    <div className="text-xs font-medium text-zinc-500">
+                      Mostrando <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, totalItems)}</span> de <span className="font-bold text-zinc-900">{totalItems}</span> eventos
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1 || isLoading}
+                        className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      
+                      <div className="flex items-center gap-1">
+                        {[...Array(totalPages)].map((_, i) => {
+                          const pageNum = i + 1;
+                          // Show only current, first, last, and neighbors
+                          if (
+                            pageNum === 1 || 
+                            pageNum === totalPages || 
+                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                          ) {
+                            return (
+                              <button
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                                  currentPage === pageNum 
+                                    ? 'bg-[#7A5AF8] text-white shadow-md shadow-[#7A5AF8]/20' 
+                                    : 'text-zinc-500 hover:bg-zinc-100'
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          } else if (
+                            pageNum === currentPage - 2 || 
+                            pageNum === currentPage + 2
+                          ) {
+                            return <span key={pageNum} className="text-zinc-400 text-xs px-1">...</span>;
+                          }
+                          return null;
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages || isLoading}
+                        className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -20,6 +20,38 @@ import ProfileSettings from './pages/settings/ProfileSettings';
 import SecuritySettings from './pages/settings/SecuritySettings';
 import NotificationSettings from './pages/settings/NotificationSettings';
 import PreferenceSettings from './pages/settings/PreferenceSettings';
+import { useEffect, useState } from 'react';
+import apiClient from './lib/api-client';
+
+const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const performRedirect = async () => {
+      try {
+        const response = await apiClient.get<{ data: { workspaces: { id: string }[] } }>('/api/workspaces');
+        const workspaces = response.data.workspaces || [];
+        
+        if (workspaces.length > 0) {
+          const lastId = localStorage.getItem('lastActiveWorkspaceId');
+          const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
+          navigate(`/w/${targetId}/${to}`, { replace: true });
+        } else {
+          navigate('/app', { replace: true });
+        }
+      } catch (err) {
+        navigate('/app', { replace: true });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    performRedirect();
+  }, [navigate, to]);
+
+  return null;
+};
 
 function App() {
   return (
@@ -88,6 +120,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
+              <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
+              <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
 
               <Route
                 path="/boards/:id"

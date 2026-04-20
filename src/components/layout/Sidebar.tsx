@@ -37,7 +37,8 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
 );
 
 const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace }) => {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId: urlWorkspaceId } = useParams<{ workspaceId: string }>();
+  const workspaceId = urlWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (

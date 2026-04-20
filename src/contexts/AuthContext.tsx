@@ -10,6 +10,9 @@ interface User {
   phone?: string;
   avatarUrl?: string;
   country?: string;
+  theme?: string;
+  language?: string;
+  notificationPrefs?: Record<string, boolean> | string;
 }
 
 interface AuthContextType {

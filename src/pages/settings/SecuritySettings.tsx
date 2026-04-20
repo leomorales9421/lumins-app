@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
-import { Shield, Key, Monitor, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Key, Monitor, Save, Loader2, CheckCircle2, Smartphone, Trash2, AlertTriangle } from 'lucide-react';
 import apiClient from '../../lib/api-client';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+interface Session {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
+}
 
 const SecuritySettings: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -11,6 +21,28 @@ const SecuritySettings: React.FC = () => {
     newPassword: '',
     confirmPassword: '',
   });
+
+  // Sessions state
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [sessionError, setSessionError] = useState('');
+
+  const fetchSessions = async () => {
+    setSessionsLoading(true);
+    try {
+      const res = await apiClient.get<{ data: { sessions: Session[] } }>('/api/auth/sessions');
+      setSessions(res.data.sessions);
+    } catch (err) {
+      console.error('Failed to fetch sessions', err);
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -33,10 +65,24 @@ const SecuritySettings: React.FC = () => {
       });
       setSuccess(true);
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    setRevokingId(sessionId);
+    setSessionError('');
+    try {
+      await apiClient.delete(`/api/auth/sessions/${sessionId}`);
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+    } catch (err) {
+      setSessionError('No se pudo cerrar la sesión. Inténtalo de nuevo.');
+    } finally {
+      setRevokingId(null);
     }
   };
 
@@ -122,28 +168,72 @@ const SecuritySettings: React.FC = () => {
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
             <Monitor size={20} />
           </div>
-          <h3 className="text-xl font-bold text-zinc-900">Sesiones Activas</h3>
+          <div>
+            <h3 className="text-xl font-bold text-zinc-900">Sesiones Activas</h3>
+            <p className="text-sm text-zinc-500">Dispositivos con acceso a tu cuenta.</p>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 bg-slate-50/50">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-zinc-400 border border-zinc-100">
-                <Monitor size={24} />
-              </div>
-              <div>
-                <p className="font-bold text-zinc-900">Chrome en Windows</p>
-                <p className="text-sm text-zinc-500">Sesión actual • Buenos Aires, AR</p>
-              </div>
-            </div>
-            <span className="text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full uppercase tracking-wider">
-              En Línea
-            </span>
+        {sessionError && (
+          <div className="flex items-center gap-2 text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 mb-4">
+            <AlertTriangle size={16} />
+            {sessionError}
           </div>
-          
-          <p className="text-sm text-zinc-500 text-center py-2">
-            Solo puedes ver tus sesiones actuales por ahora.
-          </p>
+        )}
+
+        <div className="space-y-3">
+          {sessionsLoading ? (
+            <>
+              {[1, 2, 3].map(i => (
+                <Skeleton key={i} className="h-16 w-full rounded-xl" />
+              ))}
+            </>
+          ) : sessions.length === 0 ? (
+            <p className="text-sm text-zinc-500 text-center py-4">No se encontraron sesiones activas.</p>
+          ) : (
+            sessions.map(session => (
+              <div
+                key={session.id}
+                className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 bg-slate-50/50 gap-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-zinc-400 border border-zinc-100 flex-shrink-0">
+                    <Smartphone size={20} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-zinc-900 text-sm">
+                      Sesión iniciada el{' '}
+                      {format(new Date(session.createdAt), "d 'de' MMMM, yyyy", { locale: es })}
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      Expira el {format(new Date(session.expiresAt), "d 'de' MMMM, yyyy", { locale: es })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {session.isCurrent ? (
+                    <span className="text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full uppercase tracking-wider">
+                      En Línea
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleRevokeSession(session.id)}
+                      disabled={revokingId === session.id}
+                      className="flex items-center gap-1.5 text-rose-500 hover:bg-rose-50 rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-50"
+                    >
+                      {revokingId === session.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
+                      Cerrar sesión
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
     </div>
