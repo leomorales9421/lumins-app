@@ -1,9 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { X, Layout, Trash2, Save, AlertCircle, ChevronRight, Settings, CheckCircle2 } from 'lucide-react';
+import { X, Layout, Trash2, Save, AlertCircle, ChevronRight, Settings, CheckCircle2, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
+import { Skeleton } from './ui/Skeleton';
 import apiClient from '../lib/api-client';
 import { useNavigate } from 'react-router-dom';
+
+const CACHE_KEY = 'luminous_board_bg_cache';
+
+const ImageOption = ({ img, currentBackground, onSelect }: any) => {
+  const thumbUrl = `https://picsum.photos/id/${img.id}/200/150`;
+  const fullUrl = `https://picsum.photos/id/${img.id}/2560/1440`;
+  const isActive = currentBackground === fullUrl;
+
+  // TRUCO PRO: Pre-cargar la alta resolución cuando el usuario pone el mouse encima
+  const handleMouseEnter = () => {
+    const imgPreload = new Image();
+    imgPreload.src = fullUrl;
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(fullUrl)}
+      onMouseEnter={handleMouseEnter}
+      className={`relative w-full h-16 rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.03] group ${
+        isActive ? 'border-[#7A5AF8] shadow-md ring-4 ring-violet-50' : 'border-transparent hover:border-zinc-300'
+      }`}
+    >
+      {/* Skeleton de fondo color sólido mientras carga la imagen */}
+      <div className="absolute inset-0 bg-zinc-200 animate-pulse -z-10" />
+      
+      {/* Imagen con lazy loading */}
+      <img 
+        src={thumbUrl} 
+        alt={`Fondo ${img.id}`} 
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+
+      {isActive && (
+        <div className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow-sm z-10">
+          <CheckCircle2 size={12} className="text-[#7A5AF8]" />
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+         <span className="text-[10px] font-bold text-white bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
+           Seleccionar
+         </span>
+      </div>
+    </button>
+  );
+};
 
 interface BoardSettingsSlideOverProps {
   isOpen: boolean;
@@ -53,6 +102,37 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  const [apiImages, setApiImages] = useState<any[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        // 1. Revisar Caché local
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          setApiImages(JSON.parse(cached));
+          setIsLoadingImages(false);
+          return;
+        }
+
+        // 2. Si no hay caché, llamar a la API
+        const res = await fetch('https://picsum.photos/v2/list?page=3&limit=12');
+        const data = await res.json();
+        
+        // 3. Guardar en estado y en caché
+        setApiImages(data);
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (error) {
+        console.error("Error al cargar imágenes", error);
+      } finally {
+        setIsLoadingImages(false);
+      }
+    };
+    
+    fetchImages();
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -193,35 +273,66 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 </Button>
               </form>
 
-              <div className="pt-4 border-t border-zinc-100">
-                <h3 className="text-[12px] font-bold text-zinc-400 uppercase tracking-wider mb-4 ml-1">Fondo del Tablero</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {BOARD_BACKGROUNDS.map((bg) => (
-                    <button
-                      key={bg.id}
-                      onClick={() => handleBackgroundChange(bg.value)}
-                      className={`
-                        w-full h-16 rounded-xl cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
-                        ${bg.value}
-                        ${(board.background === bg.value || (!board.background && bg.id === 'default')) 
-                          ? 'border-[#7A5AF8] shadow-md ring-4 ring-violet-50' 
-                          : 'border-transparent hover:border-zinc-300'
-                        }
-                      `}
-                      title={bg.name}
-                    >
-                      {(board.background === bg.value || (!board.background && bg.id === 'default')) && (
-                        <div className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow-sm">
-                          <CheckCircle2 size={12} className="text-[#7A5AF8]" />
+              <div className="pt-4 border-t border-zinc-100 space-y-6">
+                <div>
+                  <h3 className="text-[12px] font-bold text-zinc-400 uppercase tracking-wider mb-4 ml-1">Colores y Gradientes</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {BOARD_BACKGROUNDS.map((bg) => (
+                      <button
+                        key={bg.id}
+                        type="button"
+                        onClick={() => handleBackgroundChange(bg.value)}
+                        className={`
+                          w-full h-16 rounded-xl cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
+                          ${bg.value}
+                          ${(board.background === bg.value || (!board.background && bg.id === 'default')) 
+                            ? 'border-[#7A5AF8] shadow-md ring-4 ring-violet-50' 
+                            : 'border-transparent hover:border-zinc-300'
+                          }
+                        `}
+                        title={bg.name}
+                      >
+                        {(board.background === bg.value || (!board.background && bg.id === 'default')) && (
+                          <div className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow-sm z-10">
+                            <CheckCircle2 size={12} className="text-[#7A5AF8]" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                           <span className="text-[10px] font-bold text-white bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                             {bg.name}
+                           </span>
                         </div>
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                         <span className="text-[10px] font-bold text-white bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
-                           {bg.name}
-                         </span>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-4 ml-1">
+                    <h3 className="text-[12px] font-bold text-zinc-400 uppercase tracking-wider">Galería de Fotos</h3>
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-100 text-zinc-500">
+                      <ImageIcon size={10} />
+                      <span className="text-[10px] font-bold">Unsplash / Picsum</span>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2">
+                    {isLoadingImages ? (
+                      // Skeletons iniciales
+                      Array.from({ length: 12 }).map((_, i) => (
+                        <Skeleton key={i} className="w-full h-16 rounded-xl" />
+                      ))
+                    ) : (
+                      apiImages.map((img) => (
+                        <ImageOption 
+                          key={img.id} 
+                          img={img} 
+                          currentBackground={board.background} 
+                          onSelect={handleBackgroundChange} 
+                        />
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

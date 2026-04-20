@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import NavBar from './NavBar';
@@ -28,6 +28,48 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
+  const location = useLocation();
+  const isBoardView = location.pathname.startsWith('/boards/');
+  const [boardBackground, setBoardBackground] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoadingBg, setIsLoadingBg] = useState(false);
+
+  useEffect(() => {
+    const handleBgChange = (e: any) => {
+      const newBg = e.detail.background;
+      
+      if (newBg?.startsWith('http')) {
+        setIsLoadingBg(true);
+        const img = new Image();
+        img.src = newBg;
+        img.onload = () => {
+          setBoardBackground(newBg);
+          setIsLoadingBg(false);
+        };
+        img.onerror = () => {
+          setBoardBackground(newBg);
+          setIsLoadingBg(false);
+        };
+      } else {
+        setBoardBackground(newBg);
+        setIsLoadingBg(false);
+      }
+    };
+    const handleToggleSidebar = () => {
+      setIsSidebarOpen(prev => !prev);
+    };
+    window.addEventListener('set-board-background', handleBgChange);
+    window.addEventListener('toggle-sidebar', handleToggleSidebar);
+    return () => {
+      window.removeEventListener('set-board-background', handleBgChange);
+      window.removeEventListener('toggle-sidebar', handleToggleSidebar);
+    };
+  }, []);
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   const fetchWorkspaces = useCallback(async () => {
     try {
@@ -81,11 +123,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <>
-      <div className="flex flex-1 h-screen overflow-hidden">
-        <Sidebar onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} />
-        
-        <div className="flex-1 flex flex-col min-w-0">
+    <div 
+      className={`flex flex-1 h-screen overflow-hidden transition-all duration-700 ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
+      style={isBoardView && boardBackground?.startsWith('http') ? { 
+        backgroundImage: `url(${boardBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      } : {}}
+    >
+      {/* Background Loader Overlay */}
+      {isBoardView && isLoadingBg && (
+        <div className="fixed inset-0 z-[150] bg-black/20 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4" />
+          <p className="text-white font-bold text-sm tracking-widest uppercase">Optimizando Fondo...</p>
+        </div>
+      )}
+      {/* Sidebar - Conditional behavior */}
+      <Sidebar 
+        onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
+        isFloating={isBoardView}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ${isBoardView ? 'pl-0' : ''}`}>
+        {!isBoardView && (
           <NavBar 
             user={user} 
             logout={logout} 
@@ -93,11 +157,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
             canCreateBoard={canCreateBoard}
           />
-          
-          <main className="flex-1 overflow-y-auto custom-scrollbar">
-            {children}
-          </main>
-        </div>
+        )}
+        
+        <main className={`flex-1 overflow-y-auto custom-scrollbar ${isBoardView ? 'h-screen' : ''}`}>
+          {children}
+        </main>
       </div>
 
       <CreateWorkspaceModal 
@@ -113,7 +177,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         workspaces={workspaces}
         defaultWorkspaceId={workspaceId}
       />
-    </>
+    </div>
   );
 };
 

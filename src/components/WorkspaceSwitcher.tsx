@@ -15,9 +15,10 @@ interface Workspace {
 interface WorkspaceSwitcherProps {
   onCreateClick: () => void;
   isCollapsed?: boolean;
+  isFloating?: boolean;
 }
 
-const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, isCollapsed }) => {
+const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, isCollapsed, isFloating }) => {
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -155,17 +156,17 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
         <button 
           onClick={() => setIsOpen(!isOpen)}
           title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-2 mt-4 rounded-xl hover:bg-slate-50 transition-all group w-full`}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-2 mt-4 rounded-xl transition-all group w-full ${isFloating ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
         >
           <div className="w-8 h-8 rounded-lg bg-[#7A5AF8] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
             {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
           </div>
           
           <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-3'}`}>
-            <span className="text-sm font-bold text-zinc-900 truncate">
+            <span className={`text-sm font-bold truncate ${isFloating ? 'text-white' : 'text-zinc-900'}`}>
               {currentWorkspace?.name || 'Sin Espacios'}
             </span>
-            <ChevronDown size={16} className="text-zinc-500 min-w-[16px]" />
+            <ChevronDown size={16} className={`${isFloating ? 'text-white/50' : 'text-zinc-500'} min-w-[16px]`} />
           </div>
         </button>
       }

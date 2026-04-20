@@ -86,7 +86,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       ref={setNodeRef}
       style={style}
       className={`
-        cu-column h-fit max-h-full flex flex-col min-w-[280px] max-w-[280px] flex-shrink-0 transition-all
+        cu-column h-fit max-h-full flex flex-col min-w-[300px] max-w-[300px] flex-shrink-0 transition-all
+        bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md rounded-2xl border border-white/20 p-4
         ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
         ${isDraggingCardOver ? 'ring-2 ring-[#7A5AF8]/30 ring-offset-1' : ''}
       `}
@@ -95,7 +96,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       <div
         {...attributes}
         {...listeners}
-        className="cu-column-header px-3 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
+        className="px-1 py-2 mb-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-2 flex-1 overflow-hidden">
           {isEditingTitle ? (
@@ -110,13 +111,13 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
             </form>
           ) : (
             <h3
-              className="font-semibold text-[#1A1A2E] text-[13px] truncate cursor-text hover:text-[#7A5AF8] transition-colors"
+              className="font-bold text-[#1A1A2E] dark:text-white text-[14px] truncate cursor-text hover:text-[#7A5AF8] transition-colors"
               onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
             >
               {list.name || list.title}
             </h3>
           )}
-          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#F0F1F3] text-[#6B7280] text-[10px] font-bold">
+          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/50 text-[#6B7280] text-[10px] font-bold">
             {cards.length}
           </span>
         </div>
@@ -125,7 +126,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
           {/* Quick add card */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsAddingCard(true); }}
-            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-[#F0F1F3] transition-colors"
+            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-white transition-colors"
             title="Añadir tarjeta"
           >
             <Plus size={15} strokeWidth={2.5} />
@@ -134,7 +135,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
           {/* Column options */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
-            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#1A1A2E] hover:bg-[#F0F1F3] transition-colors"
+            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#1A1A2E] hover:bg-white transition-colors"
           >
             <MoreHorizontal size={15} strokeWidth={2.5} />
           </button>
@@ -172,7 +173,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       </div>
 
       {/* Cards */}
-      <div className="overflow-y-auto flex flex-col gap-1.5 min-h-0 cu-scrollbar px-2 py-1.5">
+      <div className="overflow-y-auto flex flex-col gap-2 min-h-0 custom-scrollbar px-0.5 py-1">
         <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
             <SortableCard
@@ -222,9 +223,9 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         ) : (
           <button
             onClick={() => setIsAddingCard(true)}
-            className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-[#F0F1F3] transition-all text-[12px] font-medium group"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[#6B7280] hover:text-[#7A5AF8] hover:bg-white/50 transition-all text-[13px] font-bold group mt-2"
           >
-            <Plus size={14} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+            <Plus size={16} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
             Añadir tarjeta
           </button>
         )}

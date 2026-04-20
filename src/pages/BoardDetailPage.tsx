@@ -11,7 +11,8 @@ import {
   Settings, 
   Plus, 
   Search,
-  MoreHorizontal
+  MoreHorizontal,
+  Menu
 } from 'lucide-react';
 
 import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
@@ -97,6 +98,15 @@ const BoardDetailPage: React.FC = () => {
 
   useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
 
+  // Sync background with MainLayout whenever it changes
+  useEffect(() => {
+    if (board?.background) {
+      window.dispatchEvent(new CustomEvent('set-board-background', { 
+        detail: { background: board.background } 
+      }));
+    }
+  }, [board?.background]);
+
   // Handle opening card from URL on initial load
   useEffect(() => {
     const cardId = searchParams.get('cardId');
@@ -111,6 +121,10 @@ const BoardDetailPage: React.FC = () => {
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('cardId');
     setSearchParams(newParams, { replace: true });
+  };
+
+  const toggleSidebar = () => {
+    window.dispatchEvent(new CustomEvent('toggle-sidebar'));
   };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -370,29 +384,36 @@ const BoardDetailPage: React.FC = () => {
   if (!board) return null;
 
   return (
-    <div className="flex flex-col h-full bg-[#F4F6F9] font-sans">
+    <div className="flex flex-col h-full font-sans">
       
-      {/* Board Header (Sub-navigation) */}
-      <header className="h-[60px] bg-white border-b border-zinc-200 px-6 flex items-center justify-between flex-shrink-0 z-20">
-        {/* Left Side: Breadcrumbs and Title */}
+      {/* Board Header (Sub-navigation) - Glassmorphism */}
+      <header className="h-16 bg-white/20 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20">
+        {/* Left Side: Hamburger, Breadcrumbs and Title */}
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
+            className="p-2 mr-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all border border-white/10"
+          >
+            <Menu size={20} />
+          </button>
+
           <Link 
             to={`/w/${board.workspaceId}/dashboard`} 
-            className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+            className="flex items-center gap-1 text-sm text-white/70 hover:text-white transition-colors"
           >
             <ChevronLeft size={16} />
             Tableros
           </Link>
-          <span className="text-zinc-300 text-lg">/</span>
+          <span className="text-white/30 text-lg">/</span>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-[#7A5AF8] flex items-center justify-center text-white shadow-sm">
+            <div className="w-8 h-8 rounded-md bg-[#7A5AF8] flex items-center justify-center text-white shadow-sm border border-white/10">
               <span className="font-bold text-xs">{board.name.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-zinc-900">{board.name}</h1>
+                <h1 className="text-lg font-bold text-white drop-shadow-sm">{board.name}</h1>
                 {isSaving && (
-                  <span className="text-[10px] font-semibold text-[#7A5AF8] bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full animate-pulse">
+                  <span className="text-[10px] font-semibold text-white bg-white/10 border border-white/10 px-2 py-0.5 rounded-full animate-pulse">
                     Guardando...
                   </span>
                 )}
@@ -408,7 +429,7 @@ const BoardDetailPage: React.FC = () => {
             {board.members?.slice(0, 3).map((member) => (
               <div 
                 key={member.userId} 
-                className="w-7 h-7 rounded-full border-2 border-white bg-zinc-200 flex items-center justify-center text-[10px] font-bold text-zinc-600 overflow-hidden shadow-sm"
+                className="w-7 h-7 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shadow-sm"
                 title={member.user.name}
               >
                 {member.user.avatarUrl ? (
@@ -419,7 +440,7 @@ const BoardDetailPage: React.FC = () => {
               </div>
             ))}
             {(board.members?.length || 0) > 3 && (
-              <div className="w-7 h-7 rounded-full border-2 border-white bg-zinc-100 flex items-center justify-center text-[10px] font-bold text-zinc-600 shadow-sm">
+              <div className="w-7 h-7 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                 +{(board.members?.length || 0) - 3}
               </div>
             )}
@@ -430,8 +451,8 @@ const BoardDetailPage: React.FC = () => {
               onClick={() => setIsFiltersOpen(!isFiltersOpen)}
               className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium transition-all shadow-sm ${
                 filterUserId || isFiltersOpen 
-                  ? 'bg-violet-50 border-violet-200 text-[#7A5AF8]' 
-                  : 'bg-white border-zinc-200 text-zinc-700 hover:bg-slate-50'
+                  ? 'bg-white/20 border-white/40 text-white' 
+                  : 'bg-white/10 border-white/10 text-white hover:bg-white/20'
               }`}
             >
               <Filter size={16} />
@@ -476,7 +497,7 @@ const BoardDetailPage: React.FC = () => {
 
           <button 
             onClick={() => setIsSettingsDrawerOpen(true)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-[#F4F6F9] text-[#6C5DD3] hover:bg-[#E5EAF2] text-sm font-bold transition-all"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 text-white hover:bg-white/20 text-sm font-bold transition-all border border-white/10"
           >
             <Settings size={16} />
             Configuración
@@ -485,7 +506,7 @@ const BoardDetailPage: React.FC = () => {
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className={`flex-1 h-[calc(100vh-130px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-6 transition-all duration-500 ${board.background || 'bg-[#F4F6F9]'}`}>
+      <main className="flex-1 h-[calc(100vh-130px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-8 transition-all duration-500 bg-transparent">
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 
