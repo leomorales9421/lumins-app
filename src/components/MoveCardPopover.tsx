@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
-import { useNotificationHelpers } from './NotificationProvider';
+import { toast } from 'sonner';
+
 
 interface Board {
   id: string;
@@ -31,7 +32,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
   onClose,
   onMoveSuccess,
 }) => {
-  const { showSuccess } = useNotificationHelpers();
+
   const [boards, setBoards] = useState<Board[]>([]);
   const [lists, setLists] = useState<List[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +99,10 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
         newPosition: targetPosition,
       });
 
-      showSuccess('Tarjeta movida', 'La tarjeta se ha movido correctamente.');
+      toast.success('Tarjeta movida', {
+        description: 'La tarjeta se ha movido correctamente.'
+      });
+
       onMoveSuccess(selectedBoardId !== currentBoardId);
       onClose();
     } catch (err) {

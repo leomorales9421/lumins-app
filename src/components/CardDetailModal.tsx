@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+
 import { 
   X, 
   MoreHorizontal, 
@@ -576,9 +578,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     if (!file || !cardId) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('El archivo es demasiado grande (máx 10MB)');
+      toast.error('Archivo demasiado grande', {
+        description: 'El archivo es demasiado grande (máx 10MB)'
+      });
       return;
     }
+
 
     const formData = new FormData();
     formData.append('file', file);

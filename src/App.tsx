@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { NotificationProvider, NotificationContainer } from './components/NotificationProvider';
+import { NotificationProvider } from './components/NotificationProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 import LoginPage from './pages/LoginPage';
@@ -22,6 +22,7 @@ import NotificationSettings from './pages/settings/NotificationSettings';
 import PreferenceSettings from './pages/settings/PreferenceSettings';
 import { useEffect, useState } from 'react';
 import apiClient from './lib/api-client';
+import { GlobalToaster } from './components/GlobalToaster';
 
 const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
     performRedirect();
   }, [navigate, to]);
 
+  if (loading) return null;
   return null;
 };
 
@@ -156,7 +158,7 @@ function App() {
               <Route path="/" element={<Navigate to="/app" replace />} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
-            <NotificationContainer />
+            <GlobalToaster />
           </PageTransitionWrapper>
         </NotificationProvider>
       </AuthProvider>

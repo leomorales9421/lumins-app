@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -269,7 +271,10 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error al subir la imagen. Verifica la conexión con el servidor.');
+      toast.error('Error al subir imagen', {
+        description: 'Verifica la conexión con el servidor.'
+      });
+
     } finally {
       setIsUploading(false);
     }

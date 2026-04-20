@@ -15,7 +15,9 @@ import {
   Menu
 } from 'lucide-react';
 
-import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
+import { toast } from 'sonner';
+import { useStructuredLogger } from '../components/NotificationProvider';
+
 import { 
   DndContext, 
   closestCorners, 
@@ -59,8 +61,8 @@ const BoardDetailPage: React.FC = () => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-  const { showError, showSuccess } = useNotificationHelpers();
   const { logSuccess } = useStructuredLogger();
+
   
   const listsRef = useRef<List[]>(lists);
   useEffect(() => {
@@ -228,7 +230,8 @@ const BoardDetailPage: React.FC = () => {
             lists: newListsOrder.map((l, index) => ({ id: l.id, position: (index + 1) * 1000 }))
           });
         } catch (err) {
-          showError('Error', 'No se pudo guardar el nuevo orden de las listas');
+          toast.error('Error', { description: 'No se pudo guardar el nuevo orden de las listas' });
+
           fetchBoard();
         } finally {
           setIsSaving(false);
@@ -285,7 +288,8 @@ const BoardDetailPage: React.FC = () => {
       }
       logSuccess('Card moved', 'Sync complete');
     } catch (err) {
-      showError('Error', 'No se pudo guardar el movimiento de la tarjeta');
+      toast.error('Error', { description: 'No se pudo guardar el movimiento de la tarjeta' });
+
       fetchBoard();
     } finally {
       setIsSaving(false);
