@@ -124,7 +124,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div 
-      className={`flex flex-1 h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
+      className={`flex h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
       style={isBoardView && boardBackground?.startsWith('http') ? { 
         backgroundImage: `url(${boardBackground})`,
         backgroundSize: 'cover',
@@ -154,20 +154,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           isFloating={isBoardView}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          logout={logout}
         />
         
-        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ${isBoardView ? 'pl-0' : ''}`}>
+        <div className="flex-1 flex flex-col min-w-0 transition-all duration-500">
           {!isBoardView && (
             <NavBar 
               user={user} 
-              logout={logout} 
               onCreateBoard={() => setShowCreateBoardModal(true)}
               onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
               canCreateBoard={canCreateBoard}
             />
           )}
           
-          <main className={`flex-1 overflow-y-auto custom-scrollbar ${isBoardView ? 'h-screen' : ''}`}>
+          <main className="flex-1 overflow-y-auto custom-scrollbar">
             {children}
           </main>
         </div>

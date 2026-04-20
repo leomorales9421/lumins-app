@@ -11,7 +11,7 @@ const AppPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col font-sans">
-      <NavBar user={user} logout={logout} />
+      <NavBar user={user} />
 
       <main className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-10">
         {/* Welcome Section */}

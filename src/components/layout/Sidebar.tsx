@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
@@ -19,6 +20,7 @@ interface SidebarProps {
   isFloating?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+  logout: () => void;
 }
 
 const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; isCollapsed: boolean; isFloating?: boolean }> = ({ to, icon, label, isCollapsed, isFloating }) => (
@@ -43,14 +45,14 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
   </NavLink>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false, isOpen = false, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false, isOpen = false, onClose, logout }) => {
   const { workspaceId: urlWorkspaceId } = useParams<{ workspaceId: string }>();
   const workspaceId = urlWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarClasses = isFloating 
     ? `fixed inset-y-0 left-0 z-[100] transition-all duration-500 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/10 w-64 shadow-2xl`
-    : `bg-white border-r border-slate-200 flex flex-col h-[calc(100vh-64px)] sticky top-16 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
+    : `bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
 
   return (
     <>
@@ -63,26 +65,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
       )}
 
       <aside className={sidebarClasses}>
-        {/* Header */}
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start gap-3'} h-16 px-4 transition-all duration-300 border-b border-slate-100 ${isFloating ? 'border-white/10' : ''}`}>
-          <div className="w-8 h-8 bg-[#7A5AF8] rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-            <Layout size={18} className="text-white" strokeWidth={2.5} />
-          </div>
-          <span className={`font-bold text-base ${isFloating ? 'text-white' : 'text-zinc-900'} transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-            Luminous
-          </span>
-          {isFloating && (
-            <button onClick={onClose} className="ml-auto text-white/50 hover:text-white transition-colors">
-              <X size={20} />
-            </button>
-          )}
-        </div>
+        {/* Brand Header Removed */}
 
-        {/* Collapse Toggle Button - Only show if not floating */}
+        {/* Collapse Toggle Button - Relocated and adjusted position */}
         {!isFloating && (
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-20 bg-white border border-zinc-200 text-zinc-500 rounded-lg p-1 cursor-pointer shadow-sm z-50 hover:bg-zinc-50 hover:text-zinc-900 transition-all"
+            className={`absolute -right-3 top-14 bg-white border border-zinc-200 text-zinc-500 rounded-lg p-1 cursor-pointer shadow-sm z-50 hover:bg-zinc-50 hover:text-zinc-900 transition-all ${isCollapsed ? 'translate-x-0' : ''}`}
           >
             {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
@@ -137,9 +126,34 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
             />
           </div>
 
-          {/* Settings — bottom */}
-          <div className={`mt-auto pt-4 border-t ${isFloating ? 'border-white/10' : 'border-slate-100'} w-full ${isCollapsed ? 'flex justify-center' : ''}`}>
-            <SidebarItem to="/settings" icon={<Settings size={17} />} label="Configuración" isCollapsed={isCollapsed} isFloating={isFloating} />
+          {/* Footer Navigation */}
+          <div className={`mt-auto pb-4 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-slate-100'} pt-4 w-full`}>
+            <SidebarItem 
+              to="/settings" 
+              icon={<Settings size={17} />} 
+              label="Configuración" 
+              isCollapsed={isCollapsed} 
+              isFloating={isFloating} 
+            />
+            
+            <button
+              onClick={logout}
+              title={isCollapsed ? "Cerrar sesión" : undefined}
+              className={`
+                flex items-center transition-colors rounded-lg p-2.5 w-full text-sm font-medium
+                text-zinc-500 hover:bg-rose-50 hover:text-rose-600 cursor-pointer
+                ${isCollapsed ? 'justify-center' : 'gap-3'}
+              `}
+            >
+              <span className={`${isCollapsed ? 'scale-110' : ''} transition-transform flex-shrink-0`}>
+                <LogOut size={17} />
+              </span>
+              {!isCollapsed && (
+                <span className="whitespace-nowrap overflow-hidden opacity-100 transition-all">
+                  Cerrar sesión
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </aside>

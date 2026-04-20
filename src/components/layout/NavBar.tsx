@@ -5,7 +5,6 @@ import GlobalCreateMenu from './GlobalCreateMenu';
 
 interface NavBarProps {
   user: any;
-  logout: () => void;
   onCreateBoard: () => void;
   onCreateWorkspace: () => void;
   canCreateBoard: boolean;
@@ -13,7 +12,6 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ 
   user, 
-  logout, 
   onCreateBoard, 
   onCreateWorkspace,
   canCreateBoard
@@ -65,16 +63,18 @@ const NavBar: React.FC<NavBarProps> = ({
 
           <div className="h-8 w-px bg-[#E8E9EC] mx-1" />
 
-          {/* User Avatar */}
-          <div className="flex items-center gap-2.5 pl-1 group cursor-pointer" onClick={logout}>
+          {/* User Profile Link */}
+          <Link 
+            to="/settings/profile" 
+            className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-lg transition-colors cursor-pointer group"
+          >
             <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#E8E9EC] group-hover:border-[#7A5AF8] transition-all shadow-sm">
                <img src={`https://i.pravatar.cc/100?u=${user?.email}`} alt="user avatar" className="w-full h-full object-cover" />
             </div>
             <div className="hidden lg:flex flex-col text-left">
                <span className="text-[12px] font-bold text-[#1A1A2E] leading-tight">{user?.name || 'Usuario'}</span>
-               <span className="text-[10px] font-medium text-[#9CA3AF] leading-tight">Admin</span>
             </div>
-          </div>
+          </Link>
         </div>
 
       </div>
