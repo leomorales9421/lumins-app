@@ -93,31 +93,31 @@ const MembersPage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full transition-colors duration-300">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-[#7A5AF8] mb-1">
+          <div className="flex items-center gap-2 text-[#6C5DD3] mb-1">
             <Users size={18} strokeWidth={2.5} />
             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Gestión de Equipo</span>
           </div>
-          <h1 className="text-3xl font-bold text-[#1A1A2E] tracking-tight">Miembros del Equipo</h1>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Miembros del Equipo</h1>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" size={16} />
             <input 
               type="text"
               placeholder="Buscar por nombre o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-[#E8E9EC] rounded-xl text-sm focus:outline-none focus:border-[#7A5AF8] transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#6C5DD3] transition-all shadow-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
             />
           </div>
-          <Button 
+           <Button 
             onClick={() => setShowInviteModal(true)}
-            className="bg-[#7A5AF8] hover:bg-[#6949F6] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-md shadow-purple-100"
+            className="bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
           >
             <UserPlus size={18} />
             <span className="hidden sm:inline">Invitar</span>
@@ -125,25 +125,25 @@ const MembersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Members List Container */}
-      <div className="bg-white rounded-2xl border border-zinc-100 shadow-xl shadow-slate-200/40 overflow-hidden">
+       {/* Members List Container */}
+      <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#F8F9FB] border-b border-zinc-100">
-              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Usuario</th>
-              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Rol en Espacio</th>
-              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Tableros</th>
+            <tr className="bg-zinc-50 dark:bg-white/5 border-b border-zinc-200 dark:border-white/10">
+              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Usuario</th>
+              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Rol en Espacio</th>
+              <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Tableros</th>
               <th className="px-6 py-4 text-right"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-50">
+          <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
             {filteredMembers.map((member, index) => (
               <motion.tr 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                key={member.id} 
-                className="hover:bg-[#F8F9FB] transition-colors cursor-pointer group"
+                 key={member.id} 
+                className="hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
                 onClick={() => setSelectedMember(member)}
               >
                 <td className="px-6 py-4">
@@ -155,9 +155,9 @@ const MembersPage: React.FC = () => {
                         className="w-full h-full" 
                       />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-[#1A1A2E]">{member.user.name}</span>
-                      <span className="text-xs text-slate-500 flex items-center gap-1">
+                     <div className="flex flex-col">
+                      <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{member.user.name}</span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                         <Mail size={12} />
                         {member.user.email}
                       </span>
@@ -175,14 +175,14 @@ const MembersPage: React.FC = () => {
                     {member.role}
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1.5 text-slate-500 group-hover:text-[#7A5AF8] transition-colors">
+                 <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 group-hover:text-[#6C5DD3] dark:group-hover:text-[#6C5DD3] transition-colors">
                     <Layout size={14} />
                     <span className="text-xs font-bold">Ver accesos</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                 <td className="px-6 py-4 text-right">
+                  <button className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all">
                     <MoreHorizontal size={18} />
                   </button>
                 </td>
@@ -192,12 +192,12 @@ const MembersPage: React.FC = () => {
         </table>
 
         {filteredMembers.length === 0 && (
-          <div className="p-20 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-[#F4F5F7] rounded-2xl flex items-center justify-center text-[#9CA3AF] mb-4">
+           <div className="p-20 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
               <Users size={32} />
             </div>
-            <h3 className="text-lg font-bold text-[#1A1A2E]">No se encontraron miembros</h3>
-            <p className="text-[#6B7280]">Intenta ajustar tu búsqueda o invita a nuevos miembros.</p>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No se encontraron miembros</h3>
+            <p className="text-zinc-500 dark:text-zinc-400">Intenta ajustar tu búsqueda o invita a nuevos miembros.</p>
           </div>
         )}
       </div>

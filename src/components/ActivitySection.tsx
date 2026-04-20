@@ -73,13 +73,13 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#7A5AF8] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#6948e5] active:scale-95 shadow-sm"
+                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#5a4cb3] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
               >
                 Guardar
               </button>
-              <button
+               <button
                 onClick={handleCancel}
-                className="text-[#806F9B] hover:text-zinc-900 text-sm font-bold px-3 transition-colors py-1.5"
+                className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm font-bold px-3 transition-colors py-1.5"
               >
                 Cancelar
               </button>
@@ -135,23 +135,22 @@ const ActivityFeedItem: React.FC<{
   return (
     <div className="flex items-start gap-3 mb-6 relative group">
       <div className="shrink-0">
-        <UserAvatar 
+         <UserAvatar 
           name={item.user.name} 
           avatarUrl={item.user.avatarUrl} 
           size="sm"
-          className={`ring-2 ring-white shadow-sm ${isSystem ? 'opacity-70' : ''}`}
+          className={`ring-2 ring-white dark:ring-[#1C1F26] shadow-sm ${isSystem ? 'opacity-70' : ''}`}
         />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col items-start">
         <div className="w-full flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-bold text-zinc-900 tracking-tight">{item.user.name}</span>
-            <span className="text-[11px] text-[#806F9B]">{relativeDate}</span>
+           <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">{item.user.name}</span>
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400">{relativeDate}</span>
           </div>
-          
-          {isSystem ? (
-            <p className="text-sm text-[#806F9B]">
+                    {isSystem ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-300">
               {item.action || 'ha realizado una acción'}
             </p>
           ) : isEditing ? (
@@ -167,22 +166,22 @@ const ActivityFeedItem: React.FC<{
               />
             </div>
           ) : (
-            <>
-              <div className="text-sm text-zinc-800 leading-relaxed break-words prose-mirror-container">
+             <>
+              <div className="text-sm text-zinc-800 dark:text-zinc-100 leading-relaxed break-words prose-mirror-container dark:prose-invert">
                 <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
               </div>
 
               {canManage && (
                 <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
+                   <button 
                     onClick={() => setIsEditing(true)}
-                    className="text-[11px] font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:underline cursor-pointer transition-colors"
+                    className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:underline cursor-pointer transition-colors"
                   >
                     Editar
                   </button>
-                  <button 
+                   <button 
                     onClick={handleDelete}
-                    className="text-[11px] font-bold text-[#806F9B] hover:text-[#E91E63] hover:underline cursor-pointer transition-colors"
+                    className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:underline cursor-pointer transition-colors"
                   >
                     Eliminar
                   </button>
@@ -218,14 +217,14 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3 text-zinc-900">
-          <MessageSquare size={20} className="text-[#7A5AF8]" />
+       <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3 text-zinc-900 dark:text-zinc-100">
+          <MessageSquare size={20} className="text-[#6C5DD3]" />
           <h3 className="text-lg font-extrabold tracking-tight">Actividad</h3>
         </div>
-        <button 
+         <button 
           onClick={() => setShowAllActivity(!showAllActivity)}
-          className="text-xs font-bold text-[#806F9B] hover:text-[#7A5AF8] hover:bg-[#F4F5F7] px-2 py-1 rounded transition-colors cursor-pointer"
+          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:bg-zinc-100 dark:hover:bg-white/5 px-2 py-1 rounded transition-colors cursor-pointer"
         >
           {showAllActivity ? 'Ocultar detalles' : 'Mostrar detalles'}
         </button>
@@ -254,10 +253,10 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
         </AnimatePresence>
         
         {hasMore && (
-          <button
+           <button
             onClick={onLoadMore}
             disabled={isFetchingMore}
-            className="w-full bg-slate-50 text-[#806F9B] text-xs font-bold py-3 mt-4 rounded-xl hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold py-3 mt-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-colors flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5"
           >
             {isFetchingMore ? (
               <>
@@ -270,9 +269,9 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
           </button>
         )}
 
-        {filteredActivities.length === 0 && (
+         {filteredActivities.length === 0 && (
           <div className="py-10 text-center">
-            <p className="text-sm text-[#806F9B] italic">No hay actividad todavía.</p>
+            <p className="text-sm text-zinc-400 dark:text-zinc-500 italic">No hay actividad todavía.</p>
           </div>
         )}
       </div>

@@ -127,17 +127,17 @@ const WorkspaceActivityPage: React.FC = () => {
 
   const getEventIconStyles = (type: string) => {
     switch (type) {
-      case 'COMMENT': return 'bg-blue-100 text-blue-600 border-blue-200';
-      case 'MOVE': return 'bg-purple-100 text-purple-600 border-purple-200';
-      case 'ATTACHMENT': return 'bg-orange-100 text-orange-600 border-orange-200';
-      case 'MEMBER': return 'bg-green-100 text-green-600 border-green-200';
-      default: return 'bg-zinc-100 text-zinc-600 border-zinc-200';
+      case 'COMMENT': return 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
+      case 'MOVE': return 'bg-purple-100 dark:bg-[#6C5DD3]/10 text-purple-600 dark:text-[#8E82E3] border-purple-200 dark:border-[#6C5DD3]/20';
+      case 'ATTACHMENT': return 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20';
+      case 'MEMBER': return 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20';
+      default: return 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/10';
     }
   };
 
   const getEventText = (event: CardEvent) => {
-    const userName = <span className="font-bold text-zinc-900">{event.user.name}</span>;
-    const cardTitle = <span className="font-bold text-zinc-900">{event.card.title}</span>;
+    const userName = <span className="font-bold text-zinc-900 dark:text-zinc-100">{event.user.name}</span>;
+    const cardTitle = <span className="font-bold text-zinc-900 dark:text-zinc-100">{event.card.title}</span>;
 
     switch (event.type) {
       case 'MOVE':
@@ -172,11 +172,11 @@ const WorkspaceActivityPage: React.FC = () => {
   const groupedActivity = groupEventsByDate(activity);
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex flex-col gap-1 mb-10">
-          <div className="flex items-center gap-2 text-[#7A5AF8] mb-1">
+          <div className="flex items-center gap-2 text-[#6C5DD3] mb-1">
             <Activity size={18} strokeWidth={2.5} />
             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Workspace Audit Log</span>
           </div>
@@ -187,8 +187,8 @@ const WorkspaceActivityPage: React.FC = () => {
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Actividad del Espacio</h1>
-              <p className="text-sm text-zinc-500 font-medium">Registro en tiempo real de todos los tableros.</p>
+              <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">Actividad del Espacio</h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Registro en tiempo real de todos los tableros.</p>
             </>
           )}
         </div>
@@ -199,7 +199,7 @@ const WorkspaceActivityPage: React.FC = () => {
             {isLoading && activity.length === 0 ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="bg-white rounded-xl border border-zinc-100 p-4 flex items-start gap-4 shadow-sm">
+                  <div key={i} className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 p-4 flex items-start gap-4 shadow-sm">
                     <Skeleton className="w-9 h-9 rounded-full flex-shrink-0" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-4 w-3/4" />
@@ -212,20 +212,20 @@ const WorkspaceActivityPage: React.FC = () => {
                 ))}
               </div>
             ) : activity.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-zinc-100 p-20 text-center flex flex-col items-center shadow-soft">
-                 <div className="w-16 h-16 bg-[#F4F5F7] rounded-2xl flex items-center justify-center text-[#9CA3AF] mb-4">
+              <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
+                 <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
                     <Clock size={32} />
                  </div>
-                 <h3 className="text-lg font-bold text-[#1A1A2E]">Sin actividad</h3>
-                 <p className="text-[#6B7280]">No se han encontrado eventos con los filtros seleccionados.</p>
+                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Sin actividad</h3>
+                 <p className="text-zinc-500 dark:text-zinc-400">No se han encontrado eventos con los filtros seleccionados.</p>
               </div>
             ) : (
               <div className="space-y-8">
                 {Object.entries(groupedActivity).map(([date, events]) => (
                   <div key={date}>
                     <div className="flex items-center gap-4 mb-4">
-                      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest bg-zinc-100 px-3 py-1 rounded-full">{date}</span>
-                      <div className="h-px flex-1 bg-zinc-200" />
+                      <span className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-3 py-1 rounded-full">{date}</span>
+                      <div className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
                     </div>
                     <div className="space-y-3">
                       {events.map((event, idx) => (
@@ -235,19 +235,19 @@ const WorkspaceActivityPage: React.FC = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.05 }}
                           onClick={() => setSelectedCard({ cardId: event.card.id, boardId: event.card.board.id })}
-                          className="bg-white rounded-xl shadow-[0_2px_10px_rgba(108,93,211,0.03)] border border-zinc-100 p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer group hover:border-[#7A5AF8]/30"
+                          className="bg-white dark:bg-[#1C1F26] rounded-xl shadow-[0_2px_10px_rgba(108,93,211,0.03)] border border-zinc-200 dark:border-white/10 p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer group hover:border-[#6C5DD3]/30"
                         >
                           <div className="shrink-0">
                             <UserAvatar 
                               name={event.user.name} 
                               avatarUrl={event.user.avatarUrl} 
                               size="sm"
-                              className="ring-1 ring-zinc-100 shadow-sm"
+                              className="ring-1 ring-zinc-100 dark:ring-white/5 shadow-sm"
                             />
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-zinc-600 leading-snug">
+                            <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-snug">
                               {getEventText(event)}
                             </p>
                             
@@ -256,23 +256,23 @@ const WorkspaceActivityPage: React.FC = () => {
                                 <div className={`flex items-center justify-center p-1 rounded-md border ${getEventIconStyles(event.type)} shadow-sm`}>
                                   {getEventIcon(event.type)}
                                 </div>
-                                <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+                                <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tight">
                                   <Clock size={10} />
                                   {formatDistanceToNow(new Date(event.createdAt), { addSuffix: true, locale: es })}
                                 </div>
                               </div>
                               
-                              <div className="h-3 w-px bg-zinc-200" />
+                              <div className="h-3 w-px bg-zinc-200 dark:bg-white/10" />
                               
-                              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#F4F6F9] rounded-md border border-zinc-100 group-hover:border-[#7A5AF8]/20 transition-colors">
-                                <Layout size={10} className="text-zinc-400 group-hover:text-[#7A5AF8] transition-colors" />
-                                <span className="text-[10px] font-bold text-zinc-500 group-hover:text-[#7A5AF8] transition-colors">{event.card.board.name}</span>
+                              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 dark:bg-white/5 rounded-md border border-zinc-200 dark:border-white/10 group-hover:border-[#6C5DD3]/20 transition-colors">
+                                <Layout size={10} className="text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
+                                <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-[#6C5DD3] transition-colors">{event.card.board.name}</span>
                               </div>
                             </div>
 
                             {event.type === 'COMMENT' && event.comment && (
-                               <div className="mt-3 p-3 bg-zinc-50 rounded-xl border border-zinc-100 text-xs text-zinc-500 italic line-clamp-2 relative overflow-hidden group-hover:bg-white transition-colors">
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#7A5AF8]/40" />
+                               <div className="mt-3 p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400 italic line-clamp-2 relative overflow-hidden group-hover:bg-white dark:group-hover:bg-[#252a33] transition-colors">
+                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6C5DD3]/40" />
                                   "{event.comment.body.replace(/<[^>]*>/g, '')}"
                                </div>
                             )}
@@ -285,15 +285,15 @@ const WorkspaceActivityPage: React.FC = () => {
 
                 {/* Pagination UI */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm mt-8">
-                    <div className="text-xs font-medium text-zinc-500">
-                      Mostrando <span className="font-bold text-zinc-900">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-zinc-900">{Math.min(currentPage * itemsPerPage, totalItems)}</span> de <span className="font-bold text-zinc-900">{totalItems}</span> eventos
+                  <div className="flex items-center justify-between bg-white dark:bg-[#1C1F26] p-4 rounded-2xl border border-zinc-200 dark:border-white/10 shadow-sm mt-8">
+                    <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Mostrando <span className="font-bold text-zinc-900 dark:text-zinc-100">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min(currentPage * itemsPerPage, totalItems)}</span> de <span className="font-bold text-zinc-900 dark:text-zinc-100">{totalItems}</span> eventos
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1 || isLoading}
-                        className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-lg border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -301,7 +301,6 @@ const WorkspaceActivityPage: React.FC = () => {
                       <div className="flex items-center gap-1">
                         {[...Array(totalPages)].map((_, i) => {
                           const pageNum = i + 1;
-                          // Show only current, first, last, and neighbors
                           if (
                             pageNum === 1 || 
                             pageNum === totalPages || 
@@ -313,8 +312,8 @@ const WorkspaceActivityPage: React.FC = () => {
                                 onClick={() => setCurrentPage(pageNum)}
                                 className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                                   currentPage === pageNum 
-                                    ? 'bg-[#7A5AF8] text-white shadow-md shadow-[#7A5AF8]/20' 
-                                    : 'text-zinc-500 hover:bg-zinc-100'
+                                    ? 'bg-[#6C5DD3] text-white shadow-md shadow-[#6C5DD3]/20' 
+                                    : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5'
                                 }`}
                               >
                                 {pageNum}
@@ -333,7 +332,7 @@ const WorkspaceActivityPage: React.FC = () => {
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages || isLoading}
-                        className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-lg border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -346,12 +345,12 @@ const WorkspaceActivityPage: React.FC = () => {
 
           {/* Filters Sidebar */}
           <div className="lg:w-[30%] w-full">
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6 sticky top-24 shadow-xl shadow-slate-200/40">
+            <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-6 sticky top-24 shadow-xl shadow-slate-200/40 dark:shadow-none">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-[#F4F5F7] rounded-lg flex items-center justify-center text-[#7A5AF8]">
+                <div className="w-8 h-8 bg-zinc-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-[#6C5DD3]">
                   <Filter size={16} />
                 </div>
-                <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Filtros</h2>
+                <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Filtros</h2>
               </div>
 
               <div className="space-y-6">
@@ -361,7 +360,7 @@ const WorkspaceActivityPage: React.FC = () => {
                     <select 
                       value={filterBoard}
                       onChange={(e) => setFilterBoard(e.target.value)}
-                      className="w-full bg-[#F4F6F9] border-none rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 focus:ring-2 focus:ring-[#7A5AF8]/20 appearance-none outline-none transition-all cursor-pointer"
+                      className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
                     >
                       <option value="">Todos los tableros</option>
                       {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -376,7 +375,7 @@ const WorkspaceActivityPage: React.FC = () => {
                     <select 
                       value={filterUser}
                       onChange={(e) => setFilterUser(e.target.value)}
-                      className="w-full bg-[#F4F6F9] border-none rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 focus:ring-2 focus:ring-[#7A5AF8]/20 appearance-none outline-none transition-all cursor-pointer"
+                      className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
                     >
                       <option value="">Todos los miembros</option>
                       {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -391,7 +390,7 @@ const WorkspaceActivityPage: React.FC = () => {
                     <select 
                       value={filterType}
                       onChange={(e) => setFilterType(e.target.value)}
-                      className="w-full bg-[#F4F6F9] border-none rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 focus:ring-2 focus:ring-[#7A5AF8]/20 appearance-none outline-none transition-all cursor-pointer"
+                      className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
                     >
                       <option value="">Cualquier acción</option>
                       <option value="MOVE">Movimientos</option>
@@ -403,14 +402,14 @@ const WorkspaceActivityPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-zinc-50">
+                <div className="pt-4 border-t border-zinc-200 dark:border-white/5">
                   <button 
                     onClick={() => {
                       setFilterBoard('');
                       setFilterUser('');
                       setFilterType('');
                     }}
-                    className="w-full py-3 bg-[#F8F9FB] hover:bg-red-50 text-[11px] font-bold text-zinc-400 hover:text-red-500 rounded-xl transition-all uppercase tracking-widest border border-zinc-100"
+                    className="w-full py-3 bg-zinc-100 dark:bg-white/5 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-500 rounded-xl transition-all uppercase tracking-widest border border-zinc-200 dark:border-white/10"
                   >
                     Limpiar filtros
                   </button>

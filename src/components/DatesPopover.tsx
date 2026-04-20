@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, X } from 'lucide-react';
+import { ChevronLeft, X, Check } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import type { DateRange } from 'react-day-picker';
 import { format, parseISO } from 'date-fns';
@@ -48,40 +48,62 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[320px] bg-white rounded-[16px] shadow-dropdown border border-[#E8E9EC] flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
-        <button onClick={onClose} className="p-1 text-[#806F9B] hover:bg-slate-50 rounded-md transition-colors">
+        <button 
+          onClick={onClose} 
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+        >
           <ChevronLeft size={16} />
         </button>
-        <h3 className="text-[10px] tracking-[0.4em] font-bold text-[#806F9B] uppercase">FECHAS</h3>
-        <button onClick={onClose} className="p-1 text-[#806F9B] hover:bg-slate-50 rounded-md transition-colors">
+        <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
+          Fechas
+        </h3>
+        <button 
+          onClick={onClose} 
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+        >
           <X size={16} />
         </button>
       </div>
 
       {/* Calendario */}
-      <div className="p-4 border-b border-[#E8E9EC] flex justify-center bg-white">
+      <div className="p-4 border-b border-zinc-100 dark:border-white/5 flex justify-center bg-zinc-50/30 dark:bg-black/10">
         <style>{`
           .rdp-root {
-            --rdp-accent-color: #7A5AF8;
+            --rdp-accent-color: #6C5DD3;
             --rdp-range_middle-background-color: #E8E9EC;
-            --rdp-range_middle-color: #7A5AF8;
-            --rdp-range_start-background-color: #7A5AF8;
-            --rdp-range_end-background-color: #7A5AF8;
+            --rdp-range_middle-color: #6C5DD3;
+            --rdp-range_start-background-color: #6C5DD3;
+            --rdp-range_end-background-color: #6C5DD3;
             margin: 0;
+            font-family: inherit;
+          }
+          .dark .rdp-root {
+            --rdp-range_middle-background-color: rgba(108, 93, 211, 0.1);
+            --rdp-range_middle-color: #8E82E3;
           }
           .rdp-day_button {
-            border-radius: 100% !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 0.8rem !important;
+            width: 32px !important;
+            height: 32px !important;
           }
           .rdp-selected .rdp-day_button {
             background-color: var(--rdp-accent-color) !important;
             color: white !important;
+            box-shadow: 0 4px 12px rgba(108, 93, 211, 0.25) !important;
           }
           .rdp-range_middle .rdp-day_button {
             background-color: #F0F1F3 !important;
-            color: #7A5AF8 !important;
+            color: #6C5DD3 !important;
             border-radius: 0 !important;
+          }
+          .dark .rdp-range_middle .rdp-day_button {
+            background-color: rgba(108, 93, 211, 0.1) !important;
+            color: #8E82E3 !important;
           }
           .rdp-range_start .rdp-day_button {
             border-top-right-radius: 0 !important;
@@ -91,22 +113,41 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             border-top-left-radius: 0 !important;
             border-bottom-left-radius: 0 !important;
           }
-          .rdp-day_button:hover:not([disabled]) {
+          .rdp-day_button:hover:not([disabled]):not(.rdp-selected) {
             background-color: #F0F1F3 !important;
-            color: #7A5AF8 !important;
+            color: #6C5DD3 !important;
+          }
+          .dark .rdp-day_button:hover:not([disabled]):not(.rdp-selected) {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: #f4f4f5 !important;
           }
           .rdp-head_cell {
-            color: #18181b;
-            font-weight: 700;
-            font-size: 0.75rem;
+            color: #71717a;
+            font-weight: 800;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.75rem;
+            letter-spacing: 0.05em;
           }
           .rdp-month_caption {
             font-weight: 800;
             color: #18181b;
-            font-size: 0.875rem;
-            padding: 0 0.5rem 1rem;
+            font-size: 0.85rem;
+            padding: 0 0.5rem 1.25rem;
+            letter-spacing: -0.01em;
+          }
+          .dark .rdp-month_caption {
+            color: #f4f4f5;
+          }
+          .rdp-nav_button {
+            color: #71717a !important;
+            border-radius: 8px !important;
+          }
+          .rdp-nav_button:hover {
+            background-color: #F0F1F3 !important;
+          }
+          .dark .rdp-nav_button:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important;
           }
         `}</style>
         <DayPicker
@@ -120,36 +161,44 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       </div>
 
       {/* Controles de Fecha */}
-      <div className="p-4 flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-bold text-zinc-900 mb-1">Fecha de inicio</label>
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox"
-              checked={hasStartDate}
-              onChange={(e) => setHasStartDate(e.target.checked)}
-              className="w-4 h-4 accent-[#7A5AF8] rounded-sm cursor-pointer"
-            />
+      <div className="p-4 flex flex-col gap-5">
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Fecha de inicio</label>
+          <div className="flex items-center gap-3">
+            <div 
+              onClick={() => setHasStartDate(!hasStartDate)}
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+                hasStartDate 
+                  ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                  : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
+              }`}
+            >
+              {hasStartDate && <Check size={12} strokeWidth={4} />}
+            </div>
             <input 
               type="text"
               readOnly
               disabled={!hasStartDate}
               placeholder="D/M/AAAA"
               value={range?.from ? format(range.from, 'd/M/yyyy') : ''}
-              className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-full outline-none transition-all ${!hasStartDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
+              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
             />
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold text-zinc-900 mb-1">Fecha de vencimiento</label>
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox"
-              checked={hasDueDate}
-              onChange={(e) => setHasDueDate(e.target.checked)}
-              className="w-4 h-4 accent-[#7A5AF8] rounded-sm cursor-pointer"
-            />
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Fecha de vencimiento</label>
+          <div className="flex items-center gap-3">
+            <div 
+              onClick={() => setHasDueDate(!hasDueDate)}
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+                hasDueDate 
+                  ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                  : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
+              }`}
+            >
+              {hasDueDate && <Check size={12} strokeWidth={4} />}
+            </div>
             <div className="flex-1 flex gap-2">
               <input 
                 type="text"
@@ -157,13 +206,13 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
                 value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
-                className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-full outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
+                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
               />
               <input 
                 type="text"
                 disabled={!hasDueDate}
                 defaultValue="12:00"
-                className={`bg-[#F4F5F7] border border-[#E8E9EC] rounded-md p-2 text-sm text-[#1A1A2E] w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-50 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40'}`}
+                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
               />
             </div>
           </div>
@@ -171,18 +220,18 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       </div>
 
       {/* Acciones */}
-      <div className="px-4 pb-4 pt-2 flex flex-col gap-2">
+      <div className="px-4 pb-5 pt-2 flex flex-col gap-3">
         <button 
           onClick={handleSave}
-          className="w-full bg-[#7A5AF8] text-white font-bold py-2 rounded-lg hover:bg-[#694de3] transition-colors shadow-lg "
+          className="w-full bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
         >
-          Guardar
+          Guardar fechas
         </button>
         <button 
           onClick={() => { onRemoveDates(); onClose(); }}
-          className="w-full bg-slate-100 text-[#806F9B] font-bold py-2 rounded-lg hover:bg-slate-200 hover:text-zinc-900 transition-colors"
+          className="w-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 font-bold py-3 rounded-xl hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all active:scale-[0.98] text-sm"
         >
-          Quitar
+          Quitar fechas
         </button>
       </div>
     </div>

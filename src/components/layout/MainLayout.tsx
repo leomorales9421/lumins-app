@@ -124,7 +124,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div 
-      className={`flex h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
+      className={`flex h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900 dark:bg-[#13151A]')}`}
       style={isBoardView && boardBackground?.startsWith('http') ? { 
         backgroundImage: `url(${boardBackground})`,
         backgroundSize: 'cover',

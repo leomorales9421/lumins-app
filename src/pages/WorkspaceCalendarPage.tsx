@@ -161,44 +161,43 @@ const WorkspaceCalendarPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto">
         
         {/* HEADER PREMIUM */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest mb-1">
-              <div className="p-1.5 bg-indigo-50 rounded-lg">
+            <div className="flex items-center gap-2 text-[#6C5DD3] font-bold text-xs uppercase tracking-widest mb-1">
+              <div className="p-1.5 bg-purple-50 dark:bg-[#6C5DD3]/10 rounded-lg">
                 <CalendarIcon size={14} />
               </div>
               <span>Vista Corporativa</span>
             </div>
-            <h1 className="text-3xl font-black text-zinc-900 tracking-tight flex items-center gap-3">
-              {currentDateTitle || 'Cargando...'}
-              <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-xs font-bold rounded-full uppercase tracking-tighter">
+            <h1 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">               {currentDateTitle || 'Cargando...'}
+              <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold rounded-full uppercase tracking-tighter border border-zinc-200 dark:border-white/10">
                 Workspace
               </span>
             </h1>
-            <p className="text-zinc-500 text-sm font-medium">Gestiona el roadmap de todos tus tableros en un solo lugar.</p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Gestiona el roadmap de todos tus tableros en un solo lugar.</p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl shadow-sm border border-zinc-200">
-            <div className="flex gap-1 pr-2 border-r border-zinc-100">
+          <div className="flex items-center gap-3 bg-white dark:bg-[#1C1F26] p-1.5 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10">
+            <div className="flex gap-1 pr-2 border-r border-zinc-100 dark:border-white/5">
               <button 
                 onClick={() => { calendarRef.current?.getApi().prev(); updateTitle(); }}
-                className="p-2 hover:bg-zinc-50 rounded-lg text-zinc-600 transition-colors"
+                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
               >
                 <ChevronLeft size={18} />
               </button>
               <button 
                 onClick={() => { calendarRef.current?.getApi().today(); updateTitle(); }}
-                className="px-4 py-1.5 text-sm font-bold text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
+                className="px-4 py-1.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg transition-colors"
               >
                 Hoy
               </button>
               <button 
                 onClick={() => { calendarRef.current?.getApi().next(); updateTitle(); }}
-                className="p-2 hover:bg-zinc-50 rounded-lg text-zinc-600 transition-colors"
+                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
               >
                 <ChevronRight size={18} />
               </button>
@@ -209,8 +208,8 @@ const WorkspaceCalendarPage: React.FC = () => {
                 onClick={() => changeView('dayGridMonth')}
                 className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-all ${
                   activeView === 'dayGridMonth' 
-                  ? 'bg-zinc-900 text-white shadow-md' 
-                  : 'text-zinc-500 hover:bg-zinc-50'
+                  ? 'bg-zinc-900 dark:bg-[#6C5DD3] text-white shadow-md' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'
                 }`}
               >
                 Mes
@@ -219,8 +218,8 @@ const WorkspaceCalendarPage: React.FC = () => {
                 onClick={() => changeView('dayGridWeek')}
                 className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-all ${
                   activeView === 'dayGridWeek' 
-                  ? 'bg-zinc-900 text-white shadow-md' 
-                  : 'text-zinc-500 hover:bg-zinc-50'
+                  ? 'bg-zinc-900 dark:bg-[#6C5DD3] text-white shadow-md' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'
                 }`}
               >
                 Semana
@@ -233,22 +232,22 @@ const WorkspaceCalendarPage: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-zinc-200 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap items-center gap-4"
+          className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap items-center gap-4"
         >
-          <div className="flex items-center gap-2 text-zinc-400 px-2 border-r border-zinc-100 mr-2">
+          <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-500 px-2 border-r border-zinc-100 dark:border-white/5 mr-2">
             <Filter size={16} />
             <span className="text-xs font-bold uppercase tracking-wider">Filtros</span>
           </div>
 
           {/* Filtro por Tablero */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1">Tablero</label>
+            <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase ml-1">Tablero</label>
             <div className="relative group">
-              <Layout size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
+              <Layout size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
               <select 
                 value={boardFilter}
                 onChange={(e) => setBoardFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Todos los tableros</option>
                 {uniqueBoards.map(board => (
@@ -261,13 +260,13 @@ const WorkspaceCalendarPage: React.FC = () => {
 
           {/* Filtro por Asignado */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1">Asignado</label>
+            <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase ml-1">Asignado</label>
             <div className="relative group">
-              <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
+              <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
               <select 
                 value={memberFilter}
                 onChange={(e) => setMemberFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Cualquier miembro</option>
                 {uniqueMembers.map(member => (
@@ -280,13 +279,13 @@ const WorkspaceCalendarPage: React.FC = () => {
 
           {/* Filtro por Estado */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase ml-1">Estado</label>
+            <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase ml-1">Estado</label>
             <div className="relative group">
-              <CheckCircle2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-indigo-500 transition-colors" />
+              <CheckCircle2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Cualquier estado</option>
                 <option value="pending">Pendientes (No Done)</option>
@@ -299,7 +298,7 @@ const WorkspaceCalendarPage: React.FC = () => {
           <div className="ml-auto">
             <button 
               onClick={() => { setBoardFilter('all'); setMemberFilter('all'); setStatusFilter('all'); }}
-              className="px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-bold text-[#6C5DD3] hover:bg-[#6C5DD3]/10 rounded-xl transition-colors"
             >
               Restablecer
             </button>
@@ -307,20 +306,24 @@ const WorkspaceCalendarPage: React.FC = () => {
         </motion.div>
 
         {/* CALENDAR CONTAINER */}
-        <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-2xl shadow-slate-200/50 overflow-hidden p-6 calendar-container relative">
+        <div className="bg-white dark:bg-[#1C1F26] rounded-[2rem] border border-zinc-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-6 calendar-container relative">
           {isLoading && (
-            <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[2px] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+            <div className="absolute inset-0 z-10 bg-white/50 dark:bg-[#1C1F26]/50 backdrop-blur-[2px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6C5DD3]"></div>
             </div>
           )}
           
           <style>{`
             .fc {
-              --fc-border-color: #F1F5F9;
-              --fc-today-bg-color: #F8FAFC;
+              --fc-border-color: rgba(241, 245, 249, 0.1);
+              --fc-today-bg-color: rgba(248, 250, 252, 0.05);
               --fc-event-bg-color: transparent;
               --fc-event-border-color: transparent;
+              --fc-page-bg-color: transparent;
               font-family: inherit;
+            }
+            .dark .fc {
+               --fc-border-color: rgba(255, 255, 255, 0.05);
             }
             .fc .fc-scrollgrid {
               border-radius: 1.5rem;
@@ -330,6 +333,9 @@ const WorkspaceCalendarPage: React.FC = () => {
             .fc .fc-col-header-cell {
               background: #F8FAFC;
             }
+            .dark .fc .fc-col-header-cell {
+              background: rgba(255, 255, 255, 0.02);
+            }
             .fc .fc-col-header-cell-cushion {
               padding: 16px 4px;
               font-size: 11px;
@@ -338,12 +344,18 @@ const WorkspaceCalendarPage: React.FC = () => {
               letter-spacing: 0.1em;
               color: #64748B;
             }
+            .dark .fc .fc-col-header-cell-cushion {
+              color: #94A3B8;
+            }
             .fc .fc-daygrid-day-number {
               font-size: 13px;
               font-weight: 700;
               color: #334155;
               padding: 12px;
               transition: color 0.2s;
+            }
+            .dark .fc .fc-daygrid-day-number {
+              color: #E2E8F0;
             }
             .fc .fc-day-today .fc-daygrid-day-number {
               color: #4F46E5;
@@ -407,13 +419,13 @@ const WorkspaceCalendarPage: React.FC = () => {
 
               return (
                 <div className={`
-                  w-full flex flex-col gap-1 p-2 rounded-lg border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white
-                  ${isDone ? 'border-emerald-500 opacity-75' : isOverdue ? 'border-rose-500 bg-rose-50/30' : 'border-indigo-500'}
-                  border border-zinc-200
+                  w-full flex flex-col gap-1 p-2 rounded-lg border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white dark:bg-[#13151A]
+                  ${isDone ? 'border-emerald-500 opacity-75' : isOverdue ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-500/10' : 'border-[#6C5DD3]'}
+                  border border-zinc-200 dark:border-white/10
                 `}>
                   {/* Board Tag */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter truncate max-w-[80%]">
+                    <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter truncate max-w-[80%]">
                       {props.boardName || 'Sin Tablero'}
                     </span>
                     {isOverdue && <AlertCircle size={10} className="text-rose-500" />}
@@ -424,8 +436,8 @@ const WorkspaceCalendarPage: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <span className={`
                       text-[11px] font-bold leading-tight line-clamp-2
-                      ${isDone ? 'text-zinc-400 line-through' : 'text-zinc-800'}
-                      ${isOverdue ? 'text-rose-900' : ''}
+                      ${isDone ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-800 dark:text-zinc-200'}
+                      ${isOverdue ? 'text-rose-900 dark:text-rose-200' : ''}
                     `}>
                       {event.title}
                     </span>

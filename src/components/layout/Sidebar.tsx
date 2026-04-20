@@ -30,10 +30,10 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
     className={({ isActive }) => `
       flex items-center transition-all font-bold text-[13px] rounded-lg p-2.5
       ${isActive 
-        ? 'bg-[#7A5AF8] text-white shadow-sm shadow-purple-300/40' 
+        ? 'bg-[#6C5DD3] text-white shadow-sm shadow-purple-500/20' 
         : isFloating 
           ? 'text-white/70 hover:text-white hover:bg-white/10'
-          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+          : 'text-zinc-500 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5'
       }
       ${isCollapsed ? 'justify-center' : 'justify-start gap-3'}
     `}
@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
 
   const sidebarClasses = isFloating 
     ? `fixed inset-y-0 left-0 z-[100] transition-all duration-500 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/10 w-64 shadow-2xl`
-    : `relative group bg-white border-r border-zinc-200 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
+    : `relative group bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
 
   return (
     <>
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           {/* Workspace Switcher Section */}
           <div className={`w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
             {!isCollapsed && (
-              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-slate-400'} uppercase tracking-[0.2em] px-2 mb-2`}>
+              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-2`}>
                 Espacio de Trabajo
               </p>
             )}
@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           {/* Main Navigation */}
           <div className="space-y-0.5 w-full">
             {!isCollapsed && (
-              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-slate-400'} uppercase tracking-[0.2em] px-2 mb-2`}>
+              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-2`}>
                 Principal
               </p>
             )}
@@ -134,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </div>
 
           {/* Footer Navigation */}
-          <div className={`mt-auto pb-4 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-slate-100'} pt-4 w-full`}>
+          <div className={`mt-auto pb-4 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-4 w-full`}>
             <SidebarItem 
               to="/settings" 
               icon={<Settings size={17} />} 
@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
               title={isCollapsed ? "Cerrar sesión" : undefined}
               className={`
                 flex items-center transition-colors rounded-lg p-2.5 w-full text-sm font-medium
-                text-zinc-500 hover:bg-rose-50 hover:text-rose-600 cursor-pointer
+                text-zinc-500 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500 cursor-pointer
                 ${isCollapsed ? 'justify-center' : 'gap-3'}
               `}
             >

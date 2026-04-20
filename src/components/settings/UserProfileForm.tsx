@@ -78,7 +78,7 @@ const UserProfileForm: React.FC = () => {
         })
         .catch(err => console.error('IP detection failed', err));
     }
-  }, []);
+  }, [formData.country]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -157,9 +157,12 @@ const UserProfileForm: React.FC = () => {
     }
   };
 
+  const inputClasses = "w-full p-3 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
+  const labelClasses = "text-sm font-bold text-zinc-700 dark:text-zinc-300";
+
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden p-8 space-y-6">
+      <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden p-8 space-y-6">
         <Skeleton className="h-7 w-48 mb-6" />
         <div className="flex items-center gap-6 mb-8">
           <Skeleton className="w-24 h-24 rounded-full" />
@@ -176,7 +179,7 @@ const UserProfileForm: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="flex justify-end pt-6 border-t border-zinc-100">
+        <div className="flex justify-end pt-6 border-t border-zinc-100 dark:border-white/5">
           <Skeleton className="h-11 w-36" />
         </div>
       </div>
@@ -184,17 +187,17 @@ const UserProfileForm: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
+    <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden">
       <div className="p-8">
-        <h2 className="text-xl font-bold text-zinc-900 mb-6">Información del Perfil</h2>
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">Información del Perfil</h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Section */}
           <div className="flex items-center gap-6 mb-8">
             <div className="relative group">
-              <div className="w-24 h-24 rounded-full bg-[#F4F6F9] border-2 border-dashed border-zinc-300 flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 rounded-full bg-zinc-50 dark:bg-[#13151A] border-2 border-dashed border-zinc-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
                 {avatarUploading ? (
-                  <Loader2 size={28} className="animate-spin text-zinc-400" />
+                  <Loader2 size={28} className="animate-spin text-zinc-400 dark:text-zinc-500" />
                 ) : formData.avatarUrl ? (
                   <img 
                     src={formData.avatarUrl 
@@ -206,7 +209,7 @@ const UserProfileForm: React.FC = () => {
                     className="w-full h-full object-cover" 
                   />
                 ) : (
-                  <Camera size={32} className="text-zinc-400" />
+                  <Camera size={32} className="text-zinc-300 dark:text-zinc-600" />
                 )}
               </div>
               {!avatarUploading && (
@@ -222,91 +225,91 @@ const UserProfileForm: React.FC = () => {
               )}
             </div>
             <div>
-              <p className="font-bold text-zinc-900">Tu Avatar</p>
-              <p className="text-sm text-zinc-500">JPG, GIF o PNG. Máximo 2MB.</p>
+              <p className="font-bold text-zinc-900 dark:text-zinc-100">Tu Avatar</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">JPG, GIF o PNG. Máximo 2MB.</p>
               {avatarError && <p className="text-xs text-red-500 mt-1">{avatarError}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Nombre</label>
+              <label className={labelClasses}>Nombre</label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
+                className={inputClasses}
                 placeholder="Ej. Juan"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Apellido</label>
+              <label className={labelClasses}>Apellido</label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
+                className={inputClasses}
                 placeholder="Ej. Pérez"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Correo Electrónico</label>
+              <label className={labelClasses}>Correo Electrónico</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full p-3 rounded-lg border border-zinc-200 bg-slate-50 text-zinc-500 cursor-not-allowed outline-none"
+                className="w-full p-3 rounded-lg border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-500 cursor-not-allowed outline-none"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">País / Región</label>
+              <label className={labelClasses}>País / Región</label>
               <div className="relative">
                 <select
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  className="w-full p-3 pl-10 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all appearance-none"
+                  className={inputClasses + " pl-10 appearance-none"}
                 >
                   <option value="">Seleccionar país...</option>
                   {LATAM_COUNTRIES.map(c => (
                     <option key={c.code} value={c.name}>{c.name}</option>
                   ))}
                 </select>
-                <Globe size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Globe size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Teléfono</label>
+              <label className={labelClasses}>Teléfono</label>
               <input
                 type="text"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg border border-zinc-200 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
+                className={inputClasses}
                 placeholder="+54 9 11 ..."
               />
             </div>
           </div>
 
           {success && (
-            <div className="flex items-center gap-2 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg border border-green-100">
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-lg border border-emerald-100 dark:border-emerald-500/20 animate-in fade-in slide-in-from-top-2">
               <CheckCircle2 size={16} />
               ¡Perfil actualizado correctamente!
             </div>
           )}
 
-          <div className="pt-6 border-t border-zinc-100 flex justify-end">
+          <div className="pt-6 border-t border-zinc-100 dark:border-white/5 flex justify-end">
             <button
               type="submit"
               disabled={loading || avatarUploading}
-              className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-purple-200 disabled:opacity-50"
+              className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-purple-200 dark:shadow-none disabled:opacity-50 active:scale-95"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               Guardar Cambios

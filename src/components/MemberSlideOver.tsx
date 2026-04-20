@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Shield, Layout, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
-import Button from './ui/Button';
 import apiClient from '../lib/api-client';
 import UserAvatar from './ui/UserAvatar';
 
@@ -44,7 +43,6 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
       // 2. For each board, check if user is a member
       const memberBoards: string[] = [];
       // Fetch details for each board to see members list
-      // Note: In a production app, a single specialized endpoint would be better
       const detailsPromises = boards.map(board => apiClient.get<{ data: { board: any } }>(`/api/boards/${board.id}`));
       const detailsResponses = await Promise.all(detailsPromises);
       
@@ -119,7 +117,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/5 z-[100]"
+            className="fixed inset-0 bg-black/20 dark:bg-black/60 z-[100] backdrop-blur-[2px]"
           />
 
           {/* Slide Over */}
@@ -128,12 +126,12 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-full max-w-[400px] bg-white shadow-[-10px_0_40px_rgba(0,0,0,0.05)] border-l border-zinc-100 z-[101] flex flex-col"
+            className="fixed inset-y-0 right-0 w-full max-w-[400px] bg-white dark:bg-[#1C1F26] shadow-[-10px_0_40px_rgba(0,0,0,0.15)] border-l border-zinc-200 dark:border-white/10 z-[101] flex flex-col"
           >
             {/* Header */}
-            <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+            <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between bg-zinc-50/50 dark:bg-white/5">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
+                <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-zinc-200 dark:border-white/10">
                   <UserAvatar 
                     user={member?.user} 
                     size="lg" 
@@ -141,13 +139,13 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                   />
                 </div>
                 <div>
-                  <h2 className="font-bold text-slate-900 leading-tight">{member?.user.name}</h2>
-                  <p className="text-xs text-slate-500">{member?.user.email}</p>
+                  <h2 className="font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{member?.user.name}</h2>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{member?.user.email}</p>
                 </div>
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors"
+                className="p-2 hover:bg-white dark:hover:bg-white/5 hover:shadow-sm border border-transparent hover:border-zinc-200 dark:hover:border-white/10 rounded-xl text-zinc-400 dark:text-zinc-500 transition-all"
               >
                 <X size={20} />
               </button>
@@ -156,7 +154,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
               {/* Role Section */}
               <section>
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Rol en el Espacio</h3>
+                <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-4 px-1">Rol en el Espacio</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {(['ADMIN', 'MEMBER', 'GUEST'] as WorkspaceRole[]).map((role) => (
                     <button
@@ -164,29 +162,29 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                       disabled={isUpdating || member?.role === 'OWNER'}
                       onClick={() => handleRoleChange(role)}
                       className={`
-                        flex items-center justify-between p-3 rounded-xl border transition-all text-left
+                        flex items-center justify-between p-4 rounded-2xl border transition-all text-left
                         ${member?.role === role 
-                          ? 'bg-[#F4F6F9] border-[#7A5AF8] text-[#7A5AF8]' 
-                          : 'bg-white border-zinc-100 text-slate-600 hover:border-zinc-300'}
+                          ? 'bg-[#6C5DD3]/5 border-[#6C5DD3] text-[#6C5DD3] dark:text-zinc-100' 
+                          : 'bg-zinc-50/50 dark:bg-[#13151A] border-zinc-100 dark:border-white/5 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}
                         ${(isUpdating || member?.role === 'OWNER') && 'opacity-50 cursor-not-allowed'}
                       `}
                     >
                       <div className="flex flex-col items-start">
                         <span className="text-sm font-bold capitalize">{role.toLowerCase()}</span>
-                        <span className="text-[10px] opacity-70">
+                        <span className="text-[11px] opacity-70">
                           {role === 'ADMIN' ? 'Control total sobre el espacio' : 
                            role === 'MEMBER' ? 'Puede crear tableros y editar' : 
                            'Acceso limitado a tableros específicos'}
                         </span>
                       </div>
-                      {member?.role === role && <CheckCircle2 size={18} />}
+                      {member?.role === role && <CheckCircle2 size={18} className="text-[#6C5DD3]" />}
                     </button>
                   ))}
                   {member?.role === 'OWNER' && (
-                    <div className="flex items-center justify-between p-3 rounded-xl border bg-amber-50 border-amber-200 text-amber-700">
+                    <div className="flex items-center justify-between p-4 rounded-2xl border bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400">
                       <div className="flex flex-col items-start">
                         <span className="text-sm font-bold capitalize">Owner</span>
-                        <span className="text-[10px] opacity-70">Propietario principal del espacio</span>
+                        <span className="text-[11px] opacity-70">Propietario principal del espacio</span>
                       </div>
                       <Shield size={18} />
                     </div>
@@ -196,11 +194,11 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
 
               {/* Boards Access Section */}
               <section>
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Acceso a Tableros</h3>
+                <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-4 px-1">Acceso a Tableros</h3>
                 {isLoadingBoards ? (
-                  <div className="flex items-center justify-center py-8 text-slate-400 gap-2">
-                    <Loader2 className="animate-spin" size={18} />
-                    <span className="text-sm">Cargando tableros...</span>
+                  <div className="flex flex-col items-center justify-center py-12 text-zinc-400 dark:text-zinc-500 gap-3">
+                    <Loader2 className="animate-spin text-[#6C5DD3]" size={24} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Cargando tableros...</span>
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -209,28 +207,28 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                       return (
                         <div 
                           key={board.id}
-                          className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-colors group"
+                          className="flex items-center justify-between p-3.5 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl transition-all group"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#7A5AF8]/10 group-hover:text-[#7A5AF8] transition-colors">
-                              <Layout size={14} />
+                            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-400 dark:text-zinc-500 group-hover:bg-[#6C5DD3]/10 group-hover:text-[#6C5DD3] transition-all">
+                              <Layout size={18} />
                             </div>
-                            <span className="text-sm font-medium text-slate-700">{board.name}</span>
+                            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">{board.name}</span>
                           </div>
                           
                           <button
                             disabled={member?.role === 'OWNER'}
                             onClick={() => toggleBoardAccess(board.id, hasAccess)}
                             className={`
-                              relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
-                              ${hasAccess ? 'bg-[#7A5AF8]' : 'bg-zinc-200'}
+                              relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
+                              ${hasAccess ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}
                               ${member?.role === 'OWNER' && 'opacity-50 cursor-not-allowed'}
                             `}
                           >
                             <span
                               className={`
-                                pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
-                                ${hasAccess ? 'translate-x-4' : 'translate-x-0'}
+                                pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
+                                ${hasAccess ? 'translate-x-5' : 'translate-x-0'}
                               `}
                             />
                           </button>
@@ -243,19 +241,18 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             </div>
 
             {/* Danger Zone */}
-            <div className="p-6 border-t border-zinc-100 bg-rose-50/50 mt-auto">
-              <h3 className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-3 px-1">Zona de Peligro</h3>
-              <Button
-                variant="outlined"
+            <div className="p-6 border-t border-zinc-200 dark:border-white/10 bg-rose-50/30 dark:bg-rose-500/5 mt-auto">
+              <h3 className="text-[10px] font-bold text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em] mb-4 px-1">Zona de Peligro</h3>
+              <button
                 disabled={isRemoving || member?.role === 'OWNER'}
                 onClick={handleRemoveMember}
-                className="w-full justify-center bg-white border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white transition-all font-bold py-2.5 rounded-xl text-sm"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-rose-100 dark:border-rose-500/20 bg-white dark:bg-[#13151A] text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Trash2 size={16} className="mr-2" />
-                {isRemoving ? 'Eliminando...' : 'Eliminar del espacio de trabajo'}
-              </Button>
+                <Trash2 size={18} />
+                {isRemoving ? 'Eliminando...' : 'Eliminar del espacio'}
+              </button>
               {member?.role === 'OWNER' && (
-                <p className="text-[10px] text-rose-400 mt-2 text-center italic">No puedes eliminar al propietario principal.</p>
+                <p className="text-[10px] text-rose-400 dark:text-rose-500 mt-2 text-center italic font-medium">No puedes eliminar al propietario principal.</p>
               )}
             </div>
           </motion.div>

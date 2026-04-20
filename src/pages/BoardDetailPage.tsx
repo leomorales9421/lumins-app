@@ -338,9 +338,9 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-[#F4F6F9] font-sans overflow-hidden">
+      <div className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#13151A] font-sans overflow-hidden">
         {/* Header Skeleton */}
-        <div className="h-[60px] px-8 flex items-center justify-between border-b border-zinc-200 bg-white">
+        <div className="h-[60px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1C1F26]">
            <div className="flex items-center gap-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-4" />
@@ -360,9 +360,9 @@ const BoardDetailPage: React.FC = () => {
                    <Skeleton className="h-5 w-32" />
                    <Skeleton className="h-5 w-5 rounded-md" />
                 </div>
-                <div className="space-y-3">
+                 <div className="space-y-3">
                    {[1, 2, 3].map(j => (
-                     <div key={j} className="bg-white rounded-lg border border-[#E8E9EC] p-3 space-y-3">
+                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 p-3 space-y-3">
                         <Skeleton className="h-4 w-full" />
                         <div className="flex justify-between">
                            <Skeleton className="h-3 w-20" />
@@ -407,7 +407,7 @@ const BoardDetailPage: React.FC = () => {
           </Link>
           <span className="text-white/30 text-lg">/</span>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-[#7A5AF8] flex items-center justify-center text-white shadow-sm border border-white/10">
+            <div className="w-8 h-8 rounded-md bg-[#6C5DD3] flex items-center justify-center text-white shadow-sm border border-white/10">
               <span className="font-bold text-xs">{board.name.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col">
@@ -461,21 +461,21 @@ const BoardDetailPage: React.FC = () => {
             </button>
 
             {isFiltersOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-zinc-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Filtrar por miembro</div>
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C1F26] rounded-xl shadow-xl border border-zinc-200 dark:border-white/10 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1.5 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Filtrar por miembro</div>
                 <div className="max-h-60 overflow-y-auto">
-                  <button 
+                   <button 
                     onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
-                    className="w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 transition-colors text-sm text-zinc-700"
+                    className="w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm text-zinc-700 dark:text-zinc-300"
                   >
-                    <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center text-[10px]">All</div>
+                    <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-[10px]">All</div>
                     Todos los miembros
                   </button>
                   {board.members?.map(member => (
-                    <button 
+                     <button 
                       key={member.userId}
                       onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#7A5AF8] font-semibold bg-violet-50/50' : 'text-zinc-700'}`}
+                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#6C5DD3] font-semibold bg-purple-50/50 dark:bg-[#6C5DD3]/10' : 'text-zinc-700 dark:text-zinc-300'}`}
                     >
                       <UserAvatar 
                         name={member.user.name} 
@@ -532,33 +532,33 @@ const BoardDetailPage: React.FC = () => {
             </SortableContext>
             
             {isAddingList ? (
-              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white rounded-xl border border-zinc-200 p-4 h-fit shadow-lg ring-1 ring-black/5">
+              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
                 <input
                   autoFocus
                   placeholder="Nombre de la lista..."
                   value={newListTitle}
                   onChange={(e) => setNewListTitle(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm font-medium mb-3 focus:bg-white focus:border-[#7A5AF8] focus:ring-4 focus:ring-[#7A5AF8]/10 outline-none transition-all"
+                  className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
                 />
-                <div className="flex items-center gap-2">
-                  <button type="submit" className="flex-1 bg-[#7A5AF8] hover:bg-[#6949d6] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-violet-200">
+                 <div className="flex items-center gap-2">
+                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-[#6C5DD3]/20">
                     Añadir lista
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsAddingList(false)}
-                    className="px-3 py-2 text-zinc-500 hover:text-zinc-900 text-sm font-medium transition-colors"
+                    className="px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm font-medium transition-colors"
                   >
                     Cancelar
                   </button>
                 </div>
               </form>
-            ) : (
+             ) : (
               <button
                 onClick={() => setIsAddingList(true)}
-                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded-xl bg-white/50 border-2 border-dashed border-zinc-300 text-zinc-500 hover:text-[#7A5AF8] hover:border-[#7A5AF8] hover:bg-white transition-all font-bold text-sm group flex-shrink-0"
+                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded-xl bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
               >
-                <div className="p-1 rounded-md bg-zinc-100 group-hover:bg-violet-100 transition-colors">
+                <div className="p-1 rounded-md bg-zinc-100 dark:bg-white/10 group-hover:bg-violet-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
                   <Plus size={18} strokeWidth={3} />
                 </div>
                 Añadir otra lista

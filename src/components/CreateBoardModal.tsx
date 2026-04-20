@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Users, ChevronDown, Layout } from 'lucide-react';
+import { X, Lock, Users, ChevronDown, Layout, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 
 interface Workspace {
@@ -94,54 +94,57 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-[#1A1A2E]/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-md"
           />
 
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white rounded-2xl shadow-modal p-8 relative overflow-hidden z-10 border border-[#E8E9EC]"
+            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-2xl shadow-modal p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 bg-[#F4F5F7] rounded-xl flex items-center justify-center text-[#7A5AF8]">
-                    <Layout size={20} strokeWidth={2.5} />
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded-2xl flex items-center justify-center shadow-sm">
+                    <Layout size={24} strokeWidth={2.5} />
                  </div>
-                 <h2 className="text-xl font-bold text-[#1A1A2E] tracking-tight">Nuevo proyecto</h2>
+                 <div>
+                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Nuevo proyecto</h2>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Organiza tus tareas en un nuevo tablero</p>
+                 </div>
               </div>
               <button 
                 onClick={handleClose}
-                className="p-2 text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] rounded-lg transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl transition-all"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Workspace Selection */}
               <div className="space-y-2">
-                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                <label className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">
                   Espacio de Trabajo
                 </label>
                 <div className="relative">
                   <select 
                     value={workspaceId}
                     onChange={(e) => setWorkspaceId(e.target.value)}
-                    className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 appearance-none transition-all"
+                    className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] appearance-none transition-all cursor-pointer"
                   >
                     {workspaces.map(ws => (
                       <option key={ws.id} value={ws.id}>{ws.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" size={16} />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none" size={18} />
                 </div>
               </div>
 
               {/* Board Name */}
               <div className="space-y-2">
-                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                <label className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">
                   Nombre del Tablero *
                 </label>
                 <input 
@@ -150,44 +153,44 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Plan de Marketing 2026"
-                  className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                   required
                 />
               </div>
 
               {/* Visibility Options */}
               <div className="space-y-2">
-                <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                <label className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">
                   Visibilidad
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                   <div 
                     onClick={() => setVisibility('private')}
-                    className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex-1 p-5 rounded-2xl border cursor-pointer transition-all ${
                       visibility === 'private' 
-                        ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
-                        : 'border-[#E8E9EC] bg-white hover:border-[#D1D5DB]'
+                        ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
+                        : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    <Lock size={18} className={visibility === 'private' ? 'text-[#7A5AF8]' : 'text-[#9CA3AF]'} />
-                    <div className="mt-2">
-                      <div className="font-bold text-[#1A1A2E] text-[13px]">Privado</div>
-                      <div className="text-[11px] text-[#6B7280] font-medium leading-tight">Solo tú y invitados</div>
+                    <Lock size={20} className={visibility === 'private' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
+                    <div className="mt-3">
+                      <div className={`font-bold text-[14px] ${visibility === 'private' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Privado</div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Solo tú e invitados</div>
                     </div>
                   </div>
 
                   <div 
                     onClick={() => setVisibility('team')}
-                    className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex-1 p-5 rounded-2xl border cursor-pointer transition-all ${
                       visibility === 'team' 
-                        ? 'border-[#7A5AF8] bg-[#F4F5F7] shadow-sm' 
-                        : 'border-[#E8E9EC] bg-white hover:border-[#D1D5DB]'
+                        ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
+                        : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    <Users size={18} className={visibility === 'team' ? 'text-[#7A5AF8]' : 'text-[#9CA3AF]'} />
-                    <div className="mt-2">
-                      <div className="font-bold text-[#1A1A2E] text-[13px]">Equipo</div>
-                      <div className="text-[11px] text-[#6B7280] font-medium leading-tight">Todo el equipo</div>
+                    <Users size={20} className={visibility === 'team' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
+                    <div className="mt-3">
+                      <div className={`font-bold text-[14px] ${visibility === 'team' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Equipo</div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Todo el equipo</div>
                     </div>
                   </div>
                 </div>
@@ -199,13 +202,13 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   <button 
                     type="button"
                     onClick={() => setIsDescriptionExpanded(true)}
-                    className="text-[#7A5AF8] text-[13px] font-bold hover:underline ml-1"
+                    className="text-[#6C5DD3] dark:text-[#8E82E3] text-[13px] font-bold hover:underline ml-1"
                   >
                     + Añadir descripción (opcional)
                   </button>
                 ) : (
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                    <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">
+                    <label className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">
                       Descripción
                     </label>
                     <textarea 
@@ -213,24 +216,24 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Breve descripción del proyecto..."
-                      className="w-full bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg p-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
+                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
                     />
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 text-xs font-bold p-3 rounded-lg border border-red-100">
+                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded-xl border border-rose-100 dark:border-rose-500/20">
                   {error}
                 </div>
               )}
 
               {/* Footer Actions */}
-              <div className="mt-8 flex justify-end items-center gap-4">
+              <div className="mt-10 flex justify-end items-center gap-6">
                 <button 
                   type="button"
                   onClick={handleClose}
-                  className="text-[#6B7280] font-bold text-sm hover:text-[#1A1A2E] transition-colors"
+                  className="text-zinc-500 dark:text-zinc-400 font-bold text-sm hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -238,14 +241,14 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-10 px-6 rounded-lg font-bold text-white transition-all shadow-sm
+                    h-12 px-8 rounded-xl font-bold text-white transition-all shadow-lg
                     ${isLoading || !name.trim() 
-                      ? 'bg-[#E8E9EC] cursor-not-allowed text-[#9CA3AF]' 
-                      : 'bg-[#7A5AF8] hover:bg-[#694de3] active:scale-[0.98]'
+                      ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 shadow-none cursor-not-allowed' 
+                      : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'
                     }
                   `}
                 >
-                  {isLoading ? 'Creando...' : 'Crear tablero'}
+                  {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Crear tablero'}
                 </button>
               </div>
             </form>

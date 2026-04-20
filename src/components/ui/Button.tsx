@@ -21,11 +21,12 @@ const Button: React.FC<ButtonProps> = ({
   
   const variantClasses = {
     // Exact colors from Identity Graph
-    primary: 'bg-[#7A5AF8] text-white shadow-soft hover:bg-[#6a4ae7]',
-    secondary: 'bg-[#F4F5F7] text-[#374151] border border-[#E8E9EC] hover:bg-[#EAECF0] hover:text-[#7A5AF8]',
-    inverted: 'bg-[#100B26] text-white hover:bg-[#000000]', // Inverted look from guide
-    outlined: 'bg-transparent border-2 border-zinc-200 text-zinc-600 hover:border-[#7A5AF8] hover:text-[#7A5AF8]',
-    danger: 'bg-[#E91E63] text-white hover:bg-[#d81b60] shadow-soft',
+    // Primary Accent: Identical in both modes
+    primary: 'bg-[#6C5DD3] text-white shadow-soft hover:bg-[#5b4dbf]',
+    secondary: 'bg-[#F4F5F7] dark:bg-white/5 text-zinc-700 dark:text-zinc-300 border border-[#E8E9EC] dark:border-white/10 hover:bg-[#EAECF0] dark:hover:bg-white/10',
+    inverted: 'bg-[#100B26] dark:bg-[#080808] text-white hover:bg-[#000000]',
+    outlined: 'bg-transparent border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]',
+    danger: 'bg-red-500 text-white hover:bg-red-600 shadow-soft',
   };
 
   const sizeClasses = {

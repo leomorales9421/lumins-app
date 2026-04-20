@@ -15,17 +15,17 @@ const Card: React.FC<CardProps> = ({
   const baseClasses = 'rounded-md transition-all duration-300 overflow-hidden';
   
   const variantClasses = {
-    // Replicating Login Style: Clean White Surface
-    default: 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] text-zinc-900',
+    // Elevated Surface base
+    default: 'bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-zinc-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]',
     
-    // Pro Glassmorphism
-    glass: 'bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]',
+    // Pro Glassmorphism (Dynamic/Transparent)
+    glass: 'bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]',
     
-    // Vibrant Header-like
-    vibrant: 'bg-gradient-to-br from-[#6e45e2] to-[#ff9a9e] text-white shadow-lg',
+    // Vibrant Brand
+    vibrant: 'bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] text-white shadow-lg',
     
-    // White alias
-    white: 'bg-white border border-zinc-100 shadow-sm text-zinc-900',
+    // White alias (Strict Surface)
+    white: 'bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-zinc-100 shadow-sm',
   };
 
   const hoverClasses = hoverable 
@@ -47,7 +47,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = '',
   ...props
 }) => (
-  <div className={`px-6 py-4 border-b border-zinc-50 bg-zinc-50/30 ${className}`} {...props}>
+  <div className={`px-6 py-4 border-b border-zinc-100 dark:border-white/5 bg-zinc-50/30 dark:bg-white/5 ${className}`} {...props}>
     {children}
   </div>
 );

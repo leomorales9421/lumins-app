@@ -87,9 +87,9 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       style={style}
       className={`
         cu-column h-fit max-h-full flex flex-col min-w-[300px] max-w-[300px] flex-shrink-0 transition-all
-        bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md rounded-2xl border border-white/30 p-4 shadow-xl
+        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl border border-white/30 dark:border-white/10 p-4 shadow-xl
         ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
-        ${isDraggingCardOver ? 'ring-2 ring-[#7A5AF8]/30 ring-offset-1' : ''}
+        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/30 ring-offset-1' : ''}
       `}
     >
       {/* Column Header */}
@@ -111,13 +111,13 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
             </form>
           ) : (
             <h3
-              className="font-bold text-[#1A1A2E] dark:text-white text-[14px] truncate cursor-text hover:text-[#7A5AF8] transition-colors"
+              className="font-bold text-zinc-900 dark:text-zinc-100 text-[14px] truncate cursor-text hover:text-[#6C5DD3] transition-colors"
               onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
             >
               {list.name || list.title}
             </h3>
           )}
-          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/50 text-[#6B7280] text-[10px] font-bold">
+          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold border border-zinc-200 dark:border-white/5">
             {cards.length}
           </span>
         </div>
@@ -126,7 +126,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
           {/* Quick add card */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsAddingCard(true); }}
-            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#7A5AF8] hover:bg-white transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] hover:bg-white dark:hover:bg-white/5 transition-colors"
             title="Añadir tarjeta"
           >
             <Plus size={15} strokeWidth={2.5} />
@@ -135,25 +135,25 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
           {/* Column options */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
-            className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#1A1A2E] hover:bg-white transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white dark:hover:bg-white/5 transition-colors"
           >
             <MoreHorizontal size={15} strokeWidth={2.5} />
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-44 cu-dropdown py-1 z-[100]">
+            <div className="absolute right-0 top-full mt-1 w-44 cu-dropdown py-1 z-[100] bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditingTitle(true);
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 text-[12px] font-medium text-[#374151] hover:bg-[#F4F5F7] flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[12px] font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 flex items-center gap-2"
               >
-                <Pencil size={13} strokeWidth={2.5} className="text-[#9CA3AF]" />
+                <Pencil size={13} strokeWidth={2.5} className="text-zinc-400 dark:text-zinc-500" />
                 Editar nombre
               </button>
-              <div className="h-px bg-[#F0F1F3] my-0.5 mx-2" />
+              <div className="h-px bg-zinc-100 dark:bg-white/5 my-0.5 mx-2" />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -162,7 +162,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                   }
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 text-[12px] font-medium text-red-500 hover:bg-red-50 flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2"
               >
                 <Trash2 size={13} strokeWidth={2.5} />
                 Eliminar lista
@@ -188,7 +188,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       {/* Footer: Add card */}
       <div className="px-2 pt-0.5 pb-2">
         {isAddingCard ? (
-          <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-[#F4F5F7] rounded-lg border border-[#E8E9EC]">
+          <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-zinc-50 dark:bg-[#13151A] rounded-lg border border-zinc-200 dark:border-white/5">
             <textarea
               autoFocus
               rows={2}
@@ -202,19 +202,19 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                 }
                 if (e.key === 'Escape') handleCancel();
               }}
-              className="bg-white border border-[#E8E9EC] rounded-md px-2.5 py-2 text-[13px] text-[#1A1A2E] outline-none w-full resize-none placeholder:text-[#9CA3AF] focus:border-[#7A5AF8] focus:ring-2 focus:ring-[#7A5AF8]/10"
+              className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-md px-2.5 py-2 text-[13px] text-zinc-900 dark:text-zinc-100 outline-none w-full resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-[#6C5DD3] focus:ring-2 focus:ring-[#6C5DD3]/10"
             />
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#7A5AF8] text-white px-3 py-1.5 rounded-md text-[12px] font-semibold hover:bg-[#6949d6] transition-colors"
+                className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded-md text-[12px] font-semibold hover:bg-[#5a4cb3] transition-colors"
               >
                 Añadir
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="text-[#6B7280] hover:text-[#1A1A2E] p-1 transition-colors text-[12px] font-medium"
+                className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 p-1 transition-colors text-[12px] font-medium"
               >
                 Cancelar
               </button>
@@ -223,7 +223,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         ) : (
           <button
             onClick={() => setIsAddingCard(true)}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[#6B7280] hover:text-[#7A5AF8] hover:bg-white/50 transition-all text-[13px] font-bold group mt-2"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-white/50 dark:hover:bg-white/5 transition-all text-[13px] font-bold group mt-2"
           >
             <Plus size={16} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
             Añadir tarjeta

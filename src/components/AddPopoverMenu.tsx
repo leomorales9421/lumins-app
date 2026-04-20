@@ -62,15 +62,15 @@ const MENU_OPTIONS: MenuOption[] = [
 
 const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption }) => {
   return (
-    <div className="w-72 bg-white rounded-xl shadow-dropdown border border-[#E8E9EC] flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
-      <div className="relative border-b border-[#F0F1F3] py-3">
-        <h3 className="text-center text-xs font-extrabold text-[#806F9B] tracking-[0.1em] uppercase">
+      <div className="relative border-b border-zinc-100 dark:border-white/5 py-3">
+        <h3 className="text-center text-[10px] font-extrabold text-zinc-500 dark:text-zinc-400 tracking-[0.1em] uppercase">
           Añadir a la tarjeta
         </h3>
         <button 
           onClick={onClose}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#806F9B] hover:bg-slate-50 rounded-md transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors"
         >
           <X size={14} />
         </button>
@@ -86,16 +86,16 @@ const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption
               onClick={() => {
                 onSelectOption(option.id);
               }}
-              className="w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-[#F4F5F7] group cursor-pointer border-b border-[#F0F1F3] last:border-0"
+              className="w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-white/5 group cursor-pointer border-b border-zinc-100 dark:border-white/5 last:border-0"
             >
-              <div className="bg-slate-50 text-[#806F9B] p-2 rounded-lg group-hover:bg-white group-hover:text-[#7A5AF8] transition-colors">
+              <div className="bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 p-2 rounded-lg group-hover:bg-white dark:group-hover:bg-[#1C1F26] group-hover:text-[#6C5DD3] transition-colors border border-transparent group-hover:border-zinc-200 dark:group-hover:border-white/10">
                 <Icon size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-zinc-900 text-sm">
+                <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
                   {option.title}
                 </span>
-                <span className="text-xs text-[#806F9B]">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
                   {option.subtitle}
                 </span>
               </div>

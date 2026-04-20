@@ -21,7 +21,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   return (
     <div
       onClick={() => navigate(`/boards/${board.id}`)}
-      className="group flex flex-col cursor-pointer bg-white border border-[#E8E9EC] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
+      className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
     >
       <div className="p-5 flex flex-col flex-1">
         
@@ -29,14 +29,14 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         <div className="flex justify-between items-center mb-4">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
             board.visibility === 'public' 
-              ? 'bg-[#F4F5F7] text-[#6B7280]' 
-              : 'bg-amber-50 text-amber-600'
+              ? 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400' 
+              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500'
           }`}>
             {board.visibility === 'public' ? 'Público' : 'Privado'}
           </span>
           <button 
             onClick={(e) => e.stopPropagation()}
-            className="p-1 rounded text-[#9CA3AF] hover:bg-[#F4F5F7] hover:text-[#1A1A2E] transition-colors"
+            className="p-1 rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
           >
             < MoreHorizontal size={16} />
           </button>
@@ -45,45 +45,45 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         {/* Content */}
         <div className="flex flex-col gap-1.5 mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#F4F5F7] text-[#7A5AF8] flex items-center justify-center group-hover:bg-[#7A5AF8] group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] flex items-center justify-center group-hover:bg-[#6C5DD3] group-hover:text-white transition-all">
                <Layout size={18} strokeWidth={2.5} />
             </div>
-            <h3 className="text-[16px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#7A5AF8] transition-colors truncate">
+            <h3 className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight group-hover:text-[#6C5DD3] transition-colors truncate">
               {board.name}
             </h3>
           </div>
-          <p className="text-[13px] font-medium text-[#6B7280] line-clamp-2 leading-snug pl-10">
+          <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-snug pl-10">
             {board.description || 'Sin descripción disponible.'}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-auto mb-5 pl-10">
-           <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[10px] font-bold text-[#9CA3AF] uppercase">Progreso</span>
-              <span className="text-[10px] font-bold text-[#7A5AF8]">{progress}%</span>
-           </div>
-           <div className="h-1.5 w-full bg-[#F4F5F7] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#7A5AF8] rounded-full transition-all duration-500" 
-                style={{ width: `${progress}%` }}
-              />
-           </div>
-        </div>
+         <div className="mt-auto mb-5 pl-10">
+            <div className="flex justify-between items-center mb-1.5">
+               <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">Progreso</span>
+               <span className="text-[10px] font-bold text-[#6C5DD3]">{progress}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+               <div 
+                 className="h-full bg-[#6C5DD3] rounded-full transition-all duration-500" 
+                 style={{ width: `${progress}%` }}
+               />
+            </div>
+         </div>
 
-        <div className="pt-4 flex items-center justify-between border-t border-[#F0F1F3]">
+        <div className="pt-4 flex items-center justify-between border-t border-zinc-100 dark:border-white/5">
           <div className="flex -space-x-2">
              <UserAvatar 
                user={user} 
                size="xs" 
-               className="border-2 border-white shadow-sm"
+               className="border-2 border-white dark:border-[#1C1F26] shadow-sm"
              />
-             <div className="w-7 h-7 rounded-full bg-[#EAECF0] flex items-center justify-center text-[#9CA3AF] border-2 border-white shadow-sm">
+             <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 dark:text-zinc-500 border-2 border-white dark:border-[#1C1F26] shadow-sm">
                <Users size={12} />
              </div>
           </div>
           
-          <div className="flex items-center gap-1.5 text-[#9CA3AF]">
+          <div className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-500">
              <Calendar size={14} />
              <span className="text-[11px] font-bold">
                {board.createdAt ? new Date(board.createdAt).getFullYear() : '2026'}

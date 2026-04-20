@@ -29,10 +29,10 @@ const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-10">
+    <div className="w-full max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-10 min-h-[calc(100vh-64px)]">
       {/* Left Navigation */}
       <aside className="w-full md:w-[250px] flex-shrink-0">
-        <h1 className="text-2xl font-extrabold text-zinc-900 mb-6">Configuraciones</h1>
+        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-6">Configuraciones</h1>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
             <NavLink
@@ -41,8 +41,8 @@ const SettingsPage: React.FC = () => {
               className={({ isActive }) => `
                 flex items-center gap-3 p-3 rounded-lg transition-colors
                 ${isActive 
-                  ? 'bg-[#F4F6F9] text-[#6C5DD3] font-bold' 
-                  : 'text-zinc-500 hover:bg-slate-50 hover:text-zinc-900'
+                  ? 'bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] font-bold' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }
               `}
             >

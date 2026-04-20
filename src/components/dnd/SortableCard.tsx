@@ -82,20 +82,20 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
         )}
 
         {/* Title */}
-        <p className="text-[13px] font-semibold text-[#1A1A2E] leading-snug group-hover:text-[#7A5AF8] transition-colors">
+        <p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100 leading-snug group-hover:text-[#6C5DD3] transition-colors">
           {card.title}
         </p>
 
         {/* Checklist progress bar */}
         {totalItems > 0 && (
           <div className="flex items-center gap-2">
-            <div className="flex-1 h-1 bg-[#F0F1F3] rounded-full overflow-hidden">
+            <div className="flex-1 h-1 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#7A5AF8]'}`}
+                className={`h-full rounded-full transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#6C5DD3]'}`}
                 style={{ width: `${checklistPct}%` }}
               />
             </div>
-            <span className={`text-[10px] font-bold ${doneItems === totalItems ? 'text-emerald-600' : 'text-[#6B7280]'}`}>
+            <span className={`text-[10px] font-bold ${doneItems === totalItems ? 'text-emerald-600' : 'text-zinc-500 dark:text-zinc-400'}`}>
               {checklistPct}%
             </span>
           </div>
@@ -110,8 +110,8 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
               <span
                 className={`flex items-center gap-1 text-[11px] font-medium rounded-md px-1.5 py-0.5 ${
                   isOverdue
-                    ? 'bg-red-50 text-red-600'
-                    : 'text-[#6B7280]'
+                    ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                    : 'text-zinc-500 dark:text-zinc-400'
                 }`}
                 title={isOverdue ? 'Vencido' : 'Fecha de vencimiento'}
               >
@@ -122,7 +122,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
 
             {/* Comments */}
             {(card._count?.comments || 0) > 0 && (
-              <span className="flex items-center gap-1 text-[11px] font-medium text-[#6B7280]" title="Comentarios">
+              <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400" title="Comentarios">
                 <MessageSquare size={11} strokeWidth={2.5} />
                 {card._count?.comments}
               </span>
@@ -130,7 +130,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
 
             {/* Attachments */}
             {(card._count?.attachments || 0) > 0 && (
-              <span className="flex items-center gap-1 text-[11px] font-medium text-[#6B7280]" title="Adjuntos">
+              <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400" title="Adjuntos">
                 <Paperclip size={11} strokeWidth={2.5} />
                 {card._count?.attachments}
               </span>
@@ -139,7 +139,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
             {/* Checklist count */}
             {totalItems > 0 && (
               <span
-                className={`flex items-center gap-1 text-[11px] font-medium ${doneItems === totalItems ? 'text-emerald-600' : 'text-[#6B7280]'}`}
+                className={`flex items-center gap-1 text-[11px] font-medium ${doneItems === totalItems ? 'text-emerald-600' : 'text-zinc-500 dark:text-zinc-400'}`}
                 title="Checklist"
               >
                 <CheckSquare size={11} strokeWidth={2.5} />
@@ -149,7 +149,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
 
             {/* Description indicator */}
             {card.description && (
-              <span className="text-[#9CA3AF]" title="Tiene descripción">
+              <span className="text-zinc-400 dark:text-zinc-500" title="Tiene descripción">
                 <AlignLeft size={11} strokeWidth={2.5} />
               </span>
             )}
@@ -173,7 +173,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                   <div
                     key={assignee.user?.id || `assignee-${idx}`}
                     title={assignee.user?.name}
-                    className="w-5 h-5 rounded-full border border-white shadow-sm transition-transform hover:scale-110"
+                    className="w-5 h-5 rounded-full border border-white dark:border-[#1C1F26] shadow-sm transition-transform hover:scale-110"
                   >
                     <UserAvatar 
                       name={assignee.user?.name || 'Usuario'} 
@@ -183,8 +183,8 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                   </div>
                 ))
               ) : (
-                <div className="w-5 h-5 rounded-full bg-[#F0F1F3] border border-[#E8E9EC] flex items-center justify-center">
-                  <Eye size={9} className="text-[#9CA3AF]" strokeWidth={2.5} />
+                <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center">
+                  <Eye size={9} className="text-zinc-400 dark:text-zinc-500" strokeWidth={2.5} />
                 </div>
               )}
             </div>

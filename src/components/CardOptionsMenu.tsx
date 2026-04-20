@@ -57,20 +57,20 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   };
 
   return (
-    <div className="w-56 bg-white rounded-[12px] shadow-dropdown border border-[#E8E9EC] flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+    <div className="w-56 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
       {/* Join / Leave */}
       <button 
         onClick={handleJoinClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors cursor-pointer group"
       >
         {isJoined ? (
           <>
-            <UserMinus size={18} className="text-[#806F9B] group-hover:text-[#7A5AF8]" />
+            <UserMinus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
             <span>Abandonar tarjeta</span>
           </>
         ) : (
           <>
-            <UserPlus size={18} className="text-[#806F9B] group-hover:text-[#7A5AF8]" />
+            <UserPlus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
             <span>Unirse</span>
           </>
         )}
@@ -79,30 +79,30 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       {/* Share */}
       <button 
         onClick={handleShareClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors cursor-pointer group"
       >
         {copied ? (
           <>
             <Check size={18} className="text-emerald-500" />
-            <span className="text-emerald-600">¡Copiado!</span>
+            <span className="text-emerald-600 dark:text-emerald-500">¡Copiado!</span>
           </>
         ) : (
           <>
-            <Link size={18} className="text-[#806F9B] group-hover:text-[#7A5AF8]" />
+            <Link size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
             <span>Copiar enlace</span>
           </>
         )}
       </button>
 
       {/* Divider */}
-      <hr className="border-[#E8E9EC] my-1 mx-2" />
+      <hr className="border-zinc-100 dark:border-white/5 my-1 mx-2" />
 
       {/* Archive */}
       <button 
         onClick={handleArchiveClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 hover:bg-rose-50 hover:text-[#E91E63] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer group"
       >
-        <Archive size={18} className="text-[#806F9B] group-hover:text-[#E91E63]" />
+        <Archive size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-rose-500 dark:group-hover:text-rose-400" />
         <span>Archivar tarjeta</span>
       </button>
     </div>

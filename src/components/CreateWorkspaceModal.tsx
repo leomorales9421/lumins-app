@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2 } from 'lucide-react';
+import { X, Building2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/api-client';
 
@@ -30,7 +30,6 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
     setError('');
 
     try {
-      // response is the data object: { success: boolean, data: { workspace: any }, message: string }
       const response = await apiClient.post<any>('/api/workspaces', {
         name,
         description: description.trim() || undefined
@@ -49,7 +48,6 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
       navigate(`/w/${newWorkspace.id}/dashboard`);
     } catch (err: any) {
       console.error('Error creating workspace:', err);
-      // If apiClient.post fails, err is likely an AxiosError or similar
       const message = err.response?.data?.message || err.message || 'Error al crear el espacio de trabajo';
       setError(message);
     } finally {
@@ -75,7 +73,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-md"
           />
 
           {/* Modal Content */}
@@ -83,28 +81,31 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white rounded-[24px] shadow-modal border border-[#E8E9EC] p-10 relative overflow-hidden z-10"
+            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-[32px] shadow-modal border border-zinc-200 dark:border-white/10 p-10 relative overflow-hidden z-10"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#F4F5F7] rounded-xl flex items-center justify-center text-[#7A5AF8]">
-                  <Building2 size={24} strokeWidth={3} />
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded-[20px] flex items-center justify-center shadow-sm">
+                  <Building2 size={32} strokeWidth={2.5} />
                 </div>
-                <h2 className="text-3xl font-bold text-zinc-900 tracking-tighter">Nuevo Espacio</h2>
+                <div>
+                  <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Nuevo Espacio</h2>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mt-1.5">Colabora con tu equipo en un lugar centralizado</p>
+                </div>
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:bg-[#F4F5F7] hover:text-[#7A5AF8] transition-all"
+                className="w-12 h-12 flex items-center justify-center rounded-2xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all"
               >
-                <X size={24} strokeWidth={3} />
+                <X size={28} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Workspace Name */}
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.4em] ml-1">
                   Nombre del Espacio *
                 </label>
                 <input 
@@ -113,7 +114,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Marketing HQ o Luminous Global"
-                  className="w-full h-10 bg-[#F4F5F7] rounded-[12px] px-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-[16px] px-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                   required
                 />
               </div>
@@ -124,13 +125,13 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   <button 
                     type="button"
                     onClick={() => setIsDescriptionExpanded(true)}
-                    className="text-[#7A5AF8] text-sm font-bold hover:underline ml-1 transition-all"
+                    className="text-[#6C5DD3] dark:text-[#8E82E3] text-sm font-bold hover:underline ml-1 transition-all"
                   >
                     + Añadir descripción (opcional)
                   </button>
                 ) : (
-                  <div className="space-y-3 animate-fade-in">
-                    <label className="text-[10px] font-bold text-[#806F9B] uppercase tracking-[0.4em] ml-1">
+                  <div className="space-y-3 animate-in fade-in slide-in-from-top-1">
+                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.4em] ml-1">
                       Descripción del Espacio
                     </label>
                     <textarea 
@@ -138,24 +139,24 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Define el propósito de este equipo..."
-                      className="w-full bg-[#F4F5F7] rounded-[12px] p-5 text-zinc-900 font-bold outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF] resize-none"
+                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-[16px] p-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
                     />
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-500 text-[10px] font-bold uppercase tracking-widest text-center py-3 rounded-[12px]">
+                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded-xl border border-rose-100 dark:border-rose-500/20">
                   {error}
                 </div>
               )}
 
               {/* Footer Actions */}
-              <div className="mt-10 flex justify-end items-center gap-6">
+              <div className="mt-12 flex justify-end items-center gap-6">
                 <button 
                   type="button"
                   onClick={handleClose}
-                  className="text-[#806F9B] font-bold text-sm hover:text-zinc-900 transition-colors"
+                  className="text-zinc-500 dark:text-zinc-400 font-bold text-sm hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -163,14 +164,14 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-10 px-10 rounded-[12px] font-bold text-white transition-all relative overflow-hidden
+                    h-12 px-10 rounded-[16px] font-bold text-white transition-all shadow-lg
                     ${isLoading || !name.trim() 
-                      ? 'bg-zinc-200 cursor-not-allowed opacity-50 grayscale' 
-                      : 'bg-[#6C5DD3] hover:shadow-[0_8px_16px_-6px_rgba(108,93,211,0.4)] active:scale-[0.98]'
+                      ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 shadow-none cursor-not-allowed' 
+                      : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'
                     }
                   `}
                 >
-                  {isLoading ? 'CREANDO...' : 'CREAR ESPACIO'}
+                  {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'CREAR ESPACIO'}
                 </button>
               </div>
             </form>
