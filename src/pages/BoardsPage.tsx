@@ -9,6 +9,7 @@ import InviteMembersModal from '../components/InviteMembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Filter, ChevronDown, Layout } from 'lucide-react';
+import { Skeleton } from '../components/ui/Skeleton';
 
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
@@ -72,8 +73,30 @@ const BoardsPage: React.FC = () => {
         <div className="max-w-[1600px] mx-auto w-full">
           
           {(isLoading || isLoadingWorkspaces) ? (
-            <div className="flex-1 flex items-center justify-center min-h-[400px]">
-              <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
+            <div className="flex-1">
+               {/* Header Skeleton */}
+               <div className="flex flex-col gap-1 mb-8">
+                  <Skeleton className="h-4 w-32 mb-1" />
+                  <Skeleton className="h-9 w-64" />
+               </div>
+               
+               {/* Grid Skeleton */}
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                 {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                   <div key={i} className="bg-white rounded-xl border border-[#E8E9EC] p-5 h-48 shadow-soft flex flex-col gap-4">
+                     <div className="flex justify-between items-start">
+                        <Skeleton className="w-10 h-10 rounded-lg" />
+                        <Skeleton className="w-6 h-6 rounded-full" />
+                     </div>
+                     <Skeleton className="h-5 w-3/4" />
+                     <Skeleton className="h-3 w-1/2" />
+                     <div className="mt-auto flex gap-2">
+                        <Skeleton className="h-4 w-12" />
+                        <Skeleton className="h-4 w-12" />
+                     </div>
+                   </div>
+                 ))}
+               </div>
             </div>
           ) : workspaces.length === 0 ? (
             <WorkspaceEmptyState onCreateClick={() => {

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
+import { Skeleton } from '../components/ui/Skeleton';
 
 import NavBar from '../components/layout/NavBar';
 import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
@@ -301,8 +302,46 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen cu-board-bg flex flex-col items-center justify-center font-sans">
-        <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
+      <div className="h-screen flex flex-col cu-board-bg font-sans overflow-hidden">
+        {/* Header Skeleton */}
+        <div className="px-8 py-4 flex items-center justify-between border-b border-[#E8E9EC] bg-white/50">
+           <div className="flex items-center gap-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-6 w-48" />
+           </div>
+           <div className="flex gap-2">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-32" />
+           </div>
+        </div>
+
+        {/* Canvas Skeleton */}
+        <div className="flex-1 p-6 flex gap-4 overflow-hidden">
+           {[1, 2, 3, 4].map(i => (
+             <div key={i} className="min-w-[300px] h-full flex flex-col gap-3">
+                <div className="flex justify-between items-center px-1">
+                   <Skeleton className="h-5 w-32" />
+                   <Skeleton className="h-5 w-5 rounded-md" />
+                </div>
+                <div className="space-y-3">
+                   {[1, 2, 3].map(j => (
+                     <div key={j} className="bg-white rounded-lg border border-[#E8E9EC] p-3 space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <div className="flex justify-between">
+                           <Skeleton className="h-3 w-20" />
+                           <div className="flex gap-1">
+                              <Skeleton className="h-4 w-4 rounded-full" />
+                              <Skeleton className="h-4 w-4 rounded-full" />
+                           </div>
+                        </div>
+                     </div>
+                   ))}
+                </div>
+                <Skeleton className="h-10 w-full rounded-lg" />
+             </div>
+           ))}
+        </div>
       </div>
     );
   }

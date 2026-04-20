@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
+import { Skeleton } from '../components/ui/Skeleton';
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -159,17 +160,35 @@ const WorkspaceActivityPage: React.FC = () => {
             <Activity size={18} strokeWidth={2.5} />
             <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Workspace Audit Log</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Actividad del Espacio</h1>
-          <p className="text-sm text-zinc-500 font-medium">Registro en tiempo real de todos los tableros.</p>
+          {isLoading && activity.length === 0 ? (
+            <>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-4 w-96" />
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">Actividad del Espacio</h1>
+              <p className="text-sm text-zinc-500 font-medium">Registro en tiempo real de todos los tableros.</p>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Main Feed Column */}
           <div className="flex-1 lg:w-[70%] w-full">
             {isLoading && activity.length === 0 ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="bg-white rounded-xl p-4 border border-zinc-100 animate-pulse h-24 shadow-sm" />
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="bg-white rounded-xl border border-zinc-100 p-4 flex items-start gap-4 shadow-sm">
+                    <Skeleton className="w-9 h-9 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : activity.length === 0 ? (

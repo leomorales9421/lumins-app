@@ -8,6 +8,7 @@ import InviteMembersModal from '../components/InviteMembersModal';
 import MemberSlideOver from '../components/MemberSlideOver';
 import { motion } from 'framer-motion';
 import type { WorkspaceMember } from '../types/workspace';
+import { Skeleton } from '../components/ui/Skeleton';
 
 const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -41,8 +42,43 @@ const MembersPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-[3px] border-[#E8E9EC] border-t-[#7A5AF8] rounded-full animate-spin" />
+      <div className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center mb-10">
+           <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-9 w-64" />
+           </div>
+           <div className="flex gap-3">
+              <Skeleton className="h-10 w-64 rounded-xl" />
+              <Skeleton className="h-10 w-24 rounded-xl" />
+           </div>
+        </div>
+
+        {/* Table Skeleton */}
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-xl overflow-hidden">
+           <div className="bg-[#F8F9FB] border-b border-zinc-100 px-6 py-4 flex gap-8">
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-32" />
+           </div>
+           <div className="divide-y divide-zinc-50">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="px-6 py-5 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-full" />
+                      <div className="space-y-1.5">
+                         <Skeleton className="h-4 w-32" />
+                         <Skeleton className="h-3 w-48" />
+                      </div>
+                   </div>
+                   <Skeleton className="h-6 w-20 rounded-full" />
+                   <Skeleton className="h-4 w-24" />
+                   <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+              ))}
+           </div>
+        </div>
       </div>
     );
   }

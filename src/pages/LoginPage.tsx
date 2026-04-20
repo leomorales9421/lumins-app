@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import { Layout, Shield, Globe } from 'lucide-react';
+import { Skeleton } from '../components/ui/Skeleton';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -10,8 +11,65 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate('/app', { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[#F0F1F3] font-sans">
+        <div className="w-full max-w-[1000px] min-h-[600px] bg-white rounded-2xl shadow-modal flex overflow-hidden">
+          {/* Left Panel Skeleton */}
+          <div className="hidden md:flex flex-1 bg-[#1A1A2E] p-16 flex-col justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-xl bg-slate-800" />
+              <Skeleton className="h-6 w-32 bg-slate-800" />
+            </div>
+            <div>
+              <Skeleton className="h-12 w-full mb-4 bg-slate-800" />
+              <Skeleton className="h-12 w-3/4 mb-6 bg-slate-800" />
+              <Skeleton className="h-4 w-full bg-slate-800" />
+            </div>
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-8 w-48 bg-slate-800" />
+              <Skeleton className="h-px w-16 bg-slate-800" />
+              <Skeleton className="h-3 w-32 bg-slate-800" />
+            </div>
+          </div>
+          {/* Right Panel Skeleton */}
+          <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
+            <div className="mb-10">
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <div className="space-y-6 max-w-[400px]">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+              <Skeleton className="h-11 w-full mt-2" />
+              <div className="flex items-center gap-4 py-2">
+                 <div className="h-px flex-1 bg-zinc-100" />
+                 <Skeleton className="h-3 w-20" />
+                 <div className="h-px flex-1 bg-zinc-100" />
+              </div>
+              <Skeleton className="h-11 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
