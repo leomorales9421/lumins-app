@@ -386,8 +386,8 @@ const BoardDetailPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full font-sans">
       
-      {/* Board Header (Sub-navigation) - Glassmorphism */}
-      <header className="h-16 bg-white/20 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20">
+      {/* Board Header (Sub-navigation) - Dark Glass Mode */}
+      <header className="h-16 bg-black/20 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20 text-white drop-shadow-md">
         {/* Left Side: Hamburger, Breadcrumbs and Title */}
         <div className="flex items-center gap-4">
           <button 
@@ -451,8 +451,8 @@ const BoardDetailPage: React.FC = () => {
               onClick={() => setIsFiltersOpen(!isFiltersOpen)}
               className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium transition-all shadow-sm ${
                 filterUserId || isFiltersOpen 
-                  ? 'bg-white/20 border-white/40 text-white' 
-                  : 'bg-white/10 border-white/10 text-white hover:bg-white/20'
+                  ? 'bg-white/30 border-white/40 text-white' 
+                  : 'bg-black/40 border-white/10 text-white hover:bg-black/60'
               }`}
             >
               <Filter size={16} />
@@ -489,7 +489,7 @@ const BoardDetailPage: React.FC = () => {
 
           <button 
             onClick={() => setIsMembersModalOpen(true)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-white border border-zinc-200 text-zinc-700 hover:bg-slate-50 text-sm font-medium transition-all shadow-sm"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-black/40 text-white hover:bg-black/60 border border-white/10 text-sm font-medium transition-all shadow-sm"
           >
             <Users size={16} />
             Miembros
@@ -497,7 +497,7 @@ const BoardDetailPage: React.FC = () => {
 
           <button 
             onClick={() => setIsSettingsDrawerOpen(true)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 text-white hover:bg-white/20 text-sm font-bold transition-all border border-white/10"
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-black/40 text-white hover:bg-black/60 text-sm font-bold transition-all border border-white/10"
           >
             <Settings size={16} />
             Configuración

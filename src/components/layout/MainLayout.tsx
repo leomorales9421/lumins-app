@@ -124,7 +124,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div 
-      className={`flex flex-1 h-screen overflow-hidden transition-all duration-700 ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
+      className={`flex flex-1 h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900')}`}
       style={isBoardView && boardBackground?.startsWith('http') ? { 
         backgroundImage: `url(${boardBackground})`,
         backgroundSize: 'cover',
@@ -133,6 +133,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         backgroundAttachment: 'fixed'
       } : {}}
     >
+      {/* Polarized Filter (Contrast Shield) */}
+      {isBoardView && boardBackground?.startsWith('http') && (
+        <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
+      )}
+
       {/* Background Loader Overlay */}
       {isBoardView && isLoadingBg && (
         <div className="fixed inset-0 z-[150] bg-black/20 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
@@ -140,28 +145,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <p className="text-white font-bold text-sm tracking-widest uppercase">Optimizando Fondo...</p>
         </div>
       )}
-      {/* Sidebar - Conditional behavior */}
-      <Sidebar 
-        onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
-        isFloating={isBoardView}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
-      
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ${isBoardView ? 'pl-0' : ''}`}>
-        {!isBoardView && (
-          <NavBar 
-            user={user} 
-            logout={logout} 
-            onCreateBoard={() => setShowCreateBoardModal(true)}
-            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
-            canCreateBoard={canCreateBoard}
-          />
-        )}
+
+      {/* UI Content Layer */}
+      <div className="relative z-10 flex flex-1 overflow-hidden">
+        {/* Sidebar - Conditional behavior */}
+        <Sidebar 
+          onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
+          isFloating={isBoardView}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
         
-        <main className={`flex-1 overflow-y-auto custom-scrollbar ${isBoardView ? 'h-screen' : ''}`}>
-          {children}
-        </main>
+        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ${isBoardView ? 'pl-0' : ''}`}>
+          {!isBoardView && (
+            <NavBar 
+              user={user} 
+              logout={logout} 
+              onCreateBoard={() => setShowCreateBoardModal(true)}
+              onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+              canCreateBoard={canCreateBoard}
+            />
+          )}
+          
+          <main className={`flex-1 overflow-y-auto custom-scrollbar ${isBoardView ? 'h-screen' : ''}`}>
+            {children}
+          </main>
+        </div>
       </div>
 
       <CreateWorkspaceModal 

@@ -87,7 +87,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       style={style}
       className={`
         cu-column h-fit max-h-full flex flex-col min-w-[300px] max-w-[300px] flex-shrink-0 transition-all
-        bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md rounded-2xl border border-white/20 p-4
+        bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md rounded-2xl border border-white/30 p-4 shadow-xl
         ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
         ${isDraggingCardOver ? 'ring-2 ring-[#7A5AF8]/30 ring-offset-1' : ''}
       `}
