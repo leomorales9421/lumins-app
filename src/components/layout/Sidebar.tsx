@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
 
   const sidebarClasses = isFloating 
     ? `fixed inset-y-0 left-0 z-[100] transition-all duration-500 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/10 w-64 shadow-2xl`
-    : `bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
+    : `relative group bg-white border-r border-zinc-200 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
 
   return (
     <>
@@ -67,13 +67,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
       <aside className={sidebarClasses}>
         {/* Brand Header Removed */}
 
-        {/* Collapse Toggle Button - Relocated and adjusted position */}
+        {/* Collapse Toggle Button - Rediseñado con estilo "Subtle Depth" */}
         {!isFloating && (
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`absolute -right-3 top-14 bg-white border border-zinc-200 text-zinc-500 rounded-lg p-1 cursor-pointer shadow-sm z-50 hover:bg-zinc-50 hover:text-zinc-900 transition-all ${isCollapsed ? 'translate-x-0' : ''}`}
+            className={`
+              absolute -right-3.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center 
+              rounded-full border border-zinc-200 bg-white text-zinc-400 
+              shadow-sm transition-all hover:scale-110 hover:border-zinc-300 
+              hover:text-zinc-700 hover:shadow-md z-50 
+              dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300
+              ${isCollapsed ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+            `}
           >
-            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            {isCollapsed ? <ChevronRight size={14} strokeWidth={2.5} /> : <ChevronLeft size={14} strokeWidth={2.5} />}
           </button>
         )}
 
