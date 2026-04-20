@@ -81,21 +81,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F1F3] flex flex-col font-sans">
-      <NavBar 
-        user={user} 
-        logout={logout} 
-        onCreateBoard={() => setShowCreateBoardModal(true)}
-        onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
-        canCreateBoard={canCreateBoard}
-      />
-      
-      <div className="flex flex-1">
+    <>
+      <div className="flex flex-1 h-screen overflow-hidden">
         <Sidebar onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} />
         
-        <main className="flex-1 overflow-y-auto custom-scrollbar">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col min-w-0">
+          <NavBar 
+            user={user} 
+            logout={logout} 
+            onCreateBoard={() => setShowCreateBoardModal(true)}
+            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+            canCreateBoard={canCreateBoard}
+          />
+          
+          <main className="flex-1 overflow-y-auto custom-scrollbar">
+            {children}
+          </main>
+        </div>
       </div>
 
       <CreateWorkspaceModal 
@@ -111,7 +113,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         workspaces={workspaces}
         defaultWorkspaceId={workspaceId}
       />
-    </div>
+    </>
   );
 };
 

@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
 import { Skeleton } from '../components/ui/Skeleton';
+import { 
+  ChevronLeft, 
+  Filter, 
+  Users, 
+  Settings, 
+  Plus, 
+  Search,
+  MoreHorizontal
+} from 'lucide-react';
 
-import NavBar from '../components/layout/NavBar';
 import { useNotificationHelpers, useStructuredLogger } from '../components/NotificationProvider';
 import { 
   DndContext, 
@@ -24,11 +32,13 @@ import {
 import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard } from '../components/dnd/SortableCard';
 import CardDetailModal from '../components/CardDetailModal';
+import ManageBoardMembersModal from '../components/ManageBoardMembersModal';
+import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [board, setBoard] = useState<Board | null>(null);
@@ -40,6 +50,13 @@ const BoardDetailPage: React.FC = () => {
   const [newListTitle, setNewListTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [originalContainer, setOriginalContainer] = useState<string | null>(null);
+  
+  // New States for Logic
+  const [filterUserId, setFilterUserId] = useState<string | null>(null);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
   const { showError, showSuccess } = useNotificationHelpers();
   const { logSuccess } = useStructuredLogger();
   
@@ -55,19 +72,30 @@ const BoardDetailPage: React.FC = () => {
       setBoard(response.data.board);
       
       // Filter out archived (closed) cards
-      const filteredLists = (response.data.board.lists || []).map(list => ({
+      let filteredLists = (response.data.board.lists || []).map(list => ({
         ...list,
         cards: (list.cards || []).filter(card => card.status === 'open')
       }));
+
+      // Apply client-side filters if active
+      if (filterUserId) {
+        filteredLists = filteredLists.map(list => ({
+          ...list,
+          cards: list.cards?.filter(card => 
+            card.assignees?.some(a => a.user.id === filterUserId)
+          ) || []
+        }));
+      }
+
       setLists(filteredLists);
     } catch (err) {
       navigate('/app');
     } finally {
       setIsLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, navigate, filterUserId]);
 
-  useEffect(() => { fetchBoard(); }, [fetchBoard]);
+  useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
 
   // Handle opening card from URL on initial load
   useEffect(() => {
@@ -87,6 +115,12 @@ const BoardDetailPage: React.FC = () => {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  const findContainer = (id: string) => {
+    const currentLists = listsRef.current;
+    if (currentLists.find((list) => list.id === id)) return id;
+    return currentLists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const activeId = active.id as string;
@@ -96,12 +130,6 @@ const BoardDetailPage: React.FC = () => {
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card);
     }
-  };
-
-  const findContainer = (id: string) => {
-    const currentLists = listsRef.current;
-    if (currentLists.find((list) => list.id === id)) return id;
-    return currentLists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -171,7 +199,6 @@ const BoardDetailPage: React.FC = () => {
     const overId = over.id as string;
     const activeType = active.data.current?.type;
     
-    // CASE: REORDERING LISTS
     if (activeType === 'list') {
       if (activeId !== overId) {
         const oldIndex = lists.findIndex((l) => l.id === activeId);
@@ -196,7 +223,6 @@ const BoardDetailPage: React.FC = () => {
       return;
     }
 
-    // CASE: REORDERING CARDS
     const currentLists = listsRef.current;
     const overContainer = findContainer(overId);
 
@@ -205,8 +231,6 @@ const BoardDetailPage: React.FC = () => {
       return;
     }
 
-    // Even if activeContainer === overContainer (due to handleDragOver), 
-    // we might need to sort within the target list
     const activeList = currentLists.find((l) => l.id === overContainer);
     if (!activeList) {
       setOriginalContainer(null);
@@ -227,19 +251,16 @@ const BoardDetailPage: React.FC = () => {
       setLists(finalLists);
     }
 
-    // SYNC WITH BACKEND
     try {
       setIsSaving(true);
       const targetList = finalLists.find(l => l.id === overContainer);
       const cardsInTarget = targetList?.cards || [];
       
       if (originalContainer === overContainer) {
-        // INTRA-LIST: Use bulk reorder to ensure all positions are unique and correct
         await apiClient.post(`/api/cards/lists/${overContainer}/reorder`, {
           cards: cardsInTarget.map((c, index) => ({ id: c.id, position: (index + 1) * 1000 }))
         });
       } else {
-        // INTER-LIST: Use single move (backend handles WIP limits and audit logs)
         const newIndexInList = cardsInTarget.findIndex(c => c.id === activeId);
         await apiClient.post(`/api/cards/${activeId}/move`, {
           destinationBoardId: id,
@@ -302,9 +323,9 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex flex-col cu-board-bg font-sans overflow-hidden">
+      <div className="flex flex-col h-full bg-[#F4F6F9] font-sans overflow-hidden">
         {/* Header Skeleton */}
-        <div className="px-8 py-4 flex items-center justify-between border-b border-[#E8E9EC] bg-white/50">
+        <div className="h-[60px] px-8 flex items-center justify-between border-b border-zinc-200 bg-white">
            <div className="flex items-center gap-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-4" />
@@ -319,7 +340,7 @@ const BoardDetailPage: React.FC = () => {
         {/* Canvas Skeleton */}
         <div className="flex-1 p-6 flex gap-4 overflow-hidden">
            {[1, 2, 3, 4].map(i => (
-             <div key={i} className="min-w-[300px] h-full flex flex-col gap-3">
+             <div key={i} className="min-w-[280px] max-w-[280px] h-full flex flex-col gap-3">
                 <div className="flex justify-between items-center px-1">
                    <Skeleton className="h-5 w-32" />
                    <Skeleton className="h-5 w-5 rounded-md" />
@@ -349,108 +370,190 @@ const BoardDetailPage: React.FC = () => {
   if (!board) return null;
 
   return (
-    <div className="h-screen flex flex-col cu-board-bg font-sans">
-      <NavBar user={user} logout={logout} />
+    <div className="flex flex-col h-full bg-[#F4F6F9] font-sans">
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        
-        {/* Simplified Top Header Area */}
-        <header className="cu-board-header px-8 py-4 flex items-center justify-between flex-shrink-0 relative z-10">
-           <div className="flex items-center gap-6">
-             <button
-               onClick={() => navigate('/app')}
-               className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#7A5AF8] transition-colors text-sm font-medium"
-             >
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-               Tableros
-             </button>
-             <span className="text-[#D1D5DB]">/</span>
-             <div className="flex items-center gap-3">
-               <div className="w-6 h-6 rounded-md bg-[#7A5AF8] flex-shrink-0" />
-               <div className="flex items-center gap-2">
-                 <h1 className="text-[15px] font-bold text-[#1A1A2E]">{board.name}</h1>
-                 {isSaving && (
-                   <span className="text-[10px] font-semibold text-[#7A5AF8] bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full animate-pulse">
-                     Guardando...
-                   </span>
-                 )}
-               </div>
-             </div>
-           </div>
-
-           <div className="flex items-center gap-2">
-              <button className="h-8 px-4 rounded-lg text-[#6B7280] text-[13px] font-semibold border border-[#E8E9EC] bg-white hover:border-[#7A5AF8] hover:text-[#7A5AF8] transition-all">Miembros</button>
-              <button className="h-8 px-4 rounded-lg text-white text-[13px] font-semibold bg-[#7A5AF8] hover:bg-[#6949d6] transition-all shadow-sm">Configuración</button>
-           </div>
-        </header>
-
-        {/* DND Canvas expanded */}
-        <main className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar">
-          <DndContext 
-            sensors={sensors} 
-            collisionDetection={closestCorners} 
-            onDragStart={handleDragStart} 
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
+      {/* Board Header (Sub-navigation) */}
+      <header className="h-[60px] bg-white border-b border-zinc-200 px-6 flex items-center justify-between flex-shrink-0 z-20">
+        {/* Left Side: Breadcrumbs and Title */}
+        <div className="flex items-center gap-4">
+          <Link 
+            to={`/w/${board.workspaceId}/dashboard`} 
+            className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
           >
-            <div className="flex gap-4 h-full items-start p-6 min-w-max">
-              <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
-                {lists.map((list) => (
-                  <SortableList 
-                    key={list.id} 
-                    list={list} 
-                    onCardClick={setSelectedCardId}
-                    onAddCard={handleAddCard}
-                    onUpdateList={handleUpdateList}
-                    onDeleteList={handleDeleteList}
-                  />
-                ))}
-              </SortableContext>
-              
-              {isAddingList ? (
-                <form onSubmit={handleAddList} className="min-w-[300px] bg-white rounded-lg border border-[#E8E9EC] p-3 h-fit shadow-soft">
-                  <input
-                    autoFocus
-                    placeholder="Nombre de la lista..."
-                    value={newListTitle}
-                    onChange={(e) => setNewListTitle(e.target.value)}
-                    className="w-full cu-input px-2.5 py-2 text-[13px] font-medium mb-2"
-                  />
-                  <div className="flex items-center gap-2">
-                    <button type="submit" className="bg-[#7A5AF8] hover:bg-[#6949d6] text-white text-[12px] font-semibold px-3 py-1.5 rounded-md transition-colors">Añadir lista</button>
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingList(false)}
-                      className="text-[#6B7280] hover:text-[#1A1A2E] text-[12px] font-medium transition-colors"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setIsAddingList(true)}
-                  className="cu-add-list-btn min-w-[300px] h-[72px] flex items-center justify-center gap-2 text-[#9CA3AF] hover:text-[#7A5AF8] font-semibold text-[13px] flex-shrink-0"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                  Añadir lista
-                </button>
-              )}
-
-              {/* Spacer to prevent sticking to the right edge */}
-              <div className="w-24 flex-shrink-0" />
+            <ChevronLeft size={16} />
+            Tableros
+          </Link>
+          <span className="text-zinc-300 text-lg">/</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-[#7A5AF8] flex items-center justify-center text-white shadow-sm">
+              <span className="font-bold text-xs">{board.name.charAt(0).toUpperCase()}</span>
             </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold text-zinc-900">{board.name}</h1>
+                {isSaving && (
+                  <span className="text-[10px] font-semibold text-[#7A5AF8] bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full animate-pulse">
+                    Guardando...
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <DragOverlay>
-              {activeCard ? (
-                <div className="w-[300px] rotate-2 shadow-2xl">
-                  <SortableCard card={activeCard} onClick={() => {}} />
+        {/* Right Side: Action Buttons */}
+        <div className="flex items-center gap-3">
+          {/* Members Avatars */}
+          <div className="flex items-center -space-x-2 mr-1">
+            {board.members?.slice(0, 3).map((member) => (
+              <div 
+                key={member.userId} 
+                className="w-7 h-7 rounded-full border-2 border-white bg-zinc-200 flex items-center justify-center text-[10px] font-bold text-zinc-600 overflow-hidden shadow-sm"
+                title={member.user.name}
+              >
+                {member.user.avatarUrl ? (
+                  <img src={member.user.avatarUrl} alt={member.user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span>{member.user.name.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+            ))}
+            {(board.members?.length || 0) > 3 && (
+              <div className="w-7 h-7 rounded-full border-2 border-white bg-zinc-100 flex items-center justify-center text-[10px] font-bold text-zinc-600 shadow-sm">
+                +{(board.members?.length || 0) - 3}
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <button 
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium transition-all shadow-sm ${
+                filterUserId || isFiltersOpen 
+                  ? 'bg-violet-50 border-violet-200 text-[#7A5AF8]' 
+                  : 'bg-white border-zinc-200 text-zinc-700 hover:bg-slate-50'
+              }`}
+            >
+              <Filter size={16} />
+              {filterUserId ? 'Filtrado' : 'Filtros'}
+            </button>
+
+            {isFiltersOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-zinc-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Filtrar por miembro</div>
+                <div className="max-h-60 overflow-y-auto">
+                  <button 
+                    onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
+                    className="w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 transition-colors text-sm text-zinc-700"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center text-[10px]">All</div>
+                    Todos los miembros
+                  </button>
+                  {board.members?.map(member => (
+                    <button 
+                      key={member.userId}
+                      onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
+                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#7A5AF8] font-semibold bg-violet-50/50' : 'text-zinc-700'}`}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-[#7A5AF8]/10 text-[#7A5AF8] flex items-center justify-center text-[10px] font-bold">
+                        {member.user.name.charAt(0).toUpperCase()}
+                      </div>
+                      {member.user.name}
+                    </button>
+                  ))}
                 </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </main>
-      </div>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => setIsMembersModalOpen(true)}
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-white border border-zinc-200 text-zinc-700 hover:bg-slate-50 text-sm font-medium transition-all shadow-sm"
+          >
+            <Users size={16} />
+            Miembros
+          </button>
+
+          <button 
+            onClick={() => setIsSettingsDrawerOpen(true)}
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-[#F4F6F9] text-[#6C5DD3] hover:bg-[#E5EAF2] text-sm font-bold transition-all"
+          >
+            <Settings size={16} />
+            Configuración
+          </button>
+        </div>
+      </header>
+
+      {/* Canvas Area (Lists) */}
+      <main className={`flex-1 h-[calc(100vh-130px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-6 transition-all duration-500 ${board.background || 'bg-[#F4F6F9]'}`}>
+        <DndContext 
+          sensors={sensors} 
+          collisionDetection={closestCorners} 
+          onDragStart={handleDragStart} 
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex items-start gap-4 h-full pb-4">
+            <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
+              {lists.map((list) => (
+                <SortableList 
+                  key={list.id} 
+                  list={list} 
+                  onCardClick={setSelectedCardId}
+                  onAddCard={handleAddCard}
+                  onUpdateList={handleUpdateList}
+                  onDeleteList={handleDeleteList}
+                />
+              ))}
+            </SortableContext>
+            
+            {isAddingList ? (
+              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white rounded-xl border border-zinc-200 p-4 h-fit shadow-lg ring-1 ring-black/5">
+                <input
+                  autoFocus
+                  placeholder="Nombre de la lista..."
+                  value={newListTitle}
+                  onChange={(e) => setNewListTitle(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm font-medium mb-3 focus:bg-white focus:border-[#7A5AF8] focus:ring-4 focus:ring-[#7A5AF8]/10 outline-none transition-all"
+                />
+                <div className="flex items-center gap-2">
+                  <button type="submit" className="flex-1 bg-[#7A5AF8] hover:bg-[#6949d6] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-violet-200">
+                    Añadir lista
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingList(false)}
+                    className="px-3 py-2 text-zinc-500 hover:text-zinc-900 text-sm font-medium transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setIsAddingList(true)}
+                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded-xl bg-white/50 border-2 border-dashed border-zinc-300 text-zinc-500 hover:text-[#7A5AF8] hover:border-[#7A5AF8] hover:bg-white transition-all font-bold text-sm group flex-shrink-0"
+              >
+                <div className="p-1 rounded-md bg-zinc-100 group-hover:bg-violet-100 transition-colors">
+                  <Plus size={18} strokeWidth={3} />
+                </div>
+                Añadir otra lista
+              </button>
+            )}
+
+            {/* Extra spacer for scroll */}
+            <div className="w-8 flex-shrink-0" />
+          </div>
+
+          <DragOverlay>
+            {activeCard ? (
+              <div className="w-[280px] rotate-2 shadow-2xl">
+                <SortableCard card={activeCard} onClick={() => {}} />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </main>
 
       <CardDetailModal
         isOpen={!!selectedCardId}
@@ -462,6 +565,23 @@ const BoardDetailPage: React.FC = () => {
           title: (board.lists || []).flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
           listName: (board.lists || []).find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
         } : undefined}
+      />
+
+      <ManageBoardMembersModal 
+        isOpen={isMembersModalOpen}
+        onClose={() => setIsMembersModalOpen(false)}
+        boardId={board.id}
+        workspaceId={board.workspaceId}
+        currentMembers={board.members || []}
+        onUpdate={fetchBoard}
+      />
+
+      <BoardSettingsSlideOver
+        isOpen={isSettingsDrawerOpen}
+        onClose={() => setIsSettingsDrawerOpen(false)}
+        board={board}
+        onUpdate={fetchBoard}
+        onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
       />
     </div>
   );

@@ -129,7 +129,9 @@ function App() {
                 path="/boards/:id"
                 element={
                   <ProtectedRoute>
-                    <BoardDetailPage />
+                    <MainLayout>
+                      <BoardDetailPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />

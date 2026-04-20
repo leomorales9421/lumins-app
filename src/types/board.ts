@@ -34,16 +34,30 @@ export interface List {
   cards?: Card[];
 }
 
+export interface BoardMember {
+  userId: string;
+  role: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  };
+}
+
 export interface Board {
   id: string;
   name: string;
   description?: string;
   visibility: 'private' | 'team' | 'public';
+  workspaceId: string;
   createdAt?: string;
   updatedAt?: string;
   starred?: boolean;
   ownerId?: string;
+  members?: BoardMember[];
   lists?: List[];
+  background?: string;
   _count?: {
     lists?: number;
     cards?: number;
@@ -76,6 +90,7 @@ export interface UpdateBoardRequest {
   name?: string;
   description?: string;
   visibility?: 'private' | 'team' | 'public';
+  background?: string;
 }
 
 export interface ChecklistItem {
