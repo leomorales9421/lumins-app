@@ -66,9 +66,6 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     displayAvatarUrl = `${API_BASE_URL}${path}`;
   }
 
-  if (displayAvatarUrl) {
-    console.log('UserAvatar URL:', displayAvatarUrl);
-  }
 
   const containerClasses = `relative flex items-center justify-center rounded border border-zinc-100 shadow-sm flex-shrink-0 overflow-hidden bg-zinc-50 ${sizeClasses[size]} ${className}`;
 

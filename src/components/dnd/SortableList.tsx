@@ -26,7 +26,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const menuRef = React.useRef<HTMLDivElement>(null);
-  const cards = list.cards || [];
+  const cards = (list.cards || []).filter(Boolean);
 
   const {
     attributes,

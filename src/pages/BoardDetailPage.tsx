@@ -133,16 +133,15 @@ const BoardDetailPage: React.FC = () => {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const findContainer = (id: string) => {
-    const currentLists = listsRef.current;
-    if (currentLists.find((list) => list.id === id)) return id;
-    return currentLists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
+  const findContainer = (lists: List[], id: string) => {
+    if (lists.find((list) => list.id === id)) return id;
+    return lists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
   };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const activeId = active.id as string;
-    const container = findContainer(activeId);
+    const container = findContainer(lists, activeId);
     setOriginalContainer(container || null);
     
     if (active.data.current?.type === 'card') {
@@ -157,14 +156,14 @@ const BoardDetailPage: React.FC = () => {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
-
-    if (!activeContainer || !overContainer || activeContainer === overContainer) {
-      return;
-    }
-
     setLists((prev) => {
+      const activeContainer = findContainer(prev, activeId);
+      const overContainer = findContainer(prev, overId);
+
+      if (!activeContainer || !overContainer || activeContainer === overContainer) {
+        return prev;
+      }
+
       const activeList = prev.find((l) => l.id === activeContainer);
       const overList = prev.find((l) => l.id === overContainer);
 
@@ -175,6 +174,8 @@ const BoardDetailPage: React.FC = () => {
       
       const activeIndex = activeItems.findIndex((item) => item.id === activeId);
       const overIndex = overItems.findIndex((item) => item.id === overId);
+
+      if (activeIndex === -1) return prev;
 
       let newIndex;
       if (prev.some(l => l.id === overId)) {
@@ -243,7 +244,7 @@ const BoardDetailPage: React.FC = () => {
     }
 
     const currentLists = listsRef.current;
-    const overContainer = findContainer(overId);
+    const overContainer = findContainer(lists, overId);
 
     if (!overContainer) {
       setOriginalContainer(null);
