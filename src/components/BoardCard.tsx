@@ -21,7 +21,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   return (
     <div
       onClick={() => navigate(`/boards/${board.id}`)}
-      className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
+      className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
     >
       <div className="p-5 flex flex-col flex-1">
         
@@ -45,7 +45,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         {/* Content */}
         <div className="flex flex-col gap-1.5 mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] flex items-center justify-center group-hover:bg-[#6C5DD3] group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] flex items-center justify-center group-hover:bg-[#6C5DD3] group-hover:text-white transition-all">
                <Layout size={18} strokeWidth={2.5} />
             </div>
             <h3 className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight group-hover:text-[#6C5DD3] transition-colors truncate">
@@ -63,9 +63,9 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">Progreso</span>
                <span className="text-[10px] font-bold text-[#6C5DD3]">{progress}%</span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-zinc-100 dark:bg-white/5 rounded overflow-hidden">
                <div 
-                 className="h-full bg-[#6C5DD3] rounded-full transition-all duration-500" 
+                 className="h-full bg-[#6C5DD3] rounded transition-all duration-500" 
                  style={{ width: `${progress}%` }}
                />
             </div>
@@ -78,7 +78,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
                size="xs" 
                className="border-2 border-white dark:border-[#1C1F26] shadow-sm"
              />
-             <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 dark:text-zinc-500 border-2 border-white dark:border-[#1C1F26] shadow-sm">
+             <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 dark:text-zinc-500 border-2 border-white dark:border-[#1C1F26] shadow-sm">
                <Users size={12} />
              </div>
           </div>

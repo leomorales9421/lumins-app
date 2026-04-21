@@ -10,12 +10,12 @@ const LiquidGlassBackground: React.FC = () => {
 
       {/* Primary Liquid Blob - Top Right */}
       <div 
-        className="absolute top-[-10%] right-[-5%] w-[1000px] h-[1000px] bg-cyan-neon/10 rounded-full blur-[150px] animate-float"
+        className="absolute top-[-10%] right-[-5%] w-[1000px] h-[1000px] bg-cyan-neon/10 rounded blur-[150px] animate-float"
       />
       
       {/* Secondary Liquid Blob - Bottom Left */}
       <div 
-        className="absolute bottom-[-15%] left-[-5%] w-[1200px] h-[1200px] bg-blue-neon/5 rounded-full blur-[180px] opacity-40 animate-pulse-slow"
+        className="absolute bottom-[-15%] left-[-5%] w-[1200px] h-[1200px] bg-blue-neon/5 rounded blur-[180px] opacity-40 animate-pulse-slow"
       />
 
       {/* Static Atmospheric Glow */}

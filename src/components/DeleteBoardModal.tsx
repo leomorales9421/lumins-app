@@ -35,10 +35,10 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
         />
 
         {/* Modal panel */}
-        <div className="inline-block transform overflow-hidden rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] text-left align-bottom shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+        <div className="inline-block transform overflow-hidden rounded bg-gradient-to-b from-[#1c2327] to-[#111618] text-left align-bottom shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
           <div className="px-6 pt-6 pb-4">
             {/* Warning icon */}
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded bg-red-500/10">
               <svg
                 className="h-6 w-6 text-red-500"
                 fill="none"
@@ -71,13 +71,13 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
 
             {/* Detailed counts */}
             {counts && (
-              <div className="mt-6 rounded-lg bg-white/5 p-4">
+              <div className="mt-6 rounded bg-white/5 p-4">
                 <h4 className="text-sm font-medium text-white mb-3">
                   Se eliminarán los siguientes elementos:
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded bg-blue-500/10 flex items-center justify-center">
                       <span className="text-sm font-medium text-blue-500">{counts.lists}</span>
                     </div>
                     <span className="text-sm text-[#9db0b9]">
@@ -85,7 +85,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded bg-green-500/10 flex items-center justify-center">
                       <span className="text-sm font-medium text-green-500">{counts.cards}</span>
                     </div>
                     <span className="text-sm text-[#9db0b9]">
@@ -93,7 +93,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded bg-indigo-500/10 flex items-center justify-center">
                       <span className="text-sm font-medium text-indigo-500">{counts.labels}</span>
                     </div>
                     <span className="text-sm text-[#9db0b9]">
@@ -101,7 +101,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center">
                       <span className="text-sm font-medium text-yellow-500">{counts.members}</span>
                     </div>
                     <span className="text-sm text-[#9db0b9]">
@@ -116,7 +116,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
             )}
 
             {/* Warning message */}
-            <div className="mt-6 rounded-lg border border-red-500/20 bg-red-500/5 p-4">
+            <div className="mt-6 rounded border border-red-500/20 bg-red-500/5 p-4">
               <div className="flex">
                 <svg
                   className="h-5 w-5 text-red-400"
@@ -148,7 +148,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
               type="button"
               disabled={isLoading}
               onClick={onConfirm}
-              className="inline-flex w-full justify-center rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-500/25 hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed sm:ml-3 sm:w-auto"
+              className="inline-flex w-full justify-center rounded bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-500/25 hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed sm:ml-3 sm:w-auto"
             >
               {isLoading ? (
                 <span className="flex items-center">
@@ -166,7 +166,7 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
               type="button"
               disabled={isLoading}
               onClick={onClose}
-              className="mt-3 inline-flex w-full justify-center rounded-lg border border-white/10 bg-[#1c2327] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 sm:mt-0 sm:w-auto"
+              className="mt-3 inline-flex w-full justify-center rounded border border-white/10 bg-[#1c2327] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 sm:mt-0 sm:w-auto"
             >
               Cancelar
             </button>

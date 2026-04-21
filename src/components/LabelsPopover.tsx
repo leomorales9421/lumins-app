@@ -86,12 +86,12 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   if (currentView === 'create' || currentView === 'edit') {
     const isEdit = currentView === 'edit';
     return (
-      <div className="w-72 bg-white dark:bg-[#1C1F26] rounded-2xl shadow-xl border border-zinc-200 dark:border-white/10 p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+      <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={() => setCurrentView('list')}
-            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
           >
             <ChevronLeft size={16} />
           </button>
@@ -100,17 +100,17 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
           </h3>
           <button 
             onClick={onClose}
-            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Preview Area */}
-        <div className="bg-zinc-50 dark:bg-[#13151A] rounded-2xl p-6 flex justify-center mb-6 border border-zinc-100 dark:border-white/5 shadow-inner">
+        <div className="bg-zinc-50 dark:bg-[#13151A] rounded p-6 flex justify-center mb-6 border border-zinc-100 dark:border-white/5 shadow-inner">
           <div 
             style={{ backgroundColor: labelColor }}
-            className="px-5 py-2 rounded-xl text-xs font-black text-white shadow-md transition-all uppercase tracking-wider"
+            className="px-5 py-2 rounded text-xs font-black text-white shadow-md transition-all uppercase tracking-wider"
           >
             {labelName || 'PREVISUALIZACIÓN'}
           </div>
@@ -126,7 +126,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               placeholder="Ej: Frontend, Urgente..."
               value={labelName}
               onChange={(e) => setLabelName(e.target.value)}
-              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
             />
           </div>
 
@@ -140,12 +140,12 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
                   onClick={() => setLabelColor(color)}
                   style={{ backgroundColor: color }}
                   className={`
-                    h-8 rounded-lg transition-all flex items-center justify-center relative group
+                    h-8 rounded transition-all flex items-center justify-center relative group
                     ${labelColor === color ? 'ring-2 ring-[#6C5DD3] ring-offset-2 dark:ring-offset-[#1C1F26] scale-110 z-10' : 'hover:scale-105'}
                   `}
                 >
                   {labelColor === color && (
-                    <div className="bg-white/20 rounded-full p-0.5">
+                    <div className="bg-white/20 rounded p-0.5">
                       <Check size={12} className="text-white" strokeWidth={4} />
                     </div>
                   )}
@@ -158,7 +158,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <button 
               type="submit"
               disabled={!labelName.trim()}
-              className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50 active:scale-[0.98] text-sm"
+              className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded transition-all shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50 active:scale-[0.98] text-sm"
             >
               {isEdit ? 'Guardar' : 'Crear'}
             </button>
@@ -166,7 +166,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               <button 
                 type="button"
                 onClick={handleDelete}
-                className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-4 rounded-xl font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all border border-rose-100 dark:border-rose-500/20 active:scale-[0.98] text-sm"
+                className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-4 rounded font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all border border-rose-100 dark:border-rose-500/20 active:scale-[0.98] text-sm"
               >
                 Eliminar
               </button>
@@ -178,14 +178,14 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   }
 
   return (
-    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded-2xl shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
       <div className="flex items-center justify-between p-4 pb-2">
         <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
           Etiquetas
         </h3>
         <button 
           onClick={onClose}
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
         >
           <X size={16} />
         </button>
@@ -199,7 +199,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             placeholder="Buscar etiquetas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
           />
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[#6C5DD3] transition-colors" />
         </div>
@@ -213,7 +213,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <div key={label.id} className="flex items-center gap-2 group px-1">
               <div 
                 onClick={() => onToggleLabel(label.id)}
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
                   isSelected 
                     ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
                     : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
@@ -224,7 +224,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               <div 
                 onClick={() => onToggleLabel(label.id)}
                 style={{ backgroundColor: label.color }}
-                className="flex-1 h-8 rounded-lg flex items-center px-3 text-[11px] font-black text-white cursor-pointer transition-all hover:brightness-110 overflow-hidden text-ellipsis whitespace-nowrap shadow-sm uppercase tracking-wider"
+                className="flex-1 h-8 rounded flex items-center px-3 text-[11px] font-black text-white cursor-pointer transition-all hover:brightness-110 overflow-hidden text-ellipsis whitespace-nowrap shadow-sm uppercase tracking-wider"
               >
                 {label.name}
               </div>
@@ -233,7 +233,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
                   e.stopPropagation();
                   openEditView(label);
                 }}
-                className="w-8 h-8 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                className="w-8 h-8 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] hover:bg-zinc-50 dark:hover:bg-white/5 rounded transition-all opacity-0 group-hover:opacity-100"
               >
                 <Edit2 size={14} />
               </button>
@@ -243,7 +243,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
 
         {filteredLabels.length === 0 && (
           <div className="py-12 text-center">
-            <div className="w-12 h-12 bg-zinc-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 bg-zinc-50 dark:bg-white/5 rounded flex items-center justify-center mx-auto mb-3">
               <Search size={20} className="text-zinc-300 dark:text-zinc-700" />
             </div>
             <p className="text-[11px] font-bold text-zinc-400 dark:text-zinc-600">
@@ -261,7 +261,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             setLabelColor(PRESET_COLORS[0]);
             setCurrentView('create');
           }}
-          className="w-full flex items-center gap-2 text-xs font-bold text-[#6C5DD3] hover:bg-white dark:hover:bg-[#1C1F26] p-2.5 rounded-xl transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-sm"
+          className="w-full flex items-center gap-2 text-xs font-bold text-[#6C5DD3] hover:bg-white dark:hover:bg-[#1C1F26] p-2.5 rounded transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-sm"
         >
           <Plus size={16} />
           Crear nueva etiqueta

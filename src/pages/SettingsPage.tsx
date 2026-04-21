@@ -40,7 +40,7 @@ const SettingsPage: React.FC = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) => `
-                flex items-center gap-3 p-3 rounded-lg transition-colors whitespace-nowrap
+                flex items-center gap-3 p-3 rounded transition-colors whitespace-nowrap
                 ${isActive 
                   ? 'bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] font-bold' 
                   : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'

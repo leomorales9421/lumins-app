@@ -57,7 +57,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   };
 
   return (
-    <div className="w-56 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+    <div className="w-56 bg-white dark:bg-[#1C1F26] rounded shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
       {/* Join / Leave */}
       <button 
         onClick={handleJoinClick}

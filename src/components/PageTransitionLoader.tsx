@@ -58,8 +58,8 @@ const PageTransitionLoader: React.FC = () => {
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               {/* Spinner grande */}
               <div className="relative mb-8">
-                <div className="w-24 h-24 border-4 border-white/10 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-24 h-24 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-24 h-24 border-4 border-white/10 rounded"></div>
+                <div className="absolute top-0 left-0 w-24 h-24 border-4 border-primary border-t-transparent rounded animate-spin"></div>
                 
                 {/* Porcentaje en el centro */}
                 <div className="absolute inset-0 flex items-center justify-center">

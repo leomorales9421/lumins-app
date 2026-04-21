@@ -26,7 +26,7 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
     to={to}
     title={isCollapsed ? label : undefined}
     className={({ isActive }) => `
-      flex items-center transition-all font-bold text-[13px] rounded-lg
+      flex items-center transition-all font-bold text-[13px] rounded
       ${isActive 
         ? 'bg-[#6C5DD3] text-white shadow-lg shadow-indigo-500/30' 
         : isFloating 
@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`
               absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:flex h-6 w-6 items-center justify-center 
-              rounded-full border border-zinc-200 bg-white text-zinc-400 
+              rounded border border-zinc-200 bg-white text-zinc-400 
               shadow-sm transition-all hover:scale-110 hover:border-zinc-300 
               hover:text-zinc-700 hover:shadow-md z-50 
               dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300
@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
               onClick={logout}
               title={isCollapsed ? "Cerrar sesión" : undefined}
               className={`
-                flex items-center transition-colors rounded-lg p-2.5 w-full text-[13px] font-bold cursor-pointer
+                flex items-center transition-colors rounded p-2.5 w-full text-[13px] font-bold cursor-pointer
                 ${isFloating 
                   ? 'text-white/80 hover:text-white hover:bg-white/10' 
                   : 'text-zinc-500 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500'}

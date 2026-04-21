@@ -27,11 +27,11 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6F9] flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-zinc-100 p-8 animate-in fade-in zoom-in duration-300">
+      <div className="w-full max-w-md bg-white rounded shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-zinc-100 p-8 animate-in fade-in zoom-in duration-300">
         
         {isSuccess ? (
           <div className="text-center py-4">
-            <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-green-50 text-green-500 rounded flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={32} />
             </div>
             <h2 className="text-2xl font-bold text-zinc-900 mb-2">¡Revisa tu bandeja de entrada!</h2>
@@ -49,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
         ) : (
           <>
             <div className="flex flex-col items-center mb-8">
-              <div className="w-14 h-14 bg-indigo-50 text-[#6C5DD3] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-14 h-14 bg-indigo-50 text-[#6C5DD3] rounded flex items-center justify-center mb-6 shadow-sm">
                 <Key size={28} />
               </div>
               <h2 className="text-2xl font-bold text-zinc-900">Recuperar contraseña</h2>
@@ -68,14 +68,14 @@ const ForgotPasswordPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl px-4 text-sm font-medium text-zinc-900 outline-none focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-zinc-400"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-zinc-400"
                   placeholder="ejemplo@correo.com"
                   required
                 />
               </div>
 
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-bold animate-in fade-in slide-in-from-top-1">
+                <div className="p-3 bg-red-50 text-red-600 rounded border border-red-100 text-xs font-bold animate-in fade-in slide-in-from-top-1">
                   {error}
                 </div>
               )}
@@ -83,7 +83,7 @@ const ForgotPasswordPage: React.FC = () => {
               <Button
                 type="submit"
                 isLoading={isSubmitting}
-                className="w-full h-11 bg-[#6C5DD3] hover:bg-[#5a4db8] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
+                className="w-full h-11 bg-[#6C5DD3] hover:bg-[#5a4db8] text-white text-sm font-bold rounded transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
               >
                 Enviar enlace de recuperación
               </Button>

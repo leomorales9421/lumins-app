@@ -64,7 +64,7 @@ const LinkPopover: React.FC<LinkPopoverProps> = ({ editor, trigger }) => {
   };
 
   const popoverContent = (
-    <div className="w-[300px] bg-[#FFFFFF] rounded-xl shadow-[0_4px_20px_rgba(17,24,39,0.1)] border border-zinc-200 p-4 z-50">
+    <div className="w-[300px] bg-[#FFFFFF] rounded shadow-[0_4px_20px_rgba(17,24,39,0.1)] border border-zinc-200 p-4 z-50">
       <div className="mb-3">
         <label className="text-xs font-semibold text-zinc-700 mb-1 block">
           Texto a mostrar (opcional)
@@ -74,7 +74,7 @@ const LinkPopover: React.FC<LinkPopoverProps> = ({ editor, trigger }) => {
           value={linkText}
           onChange={(e) => setLinkText(e.target.value)}
           placeholder="Ej. Mi Sitio Web"
-          className="w-full bg-[#F4F6F9] border border-transparent focus:border-zinc-300 focus:bg-white rounded-lg p-2 text-sm text-[#111827] outline-none transition-all"
+          className="w-full bg-[#F4F6F9] border border-transparent focus:border-zinc-300 focus:bg-white rounded p-2 text-sm text-[#111827] outline-none transition-all"
         />
       </div>
 
@@ -93,7 +93,7 @@ const LinkPopover: React.FC<LinkPopoverProps> = ({ editor, trigger }) => {
             }
           }}
           placeholder="https://ejemplo.com"
-          className="w-full bg-[#F4F6F9] border border-transparent focus:border-zinc-300 focus:bg-white rounded-lg p-2 text-sm text-[#111827] outline-none transition-all"
+          className="w-full bg-[#F4F6F9] border border-transparent focus:border-zinc-300 focus:bg-white rounded p-2 text-sm text-[#111827] outline-none transition-all"
         />
       </div>
 
@@ -107,7 +107,7 @@ const LinkPopover: React.FC<LinkPopoverProps> = ({ editor, trigger }) => {
         <button
           onClick={handleSave}
           disabled={!url}
-          className="bg-[#6C5DD3] text-white text-xs font-semibold px-4 py-1.5 rounded-lg shadow-sm hover:bg-[#5244b5] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#6C5DD3] text-white text-xs font-semibold px-4 py-1.5 rounded shadow-sm hover:bg-[#5244b5] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Guardar
         </button>

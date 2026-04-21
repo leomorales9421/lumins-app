@@ -8,7 +8,7 @@ export function GlobalToaster() {
         // Desactivamos el estilo por defecto para usar Tailwind puro
         unstyled: true,
         classNames: {
-          toast: "w-full flex items-center gap-3 p-4 rounded-xl border shadow-lg transition-all",
+          toast: "w-full flex items-center gap-3 p-4 rounded border shadow-lg transition-all",
           // Modo Claro: Fondo blanco, borde suave, texto oscuro
           // Modo Oscuro: Superficie elevada (#1C1F26), borde sutil, texto claro
           default: "bg-white border-zinc-200 text-zinc-900 dark:bg-[#1C1F26] dark:border-white/10 dark:text-zinc-100",
@@ -20,8 +20,8 @@ export function GlobalToaster() {
           title: "font-bold text-sm",
           description: "text-sm opacity-80",
           // Botón de acción dentro del toast
-          actionButton: "bg-[#6C5DD3] text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#5b4eb3] transition-colors",
-          cancelButton: "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-white/20 transition-colors",
+          actionButton: "bg-[#6C5DD3] text-white rounded px-3 py-1.5 text-xs font-semibold hover:bg-[#5b4eb3] transition-colors",
+          cancelButton: "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-300 rounded px-3 py-1.5 text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-white/20 transition-colors",
         },
       }}
     />

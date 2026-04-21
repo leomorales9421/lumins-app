@@ -32,7 +32,7 @@
   .cu-column {
     background: #FFFFFF;
     border: 1px solid #E8E9EC;
-    border-radius: 10px;
+    border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   }
 
@@ -45,7 +45,7 @@
   .cu-card {
     background: #FFFFFF;
     border: 1px solid #E8E9EC;
-    border-radius: 8px;
+    border-radius: 4px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   }
 
@@ -65,7 +65,7 @@
   .cu-add-list-btn {
     background: rgba(255,255,255,0.60);
     border: 1.5px dashed #CBD5E1;
-    border-radius: 10px;
+    border-radius: 4px;
     transition: all 0.18s ease;
   }
   .cu-add-list-btn:hover {
@@ -78,7 +78,7 @@
   .cu-action-btn {
     background: #F4F5F7;
     border: 1px solid #E8E9EC;
-    border-radius: 8px;
+    border-radius: 4px;
     transition: all 0.15s ease;
     color: #374151;
     font-weight: 600;
@@ -103,7 +103,7 @@
   .cu-input {
     background: #F4F5F7;
     border: 1px solid #E8E9EC;
-    border-radius: 8px;
+    border-radius: 4px;
     color: #1E293B;
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -126,7 +126,7 @@
   .cu-dropdown {
     background: #FFFFFF;
     border: 1px solid #E8E9EC;
-    border-radius: 10px;
+    border-radius: 4px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
   }
 
@@ -135,7 +135,7 @@
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #D1D5DB;
-    border-radius: 10px;
+    border-radius: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
 
@@ -149,7 +149,7 @@
   .cu-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .cu-scrollbar::-webkit-scrollbar-thumb {
     background: #E5E7EB;
-    border-radius: 9999px;
+    border-radius: 4px;
   }
   .cu-scrollbar::-webkit-scrollbar-thumb:hover { background: #818CF8; }
 
@@ -161,19 +161,19 @@
 
   /* Standard card styles */
   .brand-card {
-    @apply bg-white rounded-xl shadow-soft border border-brand-primary/5;
+    @apply bg-white rounded shadow-soft border border-brand-primary/5;
   }
 
   /* Brand Logotype */
   .brand-logotype {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    text-transform: none;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .brand-input {
-    @apply w-full h-12 bg-white border border-brand-primary/10 rounded-md px-5 text-sm font-medium focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none;
+    @apply w-full h-12 bg-white border border-brand-primary/10 rounded px-5 text-sm font-medium focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none;
   }
 
   /* TipTap Editor */
@@ -190,15 +190,15 @@
   .prose-mirror-container p { @apply text-[#4B5563] text-sm leading-relaxed mb-2; }
   .prose-mirror-container ul { @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
   .prose-mirror-container ol { @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
-  .prose-mirror-container blockquote { @apply border-l-4 border-[#4338ca] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r-lg my-2; }
-  .prose-mirror-container pre { @apply bg-[#1E293B] text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto; }
-  .prose-mirror-container code { @apply bg-indigo-50 text-[#4338ca] px-1.5 py-0.5 rounded-md text-xs font-mono; }
+  .prose-mirror-container blockquote { @apply border-l-4 border-[#4338ca] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r my-2; }
+  .prose-mirror-container pre { @apply bg-[#1E293B] text-zinc-100 p-3 rounded text-xs font-mono my-2 overflow-x-auto; }
+  .prose-mirror-container code { @apply bg-indigo-50 text-[#4338ca] px-1.5 py-0.5 rounded text-xs font-mono; }
   .prose-mirror-container a { @apply text-[#4338ca] underline hover:text-indigo-700 transition-colors cursor-pointer; }
-  .prose-mirror-container img { @apply rounded-xl max-w-full h-auto my-4 border border-[#E8E9EC] shadow-sm; }
+  .prose-mirror-container img { @apply rounded max-w-full h-auto my-4 border border-[#E8E9EC] shadow-sm; }
   .prose-mirror-container p { @apply mb-1 last:mb-0; }
   .prose-mirror-container.is-comment-bubble img {
     max-width: 100%;
-    border-radius: 8px;
+    border-radius: 4px;
     margin-top: 8px;
     display: block;
   }

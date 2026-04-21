@@ -45,7 +45,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
         </div>
         <button 
           onClick={() => onDeleteChecklist(checklist.id)}
-          className="bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors opacity-0 group-hover/checklist:opacity-100"
+          className="bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 text-xs font-bold px-3 py-1.5 rounded transition-colors opacity-0 group-hover/checklist:opacity-100"
         >
           Eliminar
         </button>
@@ -54,9 +54,9 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
       {/* Progress Bar */}
       <div className="flex items-center gap-3 mb-4">
         <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 w-8 text-right">{progress}%</span>
-        <div className="flex-1 h-2 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+        <div className="flex-1 h-2 bg-zinc-200 dark:bg-white/5 rounded overflow-hidden shadow-inner">
           <div 
-            className={`h-full rounded-full transition-all duration-500 ease-out ${
+            className={`h-full rounded transition-all duration-500 ease-out ${
               progress === 100 ? 'bg-emerald-500' : 'bg-[#6C5DD3]'
             }`}
             style={{ width: `${progress}%` }}
@@ -67,7 +67,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
       {/* Items List */}
       <div className="space-y-1">
         {checklist.items.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 group/item p-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors">
+          <div key={item.id} className="flex items-start gap-3 group/item p-1.5 rounded hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors">
             <div className="mt-1 relative flex items-center justify-center">
                <input
                 type="checkbox"
@@ -114,20 +114,20 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                   setIsAddingItem(false);
                 }
               }}
-               className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-md p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all resize-none shadow-sm"
+               className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all resize-none shadow-sm"
               rows={2}
             />
              <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20"
+                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded text-sm font-bold hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20"
               >
                 Añadir
               </button>
                <button
                 type="button"
                 onClick={() => setIsAddingItem(false)}
-                className="text-zinc-500 dark:text-zinc-400 text-sm font-bold hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                className="text-zinc-500 dark:text-zinc-400 text-sm font-bold hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
               >
                 Cancelar
               </button>
@@ -136,7 +136,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
          ) : (
           <button
             onClick={() => setIsAddingItem(true)}
-            className="text-sm font-bold text-zinc-500 dark:text-zinc-300 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-zinc-100 dark:hover:bg-white/5 px-4 py-2 rounded-lg transition-all flex items-center gap-2 group/btn"
+            className="text-sm font-bold text-zinc-500 dark:text-zinc-300 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-zinc-100 dark:hover:bg-white/5 px-4 py-2 rounded transition-all flex items-center gap-2 group/btn"
           >
             <span className="text-lg leading-none group-hover/btn:scale-125 transition-transform">+</span>
             Añadir un elemento

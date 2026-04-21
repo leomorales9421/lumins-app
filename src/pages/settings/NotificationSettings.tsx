@@ -32,10 +32,10 @@ const NotificationToggle: React.FC<{
     <button
       onClick={onChange}
       type="button"
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}`}
+      className={`relative inline-flex h-6 w-11 items-center rounded transition-colors focus:outline-none ${checked ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
+        className={`inline-block h-4 w-4 transform rounded bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
       />
     </button>
   </div>
@@ -47,7 +47,7 @@ const ToggleSkeleton = () => (
       <Skeleton className="h-4 w-48" />
       <Skeleton className="h-3 w-72" />
     </div>
-    <Skeleton className="h-6 w-11 rounded-full flex-shrink-0" />
+    <Skeleton className="h-6 w-11 rounded flex-shrink-0" />
   </div>
 );
 
@@ -100,7 +100,7 @@ const NotificationSettings: React.FC = () => {
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Elige qué avisos quieres recibir y dónde.</p>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl p-4 flex gap-3 text-blue-700 dark:text-blue-400">
+      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded p-4 flex gap-3 text-blue-700 dark:text-blue-400">
         <Info size={20} className="flex-shrink-0 mt-0.5" />
         <p className="text-sm font-medium leading-tight">
           Las notificaciones push están actualmente sincronizadas con las preferencias de tu navegador.
@@ -108,15 +108,15 @@ const NotificationSettings: React.FC = () => {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-lg border border-rose-100 dark:border-rose-500/20">
+        <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20">
           {error}
         </div>
       )}
 
       {/* Email Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0">
             <Mail size={20} />
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Correo Electrónico</h3>
@@ -145,9 +145,9 @@ const NotificationSettings: React.FC = () => {
       </section>
 
       {/* In-App Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center flex-shrink-0">
             <Smartphone size={20} />
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en App</h3>

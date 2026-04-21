@@ -83,10 +83,10 @@ const BoardsPage: React.FC = () => {
                {/* Grid Skeleton */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                    <div key={i} className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 p-5 h-48 shadow-soft flex flex-col gap-4">
+                    <div key={i} className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 h-48 shadow-soft flex flex-col gap-4">
                       <div className="flex justify-between items-start">
-                         <Skeleton className="w-10 h-10 rounded-lg" />
-                         <Skeleton className="w-6 h-6 rounded-full" />
+                         <Skeleton className="w-10 h-10 rounded" />
+                         <Skeleton className="w-6 h-6 rounded" />
                       </div>
                       <Skeleton className="h-5 w-3/4" />
                       <Skeleton className="h-3 w-1/2" />
@@ -116,8 +116,8 @@ const BoardsPage: React.FC = () => {
                  </div>
 
                  <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
-                       <button className="px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded-md text-[12px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                    <div className="hidden sm:flex bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
+                       <button className="px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded text-[12px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                          <Filter size={14} />
                          Todos
                          <ChevronDown size={14} />
@@ -135,8 +135,8 @@ const BoardsPage: React.FC = () => {
 
                {/* Board Grid */}
                {boards.length === 0 ? (
-                 <div className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
-                    <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
+                 <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
+                    <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
                        <Layout size={32} />
                     </div>
                     <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No hay proyectos activos</h3>
@@ -169,11 +169,11 @@ const BoardsPage: React.FC = () => {
                {/* Pagination */}
                {boards.length > 8 && (
                  <div className="flex justify-center mt-10">
-                   <div className="flex items-center gap-1.5 bg-white dark:bg-[#1C1F26] p-1.5 rounded-lg border border-zinc-200 dark:border-white/10 shadow-soft text-[13px] font-bold">
+                   <div className="flex items-center gap-1.5 bg-white dark:bg-[#1C1F26] p-1.5 rounded border border-zinc-200 dark:border-white/10 shadow-soft text-[13px] font-bold">
                       <button className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30">Prev</button>
                       <div className="flex items-center gap-1">
-                         <button className="w-8 h-8 bg-[#6C5DD3] text-white rounded-md shadow-sm">1</button>
-                         <button className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-md transition-colors">2</button>
+                         <button className="w-8 h-8 bg-[#6C5DD3] text-white rounded shadow-sm">1</button>
+                         <button className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">2</button>
                       </div>
                       <button className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Next</button>
                    </div>

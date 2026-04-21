@@ -48,13 +48,13 @@ const RegisterPage: React.FC = () => {
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1000px] min-h-[650px] bg-white rounded-2xl shadow-heavy flex overflow-hidden"
+        className="w-full max-w-[1000px] min-h-[650px] bg-white rounded shadow-heavy flex overflow-hidden"
       >
         
         {/* LEFT PANEL: Modern Professional Sidebar (v8.0) */}
         <div className="hidden md:flex flex-1 bg-[#1E293B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
            {/* Decorative background glow */}
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#4338ca]/10 blur-[120px] rounded-full pointer-events-none" />
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#4338ca]/10 blur-[120px] rounded pointer-events-none" />
 
            <motion.div 
              initial={{ opacity: 0, scale: 0.8 }}
@@ -89,9 +89,9 @@ const RegisterPage: React.FC = () => {
         {/* RIGHT PANEL: Registration Form */}
         <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
           <div className="mb-8 text-center md:text-left">
-             <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight uppercase">
-                Regístrate en <span className="brand-logotype bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">Lumins</span>
-             </h2>
+              <h2 className="text-xl font-bold text-slate-500 mb-1 tracking-tight uppercase">
+                 Regístrate en <span className="brand-logotype text-4xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] block mt-1">LUMINS</span>
+              </h2>
              <p className="text-[#6B7280] font-medium text-lg">Únete a la nueva era de gestión corporativa</p>
           </div>
 
@@ -103,7 +103,7 @@ const RegisterPage: React.FC = () => {
                   type="text" 
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                   placeholder="ej. Leonardo"
                   required
                 />
@@ -114,7 +114,7 @@ const RegisterPage: React.FC = () => {
                   type="text" 
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                   placeholder="ej. Morales"
                   required
                 />
@@ -127,7 +127,7 @@ const RegisterPage: React.FC = () => {
                  type="email" 
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                  placeholder="correo@ejemplo.com"
                  required
                />
@@ -139,7 +139,7 @@ const RegisterPage: React.FC = () => {
                  type="password" 
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                  placeholder="••••••••"
                  required
                />
@@ -151,14 +151,14 @@ const RegisterPage: React.FC = () => {
                  type="password" 
                  value={confirmPassword}
                  onChange={(e) => setConfirmPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-[12px] px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                  placeholder="••••••••"
                  required
                />
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded border border-red-100 animate-in fade-in slide-in-from-top-1">
                  <span className="text-xs font-bold">{error}</span>
               </div>
             )}
@@ -166,7 +166,7 @@ const RegisterPage: React.FC = () => {
             <Button 
               type="submit" 
               isLoading={isSubmitting}
-              className="mt-2 h-11 bg-[#4338ca] text-white text-sm font-bold rounded-[12px] hover:bg-[#312e81] transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
+              className="mt-2 h-11 bg-[#4338ca] text-white text-sm font-bold rounded hover:bg-[#312e81] transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
             >
               {isSubmitting ? 'Creando cuenta...' : 'Registrarse'}
             </Button>
@@ -179,7 +179,7 @@ const RegisterPage: React.FC = () => {
 
             <button 
               type="button"
-              className="h-11 bg-white border border-zinc-200 rounded-[12px] text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
+              className="h-11 bg-white border border-zinc-200 rounded text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
             >
                <svg width="20" height="20" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

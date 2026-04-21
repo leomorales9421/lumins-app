@@ -69,14 +69,14 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[300px] bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[300px] bg-white dark:bg-[#1C1F26] rounded shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
       {/* Header */}
       <div className="p-4 pb-2 flex items-center justify-between">
-        <button onClick={onBack} className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors">
+        <button onClick={onBack} className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-colors">
           <ChevronLeft size={18} className="text-zinc-500 dark:text-zinc-400" />
         </button>
         <span className="text-[10px] tracking-[0.4em] font-bold text-zinc-500 dark:text-zinc-400 uppercase">PROPIEDADES</span>
-        <button onClick={onClose} className="p-1 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 rounded-full transition-colors">
+        <button onClick={onClose} className="p-1 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 rounded transition-colors">
           <X size={18} className="text-zinc-500 dark:text-zinc-400" />
         </button>
       </div>
@@ -88,7 +88,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Nivel de Prioridad</label>
           <button
             onClick={() => setActiveSelect(activeSelect === 'priority' ? null : 'priority')}
-            className="bg-zinc-50 dark:bg-[#13151A] rounded-md p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
           >
             <div className="flex items-center gap-2">
               <Circle size={8} fill={PRIORITIES.find(p => p.id === priority)?.color || '#71717A'} className="text-transparent" />
@@ -98,7 +98,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           </button>
           
           {activeSelect === 'priority' && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-dropdown z-10 overflow-hidden py-1 animate-in slide-in-from-top-2">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded shadow-dropdown z-10 overflow-hidden py-1 animate-in slide-in-from-top-2">
               {PRIORITIES.map((p) => (
                 <button
                   key={p.id === null ? 'null' : p.id}
@@ -118,7 +118,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Nivel de Riesgo</label>
           <button
             onClick={() => setActiveSelect(activeSelect === 'risk' ? null : 'risk')}
-            className="bg-zinc-50 dark:bg-[#13151A] rounded-md p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
           >
             <div className="flex items-center gap-2">
               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${RISK_LEVELS.find(r => r.id === riskLevel)?.bg || 'bg-zinc-100'} ${RISK_LEVELS.find(r => r.id === riskLevel)?.text || 'text-zinc-700'}`}>
@@ -129,7 +129,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           </button>
 
           {activeSelect === 'risk' && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-dropdown z-10 overflow-hidden py-1 animate-in slide-in-from-top-2">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded shadow-dropdown z-10 overflow-hidden py-1 animate-in slide-in-from-top-2">
               {RISK_LEVELS.map((r) => (
                 <button
                   key={r.id === null ? 'null' : r.id}
@@ -155,7 +155,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
             onBlur={handleModuleBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleModuleBlur()}
             placeholder="Ej. Frontend, Backend..."
-            className="bg-zinc-50 dark:bg-[#13151A] rounded-md p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:bg-white dark:focus:bg-[#1C1F26] transition-all"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:bg-white dark:focus:bg-[#1C1F26] transition-all"
           />
         </div>
       </div>

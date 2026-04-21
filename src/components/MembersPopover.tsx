@@ -36,13 +36,13 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
   const uniqueMembers = Array.from(new Map(filteredMembers.map(m => [m.id, m])).values());
 
   return (
-    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded-2xl shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         {onBack ? (
           <button 
             onClick={onBack}
-            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
           >
             <ChevronLeft size={16} />
           </button>
@@ -56,7 +56,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
         
         <button 
           onClick={onClose}
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
         >
           <X size={16} />
         </button>
@@ -70,7 +70,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             placeholder="Buscar miembros..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
           />
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[#6C5DD3] transition-colors" />
         </div>
@@ -89,7 +89,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             <button
               key={member.id}
               onClick={() => onToggleMember(member.id)}
-              className="flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-white/5 group w-full text-left"
+              className="flex items-center justify-between p-2.5 rounded cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-white/5 group w-full text-left"
             >
               <div className="flex items-center gap-3">
                 <UserAvatar 
@@ -109,7 +109,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
               </div>
 
               {isAssigned && (
-                <div className="w-6 h-6 bg-[#6C5DD3]/10 dark:bg-[#6C5DD3]/20 rounded-lg flex items-center justify-center animate-in zoom-in duration-200">
+                <div className="w-6 h-6 bg-[#6C5DD3]/10 dark:bg-[#6C5DD3]/20 rounded flex items-center justify-center animate-in zoom-in duration-200">
                   <Check size={14} className="text-[#6C5DD3]" strokeWidth={3} />
                 </div>
               )}
@@ -119,7 +119,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
 
         {uniqueMembers.length === 0 && (
           <div className="py-12 text-center">
-            <div className="w-12 h-12 bg-zinc-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 bg-zinc-50 dark:bg-white/5 rounded flex items-center justify-center mx-auto mb-3">
               <Search size={20} className="text-zinc-300 dark:text-zinc-700" />
             </div>
             <p className="text-[11px] font-bold text-zinc-400 dark:text-zinc-600">

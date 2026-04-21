@@ -24,7 +24,7 @@ const NavBar: React.FC<NavBarProps> = ({
         {/* Mobile Menu Toggle */}
         <button 
           onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-          className="lg:hidden p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+          className="lg:hidden p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-colors"
         >
           <Menu size={24} />
         </button>
@@ -37,14 +37,14 @@ const NavBar: React.FC<NavBarProps> = ({
               alt="Lumins Logo" 
               className="h-[100px] min-w-[100px] object-contain transition-transform group-hover:scale-110 drop-shadow-2xl z-50 absolute left-1/2 -translate-x-1/2" 
             />
-            <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-3xl" />
+            <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded opacity-0 group-hover:opacity-100 transition-opacity blur-3xl" />
           </div>
           
           {/* Vertical Separator */}
           <div className="h-10 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-1 sm:block hidden" />
 
           <span className="brand-logotype text-2xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none">
-            Lumins
+            LUMINS
           </span>
         </Link>
 
@@ -76,7 +76,7 @@ const NavBar: React.FC<NavBarProps> = ({
             </div>
             <Link 
               to="/settings/profile"
-              className="w-9 h-9 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-sm hover:ring-2 hover:ring-[#6C5DD3]/20 transition-all cursor-pointer"
+              className="w-9 h-9 rounded overflow-hidden border-2 border-white dark:border-zinc-800 shadow-sm hover:ring-2 hover:ring-[#6C5DD3]/20 transition-all cursor-pointer"
             >
               <UserAvatar 
                 name={user?.name || ''} 

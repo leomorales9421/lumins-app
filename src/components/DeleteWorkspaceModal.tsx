@@ -86,7 +86,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
       />
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-[480px] bg-white rounded-2xl shadow-2xl p-6 border border-rose-100 animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full max-w-[480px] bg-white rounded shadow-2xl p-6 border border-rose-100 animate-in fade-in zoom-in duration-200">
         <button 
           onClick={onClose}
           className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors"
@@ -96,7 +96,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
 
         {/* Header */}
         <div className="text-center sm:text-left">
-          <div className="bg-rose-50 p-3 rounded-full mb-4 inline-block">
+          <div className="bg-rose-50 p-3 rounded mb-4 inline-block">
             <AlertTriangle className="w-6 h-6 text-rose-500" />
           </div>
           <h2 className="text-xl font-bold text-zinc-900">¿Eliminar espacio de trabajo?</h2>
@@ -108,7 +108,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
         {/* Stats Section */}
         <div className="mt-4">
           {isLoadingStats ? (
-            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded-xl border border-zinc-100">
+            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded border border-zinc-100">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse">
                   <div className="h-6 bg-zinc-200 rounded w-10 mb-1" />
@@ -117,7 +117,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
               ))}
             </div>
           ) : stats ? (
-            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded-xl border border-zinc-100">
+            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded border border-zinc-100">
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-zinc-900">{stats.boards}</span>
                 <span className="text-xs text-zinc-500">Tableros</span>
@@ -132,7 +132,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
               </div>
             </div>
           ) : (
-             <div className="bg-[#F4F6F9] p-4 rounded-xl border border-zinc-100 text-center py-6">
+             <div className="bg-[#F4F6F9] p-4 rounded border border-zinc-100 text-center py-6">
                 <p className="text-xs text-zinc-400">No se pudieron obtener estadísticas detalladas</p>
              </div>
           )}
@@ -149,7 +149,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
             onChange={(e) => setConfirmText(e.target.value)}
             autoFocus
             placeholder="Escribe el nombre aquí..."
-            className="w-full bg-white border border-zinc-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 rounded-lg p-2.5 text-sm outline-none transition-all mt-2"
+            className="w-full bg-white border border-zinc-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 rounded p-2.5 text-sm outline-none transition-all mt-2"
           />
         </div>
 
@@ -157,14 +157,14 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="text-sm font-semibold text-zinc-600 hover:bg-zinc-100 px-4 py-2 rounded-lg transition-colors"
+            className="text-sm font-semibold text-zinc-600 hover:bg-zinc-100 px-4 py-2 rounded transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={handleDelete}
             disabled={confirmText !== workspaceName || isDeleting}
-            className="bg-rose-500 text-white font-bold px-4 py-2 rounded-lg shadow-sm hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[100px] flex items-center justify-center"
+            className="bg-rose-500 text-white font-bold px-4 py-2 rounded shadow-sm hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[100px] flex items-center justify-center"
           >
             {isDeleting ? (
               <>

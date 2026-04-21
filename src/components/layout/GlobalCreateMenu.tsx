@@ -31,19 +31,19 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
   };
 
   const menuContent = (
-    <div className="w-64 bg-white dark:bg-[#1C1F26] rounded-xl shadow-2xl border border-zinc-100 dark:border-white/10 p-2 z-50 animate-in fade-in zoom-in duration-200">
+    <div className="w-64 bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-100 dark:border-white/10 p-2 z-50 animate-in fade-in zoom-in duration-200">
       {/* Nuevo Tablero */}
       <button
         disabled={!canCreateBoard}
         onClick={handleCreateBoard}
-        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left group/item
+        className={`w-full flex items-center gap-3 p-3 rounded transition-all text-left group/item
           ${canCreateBoard 
             ? 'hover:bg-indigo-50 dark:hover:bg-[#6C5DD3]/10 cursor-pointer' 
             : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
       >
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors
+        <div className={`w-9 h-9 rounded flex items-center justify-center transition-colors
           ${canCreateBoard ? 'bg-indigo-100 dark:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-indigo-400' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-600'}
         `}>
           <Layout size={18} strokeWidth={2.5} />
@@ -60,9 +60,9 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
       {/* Nuevo Espacio de Trabajo */}
       <button
         onClick={handleCreateWorkspace}
-        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group/item"
+        className="w-full flex items-center gap-3 p-3 rounded hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group/item"
       >
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 rounded-lg flex items-center justify-center group-hover/item:bg-zinc-200 dark:group-hover/item:bg-white/20 transition-colors">
+        <div className="w-9 h-9 bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 rounded flex items-center justify-center group-hover/item:bg-zinc-200 dark:group-hover/item:bg-white/20 transition-colors">
           <Briefcase size={18} strokeWidth={2.5} />
         </div>
         <div className="flex-1">
@@ -81,7 +81,7 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
       trigger={
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-md shadow-indigo-200/60 dark:shadow-none hover:bg-[#5244b5] transition-all flex items-center gap-1.5"
+          className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded font-bold text-xs shadow-md shadow-indigo-200/60 dark:shadow-none hover:bg-[#5244b5] transition-all flex items-center gap-1.5"
         >
           <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200`} />
           <span>Nuevo</span>

@@ -51,13 +51,13 @@ const MembersPage: React.FC = () => {
               <Skeleton className="h-9 w-64" />
            </div>
            <div className="flex gap-3">
-              <Skeleton className="h-10 w-64 rounded-xl" />
-              <Skeleton className="h-10 w-24 rounded-xl" />
+              <Skeleton className="h-10 w-64 rounded" />
+              <Skeleton className="h-10 w-24 rounded" />
            </div>
         </div>
 
         {/* Table Skeleton */}
-        <div className="bg-white rounded-2xl border border-zinc-100 shadow-xl overflow-hidden">
+        <div className="bg-white rounded border border-zinc-100 shadow-xl overflow-hidden">
            <div className="bg-[#F8F9FB] border-b border-zinc-100 px-6 py-4 flex gap-8">
               <Skeleton className="h-3 w-32" />
               <Skeleton className="h-3 w-32" />
@@ -67,15 +67,15 @@ const MembersPage: React.FC = () => {
               {[1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="px-6 py-5 flex items-center justify-between">
                    <div className="flex items-center gap-3">
-                      <Skeleton className="w-10 h-10 rounded-full" />
+                      <Skeleton className="w-10 h-10 rounded" />
                       <div className="space-y-1.5">
                          <Skeleton className="h-4 w-32" />
                          <Skeleton className="h-3 w-48" />
                       </div>
                    </div>
-                   <Skeleton className="h-6 w-20 rounded-full" />
+                   <Skeleton className="h-6 w-20 rounded" />
                    <Skeleton className="h-4 w-24" />
-                   <Skeleton className="h-8 w-8 rounded-lg" />
+                   <Skeleton className="h-8 w-8 rounded" />
                 </div>
               ))}
            </div>
@@ -112,12 +112,12 @@ const MembersPage: React.FC = () => {
               placeholder="Buscar por nombre o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#6C5DD3] transition-all shadow-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#6C5DD3] transition-all shadow-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
             />
           </div>
            <Button 
             onClick={() => setShowInviteModal(true)}
-            className="bg-[#6C5DD3] hover:bg-[#312e81] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
+            className="bg-[#6C5DD3] hover:bg-[#312e81] text-white rounded px-5 py-2.5 flex items-center gap-2 shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
           >
             <UserPlus size={18} />
             <span className="hidden sm:inline">Invitar</span>
@@ -126,7 +126,7 @@ const MembersPage: React.FC = () => {
       </div>
 
        {/* Members List Container */}
-      <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
+      <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-zinc-50 dark:bg-white/5 border-b border-zinc-200 dark:border-white/10">
@@ -166,7 +166,7 @@ const MembersPage: React.FC = () => {
                 </td>
                 <td className="px-6 py-4">
                   <span className={`
-                    inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
+                    inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider
                     ${member.role === 'OWNER' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
                       member.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
                       'bg-slate-50 text-slate-600 border border-slate-100'}
@@ -182,7 +182,7 @@ const MembersPage: React.FC = () => {
                   </div>
                 </td>
                  <td className="px-6 py-4 text-right">
-                  <button className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all">
+                  <button className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all">
                     <MoreHorizontal size={18} />
                   </button>
                 </td>
@@ -193,7 +193,7 @@ const MembersPage: React.FC = () => {
 
         {filteredMembers.length === 0 && (
            <div className="p-20 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
               <Users size={32} />
             </div>
             <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No se encontraron miembros</h3>

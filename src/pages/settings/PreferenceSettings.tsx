@@ -23,14 +23,14 @@ const ThemeCard: React.FC<{
   <button
     onClick={onClick}
     disabled={isSaving}
-    className={`group relative flex flex-col p-4 rounded-2xl border-2 transition-all text-left
+    className={`group relative flex flex-col p-4 rounded border-2 transition-all text-left
       ${isActive
         ? 'border-[#6C5DD3] bg-indigo-50/30 dark:bg-[#6C5DD3]/10 ring-4 ring-indigo-100 dark:ring-[#6C5DD3]/20'
         : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-[#1C1F26]'
       } disabled:opacity-70
     `}
   >
-    <div className={`w-full h-24 rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-zinc-100 dark:border-white/5 ${previewClass}`}>
+    <div className={`w-full h-24 rounded mb-4 flex items-center justify-center overflow-hidden border border-zinc-100 dark:border-white/5 ${previewClass}`}>
       <div className="scale-125 transition-transform group-hover:scale-150 duration-500 opacity-20 dark:opacity-40">
         {icon}
       </div>
@@ -46,7 +46,7 @@ const ThemeCard: React.FC<{
         </span>
       </div>
       {isActive && !isSaving && (
-        <div className="w-5 h-5 rounded-full bg-[#6C5DD3] flex items-center justify-center">
+        <div className="w-5 h-5 rounded bg-[#6C5DD3] flex items-center justify-center">
           <Check size={12} className="text-white" strokeWidth={4} />
         </div>
       )}
@@ -127,9 +127,9 @@ const PreferenceSettings: React.FC = () => {
       </div>
 
       {/* Theme Selector */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
             <Palette size={20} />
           </div>
           <div>
@@ -170,9 +170,9 @@ const PreferenceSettings: React.FC = () => {
       </section>
 
       {/* Language Selector */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
             <Globe2 size={20} />
           </div>
           <div>
@@ -187,7 +187,7 @@ const PreferenceSettings: React.FC = () => {
               value={language}
               onChange={handleLanguageChange}
               disabled={savingLang}
-              className="w-full p-3 pl-12 bg-[#F4F6F9] dark:bg-[#13151A] rounded-lg border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-[#6C5DD3] focus:border-[#6C5DD3] outline-none transition-all appearance-none font-bold text-zinc-900 dark:text-zinc-100 disabled:opacity-70 cursor-pointer"
+              className="w-full p-3 pl-12 bg-[#F4F6F9] dark:bg-[#13151A] rounded border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-[#6C5DD3] focus:border-[#6C5DD3] outline-none transition-all appearance-none font-bold text-zinc-900 dark:text-zinc-100 disabled:opacity-70 cursor-pointer"
             >
               {LANGUAGES.map(l => (
                 <option key={l.code} value={l.code}>

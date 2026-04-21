@@ -70,7 +70,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     console.log('UserAvatar URL:', displayAvatarUrl);
   }
 
-  const containerClasses = `relative flex items-center justify-center rounded-full border border-zinc-100 shadow-sm flex-shrink-0 overflow-hidden bg-zinc-50 ${sizeClasses[size]} ${className}`;
+  const containerClasses = `relative flex items-center justify-center rounded border border-zinc-100 shadow-sm flex-shrink-0 overflow-hidden bg-zinc-50 ${sizeClasses[size]} ${className}`;
 
   if (displayAvatarUrl && !imageError) {
     return (

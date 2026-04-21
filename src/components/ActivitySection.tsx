@@ -73,7 +73,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#312e81] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
+                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#312e81] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
               >
                 Guardar
               </button>
@@ -256,7 +256,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
            <button
             onClick={onLoadMore}
             disabled={isFetchingMore}
-            className="w-full bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold py-3 mt-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-colors flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5"
+            className="w-full bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold py-3 mt-4 rounded hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-colors flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5"
           >
             {isFetchingMore ? (
               <>

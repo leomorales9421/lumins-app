@@ -571,7 +571,7 @@ const CardModal: React.FC<CardModalProps> = ({
         />
         
         {/* Modal */}
-        <div className="relative transform overflow-hidden sm:rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto">
+        <div className="relative transform overflow-hidden sm:rounded bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="p-6 border-b border-white/5 sticky top-0 bg-[#1c2327] z-10">
             <div className="flex items-start justify-between">
@@ -613,7 +613,7 @@ const CardModal: React.FC<CardModalProps> = ({
               <div className="flex items-center space-x-2">
                 <button
                   onClick={onClose}
-                  className="text-[#9db0b9] hover:text-white p-2 rounded-full hover:bg-white/5 transition-colors"
+                  className="text-[#9db0b9] hover:text-white p-2 rounded hover:bg-white/5 transition-colors"
                   title="Cerrar"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
@@ -626,7 +626,7 @@ const CardModal: React.FC<CardModalProps> = ({
           <div className="p-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded h-8 w-8 border-b-2 border-primary"></div>
                 <p className="ml-3 text-[#9db0b9]">Cargando detalles de la tarjeta...</p>
               </div>
             ) : error ? (
@@ -671,7 +671,7 @@ const CardModal: React.FC<CardModalProps> = ({
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
                         placeholder="Añade una descripción más detallada..."
-                        className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872] min-h-[100px]"
+                        className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872] min-h-[100px]"
                         autoFocus
                         disabled={isSubmitting}
                       />
@@ -699,7 +699,7 @@ const CardModal: React.FC<CardModalProps> = ({
                     </div>
                   ) : (
                     <div 
-                      className="p-4 bg-[#111618] border border-[#3b4b54] rounded-lg min-h-[60px] cursor-pointer hover:border-primary/30 transition-colors"
+                      className="p-4 bg-[#111618] border border-[#3b4b54] rounded min-h-[60px] cursor-pointer hover:border-primary/30 transition-colors"
                       onClick={() => setIsEditingDescription(true)}
                     >
                       {card.description ? (
@@ -722,7 +722,7 @@ const CardModal: React.FC<CardModalProps> = ({
                       type="date"
                       value={card.dueDate ? new Date(card.dueDate).toISOString().split('T')[0] : ''}
                       onChange={(e) => handleUpdateDueDate(e.target.value || null)}
-                      className="px-4 py-2 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+                      className="px-4 py-2 border border-[#3b4b54] bg-[#111618] text-white rounded focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
                       disabled={isSubmitting}
                     />
                     {card.dueDate && (
@@ -751,7 +751,7 @@ const CardModal: React.FC<CardModalProps> = ({
                         <button
                           key={label.id}
                           onClick={() => handleToggleLabel(label.id)}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${isAssigned ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
+                          className={`px-3 py-1.5 rounded text-sm font-medium border transition-all ${isAssigned ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
                           style={{
                             backgroundColor: `${label.color}20`,
                             borderColor: label.color,
@@ -786,10 +786,10 @@ const CardModal: React.FC<CardModalProps> = ({
                         <button
                           key={assignee.id}
                           onClick={() => handleToggleAssignee(assignee.id)}
-                          className="px-3 py-1.5 rounded-full text-sm font-medium bg-primary/20 border border-primary text-primary hover:bg-primary/30 transition-colors flex items-center"
+                          className="px-3 py-1.5 rounded text-sm font-medium bg-primary/20 border border-primary text-primary hover:bg-primary/30 transition-colors flex items-center"
                           disabled={isSubmitting}
                         >
-                          <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center mr-1.5">
+                          <div className="w-5 h-5 rounded bg-primary/30 flex items-center justify-center mr-1.5">
                             <span className="text-xs">{(assignee.name || assignee.email || '?').charAt(0).toUpperCase()}</span>
                           </div>
                           {assignee.name}
@@ -824,7 +824,7 @@ const CardModal: React.FC<CardModalProps> = ({
                   </div>
                   
                   {newChecklistTitle && (
-                    <div className="mb-4 p-4 bg-[#111618] border border-[#3b4b54] rounded-lg">
+                    <div className="mb-4 p-4 bg-[#111618] border border-[#3b4b54] rounded">
                       <Input
                         value={newChecklistTitle}
                         onChange={(e) => setNewChecklistTitle(e.target.value)}
@@ -858,17 +858,17 @@ const CardModal: React.FC<CardModalProps> = ({
                   )}
                   
                   {checklists.map(checklist => (
-                    <div key={checklist.id} className="mb-6 p-5 bg-[#111618] border border-[#3b4b54] rounded-xl">
+                    <div key={checklist.id} className="mb-6 p-5 bg-[#111618] border border-[#3b4b54] rounded">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold text-white text-lg">{checklist.title}</h4>
-                        <div className="text-sm font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded-full shadow-md shadow-[#00a8ff]/40">
+                        <div className="text-sm font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded shadow-md shadow-[#00a8ff]/40">
                           {getChecklistProgress(checklist)}% completado
                         </div>
                       </div>
                       
                       <div className="space-y-3 mb-5">
                         {checklist.items.map(item => (
-                          <div key={item.id} className="flex items-center justify-between p-3.5 hover:bg-white/5 rounded-lg transition-colors">
+                          <div key={item.id} className="flex items-center justify-between p-3.5 hover:bg-white/5 rounded transition-colors">
                             {/* Contenedor izquierdo: Checkbox + Texto PEGADOS */}
                             <div className="flex items-start flex-1 min-w-0">
                               <button
@@ -888,7 +888,7 @@ const CardModal: React.FC<CardModalProps> = ({
                             
                             {/* Contenedor derecho: Badge completamente separado */}
                             {item.done && (
-                              <span className="ml-4 text-xs font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded-full flex-shrink-0 shadow-md shadow-[#00a8ff]/40">
+                              <span className="ml-4 text-xs font-bold bg-[#00a8ff] text-white px-3 py-1.5 rounded flex-shrink-0 shadow-md shadow-[#00a8ff]/40">
                                 Completado
                               </span>
                             )}
@@ -939,7 +939,7 @@ const CardModal: React.FC<CardModalProps> = ({
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Escribe un comentario..."
-                      className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872] min-h-[80px]"
+                      className="w-full px-4 py-3 border border-[#3b4b54] bg-[#111618] text-white rounded focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none placeholder:text-[#586872] min-h-[80px]"
                       disabled={isSubmitting}
                     />
                     <div className="flex justify-end mt-2">
@@ -956,10 +956,10 @@ const CardModal: React.FC<CardModalProps> = ({
                   
                   <div className="space-y-4">
                     {comments.map(comment => (
-                      <div key={comment.id} className="p-4 bg-[#111618] border border-[#3b4b54] rounded-lg">
+                      <div key={comment.id} className="p-4 bg-[#111618] border border-[#3b4b54] rounded">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold mr-2">
+                            <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary font-bold mr-2">
                               {(comment.author.name || comment.author.email || '?').charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -1020,7 +1020,7 @@ const CardModal: React.FC<CardModalProps> = ({
                   
                   <div className="space-y-2">
                     {attachments.map(attachment => (
-                      <div key={attachment.id} className="flex items-center justify-between p-3 bg-[#111618] border border-[#3b4b54] rounded-lg">
+                      <div key={attachment.id} className="flex items-center justify-between p-3 bg-[#111618] border border-[#3b4b54] rounded">
                         <div className="flex items-center">
                           <span className="material-symbols-outlined text-[#9db0b9] mr-3">description</span>
                           <div>

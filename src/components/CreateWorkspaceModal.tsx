@@ -81,12 +81,12 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-[32px] shadow-modal border border-zinc-200 dark:border-white/10 p-10 relative overflow-hidden z-10"
+            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded shadow-modal border border-zinc-200 dark:border-white/10 p-10 relative overflow-hidden z-10"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-10">
               <div className="flex items-center gap-5">
-                <div className="w-14 h-14 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded-[20px] flex items-center justify-center shadow-sm">
+                <div className="w-14 h-14 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded flex items-center justify-center shadow-sm">
                   <Building2 size={32} strokeWidth={2.5} />
                 </div>
                 <div>
@@ -96,7 +96,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
               </div>
               <button 
                 onClick={handleClose}
-                className="w-12 h-12 flex items-center justify-center rounded-2xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all"
+                className="w-12 h-12 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all"
               >
                 <X size={28} />
               </button>
@@ -114,7 +114,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Marketing HQ o Lumins Global"
-                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-[16px] px-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                   required
                 />
               </div>
@@ -139,14 +139,14 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Define el propósito de este equipo..."
-                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-[16px] p-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
+                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
                     />
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded-xl border border-rose-100 dark:border-rose-500/20">
+                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded border border-rose-100 dark:border-rose-500/20">
                   {error}
                 </div>
               )}
@@ -164,7 +164,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-12 px-10 rounded-[16px] font-bold text-white transition-all shadow-lg
+                    h-12 px-10 rounded font-bold text-white transition-all shadow-lg
                     ${isLoading || !name.trim() 
                       ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 shadow-none cursor-not-allowed' 
                       : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'

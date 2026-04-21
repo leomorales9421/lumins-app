@@ -63,7 +63,7 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
   }, [editor]);
 
   const buttonClass = (active: boolean) => `
-    p-1.5 rounded-md transition-all duration-200
+    p-1.5 rounded transition-all duration-200
     ${active 
       ? 'bg-white dark:bg-white/10 text-[#6C5DD3] shadow-sm' 
       : 'text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-zinc-100'}
@@ -78,7 +78,7 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
             <button
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
-              className="p-1.5 rounded-md text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-zinc-100 transition-colors disabled:opacity-30"
+              className="p-1.5 rounded text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-zinc-100 transition-colors disabled:opacity-30"
               title="Deshacer"
             >
               <Undo size={16} />
@@ -86,7 +86,7 @@ const MenuBar = ({ editor, variant }: { editor: any, variant: 'default' | 'compa
             <button
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().redo()}
-              className="p-1.5 rounded-md text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-zinc-100 transition-colors disabled:opacity-30"
+              className="p-1.5 rounded text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-zinc-100 transition-colors disabled:opacity-30"
               title="Rehacer"
             >
               <Redo size={16} />
@@ -294,7 +294,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
         inline: true,
         allowBase64: false,
         HTMLAttributes: {
-          class: 'rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-indigo-500/20 shadow-md block mx-auto',
+          class: 'rounded max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-indigo-500/20 shadow-md block mx-auto',
         },
       }),
       Placeholder.configure({
@@ -382,7 +382,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     return (
       <div 
         onClick={() => setIsEditing(true)}
-        className="w-full bg-zinc-50 dark:bg-[#13151A] rounded-lg p-3 text-sm text-zinc-400 dark:text-zinc-500 cursor-pointer hover:bg-zinc-100 dark:hover:bg-[#1C1F26] transition-all min-h-[44px] flex items-center border border-zinc-200 dark:border-white/10"
+        className="w-full bg-zinc-50 dark:bg-[#13151A] rounded p-3 text-sm text-zinc-400 dark:text-zinc-500 cursor-pointer hover:bg-zinc-100 dark:hover:bg-[#1C1F26] transition-all min-h-[44px] flex items-center border border-zinc-200 dark:border-white/10"
       >
         {placeholder}
       </div>
@@ -393,7 +393,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     return (
       <div 
         onClick={() => setIsEditing(true)}
-        className="w-full bg-zinc-50 dark:bg-[#13151A] rounded-lg p-5 text-zinc-700 dark:text-zinc-300 cursor-pointer hover:bg-zinc-100 dark:hover:bg-[#1C1F26] transition-all min-h-[100px] border border-zinc-200 dark:border-white/10"
+        className="w-full bg-zinc-50 dark:bg-[#13151A] rounded p-5 text-zinc-700 dark:text-zinc-300 cursor-pointer hover:bg-zinc-100 dark:hover:bg-[#1C1F26] transition-all min-h-[100px] border border-zinc-200 dark:border-white/10"
       >
         {initialContent ? (
           <div 
@@ -408,7 +408,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
   }
 
   return (
-    <div className={`flex flex-col w-full bg-zinc-50 dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 focus-within:ring-2 focus-within:ring-[#6C5DD3]/15 transition-all overflow-hidden relative`}>
+    <div className={`flex flex-col w-full bg-zinc-50 dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 focus-within:ring-2 focus-within:ring-[#6C5DD3]/15 transition-all overflow-hidden relative`}>
       {isUploading && (
         <div className="absolute inset-0 bg-white/50 dark:bg-black/40 backdrop-blur-[2px] z-50 flex items-center justify-center flex-col gap-2">
           <Loader2 size={isCompact ? 24 : 32} className="text-[#6C5DD3] animate-spin" />
@@ -438,7 +438,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
           <button
             onClick={handleSave}
             disabled={isUploading || (isEditing && !hasUnsavedChanges)}
-            className="bg-[#6C5DD3] text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50"
+            className="bg-[#6C5DD3] text-white font-bold text-sm px-4 py-2 rounded hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50"
           >
             {isEditing ? 'Guardar' : 'Comentar'}
           </button>

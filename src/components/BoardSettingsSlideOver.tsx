@@ -24,7 +24,7 @@ const ImageOption = ({ img, currentBackground, onSelect }: any) => {
       type="button"
       onClick={() => onSelect(fullUrl)}
       onMouseEnter={handleMouseEnter}
-      className={`relative w-full h-16 rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.03] group ${
+      className={`relative w-full h-16 rounded overflow-hidden border-2 transition-all hover:scale-[1.03] group ${
         isActive ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' : 'border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
       }`}
     >
@@ -40,13 +40,13 @@ const ImageOption = ({ img, currentBackground, onSelect }: any) => {
       />
 
       {isActive && (
-        <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded-full p-0.5 shadow-sm z-10">
+        <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded p-0.5 shadow-sm z-10">
           <CheckCircle2 size={12} className="text-[#6C5DD3]" />
         </div>
       )}
 
       <div className="absolute inset-0 bg-black/10 dark:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-         <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
+         <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
            Seleccionar
          </span>
       </div>
@@ -219,7 +219,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
             {/* Header */}
             <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between bg-zinc-50/50 dark:bg-white/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shadow-sm">
+                <div className="w-10 h-10 rounded bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shadow-sm">
                   <Settings size={20} />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-white dark:hover:bg-white/5 hover:shadow-sm border border-transparent hover:border-zinc-200 dark:hover:border-white/10 rounded-xl text-zinc-400 dark:text-zinc-500 transition-all"
+                className="p-2 hover:bg-white dark:hover:bg-white/5 hover:shadow-sm border border-transparent hover:border-zinc-200 dark:hover:border-white/10 rounded text-zinc-400 dark:text-zinc-500 transition-all"
               >
                 <X size={20} />
               </button>
@@ -243,7 +243,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all"
+                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-4 py-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all"
                   />
                 </div>
 
@@ -254,14 +254,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe el propósito de este tablero..."
-                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all resize-none"
+                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isUpdating || !name.trim() || (name === board.name && description === board.description)}
-                  className="w-full justify-center bg-[#6C5DD3] hover:bg-[#312e81] text-white py-3 rounded-xl font-bold shadow-lg shadow-[#6C5DD3]/20 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.98]"
+                  className="w-full justify-center bg-[#6C5DD3] hover:bg-[#312e81] text-white py-3 rounded font-bold shadow-lg shadow-[#6C5DD3]/20 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.98]"
                 >
                   {isUpdating ? <Loader2 size={18} className="animate-spin" /> : (
                     <>
@@ -282,7 +282,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                         type="button"
                         onClick={() => handleBackgroundChange(bg.value)}
                         className={`
-                          w-full h-16 rounded-xl cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
+                          w-full h-16 rounded cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
                           ${bg.value}
                           ${(board.background === bg.value || (!board.background && bg.id === 'default')) 
                             ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' 
@@ -292,12 +292,12 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                         title={bg.name}
                       >
                         {(board.background === bg.value || (!board.background && bg.id === 'default')) && (
-                          <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded-full p-0.5 shadow-sm z-10">
+                          <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded p-0.5 shadow-sm z-10">
                             <CheckCircle2 size={12} className="text-[#6C5DD3]" />
                           </div>
                         )}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                           <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
+                           <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
                              {bg.name}
                            </span>
                         </div>
@@ -309,7 +309,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-4 ml-1">
                     <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Galería de Fotos</h3>
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
                       <ImageIcon size={10} />
                       <span className="text-[10px] font-bold">Unsplash / Picsum</span>
                     </div>
@@ -318,7 +318,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                   <div className="grid grid-cols-3 gap-2">
                     {isLoadingImages ? (
                       Array.from({ length: 12 }).map((_, i) => (
-                        <Skeleton key={i} className="w-full h-16 rounded-xl" />
+                        <Skeleton key={i} className="w-full h-16 rounded" />
                       ))
                     ) : (
                       apiImages.map((img) => (
@@ -345,7 +345,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
               {!showDeleteConfirm ? (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-rose-100 dark:border-rose-500/20 bg-white dark:bg-[#13151A] text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded border-2 border-rose-100 dark:border-rose-500/20 bg-white dark:bg-[#13151A] text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm"
                 >
                   <Trash2 size={18} />
                   Eliminar este tablero
@@ -358,14 +358,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 py-2.5 rounded-xl bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 font-bold text-xs hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
+                      className="flex-1 py-2.5 rounded bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 font-bold text-xs hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 shadow-lg shadow-rose-200 dark:shadow-none transition-all"
+                      className="flex-1 py-2.5 rounded bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 shadow-lg shadow-rose-200 dark:shadow-none transition-all"
                     >
                       {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
                     </button>

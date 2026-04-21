@@ -73,7 +73,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                 key={item.label?.id || idx}
                 title={item.label?.name}
                 style={{ backgroundColor: item.label?.color }}
-                className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold text-white leading-tight"
+                className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold text-white leading-tight"
               >
                 {item.label?.name || ''}
               </span>
@@ -89,9 +89,9 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
         {/* Checklist progress bar */}
         {totalItems > 0 && (
           <div className="flex items-center gap-2">
-            <div className="flex-1 h-1 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="flex-1 h-1 bg-zinc-100 dark:bg-white/5 rounded overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#6C5DD3]'}`}
+                className={`h-full rounded transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#6C5DD3]'}`}
                 style={{ width: `${checklistPct}%` }}
               />
             </div>
@@ -108,7 +108,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
             {/* Due date */}
             {card.dueDate && (
               <span
-                className={`flex items-center gap-1 text-[11px] font-medium rounded-md px-1.5 py-0.5 ${
+                className={`flex items-center gap-1 text-[11px] font-medium rounded px-1.5 py-0.5 ${
                   isOverdue
                     ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                     : 'text-zinc-500 dark:text-zinc-400'
@@ -162,7 +162,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
               <span
                 title={`Prioridad ${card.priority}`}
                 style={{ backgroundColor: PRIORITY_DOT[card.priority] || '#94A3B8' }}
-                className="w-2 h-2 rounded-full flex-shrink-0"
+                className="w-2 h-2 rounded flex-shrink-0"
               />
             )}
 
@@ -173,7 +173,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                   <div
                     key={assignee.user?.id || `assignee-${idx}`}
                     title={assignee.user?.name}
-                    className="w-5 h-5 rounded-full border border-white dark:border-[#1C1F26] shadow-sm transition-transform hover:scale-110"
+                    className="w-5 h-5 rounded border border-white dark:border-[#1C1F26] shadow-sm transition-transform hover:scale-110"
                   >
                     <UserAvatar 
                       name={assignee.user?.name || 'Usuario'} 
@@ -183,7 +183,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                   </div>
                 ))
               ) : (
-                <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center">
+                <div className="w-5 h-5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center">
                   <Eye size={9} className="text-zinc-400 dark:text-zinc-500" strokeWidth={2.5} />
                 </div>
               )}

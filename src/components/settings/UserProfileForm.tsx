@@ -157,15 +157,15 @@ const UserProfileForm: React.FC = () => {
     }
   };
 
-  const inputClasses = "w-full p-3 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
+  const inputClasses = "w-full p-3 rounded border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
   const labelClasses = "text-sm font-bold text-zinc-700 dark:text-zinc-300";
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden p-8 space-y-6">
+      <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 overflow-hidden p-8 space-y-6">
         <Skeleton className="h-7 w-48 mb-6" />
         <div className="flex items-center gap-6 mb-8">
-          <Skeleton className="w-24 h-24 rounded-full" />
+          <Skeleton className="w-24 h-24 rounded" />
           <div className="space-y-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-40" />
@@ -187,7 +187,7 @@ const UserProfileForm: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden">
+    <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 overflow-hidden">
       <div className="p-5 sm:p-8">
         <h2 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 sm:mb-6">Información del Perfil</h2>
         
@@ -195,7 +195,7 @@ const UserProfileForm: React.FC = () => {
           {/* Avatar Section */}
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 sm:mb-8 text-center sm:text-left">
             <div className="relative group">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-zinc-50 dark:bg-[#13151A] border-2 border-dashed border-zinc-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded bg-zinc-50 dark:bg-[#13151A] border-2 border-dashed border-zinc-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
                 {avatarUploading ? (
                   <Loader2 size={24} className="animate-spin text-zinc-400 dark:text-zinc-500" />
                 ) : formData.avatarUrl ? (
@@ -213,7 +213,7 @@ const UserProfileForm: React.FC = () => {
                 )}
               </div>
               {!avatarUploading && (
-                <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded cursor-pointer">
                   <input
                     type="file"
                     className="hidden"
@@ -263,7 +263,7 @@ const UserProfileForm: React.FC = () => {
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full p-3 rounded-lg border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-500 cursor-not-allowed outline-none"
+                className="w-full p-3 rounded border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-500 cursor-not-allowed outline-none"
               />
             </div>
 
@@ -299,7 +299,7 @@ const UserProfileForm: React.FC = () => {
           </div>
 
           {success && (
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-lg border border-emerald-100 dark:border-emerald-500/20 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded border border-emerald-100 dark:border-emerald-500/20 animate-in fade-in slide-in-from-top-2">
               <CheckCircle2 size={16} />
               ¡Perfil actualizado correctamente!
             </div>
@@ -309,7 +309,7 @@ const UserProfileForm: React.FC = () => {
             <button
               type="submit"
               disabled={loading || avatarUploading}
-              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 active:scale-95"
+              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 active:scale-95"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               Guardar Cambios

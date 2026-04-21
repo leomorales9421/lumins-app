@@ -101,12 +101,12 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-2xl shadow-modal p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
+            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded shadow-modal p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded-2xl flex items-center justify-center shadow-sm">
+                 <div className="w-12 h-12 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded flex items-center justify-center shadow-sm">
                     <Layout size={24} strokeWidth={2.5} />
                  </div>
                  <div>
@@ -116,7 +116,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl transition-all"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 rounded transition-all"
               >
                 <X size={24} />
               </button>
@@ -132,7 +132,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   <select 
                     value={workspaceId}
                     onChange={(e) => setWorkspaceId(e.target.value)}
-                    className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] appearance-none transition-all cursor-pointer"
+                    className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] appearance-none transition-all cursor-pointer"
                   >
                     {workspaces.map(ws => (
                       <option key={ws.id} value={ws.id}>{ws.name}</option>
@@ -153,7 +153,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Plan de Marketing 2026"
-                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                  className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-4 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                   required
                 />
               </div>
@@ -166,7 +166,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                 <div className="flex gap-4">
                   <div 
                     onClick={() => setVisibility('private')}
-                    className={`flex-1 p-5 rounded-2xl border cursor-pointer transition-all ${
+                    className={`flex-1 p-5 rounded border cursor-pointer transition-all ${
                       visibility === 'private' 
                         ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
                         : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
@@ -181,7 +181,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
 
                   <div 
                     onClick={() => setVisibility('team')}
-                    className={`flex-1 p-5 rounded-2xl border cursor-pointer transition-all ${
+                    className={`flex-1 p-5 rounded border cursor-pointer transition-all ${
                       visibility === 'team' 
                         ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
                         : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
@@ -216,14 +216,14 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Breve descripción del proyecto..."
-                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
+                      className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 resize-none"
                     />
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded-xl border border-rose-100 dark:border-rose-500/20">
+                <div className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold p-4 rounded border border-rose-100 dark:border-rose-500/20">
                   {error}
                 </div>
               )}
@@ -241,7 +241,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                   type="submit"
                   disabled={isLoading || !name.trim()}
                   className={`
-                    h-12 px-8 rounded-xl font-bold text-white transition-all shadow-lg
+                    h-12 px-8 rounded font-bold text-white transition-all shadow-lg
                     ${isLoading || !name.trim() 
                       ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 shadow-none cursor-not-allowed' 
                       : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'

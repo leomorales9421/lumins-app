@@ -88,7 +88,7 @@ const SecuritySettings: React.FC = () => {
 
   const isFormValid = formData.currentPassword && formData.newPassword && formData.confirmPassword && (formData.newPassword === formData.confirmPassword);
 
-  const inputClasses = "w-full p-3 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
+  const inputClasses = "w-full p-3 rounded border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
   const labelClasses = "text-sm font-bold text-zinc-700 dark:text-zinc-300";
 
   return (
@@ -99,9 +99,9 @@ const SecuritySettings: React.FC = () => {
       </div>
 
       {/* Change Password Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
             <Key size={20} />
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Cambiar Contraseña</h3>
@@ -139,14 +139,14 @@ const SecuritySettings: React.FC = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`w-full p-3 rounded-lg border ${formData.confirmPassword && formData.newPassword !== formData.confirmPassword ? 'border-red-500' : 'border-zinc-200 dark:border-white/10'} bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all`}
+              className={`w-full p-3 rounded border ${formData.confirmPassword && formData.newPassword !== formData.confirmPassword ? 'border-red-500' : 'border-zinc-200 dark:border-white/10'} bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all`}
               placeholder="••••••••"
             />
           </div>
 
           {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           {success && (
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded border border-emerald-100 dark:border-emerald-500/20">
               <CheckCircle2 size={16} />
               ¡Contraseña actualizada con éxito!
             </div>
@@ -156,7 +156,7 @@ const SecuritySettings: React.FC = () => {
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:shadow-none active:scale-95"
+              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-6 rounded flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:shadow-none active:scale-95"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               Actualizar contraseña
@@ -166,9 +166,9 @@ const SecuritySettings: React.FC = () => {
       </section>
 
       {/* Active Sessions Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
             <Monitor size={20} />
           </div>
           <div>
@@ -178,7 +178,7 @@ const SecuritySettings: React.FC = () => {
         </div>
 
         {sessionError && (
-          <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-lg border border-rose-100 dark:border-rose-500/20 mb-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20 mb-4">
             <AlertTriangle size={16} />
             {sessionError}
           </div>
@@ -188,7 +188,7 @@ const SecuritySettings: React.FC = () => {
           {sessionsLoading ? (
             <>
               {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                <Skeleton key={i} className="h-16 w-full rounded" />
               ))}
             </>
           ) : sessions.length === 0 ? (
@@ -197,10 +197,10 @@ const SecuritySettings: React.FC = () => {
             sessions.map(session => (
               <div
                 key={session.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 gap-4"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 gap-4"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-[#1C1F26] flex items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-white/10 flex-shrink-0">
+                  <div className="w-10 h-10 rounded bg-white dark:bg-[#1C1F26] flex items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-white/10 flex-shrink-0">
                     <Smartphone size={20} />
                   </div>
                   <div>
@@ -216,14 +216,14 @@ const SecuritySettings: React.FC = () => {
 
                 <div className="flex items-center justify-end gap-3 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-zinc-100 dark:border-white/5">
                   {session.isCurrent ? (
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded uppercase tracking-wider">
                       En Línea
                     </span>
                   ) : (
                     <button
                       onClick={() => handleRevokeSession(session.id)}
                       disabled={revokingId === session.id}
-                      className="flex items-center gap-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-bold transition-colors disabled:opacity-50 active:scale-95"
+                      className="flex items-center gap-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded px-3 py-1.5 text-xs sm:text-sm font-bold transition-colors disabled:opacity-50 active:scale-95"
                     >
                       {revokingId === session.id ? (
                         <Loader2 size={14} className="animate-spin" />

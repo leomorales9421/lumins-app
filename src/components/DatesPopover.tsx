@@ -48,12 +48,12 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button 
           onClick={onClose} 
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
         >
           <ChevronLeft size={16} />
         </button>
@@ -62,7 +62,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
         </h3>
         <button 
           onClick={onClose} 
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all"
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
         >
           <X size={16} />
         </button>
@@ -167,7 +167,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
           <div className="flex items-center gap-3">
             <div 
               onClick={() => setHasStartDate(!hasStartDate)}
-              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
                 hasStartDate 
                   ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
@@ -181,7 +181,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
               disabled={!hasStartDate}
               placeholder="D/M/AAAA"
               value={range?.from ? format(range.from, 'd/M/yyyy') : ''}
-              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
             />
           </div>
         </div>
@@ -191,7 +191,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
           <div className="flex items-center gap-3">
             <div 
               onClick={() => setHasDueDate(!hasDueDate)}
-              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
                 hasDueDate 
                   ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
@@ -206,13 +206,13 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
                 value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
-                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
               />
               <input 
                 type="text"
                 disabled={!hasDueDate}
                 defaultValue="12:00"
-                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
               />
             </div>
           </div>
@@ -223,13 +223,13 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       <div className="px-4 pb-5 pt-2 flex flex-col gap-3">
         <button 
           onClick={handleSave}
-          className="w-full bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
+          className="w-full bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
         >
           Guardar fechas
         </button>
         <button 
           onClick={() => { onRemoveDates(); onClose(); }}
-          className="w-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 font-bold py-3 rounded-xl hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all active:scale-[0.98] text-sm"
+          className="w-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 font-bold py-3 rounded hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all active:scale-[0.98] text-sm"
         >
           Quitar fechas
         </button>

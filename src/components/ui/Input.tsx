@@ -33,7 +33,7 @@ const Input: React.FC<InputProps> = ({
             w-full h-12 bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 
             text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 
             focus:outline-none focus:ring-2 focus:ring-[#6C5DD3]/50 focus:border-[#6C5DD3] 
-            dark:focus:ring-[#6C5DD3]/50 transition-colors rounded-md py-3
+            dark:focus:ring-[#6C5DD3]/50 transition-colors rounded py-3
             ${leftIcon ? 'pl-12' : 'px-5'}
             ${rightIcon ? 'pr-12' : 'px-5'}
             ${error ? 'ring-2 ring-red-500/50 border-red-500' : ''}

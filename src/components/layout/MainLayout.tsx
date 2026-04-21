@@ -146,13 +146,13 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
               alt="Lumins" 
               className="h-24 w-auto animate-pulse brightness-125" 
             />
-            <div className="absolute inset-0 bg-[#6C5DD3]/20 blur-3xl rounded-full animate-pulse" />
+            <div className="absolute inset-0 bg-[#6C5DD3]/20 blur-3xl rounded animate-pulse" />
           </div>
           <div className="flex flex-col items-center gap-2">
             <p className="text-white font-black text-xs tracking-[0.4em] uppercase opacity-80">
               Preparando Espacio
             </p>
-            <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="w-48 h-1 bg-white/5 rounded overflow-hidden">
               <div className="w-full h-full bg-gradient-to-r from-transparent via-[#6C5DD3] to-transparent animate-shimmer" />
             </div>
           </div>

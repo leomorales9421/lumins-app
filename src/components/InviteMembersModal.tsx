@@ -151,7 +151,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-[600px] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
+            className="w-full max-w-[600px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-8">
@@ -163,7 +163,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
               >
                 <X size={24} />
               </button>
@@ -171,7 +171,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
 
             {success ? (
               <div className="py-12 text-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
-                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded flex items-center justify-center mx-auto mb-6 shadow-sm">
                   <Mail size={40} strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">¡Invitaciones Enviadas!</h3>
@@ -191,7 +191,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                             value={invite.email}
                             onChange={(e) => updateInviteRow(index, 'email', e.target.value)}
                             placeholder="nombre@empresa.com"
-                            className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl p-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all"
+                            className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all"
                             required
                           />
                         </div>
@@ -199,7 +199,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                           <select 
                             value={invite.role}
                             onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
-                            className="w-full bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded-xl p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none"
+                            className="w-full bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none"
                           >
                             <option value="ADMIN">Admin</option>
                             <option value="MEMBER">Miembro</option>
@@ -234,11 +234,11 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                   <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">Asignar a...</h3>
                   
                   {/* Tabs */}
-                  <div className="flex p-1.5 bg-zinc-100 dark:bg-[#13151A] rounded-xl w-fit">
+                  <div className="flex p-1.5 bg-zinc-100 dark:bg-[#13151A] rounded w-fit">
                     <button
                       type="button"
                       onClick={() => setActiveTab('workspaces')}
-                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                      className={`px-4 py-2 rounded text-sm font-bold transition-all ${
                         activeTab === 'workspaces' 
                           ? 'bg-white dark:bg-[#1C1F26] shadow-sm text-[#6C5DD3] dark:text-zinc-100' 
                           : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
@@ -249,7 +249,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setActiveTab('boards')}
-                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                      className={`px-4 py-2 rounded text-sm font-bold transition-all ${
                         activeTab === 'boards' 
                           ? 'bg-white dark:bg-[#1C1F26] shadow-sm text-[#6C5DD3] dark:text-zinc-100' 
                           : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
@@ -260,20 +260,20 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                   </div>
 
                   {/* Multi-Select List */}
-                  <div className="max-h-48 overflow-y-auto border border-zinc-200 dark:border-white/10 rounded-2xl p-3 custom-scrollbar bg-zinc-50/30 dark:bg-black/10">
+                  <div className="max-h-48 overflow-y-auto border border-zinc-200 dark:border-white/10 rounded p-3 custom-scrollbar bg-zinc-50/30 dark:bg-black/10">
                     {activeTab === 'workspaces' ? (
                       <div className="space-y-1.5">
                         {workspaces.map((ws) => (
                           <div 
                             key={ws.id}
                             onClick={() => toggleWorkspace(ws.id)}
-                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                            className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-all ${
                               selectedWorkspaces.includes(ws.id) 
                                 ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
                                 : 'hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
-                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                               selectedWorkspaces.includes(ws.id) 
                                 ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' 
                                 : 'border-zinc-300 dark:border-white/10'
@@ -295,13 +295,13 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                           <div 
                             key={board.id}
                             onClick={() => toggleBoard(board.id)}
-                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                            className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-all ${
                               selectedBoards.includes(board.id) 
                                 ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
                                 : 'hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
-                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                               selectedBoards.includes(board.id) 
                                 ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' 
                                 : 'border-zinc-300 dark:border-white/10'
@@ -322,7 +322,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 </div>
 
                 {error && (
-                  <div className="text-rose-500 dark:text-rose-400 text-[13px] font-bold text-center bg-rose-50 dark:bg-rose-500/10 p-3 rounded-xl border border-rose-100 dark:border-rose-500/20">
+                  <div className="text-rose-500 dark:text-rose-400 text-[13px] font-bold text-center bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20">
                     {error}
                   </div>
                 )}
@@ -340,7 +340,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                     type="submit"
                     disabled={isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)}
                     className={`
-                      px-8 py-3 rounded-xl font-bold text-white transition-all shadow-lg
+                      px-8 py-3 rounded font-bold text-white transition-all shadow-lg
                       ${isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)
                         ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 shadow-none cursor-not-allowed' 
                         : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'

@@ -24,8 +24,8 @@ const AppPage: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-xl border border-[#E8E9EC] shadow-soft flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#F4F5F7] text-[#4338ca] rounded-xl flex items-center justify-center">
+          <div className="bg-white p-6 rounded border border-[#E8E9EC] shadow-soft flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#F4F5F7] text-[#4338ca] rounded flex items-center justify-center">
               <Layout size={24} />
             </div>
             <div>
@@ -33,8 +33,8 @@ const AppPage: React.FC = () => {
               <div className="text-xs font-bold text-[#9CA3AF] uppercase">Tableros Activos</div>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-xl border border-[#E8E9EC] shadow-soft flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#F4F5F7] text-green-600 rounded-xl flex items-center justify-center">
+          <div className="bg-white p-6 rounded border border-[#E8E9EC] shadow-soft flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#F4F5F7] text-green-600 rounded flex items-center justify-center">
               <CheckSquare size={24} />
             </div>
             <div>
@@ -42,8 +42,8 @@ const AppPage: React.FC = () => {
               <div className="text-xs font-bold text-[#9CA3AF] uppercase">Tareas Completadas</div>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-xl border border-[#E8E9EC] shadow-soft flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#F4F5F7] text-blue-600 rounded-xl flex items-center justify-center">
+          <div className="bg-white p-6 rounded border border-[#E8E9EC] shadow-soft flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#F4F5F7] text-blue-600 rounded flex items-center justify-center">
               <Clock size={24} />
             </div>
             <div>
@@ -55,7 +55,7 @@ const AppPage: React.FC = () => {
 
         {/* Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-[#1E293B] text-white p-10 rounded-2xl relative overflow-hidden group">
+          <div className="bg-[#1E293B] text-white p-10 rounded relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#4338ca]/20 blur-3xl" />
             <div className="relative z-10">
               <h3 className="text-2xl font-bold mb-4">Gestiona tus proyectos</h3>
@@ -70,7 +70,7 @@ const AppPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white p-10 rounded-2xl border border-[#E8E9EC] shadow-soft flex flex-col justify-center">
+          <div className="bg-white p-10 rounded border border-[#E8E9EC] shadow-soft flex flex-col justify-center">
             <h3 className="text-xl font-bold text-[#1E293B] mb-2">¿Necesitas ayuda?</h3>
             <p className="text-[#6B7280] mb-6">Explora nuestra documentación para aprender a usar todas las herramientas de Lumins.</p>
             <button className="flex items-center gap-2 text-[#4338ca] font-bold text-sm hover:underline">

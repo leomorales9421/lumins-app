@@ -25,7 +25,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
     const isImage = isImageMime || (attachment.mime === 'link' && isImageUrl);
     
     return (
-      <div className="w-16 h-12 bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+      <div className="w-16 h-12 bg-zinc-900 rounded overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
         {isImage ? (
           <img 
             src={attachment.url} 
@@ -60,7 +60,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
         {attachments.map((attachment) => (
           <div 
             key={attachment.id} 
-            className="group flex items-center gap-4 p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] hover:shadow-soft transition-all mb-3 w-fit pr-10 relative overflow-hidden"
+            className="group flex items-center gap-4 p-3 rounded border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] hover:shadow-soft transition-all mb-3 w-fit pr-10 relative overflow-hidden"
           >
             {/* Glossy background effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/5 to-transparent pointer-events-none" />
@@ -78,7 +78,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
                 </span>
                 {attachment.sizeBytes && (
                   <>
-                    <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                    <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded" />
                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
                       {(attachment.sizeBytes / 1024).toFixed(1)} KB
                     </span>

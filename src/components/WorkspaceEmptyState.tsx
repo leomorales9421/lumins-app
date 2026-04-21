@@ -9,10 +9,10 @@ const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({ onCreateClick
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-10 animate-fade-up">
       {/* Icon Container */}
-      <div className="bg-[#F3E8FF] p-8 rounded-full mb-8 relative">
+      <div className="bg-[#F3E8FF] p-8 rounded mb-8 relative">
         <Rocket size={64} className="text-[#4338ca]" strokeWidth={2.5} />
         {/* Subtle decorative ring */}
-        <div className="absolute inset-0 border-4 border-[#4338ca]/10 rounded-full scale-125 animate-pulse" />
+        <div className="absolute inset-0 border-4 border-[#4338ca]/10 rounded scale-125 animate-pulse" />
       </div>
 
       {/* Text Content */}
@@ -29,7 +29,7 @@ const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({ onCreateClick
       {/* CTA Button */}
       <button
         onClick={onCreateClick}
-        className="mt-12 h-16 px-10 bg-gradient-to-r from-[#4338ca] to-[#E91E63] text-white font-black text-lg rounded-[12px] shadow-[0_10px_25px_-5px_rgba(67,56,202,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(67,56,202,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
+        className="mt-12 h-16 px-10 bg-gradient-to-r from-[#4338ca] to-[#E91E63] text-white font-black text-lg rounded shadow-[0_10px_25px_-5px_rgba(67,56,202,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(67,56,202,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest"
       >
         Crear Espacio de Trabajo
       </button>

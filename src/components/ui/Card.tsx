@@ -12,7 +12,7 @@ const Card: React.FC<CardProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'rounded-md transition-all duration-300 overflow-hidden';
+  const baseClasses = 'rounded transition-all duration-300 overflow-hidden';
   
   const variantClasses = {
     // Elevated Surface base

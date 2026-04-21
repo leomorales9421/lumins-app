@@ -352,10 +352,10 @@ const BoardDetailPage: React.FC = () => {
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#13151A] z-30">
            <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-10 w-10 rounded" />
                 <div className="space-y-2">
-                  <Skeleton className="h-5 w-32 rounded-md" />
-                  <Skeleton className="h-3 w-20 rounded-md opacity-50" />
+                  <Skeleton className="h-5 w-32 rounded" />
+                  <Skeleton className="h-3 w-20 rounded opacity-50" />
                 </div>
               </div>
               <div className="hidden md:block h-8 w-px bg-zinc-100 dark:bg-white/5" />
@@ -366,14 +366,14 @@ const BoardDetailPage: React.FC = () => {
            </div>
            <div className="flex items-center gap-4">
               <div className="flex -space-x-2">
-                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
-                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
-                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
+                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
+                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
+                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
               </div>
               <div className="h-8 w-px bg-zinc-100 dark:bg-white/5" />
               <div className="flex gap-3">
-                <Skeleton className="h-10 w-24 rounded-xl" />
-                <Skeleton className="h-10 w-32 rounded-xl" />
+                <Skeleton className="h-10 w-24 rounded" />
+                <Skeleton className="h-10 w-32 rounded" />
               </div>
            </div>
         </div>
@@ -383,28 +383,28 @@ const BoardDetailPage: React.FC = () => {
            {[1, 2, 3, 4].map(i => (
              <div key={i} className="min-w-[320px] max-w-[320px] h-full flex flex-col gap-4">
                 <div className="flex justify-between items-center px-1">
-                   <Skeleton className="h-6 w-32 rounded-lg" />
+                   <Skeleton className="h-6 w-32 rounded" />
                    <div className="flex gap-1">
-                     <Skeleton className="h-6 w-6 rounded-md" />
-                     <Skeleton className="h-6 w-6 rounded-md" />
+                     <Skeleton className="h-6 w-6 rounded" />
+                     <Skeleton className="h-6 w-6 rounded" />
                    </div>
                 </div>
                 
                 <div className="space-y-3">
                    {[1, 2, 3].map(j => (
-                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/5 p-4 space-y-4 shadow-sm">
-                        <Skeleton className="h-4 w-[90%] rounded-md" />
+                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/5 p-4 space-y-4 shadow-sm">
+                        <Skeleton className="h-4 w-[90%] rounded" />
                         <div className="flex justify-between items-center pt-2">
-                           <Skeleton className="h-3 w-16 rounded-full" />
+                           <Skeleton className="h-3 w-16 rounded" />
                            <div className="flex gap-1">
-                              <Skeleton className="h-5 w-5 rounded-full" />
+                              <Skeleton className="h-5 w-5 rounded" />
                            </div>
                         </div>
                      </div>
                    ))}
                 </div>
                 
-                <Skeleton className="h-[52px] w-full rounded-xl opacity-40" />
+                <Skeleton className="h-[52px] w-full rounded opacity-40" />
              </div>
            ))}
         </div>
@@ -428,7 +428,7 @@ const BoardDetailPage: React.FC = () => {
         <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-            className="p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded-xl text-white/90 transition-all border border-white/10 shadow-sm group"
+            className="p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded text-white/90 transition-all border border-white/10 shadow-sm group"
             title="Toggle Sidebar"
           >
             <Menu size={20} className="group-hover:text-white transition-colors" />
@@ -446,7 +446,7 @@ const BoardDetailPage: React.FC = () => {
             <span className="hidden md:block text-white/10 font-thin text-2xl">|</span>
             
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
+              <div className="w-10 h-10 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
                 <span className="font-black text-sm">{board.name.charAt(0).toUpperCase()}</span>
               </div>
               
@@ -456,8 +456,8 @@ const BoardDetailPage: React.FC = () => {
                     {board.name}
                   </h1>
                   {isSaving && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                      <div className="w-1.5 h-1.5 rounded bg-emerald-400 animate-pulse" />
                       <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
                         Salvando
                       </span>
@@ -474,12 +474,12 @@ const BoardDetailPage: React.FC = () => {
           {/* Members Group */}
           <div 
             onClick={() => setIsMembersModalOpen(true)}
-            className="hidden sm:flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10"
+            className="hidden sm:flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
           >
             {board.members?.slice(0, 4).map((member) => (
               <div 
                 key={member.userId} 
-                className="w-8 h-8 rounded-full border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
+                className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
               >
                 <UserAvatar 
                   name={member.user.name} 
@@ -489,7 +489,7 @@ const BoardDetailPage: React.FC = () => {
               </div>
             ))}
             {(board.members?.length || 0) > 4 && (
-              <div className="w-8 h-8 rounded-full border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
+              <div className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
                 +{(board.members?.length || 0) - 4}
               </div>
             )}
@@ -502,7 +502,7 @@ const BoardDetailPage: React.FC = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 shadow-lg ${
+                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
                   filterUserId || isFiltersOpen 
                     ? 'bg-white/20 border-white/40 text-white ring-4 ring-white/5' 
                     : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20'
@@ -518,7 +518,7 @@ const BoardDetailPage: React.FC = () => {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                    className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
                   >
                     <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
                       <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
@@ -529,18 +529,18 @@ const BoardDetailPage: React.FC = () => {
                     <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
                       <button 
                         onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
-                        className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-colors text-sm text-white/70"
+                        className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded transition-colors text-sm text-white/70"
                       >
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
+                        <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
                         Todos los miembros
                       </button>
                       {board.members?.map(member => (
                         <button 
                           key={member.userId}
                           onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                          className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
+                          className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
                         >
-                          <div className={`p-0.5 rounded-full ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
+                          <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
                             <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
                           </div>
                           <span className="truncate">{member.user.name}</span>
@@ -554,7 +554,7 @@ const BoardDetailPage: React.FC = () => {
 
             <button 
               onClick={() => setIsMembersModalOpen(true)}
-              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg lg:flex hidden"
+              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg lg:flex hidden"
             >
               <Users size={16} strokeWidth={2.5} />
               <span>Miembros</span>
@@ -562,7 +562,7 @@ const BoardDetailPage: React.FC = () => {
 
             <button 
               onClick={() => setIsSettingsDrawerOpen(true)}
-              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
               title="Configuración"
             >
               <Settings size={18} strokeWidth={2.5} />
@@ -596,16 +596,16 @@ const BoardDetailPage: React.FC = () => {
             </SortableContext>
             
             {isAddingList ? (
-              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
+              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
                 <input
                   autoFocus
                   placeholder="Nombre de la lista..."
                   value={newListTitle}
                   onChange={(e) => setNewListTitle(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
+                  className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
                 />
                  <div className="flex items-center gap-2">
-                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-[#6C5DD3]/20">
+                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded transition-colors shadow-md shadow-[#6C5DD3]/20">
                     Añadir lista
                   </button>
                   <button
@@ -620,9 +620,9 @@ const BoardDetailPage: React.FC = () => {
              ) : (
               <button
                 onClick={() => setIsAddingList(true)}
-                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded-xl bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
+                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
               >
-                <div className="p-1 rounded-md bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
+                <div className="p-1 rounded bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
                   <Plus size={18} strokeWidth={3} />
                 </div>
                 Añadir otra lista

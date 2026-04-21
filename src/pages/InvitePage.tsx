@@ -55,10 +55,10 @@ const InvitePage: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center"
+        className="max-w-md w-full bg-white rounded shadow-xl p-8 text-center"
       >
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[#4338ca]/10 rounded-2xl flex items-center justify-center text-[#4338ca]">
+          <div className="w-16 h-16 bg-[#4338ca]/10 rounded flex items-center justify-center text-[#4338ca]">
             <Users size={32} />
           </div>
         </div>
@@ -81,7 +81,7 @@ const InvitePage: React.FC = () => {
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 3 }}
-                className="h-1 bg-emerald-500 rounded-full mt-4"
+                className="h-1 bg-emerald-500 rounded mt-4"
               />
               <p className="text-xs text-zinc-400 mt-2">Redirigiendo al panel de control...</p>
             </div>
@@ -104,7 +104,7 @@ const InvitePage: React.FC = () => {
         {status === 'success' && (
           <button 
             onClick={() => navigate('/app')}
-            className="w-full bg-[#4338ca] text-white font-bold py-3 rounded-xl hover:bg-[#312e81] transition-all shadow-lg shadow-[#4338ca]/20"
+            className="w-full bg-[#4338ca] text-white font-bold py-3 rounded hover:bg-[#312e81] transition-all shadow-lg shadow-[#4338ca]/20"
           >
             Ir al Dashboard ahora
           </button>

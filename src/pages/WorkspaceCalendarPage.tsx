@@ -168,36 +168,36 @@ const WorkspaceCalendarPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[#6C5DD3] font-bold text-xs uppercase tracking-widest mb-1">
-              <div className="p-1.5 bg-indigo-50 dark:bg-[#6C5DD3]/10 rounded-lg">
+              <div className="p-1.5 bg-indigo-50 dark:bg-[#6C5DD3]/10 rounded">
                 <CalendarIcon size={14} />
               </div>
               <span>Vista Corporativa</span>
             </div>
             <h1 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">               {currentDateTitle || 'Cargando...'}
-              <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold rounded-full uppercase tracking-tighter border border-zinc-200 dark:border-white/10">
+              <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold rounded uppercase tracking-tighter border border-zinc-200 dark:border-white/10">
                 Workspace
               </span>
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Gestiona el roadmap de todos tus tableros en un solo lugar.</p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white dark:bg-[#1C1F26] p-1.5 rounded-xl shadow-sm border border-zinc-200 dark:border-white/10">
+          <div className="flex items-center gap-3 bg-white dark:bg-[#1C1F26] p-1.5 rounded shadow-sm border border-zinc-200 dark:border-white/10">
             <div className="flex gap-1 pr-2 border-r border-zinc-100 dark:border-white/5">
               <button 
                 onClick={() => { calendarRef.current?.getApi().prev(); updateTitle(); }}
-                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded text-zinc-600 dark:text-zinc-400 transition-colors"
               >
                 <ChevronLeft size={18} />
               </button>
               <button 
                 onClick={() => { calendarRef.current?.getApi().today(); updateTitle(); }}
-                className="px-4 py-1.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg transition-colors"
+                className="px-4 py-1.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 rounded transition-colors"
               >
                 Hoy
               </button>
               <button 
                 onClick={() => { calendarRef.current?.getApi().next(); updateTitle(); }}
-                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                className="p-2 hover:bg-zinc-50 dark:hover:bg-white/5 rounded text-zinc-600 dark:text-zinc-400 transition-colors"
               >
                 <ChevronRight size={18} />
               </button>
@@ -206,7 +206,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             <div className="flex gap-1">
               <button 
                 onClick={() => changeView('dayGridMonth')}
-                className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                className={`px-4 py-1.5 text-sm font-bold rounded transition-all ${
                   activeView === 'dayGridMonth' 
                   ? 'bg-zinc-900 dark:bg-[#6C5DD3] text-white shadow-md' 
                   : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'
@@ -216,7 +216,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               </button>
               <button 
                 onClick={() => changeView('dayGridWeek')}
-                className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                className={`px-4 py-1.5 text-sm font-bold rounded transition-all ${
                   activeView === 'dayGridWeek' 
                   ? 'bg-zinc-900 dark:bg-[#6C5DD3] text-white shadow-md' 
                   : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'
@@ -232,7 +232,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap items-center gap-4"
+          className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded p-4 mb-6 shadow-sm flex flex-wrap items-center gap-4"
         >
           <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-500 px-2 border-r border-zinc-100 dark:border-white/5 mr-2">
             <Filter size={16} />
@@ -247,7 +247,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               <select 
                 value={boardFilter}
                 onChange={(e) => setBoardFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Todos los tableros</option>
                 {uniqueBoards.map(board => (
@@ -266,7 +266,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               <select 
                 value={memberFilter}
                 onChange={(e) => setMemberFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Cualquier miembro</option>
                 {uniqueMembers.map(member => (
@@ -285,7 +285,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
+                className="pl-9 pr-8 py-2 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded text-xs font-bold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all appearance-none min-w-[160px]"
               >
                 <option value="all">Cualquier estado</option>
                 <option value="pending">Pendientes (No Done)</option>
@@ -298,7 +298,7 @@ const WorkspaceCalendarPage: React.FC = () => {
           <div className="ml-auto">
             <button 
               onClick={() => { setBoardFilter('all'); setMemberFilter('all'); setStatusFilter('all'); }}
-              className="px-4 py-2 text-xs font-bold text-[#6C5DD3] hover:bg-[#6C5DD3]/10 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-bold text-[#6C5DD3] hover:bg-[#6C5DD3]/10 rounded transition-colors"
             >
               Restablecer
             </button>
@@ -307,10 +307,10 @@ const WorkspaceCalendarPage: React.FC = () => {
 
         {/* CALENDAR CONTAINER */}
         <div className="w-full overflow-x-auto custom-scrollbar">
-          <div className="min-w-0 w-full bg-white dark:bg-[#1C1F26] rounded-[2rem] border border-zinc-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-2 sm:p-6 calendar-container relative transition-all duration-300">
+          <div className="min-w-0 w-full bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-2 sm:p-6 calendar-container relative transition-all duration-300">
             {isLoading && (
               <div className="absolute inset-0 z-10 bg-white/50 dark:bg-[#1C1F26]/50 backdrop-blur-[2px] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6C5DD3]"></div>
+                <div className="animate-spin rounded h-10 w-10 border-b-2 border-[#6C5DD3]"></div>
               </div>
             )}
             
@@ -478,7 +478,7 @@ const WorkspaceCalendarPage: React.FC = () => {
   
                 return (
                   <div className={`
-                    w-full flex flex-col gap-0.5 p-1 sm:p-2 rounded-lg border-l-2 sm:border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white dark:bg-[#13151A]
+                    w-full flex flex-col gap-0.5 p-1 sm:p-2 rounded border-l-2 sm:border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white dark:bg-[#13151A]
                     ${isDone ? 'border-emerald-500 opacity-75' : isOverdue ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-500/10' : 'border-[#6C5DD3]'}
                     border border-zinc-200 dark:border-white/10
                   `}>
@@ -509,7 +509,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                                   ? event.extendedProps.assignees[0].avatarUrl 
                                   : `${API_BASE_URL}${event.extendedProps.assignees[0].avatarUrl.startsWith('/') ? '' : '/'}${event.extendedProps.assignees[0].avatarUrl}`)
                               : `https://ui-avatars.com/api/?name=${encodeURIComponent(event.extendedProps.assignees[0].name)}&background=random`} 
-                            className="w-3 h-3 sm:w-4 sm:h-4 rounded-full ring-1 ring-white shadow-sm object-cover"
+                            className="w-3 h-3 sm:w-4 sm:h-4 rounded ring-1 ring-white shadow-sm object-cover"
                             alt={event.extendedProps.assignees[0].name}
                           />
                         </div>
