@@ -137,11 +137,25 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
       )}
 
-      {/* Background Loader Overlay */}
+      {/* Background Loader Overlay - Premium Splash */}
       {isBoardView && isLoadingBg && (
-        <div className="fixed inset-0 z-[150] bg-black/20 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4" />
-          <p className="text-white font-bold text-sm tracking-widest uppercase">Optimizando Fondo...</p>
+        <div className="fixed inset-0 z-[150] bg-zinc-950/80 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-700">
+          <div className="relative mb-8">
+            <img 
+              src="/lumins-log.png" 
+              alt="Lumins" 
+              className="h-24 w-auto animate-pulse brightness-125" 
+            />
+            <div className="absolute inset-0 bg-[#6C5DD3]/20 blur-3xl rounded-full animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-white font-black text-xs tracking-[0.4em] uppercase opacity-80">
+              Preparando Espacio
+            </p>
+            <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-r from-transparent via-[#6C5DD3] to-transparent animate-shimmer" />
+            </div>
+          </div>
         </div>
       )}
 

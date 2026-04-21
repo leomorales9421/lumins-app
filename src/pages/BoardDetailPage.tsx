@@ -343,54 +343,84 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#13151A] font-sans overflow-hidden">
-        {/* Header Skeleton */}
-        <div className="h-[60px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1C1F26]">
-           <div className="flex items-center gap-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-6 w-48" />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#09090B] font-sans overflow-hidden"
+      >
+        {/* Header Skeleton - Matches 72px height */}
+        <div className="h-[72px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#13151A] z-30">
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-32 rounded-md" />
+                  <Skeleton className="h-3 w-20 rounded-md opacity-50" />
+                </div>
+              </div>
+              <div className="hidden md:block h-8 w-px bg-zinc-100 dark:bg-white/5" />
+              <div className="hidden lg:flex gap-4">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+              </div>
            </div>
-           <div className="flex gap-2">
-              <Skeleton className="h-8 w-24" />
-              <Skeleton className="h-8 w-32" />
+           <div className="flex items-center gap-4">
+              <div className="flex -space-x-2">
+                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
+                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
+                <Skeleton className="h-8 w-8 rounded-full border-2 border-white dark:border-[#13151A]" />
+              </div>
+              <div className="h-8 w-px bg-zinc-100 dark:bg-white/5" />
+              <div className="flex gap-3">
+                <Skeleton className="h-10 w-24 rounded-xl" />
+                <Skeleton className="h-10 w-32 rounded-xl" />
+              </div>
            </div>
         </div>
 
         {/* Canvas Skeleton */}
-        <div className="flex-1 p-6 flex gap-4 overflow-hidden">
+        <div className="flex-1 p-8 flex gap-6 overflow-hidden">
            {[1, 2, 3, 4].map(i => (
-             <div key={i} className="min-w-[280px] max-w-[280px] h-full flex flex-col gap-3">
+             <div key={i} className="min-w-[320px] max-w-[320px] h-full flex flex-col gap-4">
                 <div className="flex justify-between items-center px-1">
-                   <Skeleton className="h-5 w-32" />
-                   <Skeleton className="h-5 w-5 rounded-md" />
+                   <Skeleton className="h-6 w-32 rounded-lg" />
+                   <div className="flex gap-1">
+                     <Skeleton className="h-6 w-6 rounded-md" />
+                     <Skeleton className="h-6 w-6 rounded-md" />
+                   </div>
                 </div>
-                 <div className="space-y-3">
+                
+                <div className="space-y-3">
                    {[1, 2, 3].map(j => (
-                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 p-3 space-y-3">
-                        <Skeleton className="h-4 w-full" />
-                        <div className="flex justify-between">
-                           <Skeleton className="h-3 w-20" />
+                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/5 p-4 space-y-4 shadow-sm">
+                        <Skeleton className="h-4 w-[90%] rounded-md" />
+                        <div className="flex justify-between items-center pt-2">
+                           <Skeleton className="h-3 w-16 rounded-full" />
                            <div className="flex gap-1">
-                              <Skeleton className="h-4 w-4 rounded-full" />
-                              <Skeleton className="h-4 w-4 rounded-full" />
+                              <Skeleton className="h-5 w-5 rounded-full" />
                            </div>
                         </div>
                      </div>
                    ))}
                 </div>
-                <Skeleton className="h-10 w-full rounded-lg" />
+                
+                <Skeleton className="h-[52px] w-full rounded-xl opacity-40" />
              </div>
            ))}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (!board) return null;
 
   return (
-    <div className="flex flex-col h-full font-sans">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="flex flex-col h-full font-sans"
+    >
       
       {/* Board Header (Sub-navigation) - Premium Glass Mode */}
       <header className="h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
@@ -641,7 +671,7 @@ const BoardDetailPage: React.FC = () => {
         onUpdate={fetchBoard}
         onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
       />
-    </div>
+    </motion.div>
   );
 };
 
