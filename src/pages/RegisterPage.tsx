@@ -98,23 +98,23 @@ const RegisterPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-[450px] mx-auto md:mx-0">
             <div className="flex gap-4">
               <div className="flex flex-col gap-2 flex-1">
-                <label className="text-[12px] font-bold text-slate-700 ml-1">Nombre</label>
+                <label className="text-sm font-bold text-zinc-700 ml-1">Nombre</label>
                 <input 
                   type="text" 
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                   placeholder="ej. Leonardo"
                   required
                 />
               </div>
               <div className="flex flex-col gap-2 flex-1">
-                <label className="text-[12px] font-bold text-slate-700 ml-1">Apellido</label>
+                <label className="text-sm font-bold text-zinc-700 ml-1">Apellido</label>
                 <input 
                   type="text" 
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                   placeholder="ej. Morales"
                   required
                 />
@@ -122,7 +122,7 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-               <label className="text-[12px] font-bold text-slate-700 ml-1">Email</label>
+                <label className="text-sm font-bold text-zinc-700 ml-1">Email</label>
                <input 
                  type="email" 
                  value={email}
@@ -134,24 +134,24 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-               <label className="text-[12px] font-bold text-slate-700 ml-1">Contraseña</label>
+                <label className="text-sm font-bold text-zinc-700 ml-1">Contraseña</label>
                <input 
                  type="password" 
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                  placeholder="••••••••"
                  required
                />
             </div>
 
             <div className="flex flex-col gap-2">
-               <label className="text-[12px] font-bold text-slate-700 ml-1">Confirmar Contraseña</label>
+               <label className="text-sm font-bold text-zinc-700 ml-1">Confirmar Contraseña</label>
                <input 
                  type="password" 
                  value={confirmPassword}
                  onChange={(e) => setConfirmPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                  placeholder="••••••••"
                  required
                />

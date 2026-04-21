@@ -138,12 +138,12 @@ const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-[400px] mx-auto md:mx-0">
             <div className="flex flex-col gap-2">
-               <label className="text-[12px] font-bold text-slate-700 ml-1">Email</label>
+               <label className="text-sm font-bold text-zinc-700 ml-1">Email</label>
                <input 
                  type="email" 
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-zinc-400"
                  placeholder="ejemplo@correo.com"
                  required
                />
@@ -151,14 +151,14 @@ const LoginPage: React.FC = () => {
 
             <div className="flex flex-col gap-2">
                <div className="flex items-center justify-between ml-1">
-                  <label className="text-[12px] font-bold text-slate-700">Contraseña</label>
+                  <label className="text-sm font-bold text-zinc-700">Contraseña</label>
                   <Link to="/forgot-password" title="¿Olvidaste tu contraseña?" className="text-[12px] font-bold text-[#4338ca] hover:underline">¿Olvidaste tu contraseña?</Link>
                </div>
                <input 
                  type="password" 
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-zinc-400"
                  placeholder="••••••••"
                  required
                />
