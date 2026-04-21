@@ -188,16 +188,16 @@ const UserProfileForm: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden">
-      <div className="p-8">
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">Información del Perfil</h2>
+      <div className="p-5 sm:p-8">
+        <h2 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 sm:mb-6">Información del Perfil</h2>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Avatar Section */}
-          <div className="flex items-center gap-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 sm:mb-8 text-center sm:text-left">
             <div className="relative group">
-              <div className="w-24 h-24 rounded-full bg-zinc-50 dark:bg-[#13151A] border-2 border-dashed border-zinc-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-zinc-50 dark:bg-[#13151A] border-2 border-dashed border-zinc-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
                 {avatarUploading ? (
-                  <Loader2 size={28} className="animate-spin text-zinc-400 dark:text-zinc-500" />
+                  <Loader2 size={24} className="animate-spin text-zinc-400 dark:text-zinc-500" />
                 ) : formData.avatarUrl ? (
                   <img 
                     src={formData.avatarUrl 
@@ -209,7 +209,7 @@ const UserProfileForm: React.FC = () => {
                     className="w-full h-full object-cover" 
                   />
                 ) : (
-                  <Camera size={32} className="text-zinc-300 dark:text-zinc-600" />
+                  <Camera size={28} className="text-zinc-300 dark:text-zinc-600" />
                 )}
               </div>
               {!avatarUploading && (
@@ -220,13 +220,13 @@ const UserProfileForm: React.FC = () => {
                     accept="image/jpeg,image/png,image/gif,image/webp"
                     onChange={handleAvatarChange}
                   />
-                  <span className="text-xs font-bold">Cambiar</span>
+                  <span className="text-[10px] sm:text-xs font-bold">Cambiar</span>
                 </label>
               )}
             </div>
             <div>
-              <p className="font-bold text-zinc-900 dark:text-zinc-100">Tu Avatar</p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">JPG, GIF o PNG. Máximo 2MB.</p>
+              <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base">Tu Avatar</p>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">JPG, GIF o PNG. Máximo 2MB.</p>
               {avatarError && <p className="text-xs text-red-500 mt-1">{avatarError}</p>}
             </div>
           </div>
@@ -309,7 +309,7 @@ const UserProfileForm: React.FC = () => {
             <button
               type="submit"
               disabled={loading || avatarUploading}
-              className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 active:scale-95"
+              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 active:scale-95"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               Guardar Cambios

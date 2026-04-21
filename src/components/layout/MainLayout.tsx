@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import NavBar from './NavBar';
 import Sidebar from './Sidebar';
 import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
+import PageTransitionWrapper from '../PageTransitionWrapper';
 
 interface Workspace {
   id: string;
@@ -14,11 +15,9 @@ interface Workspace {
   members?: { userId: string; role: string }[];
 }
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
+interface MainLayoutProps {}
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -166,7 +165,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           />
           
           <main className="flex-1 overflow-y-auto custom-scrollbar relative">
-            {children}
+            <PageTransitionWrapper>
+              <Outlet />
+            </PageTransitionWrapper>
           </main>
         </div>
       </div>

@@ -120,25 +120,25 @@ const PreferenceSettings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Preferencias</h2>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Personaliza el aspecto de tu espacio de trabajo.</p>
+    <div className="space-y-6 sm:space-y-10">
+      <div className="mb-4 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Preferencias</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Personaliza el aspecto de tu espacio de trabajo.</p>
       </div>
 
       {/* Theme Selector */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center">
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
             <Palette size={20} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Apariencia</h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Selecciona el tema que mejor se adapte a tu estilo de trabajo.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Apariencia</h3>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Selecciona el tema que mejor se adapte a tu estilo.</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <ThemeCard
             id="light"
             label="Claro"
@@ -170,14 +170,14 @@ const PreferenceSettings: React.FC = () => {
       </section>
 
       {/* Language Selector */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center">
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
             <Globe2 size={20} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Idioma</h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Elige el idioma de la interfaz de la plataforma.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Idioma</h3>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Elige el idioma de la interfaz de la plataforma.</p>
           </div>
         </div>
 

@@ -94,15 +94,15 @@ const NotificationSettings: React.FC = () => {
   const isLoading = authLoading;
 
   return (
-    <div className="space-y-10">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Notificaciones</h2>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-1">Elige qué avisos quieres recibir y dónde.</p>
+    <div className="space-y-6 sm:space-y-10">
+      <div className="mb-4 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Notificaciones</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Elige qué avisos quieres recibir y dónde.</p>
       </div>
 
       <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl p-4 flex gap-3 text-blue-700 dark:text-blue-400">
         <Info size={20} className="flex-shrink-0 mt-0.5" />
-        <p className="text-sm font-medium">
+        <p className="text-sm font-medium leading-tight">
           Las notificaciones push están actualmente sincronizadas con las preferencias de tu navegador.
         </p>
       </div>
@@ -114,12 +114,12 @@ const NotificationSettings: React.FC = () => {
       )}
 
       {/* Email Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center">
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0">
             <Mail size={20} />
           </div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Correo Electrónico</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Correo Electrónico</h3>
         </div>
 
         <div className="space-y-1">
@@ -128,14 +128,14 @@ const NotificationSettings: React.FC = () => {
           ) : (
             <>
               <NotificationToggle
-                label="Resumen diario de actividad"
-                description="Recibe un email cada mañana con lo más importante de tus tableros."
+                label="Resumen diario"
+                description="Un email matinal con lo más importante."
                 checked={prefs.email_daily}
                 onChange={() => toggle('email_daily')}
               />
               <NotificationToggle
-                label="Cuando me asignan una tarea"
-                description="Avisarme instantáneamente si alguien me añade a una tarjeta."
+                label="Asignaciones"
+                description="Avisarme si me añaden a una tarjeta."
                 checked={prefs.email_assign}
                 onChange={() => toggle('email_assign')}
               />
@@ -145,12 +145,12 @@ const NotificationSettings: React.FC = () => {
       </section>
 
       {/* In-App Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center">
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center flex-shrink-0">
             <Smartphone size={20} />
           </div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en la App</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en App</h3>
         </div>
 
         <div className="space-y-1">

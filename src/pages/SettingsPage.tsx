@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { User, Lock, Bell, Palette } from 'lucide-react';
+import PageTransitionWrapper from '../components/PageTransitionWrapper';
 
 const SettingsPage: React.FC = () => {
   const location = useLocation();
@@ -29,24 +30,24 @@ const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-10 px-6 flex flex-col md:flex-row gap-10 min-h-[calc(100vh-64px)]">
+    <div className="w-full max-w-6xl mx-auto py-4 sm:py-10 px-4 sm:px-6 flex flex-col md:flex-row gap-6 md:gap-10 min-h-[calc(100vh-64px)]">
       {/* Left Navigation */}
       <aside className="w-full md:w-[250px] flex-shrink-0">
-        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-6">Configuraciones</h1>
-        <nav className="flex flex-col gap-1">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-4 sm:mb-6">Configuraciones</h1>
+        <nav className="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) => `
-                flex items-center gap-3 p-3 rounded-lg transition-colors
+                flex items-center gap-3 p-3 rounded-lg transition-colors whitespace-nowrap
                 ${isActive 
                   ? 'bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] font-bold' 
                   : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }
               `}
             >
-              {item.icon}
+              <span className="shrink-0">{item.icon}</span>
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -55,7 +56,9 @@ const SettingsPage: React.FC = () => {
 
       {/* Right Content */}
       <main className="flex-1">
-        <Outlet />
+        <PageTransitionWrapper>
+          <Outlet />
+        </PageTransitionWrapper>
       </main>
     </div>
   );
