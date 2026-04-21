@@ -85,7 +85,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             --rdp-range_middle-color: #8E82E3;
           }
           .rdp-day_button {
-            border-radius: 12px !important;
+            border-radius: 9999px !important;
             font-weight: 600 !important;
             font-size: 0.8rem !important;
             width: 32px !important;

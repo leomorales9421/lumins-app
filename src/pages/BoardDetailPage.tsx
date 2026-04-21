@@ -392,7 +392,7 @@ const BoardDetailPage: React.FC = () => {
     <div className="flex flex-col h-full font-sans">
       
       {/* Board Header (Sub-navigation) - Dark Glass Mode */}
-      <header className="h-16 bg-black/20 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20 text-white drop-shadow-md">
+      <header className="h-16 bg-black/40 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20 text-white drop-shadow-md">
         {/* Left Side: Hamburger, Breadcrumbs and Title */}
         <div className="flex items-center gap-4">
           <button 

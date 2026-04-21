@@ -48,31 +48,15 @@ const NavBar: React.FC<NavBarProps> = ({
           </span>
         </Link>
 
-        {/* Search Bar — centered, takes remaining space */}
-        <div className="flex-1 flex justify-center items-center">
-          <div className="relative flex items-center w-full max-w-md">
-            <Search size={16} className="absolute left-3 text-zinc-400 dark:text-zinc-500" />
-            <input 
-              type="text"
-              placeholder="Buscar proyectos o tareas..."
-              className="w-full h-9 bg-[#F4F5F7] dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-lg pl-10 pr-4 text-[13px] font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all"
-            />
-          </div>
-        </div>
+        {/* Search Bar — hidden for now */}
+        <div className="flex-1" />
 
-        {/* Right Section: Messages · Notifications · + Nuevo · Divider · Avatar */}
+        {/* Right Section: + Nuevo · Divider · Avatar */}
         <div className="flex items-center gap-2 flex-shrink-0">
           
-          {/* Messages icon */}
-          <button className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all">
-            <MessageSquare size={18} />
-          </button>
+          {/* Messages icon — hidden for now */}
 
-          {/* Notifications icon */}
-          <button className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all relative">
-            <Bell size={18} />
-            <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-[#1C1F26]" />
-          </button>
+          {/* Notifications icon — hidden for now */}
 
           {/* + Nuevo Button */}
           <GlobalCreateMenu 

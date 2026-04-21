@@ -306,178 +306,220 @@ const WorkspaceCalendarPage: React.FC = () => {
         </motion.div>
 
         {/* CALENDAR CONTAINER */}
-        <div className="bg-white dark:bg-[#1C1F26] rounded-[2rem] border border-zinc-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-6 calendar-container relative">
-          {isLoading && (
-            <div className="absolute inset-0 z-10 bg-white/50 dark:bg-[#1C1F26]/50 backdrop-blur-[2px] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6C5DD3]"></div>
-            </div>
-          )}
-          
-          <style>{`
-            .fc {
-              --fc-border-color: rgba(241, 245, 249, 0.1);
-              --fc-today-bg-color: rgba(248, 250, 252, 0.05);
-              --fc-event-bg-color: transparent;
-              --fc-event-border-color: transparent;
-              --fc-page-bg-color: transparent;
-              font-family: inherit;
-            }
-            .dark .fc {
-               --fc-border-color: rgba(255, 255, 255, 0.05);
-            }
-            .fc .fc-scrollgrid {
-              border-radius: 1.5rem;
-              overflow: hidden;
-              border: 1px solid #E2E8F0;
-            }
-            .fc .fc-col-header-cell {
-              background: #F8FAFC;
-            }
-            .dark .fc .fc-col-header-cell {
-              background: rgba(255, 255, 255, 0.02);
-            }
-            .fc .fc-col-header-cell-cushion {
-              padding: 16px 4px;
-              font-size: 11px;
-              font-weight: 800;
-              text-transform: uppercase;
-              letter-spacing: 0.1em;
-              color: #64748B;
-            }
-            .dark .fc .fc-col-header-cell-cushion {
-              color: #94A3B8;
-            }
-            .fc .fc-daygrid-day-number {
-              font-size: 13px;
-              font-weight: 700;
-              color: #334155;
-              padding: 12px;
-              transition: color 0.2s;
-            }
-            .dark .fc .fc-daygrid-day-number {
-              color: #E2E8F0;
-            }
-            .fc .fc-day-today .fc-daygrid-day-number {
-              color: #312E81;
-              background: #EEF2FF;
-              border-radius: 0 0 0 12px;
-            }
-            .fc .fc-day-today {
-              background-color: #F8FAFC !important;
-            }
-            .fc .fc-daygrid-day-top {
-              flex-direction: row;
-            }
-            .fc .fc-daygrid-event-harness {
-              margin: 2px 8px !important;
-            }
-            .fc .fc-event {
-              background: transparent !important;
-              border: none !important;
-              padding: 0 !important;
-            }
-            .fc .fc-daygrid-more-link {
-              font-size: 11px;
-              font-weight: 800;
-              color: #6366F1;
-              padding: 4px 8px;
-              background: #F5F3FF;
-              border-radius: 6px;
-              margin-left: 8px;
-            }
-          `}</style>
-          
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            events={filteredEvents}
-            headerToolbar={false}
-            editable={true}
-            droppable={true}
-            eventDrop={handleEventDrop}
-            eventClick={handleEventClick}
-            locale="es"
-            height="auto"
-            dayMaxEvents={3}
-            eventTimeFormat={{
-              hour: '2-digit',
-              minute: '2-digit',
-              meridiem: false
-            }}
-            eventContent={(arg) => {
-              const { event } = arg;
-              const props = event.extendedProps || {};
-              const listName = props.listName?.toLowerCase() || '';
-              const isDone = props.isDueDateDone || 
-                             listName === 'done' || 
-                             listName === 'hecho';
-              
-              const isOverdue = !isDone && 
-                                event.start && 
-                                isBefore(startOfDay(new Date(event.start)), startOfDay(new Date()));
-
-              return (
-                <div className={`
-                  w-full flex flex-col gap-1 p-2 rounded-lg border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white dark:bg-[#13151A]
-                  ${isDone ? 'border-emerald-500 opacity-75' : isOverdue ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-500/10' : 'border-[#6C5DD3]'}
-                  border border-zinc-200 dark:border-white/10
-                `}>
-                  {/* Board Tag */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter truncate max-w-[80%]">
-                      {props.boardName || 'Sin Tablero'}
-                    </span>
-                    {isOverdue && <AlertCircle size={10} className="text-rose-500" />}
-                    {isDone && <CheckCircle2 size={10} className="text-emerald-500" />}
-                  </div>
-
-                  {/* Title & Avatar */}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className={`
-                      text-[11px] font-bold leading-tight line-clamp-2
-                      ${isDone ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-800 dark:text-zinc-200'}
-                      ${isOverdue ? 'text-rose-900 dark:text-rose-200' : ''}
-                    `}>
-                      {event.title}
-                    </span>
-                    
-                    {event.extendedProps.assignees?.[0] && (
-                      <div className="shrink-0 relative group/avatar">
-                        <img 
-                          src={event.extendedProps.assignees[0].avatarUrl 
-                            ? (event.extendedProps.assignees[0].avatarUrl.startsWith('http') 
-                                ? event.extendedProps.assignees[0].avatarUrl 
-                                : `${API_BASE_URL}${event.extendedProps.assignees[0].avatarUrl.startsWith('/') ? '' : '/'}${event.extendedProps.assignees[0].avatarUrl}`)
-                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(event.extendedProps.assignees[0].name)}&background=random`} 
-                          className="w-4 h-4 rounded-full ring-1 ring-white shadow-sm object-cover"
-                          alt={event.extendedProps.assignees[0].name}
-                        />
-                        {event.extendedProps.assignees.length > 1 && (
-                          <div className="absolute -top-1 -right-1 bg-zinc-800 text-white text-[8px] w-3 h-3 flex items-center justify-center rounded-full border border-white">
-                            +{event.extendedProps.assignees.length - 1}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Stats (Labels) */}
-                  {event.extendedProps.labels?.length > 0 && (
-                    <div className="flex gap-1 mt-0.5">
-                      {event.extendedProps.labels.slice(0, 3).map((label: any) => (
-                        <div 
-                          key={label.id}
-                          className="h-1 w-3 rounded-full" 
-                          style={{ backgroundColor: label.color }}
-                        />
-                      ))}
+        <div className="w-full overflow-x-auto custom-scrollbar">
+          <div className="min-w-0 w-full bg-white dark:bg-[#1C1F26] rounded-[2rem] border border-zinc-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-2 sm:p-6 calendar-container relative transition-all duration-300">
+            {isLoading && (
+              <div className="absolute inset-0 z-10 bg-white/50 dark:bg-[#1C1F26]/50 backdrop-blur-[2px] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6C5DD3]"></div>
+              </div>
+            )}
+            
+            <style>{`
+              .fc {
+                --fc-border-color: rgba(241, 245, 249, 0.1);
+                --fc-today-bg-color: transparent;
+                --fc-event-bg-color: transparent;
+                --fc-event-border-color: transparent;
+                --fc-page-bg-color: transparent;
+                font-family: inherit;
+              }
+              .dark .fc {
+                 --fc-border-color: rgba(255, 255, 255, 0.05);
+              }
+              .fc .fc-scrollgrid {
+                border-radius: 1.5rem;
+                overflow: hidden;
+                border: 1px solid #E2E8F0;
+                border-collapse: separate !important;
+                border-spacing: 4px !important;
+              }
+              @media (min-width: 1024px) {
+                .fc .fc-scrollgrid {
+                  border-spacing: 8px !important;
+                }
+              }
+              .fc .fc-col-header-cell {
+                background: #F8FAFC;
+              }
+              .dark .fc .fc-col-header-cell {
+                background: rgba(255, 255, 255, 0.02);
+              }
+              .fc .fc-col-header-cell-cushion {
+                padding: 12px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: #64748B;
+              }
+              @media (min-width: 640px) {
+                .fc .fc-col-header-cell-cushion {
+                  padding: 16px 4px;
+                  font-size: 11px;
+                }
+              }
+              .fc .fc-daygrid-day-number {
+                font-size: 10px;
+                font-weight: 700;
+                color: #64748B;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 2px auto;
+                transition: all 0.2s;
+                border-radius: 9999px;
+              }
+              @media (min-width: 640px) {
+                .fc .fc-daygrid-day-number {
+                  font-size: 13px;
+                  width: 32px;
+                  height: 32px;
+                  margin: 8px auto;
+                }
+              }
+              .dark .fc .fc-daygrid-day-number {
+                color: #94A3B8;
+              }
+              .fc .fc-day-today .fc-daygrid-day-number {
+                color: white;
+                background: #6C5DD3;
+                box-shadow: 0 4px 12px rgba(108, 93, 211, 0.3);
+              }
+              .fc .fc-daygrid-day-top {
+                flex-direction: row;
+                justify-content: center;
+              }
+              .fc .fc-daygrid-day-frame {
+                min-height: auto !important;
+                aspect-ratio: 1 / 1 !important;
+                display: flex;
+                flex-direction: column;
+                padding: 1px;
+              }
+              @media (min-width: 640px) {
+                .fc .fc-daygrid-day-frame {
+                  padding: 4px;
+                }
+              }
+              .fc .fc-daygrid-event-harness {
+                margin: 0.5px 2px !important;
+              }
+              @media (min-width: 640px) {
+                .fc .fc-daygrid-event-harness {
+                  margin: 2px 8px !important;
+                }
+              }
+              .fc .fc-event {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+              }
+              .fc .fc-daygrid-more-link {
+                font-size: 8px;
+                font-weight: 800;
+                color: #6C5DD3;
+                padding: 1px 4px;
+                background: #F5F3FF;
+                border-radius: 4px;
+                margin-left: 2px;
+              }
+              @media (min-width: 640px) {
+                .fc .fc-daygrid-more-link {
+                  font-size: 11px;
+                  padding: 4px 8px;
+                  margin-left: 8px;
+                }
+              }
+            `}</style>
+            
+            <FullCalendar
+              ref={calendarRef}
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={filteredEvents}
+              headerToolbar={false}
+              editable={true}
+              droppable={true}
+              eventDrop={handleEventDrop}
+              eventClick={handleEventClick}
+              locale="es"
+              height="auto"
+              dayMaxEvents={2}
+              dayHeaderContent={(arg) => {
+                return (
+                  <span className="hidden sm:inline">{arg.text}</span>
+                );
+              }}
+              dayHeaderDidMount={(arg) => {
+                if (window.innerWidth < 640) {
+                  const text = arg.text.charAt(0).toUpperCase();
+                  arg.el.innerHTML = `<span class="sm:hidden">${text}</span>`;
+                }
+              }}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false
+              }}
+              eventContent={(arg) => {
+                const { event } = arg;
+                const props = event.extendedProps || {};
+                const listName = props.listName?.toLowerCase() || '';
+                const isDone = props.isDueDateDone || 
+                               listName === 'done' || 
+                               listName === 'hecho';
+                
+                const isOverdue = !isDone && 
+                                  event.start && 
+                                  isBefore(startOfDay(new Date(event.start)), startOfDay(new Date()));
+  
+                return (
+                  <div className={`
+                    w-full flex flex-col gap-0.5 p-1 sm:p-2 rounded-lg border-l-2 sm:border-l-4 shadow-sm transition-all hover:shadow-md cursor-pointer group bg-white dark:bg-[#13151A]
+                    ${isDone ? 'border-emerald-500 opacity-75' : isOverdue ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-500/10' : 'border-[#6C5DD3]'}
+                    border border-zinc-200 dark:border-white/10
+                  `}>
+                    {/* Board Tag (Only visible on larger screens) */}
+                    <div className="hidden sm:flex items-center justify-between">
+                      <span className="text-[8px] sm:text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter truncate max-w-[80%]">
+                        {props.boardName || 'Sin Tablero'}
+                      </span>
+                      {isOverdue && <AlertCircle size={8} className="text-rose-500" />}
+                      {isDone && <CheckCircle2 size={8} className="text-emerald-500" />}
                     </div>
-                  )}
-                </div>
-              );
-            }}
-          />
+  
+                    {/* Title & Avatar */}
+                    <div className="flex items-start justify-between gap-1 sm:gap-2">
+                      <span className={`
+                        text-[9px] sm:text-[11px] font-bold leading-tight line-clamp-1 sm:line-clamp-2
+                        ${isDone ? 'text-zinc-400 dark:text-zinc-500 line-through' : 'text-zinc-800 dark:text-zinc-200'}
+                        ${isOverdue ? 'text-rose-900 dark:text-rose-200' : ''}
+                      `}>
+                        {event.title}
+                      </span>
+                      
+                      {event.extendedProps.assignees?.[0] && (
+                        <div className="shrink-0 relative group/avatar hidden sm:block">
+                          <img 
+                            src={event.extendedProps.assignees[0].avatarUrl 
+                              ? (event.extendedProps.assignees[0].avatarUrl.startsWith('http') 
+                                  ? event.extendedProps.assignees[0].avatarUrl 
+                                  : `${API_BASE_URL}${event.extendedProps.assignees[0].avatarUrl.startsWith('/') ? '' : '/'}${event.extendedProps.assignees[0].avatarUrl}`)
+                              : `https://ui-avatars.com/api/?name=${encodeURIComponent(event.extendedProps.assignees[0].name)}&background=random`} 
+                            className="w-3 h-3 sm:w-4 sm:h-4 rounded-full ring-1 ring-white shadow-sm object-cover"
+                            alt={event.extendedProps.assignees[0].name}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }}
+            />
+          </div>
         </div>
       </div>
 

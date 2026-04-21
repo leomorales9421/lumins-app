@@ -51,9 +51,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
   const sidebarClasses = `
     transition-all duration-300 transform flex flex-col w-64
     ${isFloating 
-      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-white/40 dark:bg-black/20 backdrop-blur-xl border-r border-white/10 shadow-xl' 
+      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-zinc-900/80 dark:bg-black/60 backdrop-blur-xl border-r border-white/10 shadow-xl' 
       : 'fixed lg:relative inset-y-0 lg:inset-auto left-0 z-[100] lg:z-40 bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 h-full'} 
-    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    ${isOpen ? 'translate-x-0' : isFloating ? '-translate-x-full' : '-translate-x-full lg:translate-x-0'}
     ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
   `;
 
@@ -148,8 +148,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
               onClick={logout}
               title={isCollapsed ? "Cerrar sesión" : undefined}
               className={`
-                flex items-center transition-colors rounded-lg p-2.5 w-full text-[13px] font-bold
-                text-zinc-500 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500 cursor-pointer
+                flex items-center transition-colors rounded-lg p-2.5 w-full text-[13px] font-bold cursor-pointer
+                ${isFloating 
+                  ? 'text-white/80 hover:text-white hover:bg-white/10' 
+                  : 'text-zinc-500 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500'}
                 ${isCollapsed ? 'justify-center' : 'gap-3'}
               `}
             >
