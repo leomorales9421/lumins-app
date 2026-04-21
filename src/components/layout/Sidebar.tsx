@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { 
   Layout, 
   Settings, 
@@ -8,8 +8,6 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  X,
   LogOut
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
@@ -52,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
 
   const sidebarClasses = isFloating 
     ? `fixed inset-y-0 left-0 z-[100] transition-all duration-500 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/10 w-64 shadow-2xl`
-    : `relative group bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-64'}`;
+    : `relative group bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 flex flex-col h-full sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-72'}`;
 
   return (
     <>
@@ -65,9 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
       )}
 
       <aside className={sidebarClasses}>
-        {/* Brand Header Removed */}
-
-        {/* Collapse Toggle Button - Rediseñado con estilo "Subtle Depth" */}
+        {/* Collapse Toggle Button */}
         {!isFloating && (
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -84,12 +80,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </button>
         )}
 
-        <div className={`px-3 py-3 flex flex-col gap-5 h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center' : ''}`}>
+        <div className={`px-3 py-6 flex flex-col gap-8 h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center' : ''}`}>
           
           {/* Workspace Switcher Section */}
           <div className={`w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
             {!isCollapsed && (
-              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-2`}>
+              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-3`}>
                 Espacio de Trabajo
               </p>
             )}
@@ -97,36 +93,36 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </div>
 
           {/* Main Navigation */}
-          <div className="space-y-0.5 w-full">
+          <div className="space-y-1 w-full">
             {!isCollapsed && (
-              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-2`}>
+              <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-3`}>
                 Principal
               </p>
             )}
             <SidebarItem 
               to={workspaceId ? `/w/${workspaceId}/dashboard` : "/app"} 
-              icon={<Layout size={17} />} 
+              icon={<Layout size={18} />} 
               label="Tableros" 
               isCollapsed={isCollapsed}
               isFloating={isFloating}
             />
             <SidebarItem 
               to={workspaceId ? `/w/${workspaceId}/calendar` : "/calendar"} 
-              icon={<Calendar size={17} />} 
+              icon={<Calendar size={18} />} 
               label="Calendario" 
               isCollapsed={isCollapsed} 
               isFloating={isFloating}
             />
             <SidebarItem 
               to={workspaceId ? `/w/${workspaceId}/activity` : "/activity"} 
-              icon={<Activity size={17} />} 
+              icon={<Activity size={18} />} 
               label="Actividad" 
               isCollapsed={isCollapsed} 
               isFloating={isFloating}
             />
             <SidebarItem 
               to={workspaceId ? `/w/${workspaceId}/members` : "/members"} 
-              icon={<Users size={17} />} 
+              icon={<Users size={18} />} 
               label="Miembros" 
               isCollapsed={isCollapsed}
               isFloating={isFloating}
@@ -134,10 +130,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </div>
 
           {/* Footer Navigation */}
-          <div className={`mt-auto pb-4 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-4 w-full`}>
+          <div className={`mt-auto pb-6 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-6 w-full`}>
             <SidebarItem 
               to="/settings" 
-              icon={<Settings size={17} />} 
+              icon={<Settings size={18} />} 
               label="Configuración" 
               isCollapsed={isCollapsed} 
               isFloating={isFloating} 
@@ -147,13 +143,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
               onClick={logout}
               title={isCollapsed ? "Cerrar sesión" : undefined}
               className={`
-                flex items-center transition-colors rounded-lg p-2.5 w-full text-sm font-medium
+                flex items-center transition-colors rounded-lg p-2.5 w-full text-[13px] font-bold
                 text-zinc-500 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500 cursor-pointer
                 ${isCollapsed ? 'justify-center' : 'gap-3'}
               `}
             >
               <span className={`${isCollapsed ? 'scale-110' : ''} transition-transform flex-shrink-0`}>
-                <LogOut size={17} />
+                <LogOut size={18} />
               </span>
               {!isCollapsed && (
                 <span className="whitespace-nowrap overflow-hidden opacity-100 transition-all">

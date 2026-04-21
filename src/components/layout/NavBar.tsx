@@ -18,20 +18,30 @@ const NavBar: React.FC<NavBarProps> = ({
   canCreateBoard
 }) => {
   return (
-    <nav className="h-16 bg-white dark:bg-[#1C1F26] border-b border-zinc-200 dark:border-white/10 flex items-center px-6 z-50 sticky top-0">
-      <div className="w-full flex items-center gap-4">
+    <nav className="h-20 bg-white dark:bg-[#1C1F26] border-b border-zinc-200 dark:border-white/10 flex items-center px-4 z-50 sticky top-0 w-full">
+      <div className="w-full flex items-center justify-between gap-4">
         
         {/* Brand/Logo */}
-        <Link to="/app" className="flex items-center group flex-shrink-0">
-          <img 
-            src="/lumins-log.png" 
-            alt="Lumins Logo" 
-            className="h-14 w-auto object-contain" 
-          />
+        <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2">
+          <div className="relative">
+            <img 
+              src="/lumins-log.png" 
+              alt="Lumins Logo" 
+              className="h-16 w-auto object-contain transition-transform group-hover:scale-105" 
+            />
+            <div className="absolute inset-0 bg-[#6C5DD3]/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+          </div>
+          
+          {/* Vertical Separator */}
+          <div className="h-10 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-1 sm:block hidden" />
+
+          <span className="font-brand text-4xl font-black tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none">
+            Lumins
+          </span>
         </Link>
 
         {/* Search Bar — centered, takes remaining space */}
-        <div className="flex-1 flex justify-center px-4">
+        <div className="flex-1 flex justify-center items-center">
           <div className="relative flex items-center w-full max-w-md">
             <Search size={16} className="absolute left-3 text-zinc-400 dark:text-zinc-500" />
             <input 

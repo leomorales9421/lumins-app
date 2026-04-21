@@ -147,27 +147,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
 
       {/* UI Content Layer */}
-      <div className="relative z-10 flex flex-1 overflow-hidden">
-        {/* Sidebar - Conditional behavior */}
-        <Sidebar 
-          onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
-          isFloating={isBoardView}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          logout={logout}
-        />
+      <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
         
-        <div className="flex-1 flex flex-col min-w-0 transition-all duration-500">
-          {!isBoardView && (
-            <NavBar 
-              user={user} 
-              onCreateBoard={() => setShowCreateBoardModal(true)}
-              onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
-              canCreateBoard={canCreateBoard}
-            />
-          )}
+        {!isBoardView && (
+          <NavBar 
+            user={user} 
+            onCreateBoard={() => setShowCreateBoardModal(true)}
+            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+            canCreateBoard={canCreateBoard}
+          />
+        )}
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar - Conditional behavior */}
+          <Sidebar 
+            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
+            isFloating={isBoardView}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            logout={logout}
+          />
           
-          <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <main className="flex-1 overflow-y-auto custom-scrollbar relative">
             {children}
           </main>
         </div>
