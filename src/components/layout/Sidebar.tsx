@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useParams } from 'react-router-dom';
 import { 
   Layout, 
   Settings, 
@@ -10,7 +10,6 @@ import {
   ChevronRight,
   LogOut
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
 
 interface SidebarProps {
@@ -43,7 +42,13 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
   </NavLink>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false, isOpen = false, onClose, logout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+  onCreateWorkspace, 
+  isFloating = false, 
+  isOpen = false, 
+  onClose,
+  logout
+}) => {
   const { workspaceId: urlWorkspaceId } = useParams<{ workspaceId: string }>();
   const workspaceId = urlWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);

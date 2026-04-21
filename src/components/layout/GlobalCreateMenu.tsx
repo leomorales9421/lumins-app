@@ -81,10 +81,18 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
       trigger={
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded font-bold text-xs shadow-md shadow-indigo-200/60 dark:shadow-none hover:bg-[#5244b5] transition-all flex items-center gap-1.5"
+          className={`
+            h-10 px-3 rounded-[4px] font-bold text-[13px] transition-all flex items-center justify-center gap-2
+            ${isOpen 
+              ? 'bg-zinc-100 dark:bg-white/10 text-indigo-600 dark:text-indigo-400' 
+              : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
+            }
+          `}
         >
-          <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200`} />
-          <span>Nuevo</span>
+          <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isOpen ? 'bg-indigo-100 dark:bg-[#6C5DD3]/20' : 'bg-zinc-100 dark:bg-white/10'}`}>
+            <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200 ${isOpen ? 'text-indigo-600' : ''}`} />
+          </div>
+          <span className="uppercase tracking-wider">Nuevo</span>
         </button>
       }
 
