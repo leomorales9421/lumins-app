@@ -49,13 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarClasses = `
-    transition-all duration-300 transform flex flex-col
+    transition-all duration-300 transform flex flex-col w-64
     ${isFloating 
-      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-white/40 dark:bg-black/20 backdrop-blur-xl border-r border-white/10 shadow-xl w-64' 
-      : 'relative z-40 bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 h-full'} 
+      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-white/40 dark:bg-black/20 backdrop-blur-xl border-r border-white/10 shadow-xl' 
+      : 'fixed lg:relative inset-y-0 lg:inset-auto left-0 z-[100] lg:z-40 bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 h-full'} 
     ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
-    w-64
   `;
 
   return (
@@ -86,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </button>
         )}
 
-        <div className={`px-4 py-6 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center px-2' : ''}`}>
+        <div className={`px-4 py-8 flex flex-col h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center px-2' : ''}`}>
           
           {/* Workspace Switcher Section */}
           <div className={`w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
@@ -99,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           </div>
 
           {/* Main Navigation */}
-          <div className="space-y-1 w-full">
+          <div className="space-y-1 w-full mt-6">
             {!isCollapsed && (
               <p className={`text-[10px] font-bold ${isFloating ? 'text-white/40' : 'text-zinc-400 dark:text-zinc-300'} uppercase tracking-[0.2em] px-2 mb-3`}>
                 Principal

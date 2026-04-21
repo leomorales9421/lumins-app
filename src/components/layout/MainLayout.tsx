@@ -147,8 +147,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
 
       {/* UI Content Layer */}
-      <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
-        
+      <div className="flex flex-col h-screen overflow-hidden w-full relative z-10">
         <NavBar 
           user={user} 
           onCreateBoard={() => setShowCreateBoardModal(true)}
@@ -156,7 +155,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           canCreateBoard={canCreateBoard}
         />
 
-        <div className="flex flex-1 overflow-hidden h-full">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar - Conditional behavior */}
           <Sidebar 
             onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
