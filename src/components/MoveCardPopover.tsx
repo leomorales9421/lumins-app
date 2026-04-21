@@ -199,7 +199,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
       <button
         onClick={handleMove}
         disabled={isMoving || (selectedBoardId === currentBoardId && selectedListId === currentListId && selectedPosition === 1)}
-        className="w-full bg-[#6C5DD3] text-white font-bold py-2.5 rounded-lg mt-6 hover:bg-[#5a4cb3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#6C5DD3]/20"
+        className="w-full bg-[#6C5DD3] text-white font-bold py-2.5 rounded-lg mt-6 hover:bg-[#312e81] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#6C5DD3]/20"
       >
         {isMoving && <Loader2 size={16} className="animate-spin" />}
         Mover

@@ -117,7 +117,7 @@ const MembersPage: React.FC = () => {
           </div>
            <Button 
             onClick={() => setShowInviteModal(true)}
-            className="bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
+            className="bg-[#6C5DD3] hover:bg-[#312e81] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
           >
             <UserPlus size={18} />
             <span className="hidden sm:inline">Invitar</span>
@@ -168,7 +168,7 @@ const MembersPage: React.FC = () => {
                   <span className={`
                     inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
                     ${member.role === 'OWNER' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
-                      member.role === 'ADMIN' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
+                      member.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
                       'bg-slate-50 text-slate-600 border border-slate-100'}
                   `}>
                     <Shield size={10} />

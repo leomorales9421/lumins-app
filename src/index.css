@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply antialiased text-[#1A1A2E] bg-[#F0F1F3] font-sans transition-colors duration-300;
+    @apply antialiased text-[#1E293B] bg-[#F0F1F3] font-sans transition-colors duration-300;
   }
 
   .dark body {
@@ -50,8 +50,8 @@
   }
 
   .cu-card:hover {
-    border-color: #C4B5FD;
-    box-shadow: 0 4px 12px rgba(122, 90, 248, 0.10), 0 1px 3px rgba(0,0,0,0.06);
+    border-color: #818CF8;
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.10), 0 1px 3px rgba(0,0,0,0.06);
     transform: translateY(-1px);
   }
 
@@ -70,8 +70,8 @@
   }
   .cu-add-list-btn:hover {
     background: #FFFFFF;
-    border-color: #7A5AF8;
-    box-shadow: 0 1px 3px rgba(122,90,248,0.12);
+    border-color: #4338ca;
+    box-shadow: 0 1px 3px rgba(67,56,202,0.12);
   }
 
   /* Action pill buttons (inside modal sidebar) */
@@ -85,9 +85,9 @@
     font-size: 0.8125rem;
   }
   .cu-action-btn:hover {
-    background: #EDE9FE;
-    border-color: #C4B5FD;
-    color: #7A5AF8;
+    background: #EEF2FF;
+    border-color: #818CF8;
+    color: #4338ca;
   }
 
   /* Section heading inside modal */
@@ -104,15 +104,15 @@
     background: #F4F5F7;
     border: 1px solid #E8E9EC;
     border-radius: 8px;
-    color: #1A1A2E;
+    color: #1E293B;
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .cu-input::placeholder { color: #9CA3AF; }
   .cu-input:focus {
     background: #FFFFFF;
-    border-color: #7A5AF8;
-    box-shadow: 0 0 0 3px rgba(122,90,248,0.12);
+    border-color: #4338ca;
+    box-shadow: 0 0 0 3px rgba(67,56,202,0.12);
   }
 
   /* Board header */
@@ -151,7 +151,7 @@
     background: #E5E7EB;
     border-radius: 9999px;
   }
-  .cu-scrollbar::-webkit-scrollbar-thumb:hover { background: #C4B5FD; }
+  .cu-scrollbar::-webkit-scrollbar-thumb:hover { background: #818CF8; }
 
   /* Thin variant for activity */
   .activity-feed-container {
@@ -177,15 +177,15 @@
     height: 0;
   }
   .prose-mirror-container { @apply outline-none; }
-  .prose-mirror-container h1 { @apply text-2xl font-black text-[#1A1A2E] mt-4 mb-2 tracking-tight; }
-  .prose-mirror-container h2 { @apply text-xl font-extrabold text-[#1A1A2E] mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container h1 { @apply text-2xl font-black text-[#1E293B] mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container h2 { @apply text-xl font-extrabold text-[#1E293B] mt-4 mb-2 tracking-tight; }
   .prose-mirror-container p { @apply text-[#4B5563] text-sm leading-relaxed mb-2; }
   .prose-mirror-container ul { @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
   .prose-mirror-container ol { @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
-  .prose-mirror-container blockquote { @apply border-l-4 border-[#7A5AF8] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r-lg my-2; }
-  .prose-mirror-container pre { @apply bg-[#1A1A2E] text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto; }
-  .prose-mirror-container code { @apply bg-violet-50 text-[#7A5AF8] px-1.5 py-0.5 rounded-md text-xs font-mono; }
-  .prose-mirror-container a { @apply text-[#7A5AF8] underline hover:text-violet-700 transition-colors cursor-pointer; }
+  .prose-mirror-container blockquote { @apply border-l-4 border-[#4338ca] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r-lg my-2; }
+  .prose-mirror-container pre { @apply bg-[#1E293B] text-zinc-100 p-3 rounded-lg text-xs font-mono my-2 overflow-x-auto; }
+  .prose-mirror-container code { @apply bg-indigo-50 text-[#4338ca] px-1.5 py-0.5 rounded-md text-xs font-mono; }
+  .prose-mirror-container a { @apply text-[#4338ca] underline hover:text-indigo-700 transition-colors cursor-pointer; }
   .prose-mirror-container img { @apply rounded-xl max-w-full h-auto my-4 border border-[#E8E9EC] shadow-sm; }
   .prose-mirror-container p { @apply mb-1 last:mb-0; }
   .prose-mirror-container.is-comment-bubble img {
@@ -250,3 +250,15 @@
     background: #6C5DD3;
   }
 }
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+

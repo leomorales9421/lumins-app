@@ -113,7 +113,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
                   autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Marketing HQ o Luminous Global"
+                  placeholder="Ej: Marketing HQ o Lumins Global"
                   className="w-full h-12 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-[16px] px-6 text-zinc-900 dark:text-zinc-100 font-bold outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                   required
                 />

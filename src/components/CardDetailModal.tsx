@@ -1185,7 +1185,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                             setIsEditingDescription(false);
                           }
                         }}
-                        className="bg-[#6C5DD3] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-[#5a4cb3] transition-colors"
+                        className="bg-[#6C5DD3] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-[#312e81] transition-colors"
                       >
                         Guardar
                       </button>

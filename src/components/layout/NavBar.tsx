@@ -22,11 +22,12 @@ const NavBar: React.FC<NavBarProps> = ({
       <div className="w-full flex items-center gap-4">
         
         {/* Brand/Logo */}
-        <Link to="/app" className="flex items-center gap-2.5 group flex-shrink-0">
-          <div className="w-8 h-8 bg-[#6C5DD3] rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-             <Layout size={18} className="text-white" strokeWidth={2.5} />
-          </div>
-          <span className="hidden lg:block font-bold text-lg text-zinc-900 dark:text-zinc-100 tracking-tight">Luminous</span>
+        <Link to="/app" className="flex items-center group flex-shrink-0">
+          <img 
+            src="/lumins-log.png" 
+            alt="Lumins Logo" 
+            className="h-14 w-auto object-contain" 
+          />
         </Link>
 
         {/* Search Bar — centered, takes remaining space */}

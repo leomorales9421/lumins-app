@@ -5,6 +5,8 @@ import Button from '../components/ui/Button';
 import { Layout, Shield, Globe } from 'lucide-react';
 import { Skeleton } from '../components/ui/Skeleton';
 
+import { motion } from 'framer-motion';
+
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,20 +28,16 @@ const LoginPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#F0F1F3] font-sans">
         <div className="w-full max-w-[1000px] min-h-[600px] bg-white rounded-2xl shadow-modal flex overflow-hidden">
           {/* Left Panel Skeleton */}
-          <div className="hidden md:flex flex-1 bg-[#1A1A2E] p-16 flex-col justify-between">
-            <div className="flex items-center gap-3">
-              <Skeleton className="w-10 h-10 rounded-xl bg-slate-800" />
-              <Skeleton className="h-6 w-32 bg-slate-800" />
+          <div className="hidden md:flex flex-1 bg-[#1E293B] p-16 flex-col justify-between">
+            <div className="flex flex-col items-center gap-6">
+              <Skeleton className="w-48 h-48 rounded-2xl bg-slate-800" />
             </div>
-            <div>
+            <div className="text-center">
               <Skeleton className="h-12 w-full mb-4 bg-slate-800" />
-              <Skeleton className="h-12 w-3/4 mb-6 bg-slate-800" />
-              <Skeleton className="h-4 w-full bg-slate-800" />
+              <Skeleton className="h-4 w-3/4 mx-auto bg-slate-800" />
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-4">
               <Skeleton className="h-8 w-48 bg-slate-800" />
-              <Skeleton className="h-px w-16 bg-slate-800" />
-              <Skeleton className="h-3 w-32 bg-slate-800" />
             </div>
           </div>
           {/* Right Panel Skeleton */}
@@ -88,53 +86,64 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#F0F1F3] font-sans">
-      <div className="w-full max-w-[1000px] min-h-[600px] bg-white rounded-2xl shadow-modal flex overflow-hidden animate-in fade-in zoom-in duration-300">
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[1000px] min-h-[600px] bg-white rounded-2xl shadow-heavy flex overflow-hidden"
+      >
         
         {/* LEFT PANEL: Modern Professional Sidebar */}
-        <div className="hidden md:flex flex-1 bg-[#1A1A2E] p-16 flex-col justify-between text-white relative">
-           <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#7A5AF8] rounded-xl flex items-center justify-center shadow-lg shadow-purple-900/20">
-                 <Layout size={24} className="text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">Luminous</span>
-           </div>
+        <div className="hidden md:flex flex-1 bg-[#1E293B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
+           {/* Decorative background glow */}
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#4338ca]/10 blur-[120px] rounded-full pointer-events-none" />
 
-           <div className="relative z-10">
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ delay: 0.2, duration: 1 }}
+             className="flex justify-center relative z-10"
+           >
+              <img 
+                src="/lumins-log.png" 
+                alt="Lumins Logo" 
+                className="h-64 w-auto object-contain" 
+              />
+           </motion.div>
+
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ delay: 0.4, duration: 0.8 }}
+             className="relative z-10 text-center"
+           >
               <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight">
                 Productividad <br/> sin límites.
               </h1>
-              <p className="text-lg text-slate-400 font-medium max-w-sm leading-relaxed">
+              <p className="text-lg text-slate-400 font-medium max-w-sm mx-auto leading-relaxed">
                 Gestiona tus proyectos con una interfaz profesional diseñada para el alto rendimiento y la claridad visual.
               </p>
-           </div>
+           </motion.div>
 
-           <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-4 text-slate-400">
-                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                    <Shield size={16} />
-                 </div>
-                 <span className="text-sm font-medium">Seguridad de nivel empresarial</span>
-              </div>
-              <div className="h-px w-16 bg-slate-800" />
-              <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-500">v2.0 Professional Edition</div>
-           </div>
         </div>
 
         {/* RIGHT PANEL: Clean Access Form */}
         <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
           <div className="mb-10 text-center md:text-left">
-             <h2 className="text-2xl font-bold text-[#1A1A2E] mb-2">Bienvenido de nuevo</h2>
-             <p className="text-[#6B7280] font-medium">Ingresa tus credenciales para acceder</p>
+             <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight uppercase">
+               Ingresa a <span className="font-brand bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">LUMINS</span>
+             </h2>
+             <p className="text-[#6B7280] font-medium text-lg">Tu centro de operaciones inteligente</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-[400px] mx-auto md:mx-0">
             <div className="flex flex-col gap-2">
-               <label className="text-[12px] font-bold text-[#1A1A2E] ml-1">Email</label>
+               <label className="text-[12px] font-bold text-slate-700 ml-1">Email</label>
                <input 
                  type="email" 
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-[#9CA3AF]"
                  placeholder="ejemplo@correo.com"
                  required
                />
@@ -142,14 +151,14 @@ const LoginPage: React.FC = () => {
 
             <div className="flex flex-col gap-2">
                <div className="flex items-center justify-between ml-1">
-                  <label className="text-[12px] font-bold text-[#1A1A2E]">Contraseña</label>
-                  <Link to="/forgot-password" title="¿Olvidaste tu contraseña?" className="text-[12px] font-bold text-[#7A5AF8] hover:underline">¿Olvidaste tu contraseña?</Link>
+                  <label className="text-[12px] font-bold text-slate-700">Contraseña</label>
+                  <Link to="/forgot-password" title="¿Olvidaste tu contraseña?" className="text-[12px] font-bold text-[#4338ca] hover:underline">¿Olvidaste tu contraseña?</Link>
                </div>
                <input 
                  type="password" 
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#7A5AF8]/15 focus:border-[#7A5AF8]/40 transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-lg px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-[#9CA3AF]"
                  placeholder="••••••••"
                  required
                />
@@ -164,7 +173,7 @@ const LoginPage: React.FC = () => {
             <Button 
               type="submit" 
               isLoading={isSubmitting}
-              className="mt-2 h-11 bg-[#7A5AF8] text-white text-sm font-bold rounded-lg hover:bg-[#694de3] transition-all shadow-sm active:scale-[0.98]"
+              className="mt-2 h-11 bg-[#4338ca] text-white text-sm font-bold rounded-lg hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
             >
               Iniciar sesión
             </Button>
@@ -179,19 +188,24 @@ const LoginPage: React.FC = () => {
               type="button"
               className="h-11 border border-[#E8E9EC] rounded-lg text-[#374151] font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#F4F5F7] transition-all active:scale-[0.98]"
             >
-               <Globe size={18} />
+               <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.51 6.16-4.51z" fill="#EA4335"/>
+               </svg>
                Google
             </button>
           </form>
 
           <div className="mt-12 text-center md:text-left">
              <p className="text-sm text-[#6B7280] font-medium">
-                ¿No tienes una cuenta? <Link to="/register" className="text-[#7A5AF8] font-bold hover:underline">Regístrate gratis</Link>
+                ¿No tienes una cuenta? <Link to="/register" className="text-[#4338ca] font-bold hover:underline">Regístrate gratis</Link>
              </p>
           </div>
         </div>
 
-      </div>
+      </motion.div>
     </div>
   );
 };

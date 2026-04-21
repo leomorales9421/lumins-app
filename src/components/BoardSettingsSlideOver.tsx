@@ -6,7 +6,7 @@ import { Skeleton } from './ui/Skeleton';
 import apiClient from '../lib/api-client';
 import { useNavigate } from 'react-router-dom';
 
-const CACHE_KEY = 'luminous_board_bg_cache';
+const CACHE_KEY = 'lumins_board_bg_cache';
 
 const ImageOption = ({ img, currentBackground, onSelect }: any) => {
   const thumbUrl = `https://picsum.photos/id/${img.id}/200/150`;
@@ -73,20 +73,20 @@ export const BOARD_BACKGROUNDS = [
   { id: 'ocean', value: 'bg-gradient-to-br from-cyan-500 to-blue-600', name: 'Océano' },
   { id: 'sunset', value: 'bg-gradient-to-br from-orange-400 to-rose-500', name: 'Atardecer' },
   { id: 'forest', value: 'bg-gradient-to-br from-emerald-400 to-teal-600', name: 'Bosque' },
-  { id: 'amethyst', value: 'bg-gradient-to-br from-fuchsia-500 to-purple-600', name: 'Amatista' },
+  { id: 'amethyst', value: 'bg-gradient-to-br from-fuchsia-500 to-indigo-600', name: 'Amatista' },
   { id: 'midnight', value: 'bg-gradient-to-br from-slate-800 to-zinc-900', name: 'Medianoche' },
   { id: 'candy', value: 'bg-gradient-to-br from-rose-400 to-pink-600', name: 'Gominola' },
   { id: 'morning', value: 'bg-gradient-to-br from-yellow-200 to-orange-400', name: 'Mañana' },
   { id: 'deep-sea', value: 'bg-gradient-to-br from-blue-600 to-indigo-900', name: 'Mar Profundo' },
-  { id: 'cyberpunk', value: 'bg-gradient-to-br from-violet-500 to-fuchsia-600', name: 'Cyberpunk' },
+  { id: 'cyberpunk', value: 'bg-gradient-to-br from-indigo-500 to-fuchsia-600', name: 'Cyberpunk' },
   { id: 'mint', value: 'bg-gradient-to-br from-emerald-300 to-cyan-500', name: 'Menta' },
   { id: 'peach', value: 'bg-gradient-to-br from-orange-300 to-rose-400', name: 'Melocotón' },
   { id: 'autumn', value: 'bg-gradient-to-br from-amber-500 to-orange-700', name: 'Otoño' },
   { id: 'spring', value: 'bg-gradient-to-br from-lime-400 to-emerald-500', name: 'Primavera' },
-  { id: 'galaxy', value: 'bg-gradient-to-br from-indigo-500 to-purple-800', name: 'Galaxia' },
+  { id: 'galaxy', value: 'bg-gradient-to-br from-indigo-500 to-indigo-800', name: 'Galaxia' },
   { id: 'mars', value: 'bg-gradient-to-br from-red-500 to-rose-800', name: 'Marte' },
   { id: 'silver', value: 'bg-gradient-to-br from-slate-300 to-slate-500', name: 'Plata' },
-  { id: 'lavender', value: 'bg-gradient-to-br from-violet-200 to-indigo-400', name: 'Lavanda' },
+  { id: 'lavender', value: 'bg-gradient-to-br from-indigo-200 to-indigo-400', name: 'Lavanda' },
 ];
 
 const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({ 
@@ -261,7 +261,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 <button
                   type="submit"
                   disabled={isUpdating || !name.trim() || (name === board.name && description === board.description)}
-                  className="w-full justify-center bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white py-3 rounded-xl font-bold shadow-lg shadow-[#6C5DD3]/20 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.98]"
+                  className="w-full justify-center bg-[#6C5DD3] hover:bg-[#312e81] text-white py-3 rounded-xl font-bold shadow-lg shadow-[#6C5DD3]/20 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.98]"
                 >
                   {isUpdating ? <Loader2 size={18} className="animate-spin" /> : (
                     <>

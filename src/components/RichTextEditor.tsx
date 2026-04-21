@@ -294,7 +294,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
         inline: true,
         allowBase64: false,
         HTMLAttributes: {
-          class: 'rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-purple-500/20 shadow-md block mx-auto',
+          class: 'rounded-xl max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-indigo-500/20 shadow-md block mx-auto',
         },
       }),
       Placeholder.configure({
@@ -438,7 +438,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
           <button
             onClick={handleSave}
             disabled={isUploading || (isEditing && !hasUnsavedChanges)}
-            className="bg-[#6C5DD3] text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-[#5a4cb3] transition-colors shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50"
+            className="bg-[#6C5DD3] text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50"
           >
             {isEditing ? 'Guardar' : 'Comentar'}
           </button>

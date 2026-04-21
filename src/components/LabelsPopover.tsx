@@ -158,7 +158,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <button 
               type="submit"
               disabled={!labelName.trim()}
-              className="flex-1 bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50 active:scale-[0.98] text-sm"
+              className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50 active:scale-[0.98] text-sm"
             >
               {isEdit ? 'Guardar' : 'Crear'}
             </button>

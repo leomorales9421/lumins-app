@@ -49,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
         ) : (
           <>
             <div className="flex flex-col items-center mb-8">
-              <div className="w-14 h-14 bg-purple-50 text-[#6C5DD3] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-14 h-14 bg-indigo-50 text-[#6C5DD3] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                 <Key size={28} />
               </div>
               <h2 className="text-2xl font-bold text-zinc-900">Recuperar contraseña</h2>
@@ -68,7 +68,7 @@ const ForgotPasswordPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl px-4 text-sm font-medium text-zinc-900 outline-none focus:bg-white focus:border-purple-200 focus:ring-4 focus:ring-purple-50 transition-all placeholder:text-zinc-400"
+                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl px-4 text-sm font-medium text-zinc-900 outline-none focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-zinc-400"
                   placeholder="ejemplo@correo.com"
                   required
                 />
@@ -83,7 +83,7 @@ const ForgotPasswordPage: React.FC = () => {
               <Button
                 type="submit"
                 isLoading={isSubmitting}
-                className="w-full h-11 bg-[#6C5DD3] hover:bg-[#5a4db8] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-purple-200 active:scale-[0.98]"
+                className="w-full h-11 bg-[#6C5DD3] hover:bg-[#5a4db8] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
               >
                 Enviar enlace de recuperación
               </Button>

@@ -168,7 +168,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[#6C5DD3] font-bold text-xs uppercase tracking-widest mb-1">
-              <div className="p-1.5 bg-purple-50 dark:bg-[#6C5DD3]/10 rounded-lg">
+              <div className="p-1.5 bg-indigo-50 dark:bg-[#6C5DD3]/10 rounded-lg">
                 <CalendarIcon size={14} />
               </div>
               <span>Vista Corporativa</span>
@@ -358,7 +358,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               color: #E2E8F0;
             }
             .fc .fc-day-today .fc-daygrid-day-number {
-              color: #4F46E5;
+              color: #312E81;
               background: #EEF2FF;
               border-radius: 0 0 0 12px;
             }

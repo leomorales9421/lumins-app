@@ -223,7 +223,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       <div className="px-4 pb-5 pt-2 flex flex-col gap-3">
         <button 
           onClick={handleSave}
-          className="w-full bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
+          className="w-full bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
         >
           Guardar fechas
         </button>

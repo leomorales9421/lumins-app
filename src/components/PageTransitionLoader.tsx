@@ -87,7 +87,7 @@ const PageTransitionLoader: React.FC = () => {
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
-                className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-blue-500 to-purple-500"
+                className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-blue-500 to-indigo-500"
               />
             </div>
           </motion.div>

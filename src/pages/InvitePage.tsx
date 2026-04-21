@@ -58,17 +58,17 @@ const InvitePage: React.FC = () => {
         className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center"
       >
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[#7A5AF8]/10 rounded-2xl flex items-center justify-center text-[#7A5AF8]">
+          <div className="w-16 h-16 bg-[#4338ca]/10 rounded-2xl flex items-center justify-center text-[#4338ca]">
             <Users size={32} />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-2">Invitación de Equipo</h1>
+        <h1 className="text-2xl font-bold text-[#1E293B] mb-2">Invitación de Equipo</h1>
         
         <div className="my-8">
           {status === 'loading' && (
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-10 h-10 text-[#7A5AF8] animate-spin" />
+              <Loader2 className="w-10 h-10 text-[#4338ca] animate-spin" />
               <p className="text-zinc-500 font-medium">{message}</p>
             </div>
           )}
@@ -93,7 +93,7 @@ const InvitePage: React.FC = () => {
               <p className="text-zinc-600 font-medium">{message}</p>
               <Link 
                 to="/app"
-                className="mt-6 flex items-center gap-2 text-[#7A5AF8] font-bold hover:underline"
+                className="mt-6 flex items-center gap-2 text-[#4338ca] font-bold hover:underline"
               >
                 Ir al Inicio <ArrowRight size={16} />
               </Link>
@@ -104,7 +104,7 @@ const InvitePage: React.FC = () => {
         {status === 'success' && (
           <button 
             onClick={() => navigate('/app')}
-            className="w-full bg-[#7A5AF8] text-white font-bold py-3 rounded-xl hover:bg-[#6949F6] transition-all shadow-lg shadow-[#7A5AF8]/20"
+            className="w-full bg-[#4338ca] text-white font-bold py-3 rounded-xl hover:bg-[#312e81] transition-all shadow-lg shadow-[#4338ca]/20"
           >
             Ir al Dashboard ahora
           </button>

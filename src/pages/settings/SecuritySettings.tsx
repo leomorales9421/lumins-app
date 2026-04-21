@@ -156,7 +156,7 @@ const SecuritySettings: React.FC = () => {
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-purple-200 dark:shadow-none disabled:opacity-50 disabled:shadow-none active:scale-95"
+              className="bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:shadow-none active:scale-95"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
               Actualizar contraseña

@@ -479,7 +479,7 @@ const BoardDetailPage: React.FC = () => {
                      <button 
                       key={member.userId}
                       onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#6C5DD3] font-semibold bg-purple-50/50 dark:bg-[#6C5DD3]/10' : 'text-zinc-700 dark:text-zinc-300'}`}
+                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#6C5DD3] font-semibold bg-indigo-50/50 dark:bg-[#6C5DD3]/10' : 'text-zinc-700 dark:text-zinc-300'}`}
                     >
                       <UserAvatar 
                         name={member.user.name} 
@@ -545,7 +545,7 @@ const BoardDetailPage: React.FC = () => {
                   className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
                 />
                  <div className="flex items-center gap-2">
-                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-[#6C5DD3]/20">
+                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded-lg transition-colors shadow-md shadow-[#6C5DD3]/20">
                     Añadir lista
                   </button>
                   <button
@@ -562,7 +562,7 @@ const BoardDetailPage: React.FC = () => {
                 onClick={() => setIsAddingList(true)}
                 className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded-xl bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
               >
-                <div className="p-1 rounded-md bg-zinc-100 dark:bg-white/10 group-hover:bg-violet-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
+                <div className="p-1 rounded-md bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
                   <Plus size={18} strokeWidth={3} />
                 </div>
                 Añadir otra lista

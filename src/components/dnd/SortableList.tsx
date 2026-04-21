@@ -207,7 +207,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded-md text-[12px] font-semibold hover:bg-[#5a4cb3] transition-colors"
+                className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded-md text-[12px] font-semibold hover:bg-[#312e81] transition-colors"
               >
                 Añadir
               </button>

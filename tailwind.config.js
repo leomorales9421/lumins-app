@@ -11,7 +11,7 @@ module.exports = {
     extend: {
       colors: {
         // Core brand
-        'brand-primary': '#7A5AF8',
+        'brand-primary': '#4338ca',
         'brand-secondary': '#E91E63',
         'brand-tertiary': '#FF8A80',
         'brand-neutral': '#6B7280',
@@ -26,18 +26,19 @@ module.exports = {
         'cu-bg': '#F0F1F3',
         'cu-surface': '#FFFFFF',
         'cu-border': '#E8E9EC',
-        'cu-text': '#1A1A2E',
+        'cu-text': '#1E293B',
         'cu-muted': '#6B7280',
-        'cu-accent': '#7A5AF8',
-        'cu-accent-light': '#EDE9FE',
+        'cu-accent': '#4338ca',
+        'cu-accent-light': '#EEF2FF',
 
         // Semantic aliases
-        'vibrant-purple': '#7A5AF8',
+        'vibrant-purple': '#4338ca',
         'vibrant-pink': '#E91E63',
         'soft-purple': '#F0F1F3',
       },
       fontFamily: {
         sans: ['Inter', 'Manrope', ...defaultTheme.fontFamily.sans],
+        brand: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
       },
       borderRadius: {
         'sm': '6px',
@@ -49,9 +50,9 @@ module.exports = {
       boxShadow: {
         'soft': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
         'card': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-        'card-hover': '0 4px 12px rgba(122,90,248,0.10), 0 1px 3px rgba(0,0,0,0.06)',
+        'card-hover': '0 4px 12px rgba(67, 56, 202, 0.10), 0 1px 3px rgba(0,0,0,0.06)',
         'modal': '0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.10)',
-        'heavy': '0 20px 50px rgba(122, 90, 248, 0.15)',
+        'heavy': '0 20px 50px rgba(67, 56, 202, 0.15)',
         'dropdown': '0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)',
       }
     },

@@ -120,7 +120,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
              <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#5a4cb3] transition-colors shadow-lg shadow-[#6C5DD3]/20"
+                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20"
               >
                 Añadir
               </button>

@@ -88,7 +88,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   // Generate a consistent color based on the name
   const colors = [
     'from-blue-500 to-blue-600',
-    'from-purple-500 to-purple-600',
+    'from-indigo-500 to-indigo-600',
     'from-indigo-500 to-indigo-600',
     'from-rose-500 to-rose-600',
     'from-amber-500 to-amber-600',

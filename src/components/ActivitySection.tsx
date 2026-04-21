@@ -73,7 +73,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#5a4cb3] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
+                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#312e81] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
               >
                 Guardar
               </button>

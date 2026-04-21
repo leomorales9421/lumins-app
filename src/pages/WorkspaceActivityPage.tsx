@@ -128,7 +128,7 @@ const WorkspaceActivityPage: React.FC = () => {
   const getEventIconStyles = (type: string) => {
     switch (type) {
       case 'COMMENT': return 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
-      case 'MOVE': return 'bg-purple-100 dark:bg-[#6C5DD3]/10 text-purple-600 dark:text-[#8E82E3] border-purple-200 dark:border-[#6C5DD3]/20';
+      case 'MOVE': return 'bg-indigo-100 dark:bg-[#6C5DD3]/10 text-indigo-600 dark:text-[#8E82E3] border-indigo-200 dark:border-[#6C5DD3]/20';
       case 'ATTACHMENT': return 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20';
       case 'MEMBER': return 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20';
       default: return 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/10';

@@ -140,7 +140,7 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
                       className="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6C5DD3] to-[#5a4cb3] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6C5DD3] to-[#312e81] flex items-center justify-center text-white text-xs font-bold shadow-sm">
                           {member.user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>

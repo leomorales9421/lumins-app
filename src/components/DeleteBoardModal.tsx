@@ -93,8 +93,8 @@ const DeleteBoardModal: React.FC<DeleteBoardModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <span className="text-sm font-medium text-purple-500">{counts.labels}</span>
+                    <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                      <span className="text-sm font-medium text-indigo-500">{counts.labels}</span>
                     </div>
                     <span className="text-sm text-[#9db0b9]">
                       Etiqueta{counts.labels !== 1 ? 's' : ''}

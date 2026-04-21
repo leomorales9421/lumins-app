@@ -115,7 +115,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         <button 
           onClick={handleInsertLink}
           disabled={!linkUrl.trim()}
-          className="bg-[#6C5DD3] hover:bg-[#5a4cb3] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-[#6C5DD3]/20 transition-all disabled:opacity-50 active:scale-95"
+          className="bg-[#6C5DD3] hover:bg-[#312e81] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-[#6C5DD3]/20 transition-all disabled:opacity-50 active:scale-95"
         >
           Adjuntar enlace
         </button>

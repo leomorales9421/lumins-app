@@ -147,7 +147,7 @@ const NotificationSettings: React.FC = () => {
       {/* In-App Notifications */}
       <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 p-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center">
             <Smartphone size={20} />
           </div>
           <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en la App</h3>

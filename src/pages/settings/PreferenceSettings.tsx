@@ -25,7 +25,7 @@ const ThemeCard: React.FC<{
     disabled={isSaving}
     className={`group relative flex flex-col p-4 rounded-2xl border-2 transition-all text-left
       ${isActive
-        ? 'border-[#6C5DD3] bg-purple-50/30 dark:bg-[#6C5DD3]/10 ring-4 ring-purple-100 dark:ring-[#6C5DD3]/20'
+        ? 'border-[#6C5DD3] bg-indigo-50/30 dark:bg-[#6C5DD3]/10 ring-4 ring-indigo-100 dark:ring-[#6C5DD3]/20'
         : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-[#1C1F26]'
       } disabled:opacity-70
     `}

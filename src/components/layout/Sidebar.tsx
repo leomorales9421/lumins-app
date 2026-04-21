@@ -30,7 +30,7 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
     className={({ isActive }) => `
       flex items-center transition-all font-bold text-[13px] rounded-lg p-2.5
       ${isActive 
-        ? 'bg-[#6C5DD3] text-white shadow-sm shadow-purple-500/20' 
+        ? 'bg-[#6C5DD3] text-white shadow-sm shadow-indigo-500/20' 
         : isFloating 
           ? 'text-white/70 hover:text-white hover:bg-white/10'
           : 'text-zinc-500 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5'
