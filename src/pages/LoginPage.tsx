@@ -131,7 +131,7 @@ const LoginPage: React.FC = () => {
         <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
           <div className="mb-10 text-center md:text-left">
              <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight uppercase">
-               Ingresa a <span className="font-brand bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">LUMINS</span>
+               Ingresa a <span className="brand-logotype bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">Lumins</span>
              </h2>
              <p className="text-[#6B7280] font-medium text-lg">Tu centro de operaciones inteligente</p>
           </div>

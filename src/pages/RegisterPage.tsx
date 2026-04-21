@@ -90,7 +90,7 @@ const RegisterPage: React.FC = () => {
         <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
           <div className="mb-8 text-center md:text-left">
              <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight uppercase">
-                Regístrate en <span className="font-brand bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">Lumins</span>
+                Regístrate en <span className="brand-logotype bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED]">Lumins</span>
              </h2>
              <p className="text-[#6B7280] font-medium text-lg">Únete a la nueva era de gestión corporativa</p>
           </div>

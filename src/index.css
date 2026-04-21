@@ -164,6 +164,14 @@
     @apply bg-white rounded-xl shadow-soft border border-brand-primary/5;
   }
 
+  /* Brand Logotype */
+  .brand-logotype {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
   .brand-input {
     @apply w-full h-12 bg-white border border-brand-primary/10 rounded-md px-5 text-sm font-medium focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none;
   }

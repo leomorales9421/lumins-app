@@ -30,20 +30,20 @@ const NavBar: React.FC<NavBarProps> = ({
         </button>
 
         {/* Brand/Logo */}
-        <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2">
-          <div className="relative">
+        <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2 h-full">
+          <div className="relative flex items-center h-full w-24">
             <img 
               src="/lumins-log.png" 
               alt="Lumins Logo" 
-              className="h-16 w-auto object-contain transition-transform group-hover:scale-105" 
+              className="h-[100px] min-w-[100px] object-contain transition-transform group-hover:scale-110 drop-shadow-2xl z-50 absolute left-1/2 -translate-x-1/2" 
             />
-            <div className="absolute inset-0 bg-[#6C5DD3]/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+            <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-3xl" />
           </div>
           
           {/* Vertical Separator */}
           <div className="h-10 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-1 sm:block hidden" />
 
-          <span className="font-brand text-4xl font-black tracking-tighter uppercase bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none">
+          <span className="brand-logotype text-2xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none">
             Lumins
           </span>
         </Link>
