@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
   const sidebarClasses = `
     transition-all duration-300 transform flex flex-col w-64
     ${isFloating 
-      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-zinc-900/80 dark:bg-black/60 backdrop-blur-xl border-r border-white/10 shadow-xl' 
+      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-black/20 backdrop-blur-xl border-r border-white/10 shadow-2xl' 
       : 'fixed lg:relative inset-y-0 lg:inset-auto left-0 z-[100] lg:z-40 bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 h-full'} 
     ${isOpen ? 'translate-x-0' : isFloating ? '-translate-x-full' : '-translate-x-full lg:translate-x-0'}
     ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}

@@ -152,6 +152,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
           onCreateBoard={() => setShowCreateBoardModal(true)}
           onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
           canCreateBoard={canCreateBoard}
+          isBoardView={isBoardView}
         />
 
         <div className="flex flex-1 overflow-hidden">

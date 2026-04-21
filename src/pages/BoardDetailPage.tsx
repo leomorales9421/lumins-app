@@ -38,6 +38,7 @@ import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
 import ManageBoardMembersModal from '../components/ManageBoardMembersModal';
 import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -391,51 +392,64 @@ const BoardDetailPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full font-sans">
       
-      {/* Board Header (Sub-navigation) - Dark Glass Mode */}
-      <header className="h-16 bg-black/40 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between flex-shrink-0 z-20 text-white drop-shadow-md">
-        {/* Left Side: Hamburger, Breadcrumbs and Title */}
-        <div className="flex items-center gap-4">
+      {/* Board Header (Sub-navigation) - Premium Glass Mode */}
+      <header className="h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
+        {/* Left Side: Sidebar Toggle, Breadcrumbs and Title */}
+        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-            className="p-2 mr-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all border border-white/10"
+            className="p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded-xl text-white/90 transition-all border border-white/10 shadow-sm group"
+            title="Toggle Sidebar"
           >
-            <Menu size={20} />
+            <Menu size={20} className="group-hover:text-white transition-colors" />
           </button>
 
-          <Link 
-            to={`/w/${board.workspaceId}/dashboard`} 
-            className="flex items-center gap-1 text-sm text-white/70 hover:text-white transition-colors"
-          >
-            <ChevronLeft size={16} />
-            Tableros
-          </Link>
-          <span className="text-white/30 text-lg">/</span>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-[#6C5DD3] flex items-center justify-center text-white shadow-sm border border-white/10">
-              <span className="font-bold text-xs">{board.name.charAt(0).toUpperCase()}</span>
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-white drop-shadow-sm">{board.name}</h1>
-                {isSaving && (
-                  <span className="text-[10px] font-semibold text-white bg-white/10 border border-white/10 px-2 py-0.5 rounded-full animate-pulse">
-                    Guardando...
-                  </span>
-                )}
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <Link 
+              to={`/w/${board.workspaceId}/dashboard`} 
+              className="hidden md:flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white transition-all hover:translate-x-[-2px]"
+            >
+              <ChevronLeft size={14} strokeWidth={3} />
+              Tableros
+            </Link>
+            
+            <span className="hidden md:block text-white/10 font-thin text-2xl">|</span>
+            
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
+                <span className="font-black text-sm">{board.name.charAt(0).toUpperCase()}</span>
+              </div>
+              
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <h1 className="text-lg sm:text-xl font-black text-white truncate drop-shadow-md tracking-tight">
+                    {board.name}
+                  </h1>
+                  {isSaving && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
+                        Salvando
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Action Buttons */}
-        <div className="flex items-center gap-3">
-          {/* Members Avatars */}
-          <div className="flex items-center -space-x-2 mr-1">
-            {board.members?.slice(0, 3).map((member) => (
+        {/* Right Side: Members & Action Buttons */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Members Group */}
+          <div 
+            onClick={() => setIsMembersModalOpen(true)}
+            className="hidden sm:flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10"
+          >
+            {board.members?.slice(0, 4).map((member) => (
               <div 
                 key={member.userId} 
-                className="w-7 h-7 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shadow-sm"
-                title={member.user.name}
+                className="w-8 h-8 rounded-full border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
               >
                 <UserAvatar 
                   name={member.user.name} 
@@ -444,71 +458,87 @@ const BoardDetailPage: React.FC = () => {
                 />
               </div>
             ))}
-            {(board.members?.length || 0) > 3 && (
-              <div className="w-7 h-7 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                +{(board.members?.length || 0) - 3}
+            {(board.members?.length || 0) > 4 && (
+              <div className="w-8 h-8 rounded-full border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
+                +{(board.members?.length || 0) - 4}
               </div>
             )}
           </div>
 
-          <div className="relative">
+          <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative">
+              <button 
+                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl border text-sm font-bold transition-all active:scale-95 shadow-lg ${
+                  filterUserId || isFiltersOpen 
+                    ? 'bg-white/20 border-white/40 text-white ring-4 ring-white/5' 
+                    : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20'
+                }`}
+              >
+                <Filter size={16} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
+                <span className="hidden lg:inline">{filterUserId ? 'Filtrado' : 'Filtros'}</span>
+              </button>
+
+              <AnimatePresence>
+                {isFiltersOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                  >
+                    <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
+                      {filterUserId && (
+                        <button onClick={() => setFilterUserId(null)} className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter hover:underline">Limpiar</button>
+                      )}
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
+                      <button 
+                        onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
+                        className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-colors text-sm text-white/70"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
+                        Todos los miembros
+                      </button>
+                      {board.members?.map(member => (
+                        <button 
+                          key={member.userId}
+                          onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
+                          className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
+                        >
+                          <div className={`p-0.5 rounded-full ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
+                            <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
+                          </div>
+                          <span className="truncate">{member.user.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <button 
-              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-              className={`flex items-center gap-2 h-9 px-3 rounded-lg border text-sm font-medium transition-all shadow-sm ${
-                filterUserId || isFiltersOpen 
-                  ? 'bg-white/30 border-white/40 text-white' 
-                  : 'bg-black/40 border-white/10 text-white hover:bg-black/60'
-              }`}
+              onClick={() => setIsMembersModalOpen(true)}
+              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg lg:flex hidden"
             >
-              <Filter size={16} />
-              {filterUserId ? 'Filtrado' : 'Filtros'}
+              <Users size={16} strokeWidth={2.5} />
+              <span>Miembros</span>
             </button>
 
-            {isFiltersOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C1F26] rounded-xl shadow-xl border border-zinc-200 dark:border-white/10 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1.5 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Filtrar por miembro</div>
-                <div className="max-h-60 overflow-y-auto">
-                   <button 
-                    onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
-                    className="w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm text-zinc-700 dark:text-zinc-300"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-[10px]">All</div>
-                    Todos los miembros
-                  </button>
-                  {board.members?.map(member => (
-                     <button 
-                      key={member.userId}
-                      onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                      className={`w-full px-3 py-2 flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors text-sm ${filterUserId === member.userId ? 'text-[#6C5DD3] font-semibold bg-indigo-50/50 dark:bg-[#6C5DD3]/10' : 'text-zinc-700 dark:text-zinc-300'}`}
-                    >
-                      <UserAvatar 
-                        name={member.user.name} 
-                        avatarUrl={member.user.avatarUrl} 
-                        size="sm"
-                      />
-                      {member.user.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <button 
+              onClick={() => setIsSettingsDrawerOpen(true)}
+              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+              title="Configuración"
+            >
+              <Settings size={18} strokeWidth={2.5} />
+              <span className="hidden lg:inline">Configuración</span>
+            </button>
           </div>
-
-          <button 
-            onClick={() => setIsMembersModalOpen(true)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-black/40 text-white hover:bg-black/60 border border-white/10 text-sm font-medium transition-all shadow-sm"
-          >
-            <Users size={16} />
-            Miembros
-          </button>
-
-          <button 
-            onClick={() => setIsSettingsDrawerOpen(true)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-black/40 text-white hover:bg-black/60 text-sm font-bold transition-all border border-white/10"
-          >
-            <Settings size={16} />
-            Configuración
-          </button>
         </div>
       </header>
 
