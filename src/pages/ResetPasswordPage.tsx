@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import Button from '../components/ui/Button';
 import apiClient from '../lib/api-client';
+import AmbientBackground from '../components/layout/AmbientBackground';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -53,11 +55,42 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-white rounded shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-zinc-100 p-8 animate-in fade-in zoom-in duration-300">
-        
-        {!token && !isSuccess ? (
-          <div className="text-center py-4">
+    <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
+      <AmbientBackground />
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[1000px] min-h-[600px] bg-white/90 backdrop-blur-md border border-white/20 rounded shadow-2xl flex overflow-hidden relative z-10"
+      >
+        {/* LEFT PANEL: Branding */}
+        <div className="hidden md:flex flex-1 bg-[#09090B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
+           <div 
+             className="absolute inset-0 pointer-events-none" 
+             style={{ background: 'radial-gradient(circle at 50% 40%, rgba(30, 27, 75, 0.25) 0%, rgba(9, 9, 11, 0) 70%)' }} 
+           />
+           <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <filter id="noiseFilterReset">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#noiseFilterReset)" />
+              </svg>
+           </div>
+           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="flex justify-center relative z-10">
+              <img src="/lumins-log.png" alt="Lumins Logo" className="h-64 w-auto object-contain" />
+           </motion.div>
+           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="relative z-10 text-center">
+              <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white/90">Nueva <br/> contraseña.</h1>
+              <p className="text-lg text-white/60 font-medium max-w-sm mx-auto leading-relaxed">Crea una clave segura para proteger tus tableros y proyectos.</p>
+           </motion.div>
+        </div>
+
+        {/* RIGHT PANEL: Form */}
+        <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            {!token && !isSuccess ? (
+              <motion.div key="invalid" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center py-4 w-full max-w-md mx-auto">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded flex items-center justify-center mx-auto mb-6">
               <AlertCircle size={32} />
             </div>
@@ -71,9 +104,9 @@ const ResetPasswordPage: React.FC = () => {
             >
               Solicitar nuevo enlace
             </Link>
-          </div>
-        ) : isSuccess ? (
-          <div className="text-center py-4">
+              </motion.div>
+            ) : isSuccess ? (
+              <motion.div key="success" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center py-4 w-full max-w-md mx-auto">
             <div className="w-16 h-16 bg-green-50 text-green-500 rounded flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={32} />
             </div>
@@ -87,9 +120,9 @@ const ResetPasswordPage: React.FC = () => {
             >
               Ir al Login ahora
             </Link>
-          </div>
-        ) : (
-          <>
+              </motion.div>
+            ) : (
+              <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-md mx-auto">
             <div className="flex flex-col items-center mb-8">
               <div className="w-14 h-14 bg-indigo-50 text-[#6C5DD3] rounded flex items-center justify-center mb-6 shadow-sm">
                 <Lock size={28} />
@@ -153,9 +186,11 @@ const ResetPasswordPage: React.FC = () => {
                 Volver al Login
               </Link>
             </form>
-          </>
-        )}
-      </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 };

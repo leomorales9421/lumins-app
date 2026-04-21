@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import { Layout, Shield } from 'lucide-react';
+import AmbientBackground from '../components/layout/AmbientBackground';
 
 import { motion } from 'framer-motion';
 
@@ -43,18 +44,34 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#F0F1F3] font-sans">
+    <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
+      <AmbientBackground />
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1000px] min-h-[650px] bg-white rounded shadow-heavy flex overflow-hidden"
+        className="w-full max-w-[1000px] min-h-[650px] bg-white/90 backdrop-blur-md border border-white/20 rounded shadow-2xl flex overflow-hidden relative z-10"
       >
         
         {/* LEFT PANEL: Modern Professional Sidebar (v8.0) */}
-        <div className="hidden md:flex flex-1 bg-[#1E293B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
-           {/* Decorative background glow */}
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#4338ca]/10 blur-[120px] rounded pointer-events-none" />
+        <div className="hidden md:flex flex-1 bg-[#09090B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
+           {/* 1. Radial Spotlight Effect */}
+           <div 
+             className="absolute inset-0 pointer-events-none" 
+             style={{ 
+               background: 'radial-gradient(circle at 50% 40%, rgba(30, 27, 75, 0.25) 0%, rgba(9, 9, 11, 0) 70%)' 
+             }} 
+           />
+
+           {/* 2. Grain Texture Overlay */}
+           <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <filter id="noiseFilterRegister">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#noiseFilterRegister)" />
+              </svg>
+           </div>
 
            <motion.div 
              initial={{ opacity: 0, scale: 0.8 }}
@@ -75,10 +92,10 @@ const RegisterPage: React.FC = () => {
              transition={{ delay: 0.4, duration: 0.8 }}
              className="relative z-10 text-center"
            >
-              <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight">
+              <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white/90">
                 Empieza a <br/> iluminar tus <br/> proyectos.
               </h1>
-              <p className="text-lg text-slate-400 font-medium max-w-sm mx-auto leading-relaxed">
+              <p className="text-lg text-white/60 font-medium max-w-sm mx-auto leading-relaxed">
                 Regístrate gratis y toma el control total de tus tableros.
               </p>
            </motion.div>

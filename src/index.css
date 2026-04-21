@@ -293,4 +293,8 @@
   .animate-shimmer {
     animation: shimmer 2s infinite linear;
   }
+
+  .will-change-transform {
+    will-change: transform;
+  }
 }
