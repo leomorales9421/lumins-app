@@ -562,7 +562,7 @@ const CardModal: React.FC<CardModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4 text-center">
+      <div className="flex min-h-full items-center justify-center p-0 sm:p-4 text-center">
         {/* Backdrop */}
         <div 
           className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -571,7 +571,7 @@ const CardModal: React.FC<CardModalProps> = ({
         />
         
         {/* Modal */}
-        <div className="relative transform overflow-hidden rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="relative transform overflow-hidden sm:rounded-2xl bg-gradient-to-b from-[#1c2327] to-[#111618] border border-white/10 shadow-2xl transition-all w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="p-6 border-b border-white/5 sticky top-0 bg-[#1c2327] z-10">
             <div className="flex items-start justify-between">

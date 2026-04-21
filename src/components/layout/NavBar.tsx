@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Layout, Search, Bell, MessageSquare } from 'lucide-react';
+import { Layout, Search, Bell, MessageSquare, Menu } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
 import UserAvatar from '../ui/UserAvatar';
 
@@ -21,6 +21,14 @@ const NavBar: React.FC<NavBarProps> = ({
     <nav className="h-20 bg-white dark:bg-[#1C1F26] border-b border-zinc-200 dark:border-white/10 flex items-center px-4 z-50 sticky top-0 w-full">
       <div className="w-full flex items-center justify-between gap-4">
         
+        {/* Mobile Menu Toggle */}
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
+          className="lg:hidden p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+        >
+          <Menu size={24} />
+        </button>
+
         {/* Brand/Logo */}
         <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2">
           <div className="relative">

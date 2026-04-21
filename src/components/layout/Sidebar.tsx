@@ -26,14 +26,14 @@ const SidebarItem: React.FC<{ to: string; icon: React.ReactNode; label: string; 
     to={to}
     title={isCollapsed ? label : undefined}
     className={({ isActive }) => `
-      flex items-center transition-all font-bold text-[13px] rounded-lg p-2.5
+      flex items-center transition-all font-bold text-[13px] rounded-lg
       ${isActive 
-        ? 'bg-[#6C5DD3] text-white shadow-sm shadow-indigo-500/20' 
+        ? 'bg-[#6C5DD3] text-white shadow-lg shadow-indigo-500/30' 
         : isFloating 
-          ? 'text-white/70 hover:text-white hover:bg-white/10'
-          : 'text-zinc-500 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5'
+          ? 'text-white/80 hover:text-white hover:bg-white/10'
+          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/80 dark:hover:bg-white/5'
       }
-      ${isCollapsed ? 'justify-center' : 'justify-start gap-3'}
+      ${isCollapsed ? 'justify-center p-2' : 'justify-start gap-3 px-3 py-2.5'}
     `}
   >
     <span className={`${isCollapsed ? 'scale-110' : ''} transition-transform flex-shrink-0`}>{icon}</span>
@@ -48,16 +48,22 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
   const workspaceId = urlWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const sidebarClasses = isFloating 
-    ? `fixed inset-y-0 left-0 z-[100] transition-all duration-500 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} bg-white/10 dark:bg-black/10 backdrop-blur-xl border-r border-white/10 w-64 shadow-2xl`
-    : `relative group bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 flex flex-col h-full sticky top-0 transition-all duration-300 ease-in-out z-40 ${isCollapsed ? 'w-20' : 'w-72'}`;
+  const sidebarClasses = `
+    transition-all duration-300 transform flex flex-col
+    ${isFloating 
+      ? 'fixed top-20 bottom-0 left-0 z-[100] bg-white/40 dark:bg-black/20 backdrop-blur-xl border-r border-white/10 shadow-xl w-64' 
+      : 'relative z-40 bg-white dark:bg-[#1C1F26] border-r border-zinc-200 dark:border-white/10 h-full'} 
+    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+    w-64
+  `;
 
   return (
     <>
-      {/* Backdrop for floating sidebar */}
-      {isFloating && isOpen && (
+      {/* Backdrop for mobile and floating sidebar */}
+      {(isOpen || (isFloating && isOpen)) && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[99] transition-opacity duration-500"
+          className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] z-[99] transition-opacity duration-500 ${!isFloating ? 'lg:hidden' : ''}`}
           onClick={onClose}
         />
       )}
@@ -68,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`
-              absolute -right-3.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center 
+              absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:flex h-6 w-6 items-center justify-center 
               rounded-full border border-zinc-200 bg-white text-zinc-400 
               shadow-sm transition-all hover:scale-110 hover:border-zinc-300 
               hover:text-zinc-700 hover:shadow-md z-50 
@@ -76,11 +82,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateWorkspace, isFloating = false
               ${isCollapsed ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
             `}
           >
-            {isCollapsed ? <ChevronRight size={14} strokeWidth={2.5} /> : <ChevronLeft size={14} strokeWidth={2.5} />}
+            {isCollapsed ? <ChevronRight size={12} strokeWidth={3} /> : <ChevronLeft size={12} strokeWidth={3} />}
           </button>
         )}
 
-        <div className={`px-3 py-6 flex flex-col gap-8 h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center' : ''}`}>
+        <div className={`px-4 py-6 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar ${isCollapsed ? 'items-center px-2' : ''}`}>
           
           {/* Workspace Switcher Section */}
           <div className={`w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>

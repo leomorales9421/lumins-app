@@ -124,7 +124,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div 
-      className={`flex h-screen overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900 dark:bg-[#13151A]')}`}
+      className={`flex flex-col min-h-[100dvh] overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900 dark:bg-[#13151A]')}`}
       style={isBoardView && boardBackground?.startsWith('http') ? { 
         backgroundImage: `url(${boardBackground})`,
         backgroundSize: 'cover',
@@ -149,16 +149,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* UI Content Layer */}
       <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
         
-        {!isBoardView && (
-          <NavBar 
-            user={user} 
-            onCreateBoard={() => setShowCreateBoardModal(true)}
-            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
-            canCreateBoard={canCreateBoard}
-          />
-        )}
+        <NavBar 
+          user={user} 
+          onCreateBoard={() => setShowCreateBoardModal(true)}
+          onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+          canCreateBoard={canCreateBoard}
+        />
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden h-full">
           {/* Sidebar - Conditional behavior */}
           <Sidebar 
             onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 

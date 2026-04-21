@@ -156,17 +156,17 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
         <button 
           onClick={() => setIsOpen(!isOpen)}
           title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} p-2 rounded-xl transition-all group w-full ${isFloating ? 'hover:bg-white/10' : 'hover:bg-zinc-100 dark:hover:bg-white/5'}`}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-3 py-2'} rounded-xl transition-all group w-full ${isFloating ? 'hover:bg-white/10' : 'hover:bg-zinc-100 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200 dark:hover:border-white/10'}`}
         >
-          <div className="w-8 h-8 rounded-lg bg-[#6C5DD3] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 flex-shrink-0 flex items-center justify-center text-white text-[10px] font-black shadow-lg group-hover:scale-105 transition-transform">
             {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
           </div>
           
           <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-3'}`}>
-            <span className={`text-sm font-bold truncate ${isFloating ? 'text-white' : 'text-zinc-900 dark:text-zinc-100'}`}>
+            <span className={`text-[13px] font-bold truncate ${isFloating ? 'text-white' : 'text-zinc-800 dark:text-zinc-100'}`}>
               {currentWorkspace?.name || 'Sin Espacios'}
             </span>
-            <ChevronDown size={16} className={`${isFloating ? 'text-white/50' : 'text-zinc-500 dark:text-zinc-400'} min-w-[16px]`} />
+            <ChevronDown size={14} className={`${isFloating ? 'text-white/50' : 'text-zinc-400 dark:text-zinc-500'} min-w-[14px]`} />
           </div>
         </button>
       }

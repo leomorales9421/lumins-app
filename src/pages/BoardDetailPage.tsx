@@ -513,7 +513,7 @@ const BoardDetailPage: React.FC = () => {
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className="flex-1 h-[calc(100vh-130px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-8 transition-all duration-500 bg-transparent">
+      <main className="flex-1 h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-8 transition-all duration-500 bg-transparent snap-x snap-mandatory scrollbar-hide">
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 

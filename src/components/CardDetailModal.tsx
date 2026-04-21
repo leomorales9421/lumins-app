@@ -661,7 +661,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 md:p-10"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -682,7 +682,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 border border-zinc-200 dark:border-white/10">
+      <div className="relative w-full sm:max-w-5xl h-full sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#1C1F26] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 sm:border border-zinc-200 dark:border-white/10">
         
         {/* Header */}
         <div className="border-b border-zinc-200 dark:border-white/5 px-6 py-4 flex items-center justify-between flex-shrink-0 bg-white dark:bg-[#1C1F26]">
