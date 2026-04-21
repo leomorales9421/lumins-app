@@ -40,6 +40,8 @@ interface CalendarEvent {
     isDueDateDone: boolean;
     labels: any[];
     assignees: any[];
+    startDate: string | null;
+    dueDate: string | null;
   };
 }
 
@@ -123,10 +125,15 @@ const WorkspaceCalendarPage: React.FC = () => {
 
   const handleEventDrop = async (info: any) => {
     const { event } = info;
+    const newStartDate = event.start;
+    // Si el evento tiene un fin (rango), lo usamos. Si no, usamos el inicio (evento de un día).
+    // Nota: FullCalendar entrega el 'end' de forma exclusiva, lo cual coincide con el vencimiento.
+    const newDueDate = event.end || event.start;
+
     try {
       await apiClient.patch(`/api/cards/${event.id}/dates`, {
-        dueDate: event.start ? event.start.toISOString() : null,
-        startDate: event.start ? event.start.toISOString() : null
+        startDate: newStartDate ? newStartDate.toISOString() : null,
+        dueDate: newDueDate ? newDueDate.toISOString() : null
       });
       showSuccess('Tarea reprogramada con éxito');
       fetchEvents();

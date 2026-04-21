@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useNavigate } from 'react-router-dom';
@@ -77,16 +78,16 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
       {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity" 
         onClick={onClose}
       />
       
       {/* Modal Container */}
-      <div className="relative w-full max-w-[480px] bg-white rounded shadow-2xl p-6 border border-rose-100 animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-rose-100 animate-in fade-in zoom-in duration-200">
         <button 
           onClick={onClose}
           className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors"
@@ -96,7 +97,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
 
         {/* Header */}
         <div className="text-center sm:text-left">
-          <div className="bg-rose-50 p-3 rounded mb-4 inline-block">
+          <div className="bg-rose-50 p-3 rounded-lg mb-4 inline-block">
             <AlertTriangle className="w-6 h-6 text-rose-500" />
           </div>
           <h2 className="text-xl font-bold text-zinc-900">¿Eliminar espacio de trabajo?</h2>
@@ -108,7 +109,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
         {/* Stats Section */}
         <div className="mt-4">
           {isLoadingStats ? (
-            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded border border-zinc-100">
+            <div className="grid grid-cols-3 gap-3 bg-zinc-50 p-4 rounded-lg border border-zinc-100">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse">
                   <div className="h-6 bg-zinc-200 rounded w-10 mb-1" />
@@ -117,7 +118,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
               ))}
             </div>
           ) : stats ? (
-            <div className="grid grid-cols-3 gap-3 bg-[#F4F6F9] p-4 rounded border border-zinc-100">
+            <div className="grid grid-cols-3 gap-3 bg-zinc-50 p-4 rounded-lg border border-zinc-100">
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-zinc-900">{stats.boards}</span>
                 <span className="text-xs text-zinc-500">Tableros</span>
@@ -132,7 +133,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
               </div>
             </div>
           ) : (
-             <div className="bg-[#F4F6F9] p-4 rounded border border-zinc-100 text-center py-6">
+             <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-100 text-center py-6">
                 <p className="text-xs text-zinc-400">No se pudieron obtener estadísticas detalladas</p>
              </div>
           )}
@@ -178,7 +179,8 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

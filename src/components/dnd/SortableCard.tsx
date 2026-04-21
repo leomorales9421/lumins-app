@@ -65,7 +65,6 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
     >
       <div className="px-3 pt-3 pb-2.5 flex flex-col gap-2.5">
 
-        {/* Labels */}
         {card.labels && card.labels.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {card.labels.map((item: any, idx: number) => (
@@ -73,10 +72,8 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
                 key={item.label?.id || idx}
                 title={item.label?.name}
                 style={{ backgroundColor: item.label?.color }}
-                className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold text-white leading-tight"
-              >
-                {item.label?.name || ''}
-              </span>
+                className="w-8 h-2 rounded-full inline-block shadow-sm"
+              />
             ))}
           </div>
         )}
