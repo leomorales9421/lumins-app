@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Users, Search, Mail, Shield, Layout, MoreHorizontal, UserPlus, ChevronRight } from 'lucide-react';
+import { Users, Search, Mail, Shield, Layout, MoreHorizontal, UserPlus, ChevronRight, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import type { Workspace } from '../types/workspace';
 import Button from '../components/ui/Button';
 import InviteMembersModal from '../components/InviteMembersModal';
 import MemberSlideOver from '../components/MemberSlideOver';
 import { motion } from 'framer-motion';
-import type { WorkspaceMember } from '../types/workspace';
+import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
 import { Skeleton } from '../components/ui/Skeleton';
 import UserAvatar from '../components/ui/UserAvatar';
+import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 
 const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { user } = useAuth();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<WorkspaceMember | null>(null);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const fetchWorkspace = useCallback(async () => {
     if (!workspaceId) return;
@@ -35,6 +39,34 @@ const MembersPage: React.FC = () => {
   useEffect(() => {
     fetchWorkspace();
   }, [fetchWorkspace]);
+
+  const currentUserRole = workspace?.members.find(m => m.userId === user?.id)?.role;
+  const canManage = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
+
+  const handleRoleChange = async (targetUserId: string, newRole: WorkspaceRole) => {
+    if (!workspaceId) return;
+    setIsUpdating(targetUserId);
+    try {
+      await apiClient.patch(`/api/workspaces/${workspaceId}/members/${targetUserId}`, { role: newRole });
+      toast.success('Rol actualizado correctamente');
+      fetchWorkspace();
+    } catch (err: any) {
+      toast.error('Error', { description: err.response?.data?.message || 'No se pudo actualizar el rol' });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleRemoveMember = async (targetUserId: string, name: string) => {
+    if (!workspaceId || !window.confirm(`¿Estás seguro de que deseas eliminar a ${name} del espacio de trabajo?`)) return;
+    try {
+      await apiClient.delete(`/api/workspaces/${workspaceId}/members/${targetUserId}`);
+      toast.success('Miembro eliminado');
+      fetchWorkspace();
+    } catch (err: any) {
+      toast.error('Error', { description: err.response?.data?.message || 'No se pudo eliminar al miembro' });
+    }
+  };
 
   const filteredMembers = workspace?.members.filter(member => 
     member.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,13 +161,13 @@ const MembersPage: React.FC = () => {
       <div className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
         
         {/* Desktop View (Table) */}
-        <div className="hidden md:block">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-white/5 border-b border-zinc-200 dark:border-white/10">
                 <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Usuario</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Rol en Espacio</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Tableros</th>
+                <th className="px-6 py-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Acciones</th>
                 <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
@@ -146,11 +178,10 @@ const MembersPage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
                   key={member.id} 
-                  className="hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
-                  onClick={() => setSelectedMember(member)}
+                  className="hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors group"
                 >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
+                  <td className="px-6 py-4" onClick={() => setSelectedMember(member)}>
+                    <div className="flex items-center gap-3 cursor-pointer">
                       <div className="w-10 h-10">
                         <UserAvatar 
                           user={member.user} 
@@ -168,26 +199,56 @@ const MembersPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`
-                      inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider
-                      ${member.role === 'OWNER' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
-                        member.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                        'bg-slate-50 text-slate-600 border border-slate-100'}
-                    `}>
-                      <Shield size={10} />
-                      {member.role}
-                    </span>
+                    {canManage && member.role !== 'OWNER' && member.userId !== user?.id ? (
+                      <select 
+                        value={member.role}
+                        onChange={(e) => handleRoleChange(member.userId, e.target.value as WorkspaceRole)}
+                        disabled={isUpdating === member.userId}
+                        className="bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 outline-none focus:border-[#6C5DD3] transition-all"
+                      >
+                        <option value="ADMIN">Admin</option>
+                        <option value="MEMBER">Member</option>
+                        <option value="GUEST">Guest</option>
+                      </select>
+                    ) : (
+                      <span className={`
+                        inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider
+                        ${member.role === 'OWNER' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
+                          member.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                          'bg-slate-50 text-slate-600 border border-slate-100'}
+                      `}>
+                        <Shield size={10} />
+                        {member.role}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 group-hover:text-[#6C5DD3] dark:group-hover:text-[#6C5DD3] transition-colors">
+                    <div 
+                      onClick={() => setSelectedMember(member)}
+                      className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 group-hover:text-[#6C5DD3] dark:group-hover:text-[#6C5DD3] transition-colors cursor-pointer"
+                    >
                       <Layout size={14} />
                       <span className="text-xs font-bold">Ver accesos</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all">
-                      <MoreHorizontal size={18} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                       {canManage && member.role !== 'OWNER' && member.userId !== user?.id && (
+                        <button 
+                          onClick={() => handleRemoveMember(member.userId, member.user.name)}
+                          className="p-2 text-rose-400/60 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded transition-all"
+                          title="Eliminar del espacio"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => setSelectedMember(member)}
+                        className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
+                      >
+                        <MoreHorizontal size={18} />
+                      </button>
+                    </div>
                   </td>
                 </motion.tr>
               ))}
@@ -203,28 +264,29 @@ const MembersPage: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.03 }}
               key={member.id}
-              onClick={() => setSelectedMember(member)}
               className="p-4 active:bg-zinc-100 dark:active:bg-white/5 transition-colors flex items-center gap-4"
             >
-              <UserAvatar user={member.user} size="md" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-0.5">
-                  <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                    {member.user.name}
+              <div className="cursor-pointer flex items-center gap-4 flex-1 min-w-0" onClick={() => setSelectedMember(member)}>
+                <UserAvatar user={member.user} size="md" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                      {member.user.name}
+                    </p>
+                    <span className={`
+                      inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter
+                      ${member.role === 'OWNER' ? 'bg-amber-100 text-amber-700' : 
+                        member.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
+                        'bg-slate-100 text-slate-700'}
+                    `}>
+                      {member.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate flex items-center gap-1">
+                    <Mail size={10} />
+                    {member.user.email}
                   </p>
-                  <span className={`
-                    inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter
-                    ${member.role === 'OWNER' ? 'bg-amber-100 text-amber-700' : 
-                      member.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
-                      'bg-slate-100 text-slate-700'}
-                  `}>
-                    {member.role}
-                  </span>
                 </div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate flex items-center gap-1">
-                  <Mail size={10} />
-                  {member.user.email}
-                </p>
               </div>
               <ChevronRight size={16} className="text-zinc-300" />
             </motion.div>

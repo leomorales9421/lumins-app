@@ -12,7 +12,12 @@ import {
   Plus, 
   Search,
   MoreHorizontal,
-  Menu
+  Menu,
+  Lock,
+  Globe,
+  Building2,
+  Trash2,
+  Check
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -65,6 +70,7 @@ const BoardDetailPage: React.FC = () => {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isVisibilityDropdownOpen, setIsVisibilityDropdownOpen] = useState(false);
 
   const canEdit = isGodMode || userRole === 'admin' || userRole === 'editor';
   const isAdmin = isGodMode || userRole === 'admin';
@@ -118,6 +124,23 @@ const BoardDetailPage: React.FC = () => {
       }));
     }
   }, [board?.background]);
+
+  const handleUpdateVisibility = async (newVisibility: 'PRIVATE' | 'WORKSPACE') => {
+    if (!id || !board) return;
+    
+    // Optimistic update
+    const previousVisibility = board.visibility;
+    setBoard({ ...board, visibility: newVisibility });
+    setIsVisibilityDropdownOpen(false);
+
+    try {
+      await apiClient.patch(`/api/boards/${id}/visibility`, { visibility: newVisibility });
+      logSuccess('Visibilidad actualizada', `El tablero ahora es ${newVisibility.toLowerCase()}`);
+    } catch (err) {
+      setBoard({ ...board, visibility: previousVisibility });
+      toast.error('Error', { description: 'No se pudo actualizar la visibilidad' });
+    }
+  };
 
   // Handle opening card from URL on initial load
   useEffect(() => {
@@ -462,11 +485,73 @@ const BoardDetailPage: React.FC = () => {
                 <span className="font-black text-sm">{board.name.charAt(0).toUpperCase()}</span>
               </div>
               
-              <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <h1 className="text-lg sm:text-xl font-black text-white truncate drop-shadow-md tracking-tight">
                     {board.name}
                   </h1>
+
+                  {/* Visibility Selector */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
+                      className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
+                      title={board.visibility === 'PRIVATE' ? 'Privado' : 'Espacio de trabajo'}
+                    >
+                      {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
+                    </button>
+
+                    <AnimatePresence>
+                      {isVisibilityDropdownOpen && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-40" 
+                            onClick={() => setIsVisibilityDropdownOpen(false)}
+                          />
+                          <motion.div 
+                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                            className="absolute left-0 mt-2 w-56 bg-[#1C1F26] border border-white/10 rounded-[4px] shadow-2xl z-50 overflow-hidden"
+                          >
+                            <div className="p-2 border-b border-white/5">
+                              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest px-2">Visibilidad</span>
+                            </div>
+                            <div className="p-1">
+                              <button 
+                                onClick={() => handleUpdateVisibility('PRIVATE')}
+                                className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'PRIVATE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Lock size={14} />
+                                  <span>Privado</span>
+                                </div>
+                                {board.visibility === 'PRIVATE' && <Check size={14} />}
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateVisibility('WORKSPACE')}
+                                className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'WORKSPACE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Building2 size={14} />
+                                  <span>Espacio de Trabajo</span>
+                                </div>
+                                {board.visibility === 'WORKSPACE' && <Check size={14} />}
+                              </button>
+                            </div>
+                            <div className="p-3 bg-white/5 border-t border-white/5">
+                              <p className="text-[10px] text-white/40 leading-relaxed italic">
+                                {board.visibility === 'PRIVATE' 
+                                  ? 'Solo los miembros del tablero pueden verlo y editarlo.' 
+                                  : 'Todos los miembros del espacio de trabajo pueden ver este tablero.'}
+                              </p>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
                   {isSaving && (
                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10">
                       <div className="w-1.5 h-1.5 rounded bg-emerald-400 animate-pulse" />
@@ -484,18 +569,18 @@ const BoardDetailPage: React.FC = () => {
         {/* Right Side: Members & Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Members Group */}
-          <div 
+          <div
             onClick={() => setIsMembersModalOpen(true)}
             className="hidden sm:flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
           >
             {board.members?.slice(0, 4).map((member) => (
-              <div 
-                key={member.userId} 
+              <div
+                key={member.userId}
                 className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
               >
-                <UserAvatar 
-                  name={member.user.name} 
-                  avatarUrl={member.user.avatarUrl} 
+                <UserAvatar
+                  name={member.user.name}
+                  avatarUrl={member.user.avatarUrl}
                   size="sm"
                 />
               </div>
@@ -505,6 +590,12 @@ const BoardDetailPage: React.FC = () => {
                 +{(board.members?.length || 0) - 4}
               </div>
             )}
+          </div>
+
+          {/* My role badge */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/70">
+            {userRole === 'admin' ? '👑' : userRole === 'editor' ? '✏️' : '👁️'}
+            <span>{userRole === 'admin' ? 'Admin' : userRole === 'editor' ? 'Editor' : 'Viewer'}</span>
           </div>
 
           <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
@@ -671,7 +762,7 @@ const BoardDetailPage: React.FC = () => {
         } : undefined}
       />
 
-      <ManageBoardMembersModal 
+      <ManageBoardMembersModal
         isOpen={isMembersModalOpen}
         onClose={() => setIsMembersModalOpen(false)}
         boardId={board.id}

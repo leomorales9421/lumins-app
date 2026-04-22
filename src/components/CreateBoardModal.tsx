@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Users, ChevronDown, Layout, Loader2 } from 'lucide-react';
+import { X, Lock, Users, ChevronDown, Layout, Loader2, Building2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 
 interface Workspace {
@@ -19,7 +19,7 @@ interface CreateBoardModalProps {
 interface CreateBoardPayload {
   name: string;
   workspaceId: string;
-  visibility: 'private' | 'team';
+  visibility: 'PRIVATE' | 'WORKSPACE';
   description?: string;
 }
 
@@ -43,7 +43,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
     }
   }, [isOpen, workspaces, workspaceId, defaultWorkspaceId]);
 
-  const [visibility, setVisibility] = useState<'private' | 'team'>('private');
+  const [visibility, setVisibility] = useState<'PRIVATE' | 'WORKSPACE'>('PRIVATE');
   const [description, setDescription] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
   const handleClose = () => {
     setName('');
     setWorkspaceId(workspaces[0]?.id || '');
-    setVisibility('private');
+    setVisibility('PRIVATE');
     setDescription('');
     setIsDescriptionExpanded(false);
     setError('');
@@ -106,13 +106,13 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded flex items-center justify-center shadow-sm">
-                    <Layout size={24} strokeWidth={2.5} />
-                 </div>
-                 <div>
-                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Nuevo proyecto</h2>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Organiza tus tareas en un nuevo tablero</p>
-                 </div>
+                <div className="w-12 h-12 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded flex items-center justify-center shadow-sm">
+                  <Layout size={24} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Nuevo proyecto</h2>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Organiza tus tareas en un nuevo tablero</p>
+                </div>
               </div>
               <button 
                 onClick={handleClose}
@@ -165,32 +165,32 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                 </label>
                 <div className="flex gap-4">
                   <div 
-                    onClick={() => setVisibility('private')}
+                    onClick={() => setVisibility('PRIVATE')}
                     className={`flex-1 p-5 rounded border cursor-pointer transition-all ${
-                      visibility === 'private' 
+                      visibility === 'PRIVATE' 
                         ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
                         : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    <Lock size={20} className={visibility === 'private' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
+                    <Lock size={20} className={visibility === 'PRIVATE' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
                     <div className="mt-3">
-                      <div className={`font-bold text-[14px] ${visibility === 'private' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Privado</div>
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Solo tú e invitados</div>
+                      <div className={`font-bold text-[14px] ${visibility === 'PRIVATE' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Privado</div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Solo miembros del tablero</div>
                     </div>
                   </div>
 
                   <div 
-                    onClick={() => setVisibility('team')}
+                    onClick={() => setVisibility('WORKSPACE')}
                     className={`flex-1 p-5 rounded border cursor-pointer transition-all ${
-                      visibility === 'team' 
+                      visibility === 'WORKSPACE' 
                         ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-sm' 
                         : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/10 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                   >
-                    <Users size={20} className={visibility === 'team' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
+                    <Building2 size={20} className={visibility === 'WORKSPACE' ? 'text-[#6C5DD3]' : 'text-zinc-400 dark:text-zinc-500'} />
                     <div className="mt-3">
-                      <div className={`font-bold text-[14px] ${visibility === 'team' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Equipo</div>
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Todo el equipo</div>
+                      <div className={`font-bold text-[14px] ${visibility === 'WORKSPACE' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>Espacio</div>
+                      <div className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-tight mt-0.5">Todo el espacio de trabajo</div>
                     </div>
                   </div>
                 </div>

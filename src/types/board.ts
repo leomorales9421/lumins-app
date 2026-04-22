@@ -49,7 +49,7 @@ export interface Board {
   id: string;
   name: string;
   description?: string;
-  visibility: 'private' | 'team' | 'public';
+  visibility: 'PRIVATE' | 'WORKSPACE';
   workspaceId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -83,13 +83,13 @@ export interface BoardResponse {
 export interface CreateBoardRequest {
   name: string;
   description?: string;
-  visibility: 'private' | 'team' | 'public';
+  visibility: 'PRIVATE' | 'WORKSPACE';
 }
 
 export interface UpdateBoardRequest {
   name?: string;
   description?: string;
-  visibility?: 'private' | 'team' | 'public';
+  visibility?: 'PRIVATE' | 'WORKSPACE';
   background?: string;
 }
 
