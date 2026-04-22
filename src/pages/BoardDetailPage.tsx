@@ -40,13 +40,17 @@ import ManageBoardMembersModal from '../components/ManageBoardMembersModal';
 import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { usePermission } from '../contexts/PermissionContext';
+
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isGodMode } = usePermission();
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [board, setBoard] = useState<Board | null>(null);
+  const [userRole, setUserRole] = useState<string>('viewer');
   const [lists, setLists] = useState<List[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -62,6 +66,9 @@ const BoardDetailPage: React.FC = () => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+  const canEdit = isGodMode || userRole === 'admin' || userRole === 'editor';
+  const isAdmin = isGodMode || userRole === 'admin';
+
   const { logSuccess } = useStructuredLogger();
 
   
@@ -73,8 +80,9 @@ const BoardDetailPage: React.FC = () => {
   const fetchBoard = useCallback(async () => {
     if (!id) return;
     try {
-      const response = await apiClient.get<{ data: { board: Board } }>(`/api/boards/${id}`);
+      const response = await apiClient.get<{ data: { board: Board, userRole: string } }>(`/api/boards/${id}`);
       setBoard(response.data.board);
+      setUserRole(response.data.userRole);
       
       // Filter out archived (closed) cards
       let filteredLists = (response.data.board.lists || []).map(list => ({
@@ -131,7 +139,10 @@ const BoardDetailPage: React.FC = () => {
     window.dispatchEvent(new CustomEvent('toggle-sidebar'));
   };
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(useSensor(PointerSensor, { 
+    activationConstraint: { distance: 5 },
+    disabled: !canEdit
+  }));
 
   const findContainer = (lists: List[], id: string) => {
     if (lists.find((list) => list.id === id)) return id;
@@ -561,14 +572,16 @@ const BoardDetailPage: React.FC = () => {
               <span>Miembros</span>
             </button>
 
-            <button 
-              onClick={() => setIsSettingsDrawerOpen(true)}
-              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
-              title="Configuración"
-            >
-              <Settings size={18} strokeWidth={2.5} />
-              <span className="hidden lg:inline">Configuración</span>
-            </button>
+            {isAdmin && (
+              <button 
+                onClick={() => setIsSettingsDrawerOpen(true)}
+                className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+                title="Configuración"
+              >
+                <Settings size={18} strokeWidth={2.5} />
+                <span className="hidden lg:inline">Configuración</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -596,38 +609,40 @@ const BoardDetailPage: React.FC = () => {
               ))}
             </SortableContext>
             
-            {isAddingList ? (
-              <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
-                <input
-                  autoFocus
-                  placeholder="Nombre de la lista..."
-                  value={newListTitle}
-                  onChange={(e) => setNewListTitle(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
-                />
-                 <div className="flex items-center gap-2">
-                  <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded transition-colors shadow-md shadow-[#6C5DD3]/20">
-                    Añadir lista
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingList(false)}
-                    className="px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm font-medium transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-             ) : (
-              <button
-                onClick={() => setIsAddingList(true)}
-                className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
-              >
-                <div className="p-1 rounded bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
-                  <Plus size={18} strokeWidth={3} />
-                </div>
-                Añadir otra lista
-              </button>
+            {canEdit && (
+              isAddingList ? (
+                <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
+                  <input
+                    autoFocus
+                    placeholder="Nombre de la lista..."
+                    value={newListTitle}
+                    onChange={(e) => setNewListTitle(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
+                  />
+                   <div className="flex items-center gap-2">
+                    <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded transition-colors shadow-md shadow-[#6C5DD3]/20">
+                      Añadir lista
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingList(false)}
+                      className="px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm font-medium transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+               ) : (
+                <button
+                  onClick={() => setIsAddingList(true)}
+                  className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
+                >
+                  <div className="p-1 rounded bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
+                    <Plus size={18} strokeWidth={3} />
+                  </div>
+                  Añadir otra lista
+                </button>
+              )
             )}
 
             {/* Extra spacer for scroll */}

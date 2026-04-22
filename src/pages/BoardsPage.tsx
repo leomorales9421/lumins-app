@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermission } from '../contexts/PermissionContext';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
 import Button from '../components/ui/Button';
@@ -13,13 +14,14 @@ import { Skeleton } from '../components/ui/Skeleton';
 
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
+  const { isGodMode } = usePermission();
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [workspaces, setWorkspaces] = useState<{ id: string, name: string }[]>([]);
+  const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
 
   const fetchWorkspaces = useCallback(async () => {
     setIsLoadingWorkspaces(true);
@@ -122,13 +124,15 @@ const BoardsPage: React.FC = () => {
                          Todos
                          <ChevronDown size={14} />
                        </button>
-                       <button 
-                         onClick={() => setShowInviteModal(true)}
-                         className="px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"
-                       >
-                         <Users size={14} />
-                         Miembros
-                       </button>
+                       {(isGodMode || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
+                        <button 
+                          onClick={() => setShowInviteModal(true)}
+                          className="px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"
+                        >
+                          <Users size={14} />
+                          Miembros
+                        </button>
+                       )}
                     </div>
                  </div>
               </div>

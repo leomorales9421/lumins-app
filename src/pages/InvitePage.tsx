@@ -49,6 +49,7 @@ const InvitePage: React.FC = () => {
 
         // If already accepted, just show success or redirect
         if (data.isAlreadyAccepted) {
+          Cookies.remove('invitation_token');
           setStatus('success');
           setMessage('Ya eres miembro de este equipo. Redirigiendo al dashboard...');
           setTimeout(() => navigate('/app'), 2000);

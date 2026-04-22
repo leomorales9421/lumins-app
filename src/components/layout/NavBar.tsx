@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Layout, Search, Bell, MessageSquare, Menu } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Layout, Search, Bell, MessageSquare, Menu, Shield, ShieldAlert, Settings } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
 import UserAvatar from '../ui/UserAvatar';
+import { usePermission } from '../../contexts/PermissionContext';
 
 interface NavBarProps {
   user: any;
@@ -17,6 +18,9 @@ const NavBar: React.FC<NavBarProps> = ({
   onCreateWorkspace,
   canCreateBoard
 }) => {
+  const { isGodMode, setGodMode } = usePermission();
+  const navigate = useNavigate();
+
   return (
     <nav className="h-16 bg-white dark:bg-[#1C1F26] border-b border-zinc-200 dark:border-white/10 flex items-center px-4 z-50 sticky top-0 w-full">
       <div className="w-full flex items-center justify-between gap-4">
@@ -54,6 +58,35 @@ const NavBar: React.FC<NavBarProps> = ({
         {/* Right Section: Actions · Divider · Avatar */}
         <div className="flex items-center gap-1 flex-shrink-0">
           
+          {/* System Admin Section */}
+          {user?.globalRole === 'SYSTEM_ADMIN' && (
+            <div className="flex items-center gap-1.5 mr-2 pr-2 border-r border-zinc-200 dark:border-white/10">
+              <button
+                onClick={() => navigate('/w/global/system-admin')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:text-[#6C5DD3] transition-all text-xs font-bold border border-transparent hover:border-[#6C5DD3]/20"
+                title="Panel de Control Global"
+              >
+                <Settings size={14} />
+                <span className="hidden xl:block uppercase tracking-wider">Sistema</span>
+              </button>
+
+              {/* God Mode Toggle */}
+              <button
+                onClick={() => setGodMode(!isGodMode)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  isGodMode 
+                    ? 'bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]' 
+                    : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 border border-transparent'
+                }`}
+                title={isGodMode ? 'Desactivar Modo Dios' : 'Activar Modo Dios'}
+              >
+                {isGodMode ? <ShieldAlert size={14} /> : <Shield size={14} />}
+                <span className="hidden md:block uppercase tracking-wider">MODO DIOS</span>
+                {isGodMode && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-0.5" />}
+              </button>
+            </div>
+          )}
+
           <GlobalCreateMenu 
             onCreateBoard={onCreateBoard}
             onCreateWorkspace={onCreateWorkspace}

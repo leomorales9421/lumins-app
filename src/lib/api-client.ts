@@ -41,13 +41,26 @@ class ApiClient {
       },
     });
 
-    // Request interceptor to add auth token
+    // Request interceptor to add auth token and contextual headers
     this.client.interceptors.request.use(
       (config) => {
         const token = this.getAccessToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Add God Mode header if active
+        const isGodMode = localStorage.getItem('lumins_god_mode') === 'true';
+        if (isGodMode) {
+          config.headers['X-God-Mode'] = 'true';
+        }
+
+        // Add Workspace ID header if available
+        const workspaceId = localStorage.getItem('lastActiveWorkspaceId');
+        if (workspaceId) {
+          config.headers['X-Workspace-ID'] = workspaceId;
+        }
+
         return config;
       },
       (error) => Promise.reject(error)

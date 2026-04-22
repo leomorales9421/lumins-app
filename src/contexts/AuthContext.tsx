@@ -7,6 +7,7 @@ interface User {
   email: string;
   name: string;
   role: string;
+  globalRole: 'USER' | 'SYSTEM_ADMIN';
   phone?: string;
   avatarUrl?: string;
   country?: string;
