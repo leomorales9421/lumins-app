@@ -125,36 +125,36 @@ export const useStructuredLogger = () => {
     
     console.error(`[${context}]`, error, metadata);
     
-    showError(
-      'Error',
-      `${context}: ${errorDetails}`,
-      8000
-    );
-  }, [showError]);
+    toast.error(context, { 
+      description: errorDetails,
+      duration: 8000 
+    });
+  }, []);
 
   const logWarning = useCallback((context: string, message: string, metadata?: Record<string, any>) => {
     console.warn(`[${context}]`, message, metadata);
     
-    showWarning(
-      'Aviso',
-      `${context}: ${message}`,
-      6000
-    );
-  }, [showWarning]);
+    toast.warning(context, { 
+      description: message,
+      duration: 6000 
+    });
+  }, []);
 
   const logInfo = useCallback((context: string, message: string, metadata?: Record<string, any>) => {
     console.info(`[${context}]`, message, metadata);
     
-    showInfo(
-      'Información',
-      `${context}: ${message}`,
-      4000
-    );
-  }, [showInfo]);
+    toast.info(context, { 
+      description: message,
+      duration: 4000 
+    });
+  }, []);
 
   const logSuccess = useCallback((context: string, message: string, metadata?: Record<string, any>) => {
     console.log(`[${context}]`, message, metadata);
-    toast.success('Éxito', { description: `${context}: ${message}` });
+    toast.success(context, { 
+      description: message,
+      duration: 4000
+    });
   }, []);
 
   return {

@@ -1,27 +1,33 @@
 import { Toaster } from 'sonner';
+import { CheckCircle2, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
 export function GlobalToaster() {
   return (
     <Toaster 
-      position="bottom-right"
+      position="bottom-center"
+      icons={{
+        success: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+        error: <AlertCircle className="w-5 h-5 text-rose-400" />,
+        info: <Info className="w-5 h-5 text-[#8E82E3]" />,
+        warning: <AlertTriangle className="w-5 h-5 text-amber-400" />,
+      }}
       toastOptions={{
-        // Desactivamos el estilo por defecto para usar Tailwind puro
         unstyled: true,
+        duration: 4000,
         classNames: {
-          toast: "w-full flex items-center gap-3 p-4 rounded border shadow-lg transition-all",
-          // Modo Claro: Fondo blanco, borde suave, texto oscuro
-          // Modo Oscuro: Superficie elevada (#1C1F26), borde sutil, texto claro
-          default: "bg-white border-zinc-200 text-zinc-900 dark:bg-[#1C1F26] dark:border-white/10 dark:text-zinc-100",
-          // Variantes de estado (Sobrescriben el default si es success/error/info)
-          success: "bg-white border-emerald-200 text-emerald-800 dark:bg-[#1C1F26] dark:border-emerald-500/30 dark:text-emerald-400",
-          error: "bg-white border-rose-200 text-rose-800 dark:bg-[#1C1F26] dark:border-rose-500/30 dark:text-rose-400",
-          info: "bg-white border-blue-200 text-blue-800 dark:bg-[#1C1F26] dark:border-blue-500/30 dark:text-blue-400",
-          // Estilos para el título y la descripción
-          title: "font-bold text-sm",
-          description: "text-sm opacity-80",
-          // Botón de acción dentro del toast
-          actionButton: "bg-[#6C5DD3] text-white rounded px-3 py-1.5 text-xs font-semibold hover:bg-[#5b4eb3] transition-colors",
-          cancelButton: "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-300 rounded px-3 py-1.5 text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-white/20 transition-colors",
+          toast: "group w-[400px] flex items-start gap-4 p-4 rounded-xl border shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-500 active:scale-[0.98] animate-in slide-in-from-bottom-5",
+          // Modo Claro - Sólido
+          default: "bg-white border-zinc-200 text-zinc-900",
+          // Modo Oscuro - Sólido (Coincidiendo con el panel principal #1C1F26)
+          success: "bg-white border-emerald-100 text-emerald-900 dark:bg-[#1C1F26] dark:border-emerald-500/20 dark:text-emerald-400",
+          error: "bg-white border-rose-100 text-rose-900 dark:bg-[#1C1F26] dark:border-rose-500/20 dark:text-rose-400",
+          info: "bg-white border-indigo-100 text-indigo-900 dark:bg-[#1C1F26] dark:border-[#6C5DD3]/30 dark:text-[#8E82E3]",
+          // Estilos base de texto
+          title: "text-[15px] font-bold tracking-tight leading-tight",
+          description: "text-[13px] opacity-70 leading-relaxed font-medium mt-1",
+          // Botones
+          actionButton: "bg-[#6C5DD3] text-white rounded-lg px-4 py-2 text-xs font-bold hover:bg-[#5b4eb3] shadow-lg shadow-[#6C5DD3]/20 transition-all active:scale-95",
+          cancelButton: "bg-zinc-100 text-zinc-700 dark:bg-white/5 dark:text-zinc-300 rounded-lg px-4 py-2 text-xs font-bold hover:bg-zinc-200 dark:hover:bg-white/10 transition-all active:scale-95",
         },
       }}
     />

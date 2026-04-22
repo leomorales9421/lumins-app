@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider } from './components/NotificationProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
@@ -23,6 +23,7 @@ import PreferenceSettings from './pages/settings/PreferenceSettings';
 import { useEffect, useState } from 'react';
 import apiClient from './lib/api-client';
 import { GlobalToaster } from './components/GlobalToaster';
+import Cookies from 'js-cookie';
 
 const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
   const navigate = useNavigate();
@@ -55,10 +56,30 @@ const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
   return null;
 };
 
+const GlobalInvitationDetector: React.FC = () => {
+  const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading || !user) return;
+
+    const inviteToken = Cookies.get('invitation_token');
+    const currentPath = window.location.pathname;
+
+    // If we have a token and we are NOT already on the invite page, redirect to it
+    if (inviteToken && currentPath !== '/invite') {
+      navigate(`/invite?token=${inviteToken}`, { replace: true });
+    }
+  }, [user, isLoading, navigate]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <GlobalInvitationDetector />
         <NotificationProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
