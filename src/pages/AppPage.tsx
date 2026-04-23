@@ -59,7 +59,7 @@ const AppPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#4338ca]/20 blur-3xl" />
             <div className="relative z-10">
               <h3 className="text-2xl font-bold mb-4">Gestiona tus proyectos</h3>
-              <p className="text-slate-400 mb-8 max-w-sm">Accede a tus tableros de Kanban y organiza tus tareas con el equipo en tiempo real.</p>
+              <p className="text-slate-400 mb-8 max-w-sm">Accede a tus tableros de Lumins y organiza tus tareas con el equipo en tiempo real.</p>
               <Button 
                 onClick={() => navigate('/app')}
                 className="bg-[#4338ca] text-white border-none"

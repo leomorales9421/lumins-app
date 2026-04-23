@@ -36,7 +36,7 @@
 ## Estructura de Archivos
 
 ```
-frontend/src/components/dnd/
+lumins-app/src/components/dnd/
 ├── DndProvider.tsx      # Contexto principal de DnD
 ├── SortableList.tsx     # Componente de lista arrastrable
 └── SortableCard.tsx     # Componente de tarjeta arrastrable

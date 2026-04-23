@@ -44,7 +44,7 @@ Para que las pruebas funcionen correctamente, necesitas:
 
 1. Inicia el backend:
    ```bash
-   cd ../backend
+   cd ../lumins-api
    npm run dev
    ```
 
