@@ -4,7 +4,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 // Import for structured logging (will be used when available)
 // import { useStructuredLogger } from '../components/NotificationProvider';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'access_token';

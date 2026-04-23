@@ -23,7 +23,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (isAuthenticated && !socket) {
       const token = apiClient.getAccessToken();
-      const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || '';
 
       const newSocket = io(SOCKET_URL, {
         auth: { token },
