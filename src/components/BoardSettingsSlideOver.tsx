@@ -9,11 +9,11 @@ import { useNavigate } from 'react-router-dom';
 const CACHE_KEY = 'lumins_board_bg_cache';
 
 const ImageOption = ({ img, currentBackground, onSelect }: any) => {
-  const thumbUrl = `https://picsum.photos/id/${img.id}/200/150`;
-  const fullUrl = `https://picsum.photos/id/${img.id}/2560/1440`;
+  const thumbUrl = `https://picsum.photos/id/${img.id}/400/250`;
+  const fullUrl = `https://picsum.photos/id/${img.id}/1920/1080`;
   const isActive = currentBackground === fullUrl;
 
-  // TRUCO PRO: Pre-cargar la alta resolución cuando el usuario pone el mouse encima
+  // TRUCO PRO: Pre-cargar solo si es necesario
   const handleMouseEnter = () => {
     const imgPreload = new Image();
     imgPreload.src = fullUrl;
