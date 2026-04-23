@@ -34,55 +34,55 @@ const NavBar: React.FC<NavBarProps> = ({
         </button>
 
         {/* Brand/Logo */}
-        <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2 h-full">
-          <div className="relative flex items-center h-full w-24">
+        <Link to="/app" className="flex items-center gap-3 group flex-shrink-0 mr-2 sm:mr-8 px-1 h-full">
+          <div className="relative flex items-center h-full w-10 sm:w-16">
             <img 
               src="/lumins-log.webp" 
               alt="Lumins Logo" 
-              className="h-[80px] min-w-[80px] object-contain transition-transform group-hover:scale-110 drop-shadow-2xl z-50 absolute left-1/2 -translate-x-1/2" 
+              className="h-8 sm:h-12 w-auto object-contain transition-transform group-hover:scale-110 drop-shadow-xl z-50" 
             />
-            <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded opacity-0 group-hover:opacity-100 transition-opacity blur-3xl" />
+            <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded opacity-0 group-hover:opacity-100 transition-opacity blur-2xl" />
           </div>
           
           {/* Vertical Separator */}
           <div className="h-8 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-1 sm:block hidden" />
 
-          <span className="brand-logotype text-2xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none">
+          <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none font-black tracking-tighter">
             LUMINS
           </span>
         </Link>
 
-        {/* Search Bar — hidden for now */}
+        {/* Search Bar Area / Spacer */}
         <div className="flex-1" />
 
         {/* Right Section: Actions · Divider · Avatar */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           
           {/* System Admin Section */}
           {user?.globalRole === 'SYSTEM_ADMIN' && (
-            <div className="flex items-center gap-1.5 mr-2 pr-2 border-r border-zinc-200 dark:border-white/10">
+            <div className="flex items-center gap-1 sm:gap-1.5 mr-1 sm:mr-2 pr-1 sm:pr-2 border-r border-zinc-200 dark:border-white/10">
               <button
                 onClick={() => navigate('/w/global/system-admin')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:text-[#6C5DD3] transition-all text-xs font-bold border border-transparent hover:border-[#6C5DD3]/20"
+                className="flex items-center justify-center p-2 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:text-[#6C5DD3] transition-all border border-transparent hover:border-[#6C5DD3]/20"
                 title="Panel de Control Global"
               >
-                <Settings size={14} />
-                <span className="hidden xl:block uppercase tracking-wider">Sistema</span>
+                <Settings size={18} />
+                <span className="hidden xl:block text-xs font-bold uppercase tracking-wider ml-2">Sistema</span>
               </button>
 
               {/* God Mode Toggle */}
               <button
                 onClick={() => setGodMode(!isGodMode)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center justify-center p-2 rounded-lg transition-all ${
                   isGodMode 
                     ? 'bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]' 
                     : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 border border-transparent'
                 }`}
                 title={isGodMode ? 'Desactivar Modo Dios' : 'Activar Modo Dios'}
               >
-                {isGodMode ? <ShieldAlert size={14} /> : <Shield size={14} />}
-                <span className="hidden md:block uppercase tracking-wider">MODO DIOS</span>
-                {isGodMode && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-0.5" />}
+                {isGodMode ? <ShieldAlert size={18} /> : <Shield size={18} />}
+                <span className="hidden md:block text-xs font-bold uppercase tracking-wider ml-2">GOD</span>
+                {isGodMode && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-1" />}
               </button>
             </div>
           )}
@@ -93,11 +93,11 @@ const NavBar: React.FC<NavBarProps> = ({
             canCreateBoard={canCreateBoard}
           />
 
-          <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 mx-2" />
+          <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 mx-1 sm:mx-2" />
 
           {/* User Profile */}
-          <div className="flex items-center gap-3 pl-2">
-            <div className="flex flex-col items-end hidden sm:flex">
+          <div className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2">
+            <div className="flex flex-col items-end hidden md:flex">
               <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 leading-none">
                 {user?.name}
               </span>

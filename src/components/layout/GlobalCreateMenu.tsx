@@ -92,7 +92,7 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
           <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isOpen ? 'bg-indigo-100 dark:bg-[#6C5DD3]/20' : 'bg-zinc-100 dark:bg-white/10'}`}>
             <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200 ${isOpen ? 'text-indigo-600' : ''}`} />
           </div>
-          <span className="uppercase tracking-wider">Nuevo</span>
+          <span className="uppercase tracking-wider hidden sm:block">Nuevo</span>
         </button>
       }
 
