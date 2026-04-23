@@ -6,26 +6,35 @@ import { NotificationProvider } from './components/NotificationProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import BoardsPage from './pages/BoardsPage';
-import BoardDetailPage from './pages/BoardDetailPage';
-import InvitePage from './pages/InvitePage';
-import MembersPage from './pages/MembersPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import WorkspaceActivityPage from './pages/WorkspaceActivityPage';
-import WorkspaceCalendarPage from './pages/WorkspaceCalendarPage';
-import SystemAdminPage from './pages/SystemAdminPage';
-
 import MainLayout from './components/layout/MainLayout';
-import SettingsPage from './pages/SettingsPage';
-import ProfileSettings from './pages/settings/ProfileSettings';
-import SecuritySettings from './pages/settings/SecuritySettings';
-import NotificationSettings from './pages/settings/NotificationSettings';
-import PreferenceSettings from './pages/settings/PreferenceSettings';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import apiClient from './lib/api-client';
 import { GlobalToaster } from './components/GlobalToaster';
 import Cookies from 'js-cookie';
+import { Loader2 } from 'lucide-react';
+
+// Lazy Loaded Pages
+const BoardsPage = lazy(() => import('./pages/BoardsPage'));
+const BoardDetailPage = lazy(() => import('./pages/BoardDetailPage'));
+const InvitePage = lazy(() => import('./pages/InvitePage'));
+const MembersPage = lazy(() => import('./pages/MembersPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const WorkspaceActivityPage = lazy(() => import('./pages/WorkspaceActivityPage'));
+const WorkspaceCalendarPage = lazy(() => import('./pages/WorkspaceCalendarPage'));
+const SystemAdminPage = lazy(() => import('./pages/SystemAdminPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ProfileSettings = lazy(() => import('./pages/settings/ProfileSettings'));
+const SecuritySettings = lazy(() => import('./pages/settings/SecuritySettings'));
+const NotificationSettings = lazy(() => import('./pages/settings/NotificationSettings'));
+const PreferenceSettings = lazy(() => import('./pages/settings/PreferenceSettings'));
+
+const PageLoader = () => (
+  <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
+    <Loader2 className="animate-spin mb-4" size={48} />
+    <span className="text-sm font-bold uppercase tracking-widest animate-pulse">Cargando Lumins...</span>
+  </div>
+);
 
 const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
   const navigate = useNavigate();
@@ -85,38 +94,40 @@ function App() {
           <SocketProvider>
             <GlobalInvitationDetector />
             <NotificationProvider>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/invite" element={<InvitePage />} />
-                
-                <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                  <Route path="/app" element={<BoardsPage />} />
-                  <Route path="/w/:workspaceId/dashboard" element={<BoardsPage />} />
-                  <Route path="/w/:workspaceId/members" element={<MembersPage />} />
-                  <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
-                  <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
-                  <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
-                  <Route path="/boards/:id" element={<BoardDetailPage />} />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/invite" element={<InvitePage />} />
                   
-                  <Route path="/settings" element={<SettingsPage />}>
-                    <Route index element={<Navigate to="profile" replace />} />
-                    <Route path="profile" element={<ProfileSettings />} />
-                    <Route path="security" element={<SecuritySettings />} />
-                    <Route path="notifications" element={<NotificationSettings />} />
-                    <Route path="preferences" element={<PreferenceSettings />} />
+                  <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                    <Route path="/app" element={<BoardsPage />} />
+                    <Route path="/w/:workspaceId/dashboard" element={<BoardsPage />} />
+                    <Route path="/w/:workspaceId/members" element={<MembersPage />} />
+                    <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
+                    <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
+                    <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
+                    <Route path="/boards/:id" element={<BoardDetailPage />} />
+                    
+                    <Route path="/settings" element={<SettingsPage />}>
+                      <Route index element={<Navigate to="profile" replace />} />
+                      <Route path="profile" element={<ProfileSettings />} />
+                      <Route path="security" element={<SecuritySettings />} />
+                      <Route path="notifications" element={<NotificationSettings />} />
+                      <Route path="preferences" element={<PreferenceSettings />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
-                <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
-                <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
+                  <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
+                  <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
+                  <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
 
-                <Route path="/" element={<Navigate to="/app" replace />} />
-                <Route path="*" element={<Navigate to="/app" replace />} />
-              </Routes>
+                  <Route path="/" element={<Navigate to="/app" replace />} />
+                  <Route path="*" element={<Navigate to="/app" replace />} />
+                </Routes>
+              </Suspense>
               <GlobalToaster />
             </NotificationProvider>
           </SocketProvider>
