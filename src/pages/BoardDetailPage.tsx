@@ -47,6 +47,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { usePermission } from '../contexts/PermissionContext';
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
+import { useBoardSocket } from '../hooks/useBoardSocket';
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +55,9 @@ const BoardDetailPage: React.FC = () => {
   const { user } = useAuth();
   const { isGodMode } = usePermission();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize Socket.io for this board
+  useBoardSocket(id);
   
   const [board, setBoard] = useState<Board | null>(null);
   const [userRole, setUserRole] = useState<string>('viewer');
@@ -126,6 +130,22 @@ const BoardDetailPage: React.FC = () => {
       }));
     }
   }, [board?.background]);
+
+  // Handle real-time updates from WebSockets
+  useEffect(() => {
+    const handleBoardUpdate = (e: any) => {
+      const { boardId: updatedBoardId } = e.detail;
+      if (updatedBoardId === id) {
+        console.log('BoardDetailPage: Real-time update triggered');
+        fetchBoard();
+      }
+    };
+
+    window.addEventListener('lumins:board-updated', handleBoardUpdate);
+    return () => {
+      window.removeEventListener('lumins:board-updated', handleBoardUpdate);
+    };
+  }, [id, fetchBoard]);
 
   const handleUpdateVisibility = async (newVisibility: 'PRIVATE' | 'WORKSPACE') => {
     if (!id || !board) return;

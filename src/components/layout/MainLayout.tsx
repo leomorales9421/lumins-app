@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
+import { toast } from 'sonner';
 
 interface Workspace {
   id: string;
@@ -33,6 +34,17 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoadingBg, setIsLoadingBg] = useState(false);
 
+  const fetchWorkspaces = useCallback(async () => {
+    try {
+      const response = await apiClient.get<{ data: { workspaces: Workspace[] } }>('/api/workspaces');
+      setWorkspaces(response.data.workspaces || []);
+    } catch (err) {
+      console.error('Failed to fetch workspaces', err);
+    } finally {
+      setIsLoadingWorkspaces(false);
+    }
+  }, []);
+
   useEffect(() => {
     const handleBgChange = (e: any) => {
       const newBg = e.detail.background;
@@ -54,32 +66,47 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         setIsLoadingBg(false);
       }
     };
+    const handlePermissionUpdate = (e: any) => {
+      const { type, resourceId, newRole } = e.detail;
+      console.log('MainLayout: Permission update received', { type, resourceId, newRole });
+      
+      if (type === 'WORKSPACE_REMOVED') {
+        toast.error('Acceso denegado', { 
+          description: 'Has sido eliminado de este espacio de trabajo.' 
+        });
+        if (workspaceId === resourceId) {
+          navigate('/app');
+        }
+      } else {
+        toast.info('Permisos actualizados', { 
+          description: `Tus permisos en ${type === 'WORKSPACE' ? 'el espacio de trabajo' : 'el tablero'} han cambiado.` 
+        });
+        // Refresh workspaces and other data
+        fetchWorkspaces();
+        window.dispatchEvent(new CustomEvent('permission-changed'));
+      }
+    };
+
     const handleToggleSidebar = () => {
       setIsSidebarOpen(prev => !prev);
     };
+
     window.addEventListener('set-board-background', handleBgChange);
     window.addEventListener('toggle-sidebar', handleToggleSidebar);
+    window.addEventListener('lumins:permission-updated', handlePermissionUpdate);
+
     return () => {
       window.removeEventListener('set-board-background', handleBgChange);
       window.removeEventListener('toggle-sidebar', handleToggleSidebar);
+      window.removeEventListener('lumins:permission-updated', handlePermissionUpdate);
     };
-  }, []);
+  }, [workspaceId, navigate, fetchWorkspaces]);
 
   // Close sidebar on route change
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
-  const fetchWorkspaces = useCallback(async () => {
-    try {
-      const response = await apiClient.get<{ data: { workspaces: Workspace[] } }>('/api/workspaces');
-      setWorkspaces(response.data.workspaces || []);
-    } catch (err) {
-      console.error('Failed to fetch workspaces', err);
-    } finally {
-      setIsLoadingWorkspaces(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchWorkspaces();

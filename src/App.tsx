@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PermissionProvider } from './contexts/PermissionContext';
+import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './components/NotificationProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
@@ -81,42 +82,44 @@ function App() {
     <Router>
       <AuthProvider>
         <PermissionProvider>
-          <GlobalInvitationDetector />
-          <NotificationProvider>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/invite" element={<InvitePage />} />
-              
-              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                <Route path="/app" element={<BoardsPage />} />
-                <Route path="/w/:workspaceId/dashboard" element={<BoardsPage />} />
-                <Route path="/w/:workspaceId/members" element={<MembersPage />} />
-                <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
-                <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
-                <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
-                <Route path="/boards/:id" element={<BoardDetailPage />} />
+          <SocketProvider>
+            <GlobalInvitationDetector />
+            <NotificationProvider>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/invite" element={<InvitePage />} />
                 
-                <Route path="/settings" element={<SettingsPage />}>
-                  <Route index element={<Navigate to="profile" replace />} />
-                  <Route path="profile" element={<ProfileSettings />} />
-                  <Route path="security" element={<SecuritySettings />} />
-                  <Route path="notifications" element={<NotificationSettings />} />
-                  <Route path="preferences" element={<PreferenceSettings />} />
+                <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                  <Route path="/app" element={<BoardsPage />} />
+                  <Route path="/w/:workspaceId/dashboard" element={<BoardsPage />} />
+                  <Route path="/w/:workspaceId/members" element={<MembersPage />} />
+                  <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
+                  <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
+                  <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
+                  <Route path="/boards/:id" element={<BoardDetailPage />} />
+                  
+                  <Route path="/settings" element={<SettingsPage />}>
+                    <Route index element={<Navigate to="profile" replace />} />
+                    <Route path="profile" element={<ProfileSettings />} />
+                    <Route path="security" element={<SecuritySettings />} />
+                    <Route path="notifications" element={<NotificationSettings />} />
+                    <Route path="preferences" element={<PreferenceSettings />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
-              <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
-              <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
+                <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
+                <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
+                <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
 
-              <Route path="/" element={<Navigate to="/app" replace />} />
-              <Route path="*" element={<Navigate to="/app" replace />} />
-            </Routes>
-            <GlobalToaster />
-          </NotificationProvider>
+                <Route path="/" element={<Navigate to="/app" replace />} />
+                <Route path="*" element={<Navigate to="/app" replace />} />
+              </Routes>
+              <GlobalToaster />
+            </NotificationProvider>
+          </SocketProvider>
         </PermissionProvider>
       </AuthProvider>
     </Router>

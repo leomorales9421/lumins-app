@@ -59,7 +59,11 @@ const BoardsPage: React.FC = () => {
   useEffect(() => {
     const handleRefresh = () => fetchBoards();
     window.addEventListener('board-created', handleRefresh);
-    return () => window.removeEventListener('board-created', handleRefresh);
+    window.addEventListener('lumins:board-updated', handleRefresh);
+    return () => {
+      window.removeEventListener('board-created', handleRefresh);
+      window.removeEventListener('lumins:board-updated', handleRefresh);
+    };
   }, [fetchBoards]);
 
   useEffect(() => {

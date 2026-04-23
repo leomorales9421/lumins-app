@@ -293,6 +293,26 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
 
+  // Listen for real-time updates
+  useEffect(() => {
+    const handleCardUpdate = (e: any) => {
+      const { cardId: updatedCardId } = e.detail;
+      if (updatedCardId === cardId && isOpen) {
+        console.log('CardDetailModal: Real-time update received');
+        fetchCardDetails(true); // silent refresh
+        fetchChecklists();
+      }
+    };
+
+    window.addEventListener('lumins:card-updated', handleCardUpdate);
+    window.addEventListener('lumins:board-updated', handleCardUpdate); // Some board events affect cards too
+    
+    return () => {
+      window.removeEventListener('lumins:card-updated', handleCardUpdate);
+      window.removeEventListener('lumins:board-updated', handleCardUpdate);
+    };
+  }, [cardId, isOpen, fetchCardDetails, fetchChecklists]);
+
   // Autoscroll to new checklist
   useEffect(() => {
     if (checklists.length > 0) {
