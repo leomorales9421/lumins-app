@@ -139,7 +139,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   const handleWorkspaceCreated = (newWorkspace: any) => {
     fetchWorkspaces();
-    // Redirect logic is already in CreateWorkspaceModal, but we can double check here
+    window.dispatchEvent(new CustomEvent('workspace-changed'));
   };
 
   const handleBoardCreated = () => {

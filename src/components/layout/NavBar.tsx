@@ -37,7 +37,7 @@ const NavBar: React.FC<NavBarProps> = ({
         <Link to="/app" className="flex items-center gap-5 group flex-shrink-0 mr-8 px-2 h-full">
           <div className="relative flex items-center h-full w-24">
             <img 
-              src="/lumins-log.png" 
+              src="/lumins-log.webp" 
               alt="Lumins Logo" 
               className="h-[80px] min-w-[80px] object-contain transition-transform group-hover:scale-110 drop-shadow-2xl z-50 absolute left-1/2 -translate-x-1/2" 
             />

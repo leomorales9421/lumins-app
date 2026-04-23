@@ -23,6 +23,7 @@ import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
 import CardDetailModal from '../components/CardDetailModal';
 import { useNotificationHelpers } from '../components/NotificationProvider';
+import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -166,6 +167,16 @@ const WorkspaceCalendarPage: React.FC = () => {
     calendarRef.current?.getApi().changeView(view);
     updateTitle();
   };
+
+  if (!workspaceId) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-10 min-h-[60vh]">
+        <WorkspaceEmptyState 
+          onCreateClick={() => window.dispatchEvent(new CustomEvent('open-create-workspace'))} 
+        />
+      </div>
+    );
+  }
 
   return (
     <motion.div 

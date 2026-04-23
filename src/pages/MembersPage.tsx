@@ -12,6 +12,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import UserAvatar from '../components/ui/UserAvatar';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
+import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 
 const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -124,8 +125,10 @@ const MembersPage: React.FC = () => {
 
   if (!workspace) {
     return (
-      <div className="flex-1 p-12 text-center">
-        <h2 className="text-xl font-bold text-slate-800">Espacio de trabajo no encontrado</h2>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-10">
+        <WorkspaceEmptyState 
+          onCreateClick={() => window.dispatchEvent(new CustomEvent('open-create-workspace'))} 
+        />
       </div>
     );
   }

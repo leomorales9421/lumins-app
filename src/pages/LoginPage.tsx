@@ -123,7 +123,7 @@ const LoginPage: React.FC = () => {
              className="flex justify-center relative z-10"
            >
               <img 
-                src="/lumins-log.png" 
+                src="/lumins-log.webp" 
                 alt="Lumins Logo" 
                 className="h-64 w-auto object-contain" 
               />
