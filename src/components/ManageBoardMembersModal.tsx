@@ -10,6 +10,7 @@ interface BoardMember {
   role: string;
   inheritedFrom?: 'workspace' | 'owner' | null;
   wsRole?: string | null;
+  isBoardOwner?: boolean;
   user: {
     id: string;
     name: string;
@@ -144,7 +145,21 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
 
   // Determine current user's role in this board
   const myBoardEntry = boardMembers.find(m => m.userId === me?.id);
-  const myRole = myBoardEntry?.wsRole || myBoardEntry?.role || 'viewer';
+  const myWsRole = myBoardEntry?.wsRole;
+  const isWsAdmin = myWsRole === 'OWNER' || myWsRole === 'ADMIN';
+  const isBoardAdmin = myBoardEntry?.role === 'admin';
+  const myRole = myWsRole || myBoardEntry?.role || 'viewer';
+
+  const canManageMembers = isWsAdmin || isBoardAdmin;
+
+  const canEditMember = (member: BoardMember) => {
+    if (!canManageMembers) return false;
+    if (member.userId === me?.id) return false;
+    if (member.inheritedFrom === 'owner' || member.isBoardOwner) return false;
+    // Board Admins (who are NOT WS Admins) cannot edit other board admins
+    if (isBoardAdmin && !isWsAdmin && member.role === 'admin') return false;
+    return true;
+  };
 
   return (
     <AnimatePresence>
@@ -180,7 +195,7 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
                 {myBoardEntry && (
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${roleColors[myRole] || roleColors.viewer}`}>
                     <Crown size={10} />
-                    <span>Tú: {myRole}</span>
+                    <span>Tú: {myRole === 'OWNER' ? 'Propietario' : myRole === 'ADMIN' || myRole === 'admin' ? 'Administrador' : myRole === 'MEMBER' || myRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
                   </div>
                 )}
                 <button onClick={onClose} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/10 rounded transition-colors">
@@ -259,7 +274,7 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
                                   <div className="flex items-center gap-1 mt-0.5">
                                     <Building2 size={9} className="text-zinc-400" />
                                     <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">
-                                      {member.inheritedFrom === 'owner' ? 'Propietario del tablero' : `Vía Espacio · ${member.wsRole}`}
+                                      {member.inheritedFrom === 'owner' ? 'Propietario del tablero' : `Vía Espacio · ${member.wsRole === 'ADMIN' ? 'Administrador' : member.wsRole === 'MEMBER' ? 'Miembro' : member.wsRole === 'GUEST' ? 'Invitado' : member.wsRole}`}
                                     </span>
                                   </div>
                                 )}
@@ -271,27 +286,31 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
                                 // Inherited members: show badge, no edit (their access comes from WS role)
                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${roleColors[displayRole] || roleColors.viewer}`}>
                                   <Lock size={9} />
-                                  {displayRole}
+                                  {displayRole === 'OWNER' ? 'Propietario' : 
+                                   displayRole === 'ADMIN' ? 'Administrador' : 
+                                   displayRole === 'MEMBER' || displayRole === 'editor' ? 'Miembro' : 
+                                   displayRole === 'GUEST' || displayRole === 'viewer' ? 'Invitado' : 
+                                   displayRole}
                                 </span>
                               ) : (
                                 <>
-                                  {!isMe && (
+                                  {canEditMember(member) && (
                                     <select
                                       value={member.role}
                                       onChange={(e) => handleUpdateRole(member.userId, e.target.value)}
                                       className="bg-transparent text-[11px] font-bold text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/10 rounded-[4px] px-2 py-1 outline-none focus:border-[#6C5DD3] transition-all hover:bg-white dark:hover:bg-white/5 uppercase tracking-tighter"
                                     >
-                                      <option value="admin">Admin</option>
-                                      <option value="editor">Editor</option>
-                                      <option value="viewer">Viewer</option>
+                                      <option value="admin">Administrador</option>
+                                      <option value="editor">Miembro</option>
+                                      <option value="viewer">Invitado</option>
                                     </select>
                                   )}
-                                  {isMe && (
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${roleColors[member.role] || roleColors.viewer}`}>
-                                      {member.role}
+                                  {(isMe || !canEditMember(member)) && (
+                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${member.isBoardOwner ? roleColors.OWNER : roleColors[member.role] || roleColors.viewer}`}>
+                                      {member.isBoardOwner ? 'Propietario' : member.role === 'admin' ? 'Administrador' : member.role === 'editor' ? 'Miembro' : 'Invitado'}
                                     </span>
                                   )}
-                                  {!isMe && (
+                                  {canEditMember(member) && (
                                     <button
                                       onClick={() => handleRemoveMember(member.userId, member.user.name)}
                                       className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded transition-all"
@@ -329,8 +348,7 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
                               <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{member.user.name}</div>
                               <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">{member.user.email}</div>
                               <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-tighter px-1.5 py-0.5 rounded border mt-0.5 ${roleColors[member.role] || roleColors.viewer}`}>
-                                <Building2 size={8} />
-                                {member.role} en espacio
+                                {member.role === 'OWNER' ? 'Propietario' : member.role === 'ADMIN' ? 'Administrador' : member.role === 'MEMBER' ? 'Miembro' : 'Invitado'} en espacio
                               </span>
                             </div>
                           </div>

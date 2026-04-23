@@ -19,6 +19,9 @@ interface ActivitySectionProps {
   onLoadMore?: () => void;
   isFetchingMore?: boolean;
   cardId?: string;
+  isReadOnly?: boolean;
+  canModerate?: boolean;
+  currentUserId?: string;
 }
 
 /**
@@ -99,13 +102,15 @@ const ActivityFeedItem: React.FC<{
   onUpdate?: (id: string, content: string) => void;
   onDelete?: (id: string) => void;
   cardId?: string;
-}> = ({ item, onUpdate, onDelete, cardId }) => {
+  canModerate?: boolean;
+}> = ({ item, onUpdate, onDelete, cardId, canModerate }) => {
   const { user: currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   
   const isSystem = item.type === 'SYSTEM_EVENT';
   const isComment = item.type === 'COMMENT';
-  const canManage = isComment && currentUser?.id === item.user.id;
+  const canEdit = isComment && currentUser?.id === item.user.id;
+  const canDelete = isComment && (canModerate || currentUser?.id === item.user.id);
   
   // Safe date parsing and formatting
   const dateObj = typeof item.createdAt === 'string' ? new Date(item.createdAt) : item.createdAt;
@@ -171,20 +176,24 @@ const ActivityFeedItem: React.FC<{
                 <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
               </div>
 
-              {canManage && (
+              {(canEdit || canDelete) && (
                 <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <button 
-                    onClick={() => setIsEditing(true)}
-                    className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:underline cursor-pointer transition-colors"
-                  >
-                    Editar
-                  </button>
-                   <button 
-                    onClick={handleDelete}
-                    className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:underline cursor-pointer transition-colors"
-                  >
-                    Eliminar
-                  </button>
+                   {canEdit && (
+                     <button 
+                      onClick={() => setIsEditing(true)}
+                      className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:underline cursor-pointer transition-colors"
+                    >
+                      Editar
+                    </button>
+                   )}
+                   {canDelete && (
+                     <button 
+                      onClick={handleDelete}
+                      className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:underline cursor-pointer transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                   )}
                 </div>
               )}
             </>
@@ -207,7 +216,9 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
   hasMore,
   onLoadMore,
   isFetchingMore,
-  cardId
+  cardId,
+  isReadOnly,
+  canModerate
 }) => {
   const [showAllActivity, setShowAllActivity] = useState(true);
 
@@ -230,7 +241,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
         </button>
       </div>
 
-      <CommentInput onAddComment={onAddComment} isLoading={isLoading} cardId={cardId} />
+      {!isReadOnly && <CommentInput onAddComment={onAddComment} isLoading={isLoading} cardId={cardId} />}
       
       <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar space-y-1">
         <AnimatePresence mode="popLayout">
@@ -247,6 +258,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
                 onUpdate={onUpdateComment}
                 onDelete={onDeleteComment}
                 cardId={cardId}
+                canModerate={canModerate}
               />
             </motion.div>
           ))}

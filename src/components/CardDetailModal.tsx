@@ -38,6 +38,8 @@ import Popover from './ui/Popover';
 import SmartPopover from './SmartPopover';
 import UserAvatar from './ui/UserAvatar';
 import CardModalSkeleton from './ui/CardModalSkeleton';
+import { useBoardPermissions } from '../hooks/useBoardPermissions';
+import { useAuth } from '../contexts/AuthContext';
 
 
 interface Member {
@@ -96,6 +98,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   onUpdate,
   initialData 
 }) => {
+  const { user } = useAuth();
+  const { canModerate, isReadOnly } = useBoardPermissions(boardId);
   const [card, setCard] = useState<CardData | null>(null);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [activityPage, setActivityPage] = useState(1);
@@ -727,26 +731,28 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <SmartPopover
-              isOpen={activePopover === 'attachments'}
-              onClose={() => setActivePopover(null)}
-              placement="bottom-end"
-              trigger={
-                <button 
-                  onClick={() => setActivePopover(activePopover === 'attachments' ? null : 'attachments')}
-                  className={`p-2 rounded transition-colors ${activePopover === 'attachments' ? 'bg-zinc-100 dark:bg-white/10 text-[#6C5DD3]' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-                >
-                  <Paperclip size={20} />
-                </button>
-              }
-              content={
-                <AttachmentPopover 
-                  onClose={() => setActivePopover(null)}
-                  onUploadFile={handleFileUpload}
-                  onAttachLink={handleAttachLink}
-                />
-              }
-            />
+            {!isReadOnly && (
+              <SmartPopover
+                isOpen={activePopover === 'attachments'}
+                onClose={() => setActivePopover(null)}
+                placement="bottom-end"
+                trigger={
+                  <button 
+                    onClick={() => setActivePopover(activePopover === 'attachments' ? null : 'attachments')}
+                    className={`p-2 rounded transition-colors ${activePopover === 'attachments' ? 'bg-zinc-100 dark:bg-white/10 text-[#6C5DD3]' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+                  >
+                    <Paperclip size={20} />
+                  </button>
+                }
+                content={
+                  <AttachmentPopover 
+                    onClose={() => setActivePopover(null)}
+                    onUploadFile={handleFileUpload}
+                    onAttachLink={handleAttachLink}
+                  />
+                }
+              />
+            )}
             <SmartPopover
               isOpen={activePopover === 'options'}
               onClose={() => setActivePopover(null)}
@@ -766,6 +772,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   onToggleJoin={handleToggleMember}
                   onArchive={handleArchiveCard}
                   onClose={() => setActivePopover(null)}
+                  canModerate={canModerate}
                 />
               }
             />
@@ -968,6 +975,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             <div className="space-y-10">
               
               {/* Quick Actions Bar */}
+              {!isReadOnly && (
               <div className="flex flex-wrap gap-3 relative">
                 <SmartPopover
                   isOpen={activePopover === 'add' || activePopover === 'attachments_main' || activePopover === 'labels_main' || activePopover === 'members_main' || activePopover === 'dates_main' || activePopover === 'properties_main'}
@@ -1134,6 +1142,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   <CheckSquare size={16} /> Checklist
                 </button>
               </div>
+              )}
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2.5 text-zinc-900 dark:text-zinc-100">
@@ -1144,22 +1153,24 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 {!isEditingDescription ? (
                   card?.description ? (
                     <div 
-                      onClick={() => setIsEditingDescription(true)}
-                      className="w-full cursor-pointer group relative rounded p-2 -ml-2 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                      onClick={() => !isReadOnly && setIsEditingDescription(true)}
+                      className={`w-full ${!isReadOnly ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-white/5' : ''} group relative rounded p-2 -ml-2 transition-colors`}
                     >
-                      <Edit2 size={16} className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-zinc-400 transition-opacity" />
+                      {!isReadOnly && <Edit2 size={16} className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-zinc-400 transition-opacity" />}
                       <div 
                         className="prose prose-sm prose-zinc dark:prose-invert max-w-none" 
                         dangerouslySetInnerHTML={{ __html: card.description }} 
                       />
                     </div>
                   ) : (
-                    <div 
-                      onClick={() => setIsEditingDescription(true)}
-                      className="w-full bg-zinc-50 dark:bg-[#13151A] hover:bg-zinc-100 dark:hover:bg-[#252831] rounded p-4 cursor-pointer transition-colors border border-dashed border-zinc-200 dark:border-white/10"
-                    >
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Añadir una descripción más detallada...</p>
-                    </div>
+                    !isReadOnly ? (
+                      <div 
+                        onClick={() => setIsEditingDescription(true)}
+                        className="w-full bg-zinc-50 dark:bg-[#13151A] hover:bg-zinc-100 dark:hover:bg-[#252831] rounded p-4 cursor-pointer transition-colors border border-dashed border-zinc-200 dark:border-white/10"
+                      >
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Añadir una descripción más detallada...</p>
+                      </div>
+                    ) : null
                   )
                 ) : (
                   <div className="space-y-3">
@@ -1210,6 +1221,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   onDeleteItem={handleDeleteChecklistItem}
                   onDeleteChecklist={handleDeleteChecklist}
                   onUpdateItemTitle={(itemId, title) => console.log('Update title', itemId, title)}
+                  isReadOnly={isReadOnly}
                 />
               ))}
 
@@ -1218,6 +1230,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               <AttachmentsSection 
                 attachments={card?.attachments || []} 
                 onDelete={handleFileDelete}
+                isReadOnly={isReadOnly}
               />
             </div>
 
@@ -1234,6 +1247,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 onLoadMore={handleLoadMoreActivities}
                 isFetchingMore={isFetchingMoreActivity}
                 cardId={cardId || ''}
+                isReadOnly={isReadOnly}
+                canModerate={canModerate}
+                currentUserId={user?.id}
               />
             </div>
           </div>

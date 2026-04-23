@@ -26,6 +26,9 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
+  const isWsAdmin = member?.role === 'OWNER' || member?.role === 'ADMIN';
+  const isWsMember = member?.role === 'MEMBER';
+
   useEffect(() => {
     if (isOpen && member) {
       fetchData();
@@ -48,9 +51,14 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
       
       detailsResponses.forEach((res, index) => {
         const boardDetail = res.data.board;
-        const isMember = boardDetail.members.some((m: any) => m.userId === member?.userId);
+        const isExplicitMember = boardDetail.members.some((m: any) => m.userId === member?.userId);
         const isOwner = boardDetail.ownerId === member?.userId;
-        if (isMember || isOwner) {
+        
+        // Effective access: Direct member, Board Owner, or Workspace Inherited (Admin or Member for WORKSPACE boards)
+        const isInheritedAdmin = isWsAdmin;
+        const isInheritedMember = isWsMember && (boardDetail.visibility === 'WORKSPACE' || boardDetail.visibility === 'team');
+        
+        if (isExplicitMember || isOwner || isInheritedAdmin || isInheritedMember) {
           memberBoards.push(boards[index].id);
         }
       });
@@ -170,7 +178,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                       `}
                     >
                       <div className="flex flex-col items-start">
-                        <span className="text-sm font-bold capitalize">{role.toLowerCase()}</span>
+                        <span className="text-sm font-bold capitalize">{role === 'ADMIN' ? 'Administrador' : role === 'MEMBER' ? 'Miembro' : 'Invitado'}</span>
                         <span className="text-[11px] opacity-70">
                           {role === 'ADMIN' ? 'Control total sobre el espacio' : 
                            role === 'MEMBER' ? 'Puede crear tableros y editar' : 
@@ -183,7 +191,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                   {member?.role === 'OWNER' && (
                     <div className="flex items-center justify-between p-4 rounded border bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400">
                       <div className="flex flex-col items-start">
-                        <span className="text-sm font-bold capitalize">Owner</span>
+                        <span className="text-sm font-bold">Propietario</span>
                         <span className="text-[11px] opacity-70">Propietario principal del espacio</span>
                       </div>
                       <Shield size={18} />
@@ -203,7 +211,10 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                 ) : (
                   <div className="space-y-1">
                     {workspaceBoards.map((board) => {
-                      const hasAccess = activeBoards.includes(board.id);
+                      const isInherited = isWsAdmin || (isWsMember && (board.visibility === 'WORKSPACE' || board.visibility === 'team'));
+                      const hasAccess = activeBoards.includes(board.id) || isInherited;
+                      const isDisabled = member?.role === 'OWNER' || isInherited;
+                      
                       return (
                         <div 
                           key={board.id}
@@ -213,16 +224,21 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                             <div className="w-10 h-10 rounded bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-400 dark:text-zinc-500 group-hover:bg-[#6C5DD3]/10 group-hover:text-[#6C5DD3] transition-all">
                               <Layout size={18} />
                             </div>
-                            <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">{board.name}</span>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">{board.name}</span>
+                              {isInherited && (
+                                <span className="text-[10px] text-[#6C5DD3] font-medium">Acceso por espacio de trabajo</span>
+                              )}
+                            </div>
                           </div>
                           
                           <button
-                            disabled={member?.role === 'OWNER'}
-                            onClick={() => toggleBoardAccess(board.id, hasAccess)}
+                            disabled={isDisabled}
+                            onClick={() => toggleBoardAccess(board.id, activeBoards.includes(board.id))}
                             className={`
                               relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
                               ${hasAccess ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}
-                              ${member?.role === 'OWNER' && 'opacity-50 cursor-not-allowed'}
+                              ${isDisabled && 'opacity-50 cursor-not-allowed'}
                             `}
                           >
                             <span

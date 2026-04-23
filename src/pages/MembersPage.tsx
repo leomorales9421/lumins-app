@@ -29,6 +29,12 @@ const MembersPage: React.FC = () => {
     try {
       const response = await apiClient.get<{ data: { workspace: Workspace } }>(`/api/workspaces/${workspaceId}`);
       setWorkspace(response.data.workspace);
+      
+      // Update selectedMember if it's currently open to reflect any role/access changes
+      setSelectedMember(prev => {
+        if (!prev) return null;
+        return response.data.workspace.members.find(m => m.userId === prev.userId) || null;
+      });
     } catch (err) {
       console.error('Failed to fetch workspace members', err);
     } finally {
@@ -206,9 +212,9 @@ const MembersPage: React.FC = () => {
                         disabled={isUpdating === member.userId}
                         className="bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 outline-none focus:border-[#6C5DD3] transition-all"
                       >
-                        <option value="ADMIN">Admin</option>
-                        <option value="MEMBER">Member</option>
-                        <option value="GUEST">Guest</option>
+                        <option value="ADMIN">Administrador</option>
+                        <option value="MEMBER">Miembro</option>
+                        <option value="GUEST">Invitado</option>
                       </select>
                     ) : (
                       <span className={`
@@ -218,7 +224,7 @@ const MembersPage: React.FC = () => {
                           'bg-slate-50 text-slate-600 border border-slate-100'}
                       `}>
                         <Shield size={10} />
-                        {member.role}
+                        {member.role === 'OWNER' ? 'Propietario' : member.role === 'ADMIN' ? 'Administrador' : member.role === 'MEMBER' ? 'Miembro' : 'Invitado'}
                       </span>
                     )}
                   </td>
@@ -279,7 +285,7 @@ const MembersPage: React.FC = () => {
                         member.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
                         'bg-slate-100 text-slate-700'}
                     `}>
-                      {member.role}
+                      {member.role === 'OWNER' ? 'Propietario' : member.role === 'ADMIN' ? 'Administrador' : member.role === 'MEMBER' ? 'Miembro' : 'Invitado'}
                     </span>
                   </div>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate flex items-center gap-1">

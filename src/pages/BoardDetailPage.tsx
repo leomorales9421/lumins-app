@@ -46,6 +46,7 @@ import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { usePermission } from '../contexts/PermissionContext';
+import { useBoardPermissions } from '../hooks/useBoardPermissions';
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,8 +73,9 @@ const BoardDetailPage: React.FC = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isVisibilityDropdownOpen, setIsVisibilityDropdownOpen] = useState(false);
 
-  const canEdit = isGodMode || userRole === 'admin' || userRole === 'editor';
-  const isAdmin = isGodMode || userRole === 'admin';
+  const { canManageBoard, canEditContent, isReadOnly } = useBoardPermissions(board?.id, userRole);
+  const canEdit = canEditContent;
+  const isAdmin = canManageBoard;
 
   const { logSuccess } = useStructuredLogger();
 
@@ -594,8 +596,7 @@ const BoardDetailPage: React.FC = () => {
 
           {/* My role badge */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/70">
-            {userRole === 'admin' ? '👑' : userRole === 'editor' ? '✏️' : '👁️'}
-            <span>{userRole === 'admin' ? 'Admin' : userRole === 'editor' ? 'Editor' : 'Viewer'}</span>
+            <span>{userRole === 'admin' ? 'Administrador' : userRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
           </div>
 
           <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
@@ -696,6 +697,7 @@ const BoardDetailPage: React.FC = () => {
                   onAddCard={handleAddCard}
                   onUpdateList={handleUpdateList}
                   onDeleteList={handleDeleteList}
+                  canEdit={canEditContent}
                 />
               ))}
             </SortableContext>

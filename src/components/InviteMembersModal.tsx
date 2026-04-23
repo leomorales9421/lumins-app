@@ -201,7 +201,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                             onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
                             className="w-full bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none"
                           >
-                            <option value="ADMIN">Admin</option>
+                            <option value="ADMIN">Administrador</option>
                             <option value="MEMBER">Miembro</option>
                             <option value="GUEST">Invitado</option>
                           </select>

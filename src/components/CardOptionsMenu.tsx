@@ -15,6 +15,7 @@ interface CardOptionsMenuProps {
   onToggleJoin: (userId: string) => Promise<void>;
   onArchive: () => Promise<void>;
   onClose: () => void;
+  canModerate?: boolean;
 }
 
 const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
@@ -22,7 +23,8 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   assignedMemberIds,
   onToggleJoin,
   onArchive,
-  onClose
+  onClose,
+  canModerate
 }) => {
   const { user } = useAuth();
   const [copied, setCopied] = React.useState(false);
@@ -95,16 +97,18 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       </button>
 
       {/* Divider */}
-      <hr className="border-zinc-100 dark:border-white/5 my-1 mx-2" />
+      {canModerate && <hr className="border-zinc-100 dark:border-white/5 my-1 mx-2" />}
 
       {/* Archive */}
-      <button 
-        onClick={handleArchiveClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer group"
-      >
-        <Archive size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-rose-500 dark:group-hover:text-rose-400" />
-        <span>Archivar tarjeta</span>
-      </button>
+      {canModerate && (
+        <button 
+          onClick={handleArchiveClick}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer group"
+        >
+          <Archive size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-rose-500 dark:group-hover:text-rose-400" />
+          <span>Archivar tarjeta</span>
+        </button>
+      )}
     </div>
   );
 };

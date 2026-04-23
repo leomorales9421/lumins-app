@@ -14,9 +14,10 @@ interface Attachment {
 interface AttachmentsSectionProps {
   attachments: Attachment[];
   onDelete: (id: string) => void;
+  isReadOnly?: boolean;
 }
 
-const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, onDelete }) => {
+const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, onDelete, isReadOnly }) => {
   if (attachments.length === 0) return null;
 
   const renderThumbnail = (attachment: Attachment) => {
@@ -97,13 +98,15 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
                   Ver
                 </a>
                 
-                <button 
-                  onClick={() => onDelete(attachment.id)}
-                  className="flex items-center gap-1 text-[11px] font-bold text-rose-500 dark:text-rose-400 hover:underline cursor-pointer group/del"
-                >
-                  <Trash2 size={10} className="group-hover/del:scale-110 transition-transform" />
-                  Eliminar
-                </button>
+                {!isReadOnly && (
+                  <button 
+                    onClick={() => onDelete(attachment.id)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-rose-500 dark:text-rose-400 hover:underline cursor-pointer group/del"
+                  >
+                    <Trash2 size={10} className="group-hover/del:scale-110 transition-transform" />
+                    Eliminar
+                  </button>
+                )}
               </div>
             </div>
           </div>
