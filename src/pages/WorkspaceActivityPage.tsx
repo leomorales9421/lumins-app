@@ -65,7 +65,7 @@ const WorkspaceActivityPage: React.FC = () => {
 
   const fetchActivity = useCallback(async () => {
     if (!workspaceId) return;
-    setIsLoading(true);
+    if (activity.length === 0) setIsLoading(true);
     try {
       const params = new URLSearchParams();
       if (filterBoard) params.append('boardId', filterBoard);
@@ -279,7 +279,12 @@ const WorkspaceActivityPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans relative">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans relative"
+    >
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
@@ -506,7 +511,7 @@ const WorkspaceActivityPage: React.FC = () => {
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 

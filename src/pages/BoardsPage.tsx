@@ -37,7 +37,8 @@ const BoardsPage: React.FC = () => {
 
   const fetchBoards = useCallback(async () => {
     setIsLoading(true);
-    setBoards([]); // Clear old boards to prevent "vistas viejas"
+    // Removed setBoards([]) to prevent flickering and excessive skeletons
+    // This allows showing stale data while loading new data.
     try {
       const url = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
       const response = await apiClient.get<{ data: { boards: Board[] } }>(url);

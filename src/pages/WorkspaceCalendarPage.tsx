@@ -62,7 +62,7 @@ const WorkspaceCalendarPage: React.FC = () => {
 
   const fetchEvents = useCallback(async () => {
     if (!workspaceId) return;
-    setIsLoading(true);
+    if (events.length === 0) setIsLoading(true);
     try {
       const response = await apiClient.get<{ data: { events: CalendarEvent[] } }>(
         `/api/workspaces/${workspaceId}/calendar-events`
@@ -168,7 +168,12 @@ const WorkspaceCalendarPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans transition-colors duration-300">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="min-h-screen bg-[#F4F6F9] dark:bg-[#13151A] p-4 sm:p-8 font-sans transition-colors duration-300"
+    >
       <div className="max-w-[1600px] mx-auto">
         
         {/* HEADER PREMIUM */}
@@ -541,7 +546,7 @@ const WorkspaceCalendarPage: React.FC = () => {
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 

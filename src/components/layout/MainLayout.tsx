@@ -137,27 +137,8 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
       )}
 
-      {/* Background Loader Overlay - Premium Splash */}
-      {isBoardView && isLoadingBg && (
-        <div className="fixed inset-0 z-[150] bg-zinc-950/80 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-700">
-          <div className="relative mb-8">
-            <img 
-              src="/lumins-log.png" 
-              alt="Lumins" 
-              className="h-24 w-auto animate-pulse brightness-125" 
-            />
-            <div className="absolute inset-0 bg-[#6C5DD3]/20 blur-3xl rounded animate-pulse" />
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-white font-black text-xs tracking-[0.4em] uppercase opacity-80">
-              Preparando Espacio
-            </p>
-            <div className="w-48 h-1 bg-white/5 rounded overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-r from-transparent via-[#6C5DD3] to-transparent animate-shimmer" />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Background will now load naturally without a full-screen blocking overlay */}
+
 
       {/* UI Content Layer */}
       <div className="flex flex-col h-screen overflow-hidden w-full relative z-10">

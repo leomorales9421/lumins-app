@@ -380,10 +380,8 @@ const BoardDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#09090B] font-sans overflow-hidden"
+      <div 
+        className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#09090B] font-sans overflow-hidden transition-colors duration-500"
       >
         {/* Header Skeleton - Matches 72px height */}
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#13151A] z-30">
@@ -445,7 +443,7 @@ const BoardDetailPage: React.FC = () => {
              </div>
            ))}
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -455,7 +453,7 @@ const BoardDetailPage: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className="flex flex-col h-full font-sans"
     >
       

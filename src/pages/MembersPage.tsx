@@ -25,7 +25,7 @@ const MembersPage: React.FC = () => {
 
   const fetchWorkspace = useCallback(async () => {
     if (!workspaceId) return;
-    setIsLoading(true);
+    if (!workspace) setIsLoading(true);
     try {
       const response = await apiClient.get<{ data: { workspace: Workspace } }>(`/api/workspaces/${workspaceId}`);
       setWorkspace(response.data.workspace);
@@ -131,7 +131,12 @@ const MembersPage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full transition-colors duration-300">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="flex-1 p-4 sm:p-6 lg:p-10 font-sans max-w-[1600px] mx-auto w-full transition-colors duration-300"
+    >
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-10">
         <div className="flex flex-col gap-1">
@@ -324,7 +329,7 @@ const MembersPage: React.FC = () => {
         workspaceId={workspaceId!}
         onUpdate={fetchWorkspace}
       />
-    </div>
+    </motion.div>
   );
 };
 
