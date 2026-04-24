@@ -59,8 +59,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
 
       setSocket(newSocket);
+      
+      // Listen for token refresh to update socket authentication
+      const handleTokenRefresh = (e: any) => {
+        const { accessToken } = e.detail;
+        if (newSocket && accessToken) {
+          console.log('Syncing socket with new token');
+          newSocket.auth = { token: accessToken };
+          // If disconnected due to auth error, this will help it reconnect
+          if (!newSocket.connected) {
+            newSocket.connect();
+          }
+        }
+      };
+      
+      window.addEventListener('lumins:token-refreshed', handleTokenRefresh);
 
       return () => {
+        window.removeEventListener('lumins:token-refreshed', handleTokenRefresh);
         newSocket.disconnect();
         setSocket(null);
       };

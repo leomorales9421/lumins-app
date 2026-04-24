@@ -43,10 +43,27 @@ class ApiClient {
 
     // Request interceptor to add auth token and contextual headers
     this.client.interceptors.request.use(
-      (config) => {
-        const token = this.getAccessToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+      async (config) => {
+        let token = this.getAccessToken();
+        
+        // Skip token refresh for authentication endpoints and if already in a refresh process
+        const isAuthEndpoint = config.url?.includes('/api/auth/');
+        
+        if (token && !isAuthEndpoint) {
+          // Pre-emptive refresh: check if token is expired or about to expire
+          if (this.isTokenExpired(token)) {
+            try {
+              // If already refreshing, this will wait for the same promise
+              token = await this.refreshAccessToken();
+            } catch (error) {
+              // If refresh fails, let it proceed to trigger 401 response handling
+              console.warn("Pre-emptive token refresh failed, proceeding to response handler.");
+            }
+          }
+          
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
         }
 
         // Add God Mode header if active
@@ -160,6 +177,29 @@ class ApiClient {
     return !!this.getAccessToken();
   }
 
+  // Helper to check if JWT token is expired
+  private isTokenExpired(token: string): boolean {
+    try {
+      // Decode JWT payload (middle part)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+
+      const { exp } = JSON.parse(jsonPayload);
+      const now = Math.floor(Date.now() / 1000);
+      
+      // Consider expired if it will expire in the next 10 seconds
+      return exp < (now + 10);
+    } catch (e) {
+      return true; // If invalid, treat as expired
+    }
+  }
+
   // Refresh token logic
   private async refreshAccessToken(): Promise<string> {
     // If already refreshing, return the existing promise
@@ -169,19 +209,31 @@ class ApiClient {
 
     this.refreshPromise = new Promise(async (resolve, reject) => {
       try {
+        isRefreshing = true;
         const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, {
           withCredentials: true
         });
 
         const { accessToken } = response.data.data;
         this.setTokens(accessToken);
+        
+        // Notify other components (like Socket Context)
+        window.dispatchEvent(new CustomEvent('lumins:token-refreshed', { 
+          detail: { accessToken } 
+        }));
+        
+        processQueue(null, accessToken);
         resolve(accessToken);
       } catch (error: any) {
         // Only clear tokens if the server explicitly returns an authentication error
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
           this.clearTokens();
         }
+        processQueue(error, null);
         reject(error);
+      } finally {
+        isRefreshing = false;
+        this.refreshPromise = null;
       }
     });
 
