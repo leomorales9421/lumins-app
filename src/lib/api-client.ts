@@ -46,23 +46,30 @@ class ApiClient {
       async (config) => {
         let token = this.getAccessToken();
         
-        // Skip token refresh for authentication endpoints and if already in a refresh process
-        const isAuthEndpoint = config.url?.includes('/api/auth/');
+        // Precise check for endpoints that should NOT trigger a token refresh or have a token added
+        const isLoginOrRegister = config.url?.includes('/api/auth/login') || config.url?.includes('/api/auth/register');
+        const isRefreshEndpoint = config.url?.includes('/api/auth/refresh');
         
-        if (token && !isAuthEndpoint) {
+        if (token) {
+          // Add token to all requests except refresh (which uses cookies)
+          if (!isRefreshEndpoint) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+
           // Pre-emptive refresh: check if token is expired or about to expire
-          if (this.isTokenExpired(token)) {
+          // We don't pre-emptively refresh for login/register/refresh endpoints
+          if (!isLoginOrRegister && !isRefreshEndpoint && this.isTokenExpired(token)) {
             try {
               // If already refreshing, this will wait for the same promise
               token = await this.refreshAccessToken();
+              // Update token in header if it was refreshed
+              if (token && !isRefreshEndpoint) {
+                config.headers.Authorization = `Bearer ${token}`;
+              }
             } catch (error) {
               // If refresh fails, let it proceed to trigger 401 response handling
               console.warn("Pre-emptive token refresh failed, proceeding to response handler.");
             }
-          }
-          
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
           }
         }
 
@@ -102,11 +109,14 @@ class ApiClient {
           return this.client(originalRequest);
         }
 
-        // Skip token refresh for authentication endpoints
-        const isAuthEndpoint = originalRequest?.url?.includes('/api/auth/');
+        // Skip token refresh only for login, register and the refresh endpoint itself
+        const isExemptFromRetry = 
+          originalRequest?.url?.includes('/api/auth/login') || 
+          originalRequest?.url?.includes('/api/auth/register') || 
+          originalRequest?.url?.includes('/api/auth/refresh');
         
-        // If error is 401 and we haven't retried yet, and it's not an auth endpoint
-        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+        // If error is 401 and we haven't retried yet, and it's not an exempt endpoint
+        if (error.response?.status === 401 && !originalRequest._retry && !isExemptFromRetry) {
           if (isRefreshing) {
             // If already refreshing, add to queue
             return new Promise((resolve, reject) => {
@@ -193,8 +203,8 @@ class ApiClient {
       const { exp } = JSON.parse(jsonPayload);
       const now = Math.floor(Date.now() / 1000);
       
-      // Consider expired if it will expire in the next 10 seconds
-      return exp < (now + 10);
+      // Consider expired if it will expire in the next 60 seconds
+      return exp < (now + 60);
     } catch (e) {
       return true; // If invalid, treat as expired
     }
