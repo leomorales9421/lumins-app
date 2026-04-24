@@ -25,7 +25,7 @@ import CardDetailModal from '../components/CardDetailModal';
 import { useNotificationHelpers } from '../components/NotificationProvider';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 interface CalendarEvent {
   id: string;

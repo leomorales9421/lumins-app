@@ -12,7 +12,7 @@ interface UserAvatarProps {
   className?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const sizeClasses = {
   xs: 'w-6 h-6 text-[10px]',

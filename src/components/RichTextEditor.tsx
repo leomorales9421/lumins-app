@@ -280,27 +280,33 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     }
   };
 
+  const extensions = React.useMemo(() => [
+    StarterKit.configure({
+      heading: {
+        levels: [1, 2, 3],
+      },
+    }),
+    Underline.configure({}),
+    Link.configure({
+      openOnClick: false,
+      HTMLAttributes: {
+        class: 'text-[#6C5DD3] underline hover:text-[#5244b5] transition-colors cursor-pointer',
+      },
+    }),
+    Image.configure({
+      inline: true,
+      allowBase64: false,
+      HTMLAttributes: {
+        class: 'rounded max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-indigo-500/20 shadow-md block mx-auto',
+      },
+    }),
+    Placeholder.configure({
+      placeholder,
+    }),
+  ], [placeholder]);
+
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-[#6C5DD3] underline hover:text-[#5244b5] transition-colors cursor-pointer',
-        },
-      }),
-      Image.configure({
-        inline: true,
-        allowBase64: false,
-        HTMLAttributes: {
-          class: 'rounded max-w-full h-auto my-4 border-2 border-[#E9D5FF]/50 dark:border-indigo-500/20 shadow-md block mx-auto',
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-    ],
+    extensions,
     content: initialContent,
     autofocus: autoFocus,
     onUpdate: () => {

@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import { Skeleton } from '../ui/Skeleton';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const LATAM_COUNTRIES = [
   { name: 'Argentina', code: 'AR', prefix: '+54' },
