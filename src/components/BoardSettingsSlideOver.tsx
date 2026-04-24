@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Image as ImageIcon } from 'lucide-react';
+import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
 import { Skeleton } from './ui/Skeleton';

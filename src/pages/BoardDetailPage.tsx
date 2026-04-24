@@ -528,13 +528,22 @@ const BoardDetailPage: React.FC = () => {
 
                   {/* Visibility Selector */}
                   <div className="relative">
-                    <button 
-                      onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
-                      className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
-                      title={board.visibility === 'PRIVATE' ? 'Privado' : 'Espacio de trabajo'}
-                    >
-                      {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
-                    </button>
+                    {board.ownerId === user?.id ? (
+                      <button 
+                        onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
+                        className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
+                        title={board.visibility === 'PRIVATE' ? 'Click para cambiar visibilidad (Privado)' : 'Click para cambiar visibilidad (Espacio de trabajo)'}
+                      >
+                        {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
+                      </button>
+                    ) : (
+                      <div 
+                        className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 text-white/40 flex items-center gap-2 cursor-default"
+                        title={board.visibility === 'PRIVATE' ? 'Este tablero es Privado' : 'Este tablero es visible para el Espacio de Trabajo'}
+                      >
+                        {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
+                      </div>
+                    )}
 
                     <AnimatePresence>
                       {isVisibilityDropdownOpen && (
