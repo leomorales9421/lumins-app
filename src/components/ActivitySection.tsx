@@ -8,6 +8,7 @@ import UserAvatar from './ui/UserAvatar';
 import { useAuth } from '../contexts/AuthContext';
 import RichTextEditor from './RichTextEditor';
 import type { RichTextEditorRef } from './RichTextEditor';
+import { fixEncoding } from '../lib/encoding';
 
 interface ActivitySectionProps {
   activities: ActivityItem[];
@@ -156,7 +157,7 @@ const ActivityFeedItem: React.FC<{
           </div>
                     {isSystem ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-300">
-              {item.action || 'ha realizado una acción'}
+              {fixEncoding(item.action) || 'ha realizado una acción'}
             </p>
           ) : isEditing ? (
             <div className="w-full mt-1">
@@ -173,7 +174,7 @@ const ActivityFeedItem: React.FC<{
           ) : (
              <>
               <div className="text-sm text-zinc-800 dark:text-zinc-100 leading-relaxed break-words prose-mirror-container dark:prose-invert">
-                <div dangerouslySetInnerHTML={{ __html: item.content || '' }} />
+                <div dangerouslySetInnerHTML={{ __html: fixEncoding(item.content) }} />
               </div>
 
               {(canEdit || canDelete) && (

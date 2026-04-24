@@ -301,9 +301,9 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                       </div>
                     </button>
                   </div>
-                  {board.ownerId !== user?.id && workspaceRole !== 'admin' && (
+                  {board.ownerId !== user?.id && workspaceRole !== 'ADMIN' && workspaceRole !== 'OWNER' && (
                     <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium px-1">
-                      * Solo el propietario o administradores pueden cambiar la visibilidad
+                      * Solo el propietario o administradores del espacio pueden cambiar la visibilidad
                     </p>
                   )}
                 </div>

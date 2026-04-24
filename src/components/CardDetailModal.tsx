@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import RichTextEditor, { type RichTextEditorRef } from './RichTextEditor';
+import { fixEncoding } from '../lib/encoding';
 import AddPopoverMenu from './AddPopoverMenu';
 import LabelsPopover from './LabelsPopover';
 import MembersPopover from './MembersPopover';
@@ -1179,7 +1180,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       {!isReadOnly && <Edit2 size={16} className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-zinc-400 transition-opacity" />}
                       <div 
                         className="prose prose-sm prose-zinc dark:prose-invert max-w-none" 
-                        dangerouslySetInnerHTML={{ __html: card.description }} 
+                        dangerouslySetInnerHTML={{ __html: fixEncoding(card.description) }} 
                       />
                     </div>
                   ) : (

@@ -27,6 +27,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
+import { fixEncoding } from '../lib/encoding';
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -307,7 +308,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
 
   const editor = useEditor({
     extensions,
-    content: initialContent,
+    content: fixEncoding(initialContent),
     autofocus: autoFocus,
     onUpdate: () => {
       setHasUnsavedChanges(true); 
@@ -359,7 +360,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
 
   useEffect(() => {
     if (editor && initialContent !== editor.getHTML() && !isEditing) {
-      editor.commands.setContent(initialContent);
+      editor.commands.setContent(fixEncoding(initialContent));
       setHasUnsavedChanges(false);
     }
   }, [initialContent, editor, isEditing]);
@@ -375,7 +376,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
 
   const handleCancel = () => {
     if (editor) {
-      editor.commands.setContent(initialContent);
+      editor.commands.setContent(fixEncoding(initialContent));
       setHasUnsavedChanges(false);
       setIsEditing(false);
       if (onCancel) onCancel();
@@ -404,7 +405,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
         {initialContent ? (
           <div 
             className="prose-mirror-container dark:prose-invert max-w-none text-zinc-900 dark:text-zinc-100"
-            dangerouslySetInnerHTML={{ __html: initialContent }} 
+            dangerouslySetInnerHTML={{ __html: fixEncoding(initialContent) }} 
           />
         ) : (
           <p className="text-zinc-500 dark:text-zinc-400 italic">{placeholder}</p>
