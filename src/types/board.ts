@@ -58,6 +58,10 @@ export interface Board {
   members?: BoardMember[];
   lists?: List[];
   background?: string;
+  workspace?: {
+    id: string;
+    name: string;
+  };
   _count?: {
     lists?: number;
     cards?: number;

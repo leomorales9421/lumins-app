@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { toast } from 'sonner';
+import { Board } from '../types/board';
 
-
-interface Board {
-  id: string;
-  name: string;
-}
 
 interface List {
   id: string;
@@ -59,25 +55,18 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
 
   // Fetch lists when board changes
   useEffect(() => {
+    if (!selectedBoardId) return;
+
     const fetchLists = async () => {
-      if (!selectedBoardId) return;
       try {
-        const res = await apiClient.get<{ data: { lists: any[] } }>(`/api/lists/boards/${selectedBoardId}/lists`);
-        const fetchedLists = res.data.lists.map(l => ({
-          id: l.id,
-          name: l.name,
-          _count: l._count
-        }));
-        setLists(fetchedLists);
+        const res = await apiClient.get<{ data: { lists: List[] } }>(`/api/lists/boards/${selectedBoardId}/lists`);
+        setLists(res.data.lists);
         
-        // Reset list and position if board changed
-        if (selectedBoardId !== currentBoardId) {
-          if (fetchedLists.length > 0) {
-            setSelectedListId(fetchedLists[0].id);
-            setSelectedPosition(1);
-          }
-        } else {
+        // If moving to current board, select current list
+        if (selectedBoardId === currentBoardId) {
           setSelectedListId(currentListId);
+        } else if (res.data.lists.length > 0) {
+          setSelectedListId(res.data.lists[0].id);
         }
       } catch (err) {
         console.error('Error fetching lists:', err);
@@ -87,16 +76,14 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
   }, [selectedBoardId, currentBoardId, currentListId]);
 
   const handleMove = async () => {
+    if (!selectedBoardId || !selectedListId) return;
+
     setIsMoving(true);
     try {
-      // In this system, position is usually multiples of 1024.
-      // We calculate a rough position based on the selected rank.
-      const targetPosition = (selectedPosition - 1) * 1024 + 512;
-
       await apiClient.post(`/api/cards/${cardId}/move`, {
         destinationBoardId: selectedBoardId,
         destinationListId: selectedListId,
-        newPosition: targetPosition,
+        newPosition: (selectedPosition - 1) * 1024 + 1024,
       });
 
       toast.success('Tarjeta movida', {
@@ -105,8 +92,12 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
 
       onMoveSuccess(selectedBoardId !== currentBoardId);
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error moving card:', err);
+      const message = err.response?.data?.message || 'Error al mover la tarjeta';
+      toast.error('No se pudo mover', {
+        description: message
+      });
     } finally {
       setIsMoving(false);
     }
@@ -116,6 +107,14 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
   // If moving within the same list, we don't add 1. If moving to another list, we add 1.
   const maxPosition = (selectedListId === currentListId) ? currentListCardsCount : currentListCardsCount + 1;
   const positions = Array.from({ length: Math.max(1, maxPosition) }, (_, i) => i + 1);
+
+  // Group boards by workspace
+  const groupedBoards = boards.reduce((acc, b) => {
+    const wsName = b.workspace?.name || 'Otros';
+    if (!acc[wsName]) acc[wsName] = [];
+    acc[wsName].push(b);
+    return acc;
+  }, {} as Record<string, Board[]>);
 
   if (isLoading) {
     return (
@@ -146,10 +145,14 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
             onChange={(e) => setSelectedBoardId(e.target.value)}
             className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
           >
-            {boards.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name} {b.id === currentBoardId ? '(Actual)' : ''}
-              </option>
+            {Object.entries(groupedBoards).map(([wsName, wsBoards]) => (
+              <optgroup key={wsName} label={wsName}>
+                {wsBoards.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} {b.id === currentBoardId ? '(Actual)' : ''}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
           <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500" />
