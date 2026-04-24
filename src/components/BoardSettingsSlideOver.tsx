@@ -66,6 +66,7 @@ interface BoardSettingsSlideOverProps {
   };
   onUpdate: () => void;
   onUpdateBoard?: (data: Partial<any>) => void;
+  workspaceRole?: string;
 }
 
 export const BOARD_BACKGROUNDS = [
@@ -94,11 +95,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
   onClose, 
   board, 
   onUpdate,
-  onUpdateBoard
+  onUpdateBoard,
+  workspaceRole
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [name, setName] = useState(board.name);
   const [description, setDescription] = useState(board.description || '');
+  const [visibility, setVisibility] = useState(board.visibility);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -138,6 +142,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
     if (isOpen) {
       setName(board.name);
       setDescription(board.description || '');
+      setVisibility(board.visibility);
       setShowDeleteConfirm(false);
     }
   }, [isOpen, board]);
@@ -150,7 +155,8 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
     try {
       await apiClient.patch(`/api/boards/${board.id}`, { 
         name: name.trim(),
-        description: description.trim()
+        description: description.trim(),
+        visibility: visibility
       });
       onUpdate();
       onClose();
@@ -258,9 +264,50 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                   />
                 </div>
 
+                <div className="space-y-3">
+                  <label className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider ml-1">Visibilidad</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setVisibility('PRIVATE')}
+                      className={`flex items-center gap-3 p-3 rounded border-2 transition-all ${
+                        visibility === 'PRIVATE' 
+                          ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 text-[#6C5DD3]' 
+                          : 'border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-zinc-200'
+                      }`}
+                    >
+                      <Lock size={16} />
+                      <div className="text-left">
+                        <div className="text-[13px] font-bold">Privado</div>
+                        <div className="text-[10px] opacity-70">Solo miembros</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVisibility('WORKSPACE')}
+                      className={`flex items-center gap-3 p-3 rounded border-2 transition-all ${
+                        visibility === 'WORKSPACE' 
+                          ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 text-[#6C5DD3]' 
+                          : 'border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-zinc-200'
+                      }`}
+                    >
+                      <Building2 size={16} />
+                      <div className="text-left">
+                        <div className="text-[13px] font-bold">Espacio</div>
+                        <div className="text-[10px] opacity-70">Todo el equipo</div>
+                      </div>
+                    </button>
+                  </div>
+                  {board.ownerId !== user?.id && workspaceRole !== 'admin' && (
+                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium px-1">
+                      * Solo el propietario o administradores pueden cambiar la visibilidad
+                    </p>
+                  )}
+                </div>
+
                 <button
                   type="submit"
-                  disabled={isUpdating || !name.trim() || (name === board.name && description === board.description)}
+                  disabled={isUpdating || !name.trim() || (name === board.name && description === board.description && visibility === board.visibility)}
                   className="w-full justify-center bg-[#6C5DD3] hover:bg-[#312e81] text-white py-3 rounded font-bold shadow-lg shadow-[#6C5DD3]/20 flex items-center gap-2 transition-all disabled:opacity-50 active:scale-[0.98]"
                 >
                   {isUpdating ? <Loader2 size={18} className="animate-spin" /> : (

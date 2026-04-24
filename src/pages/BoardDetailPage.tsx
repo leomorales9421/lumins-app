@@ -528,7 +528,7 @@ const BoardDetailPage: React.FC = () => {
 
                   {/* Visibility Selector */}
                   <div className="relative">
-                    {board.ownerId === user?.id ? (
+                    {isAdmin ? (
                       <button 
                         onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
                         className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
@@ -820,6 +820,7 @@ const BoardDetailPage: React.FC = () => {
         onClose={() => setIsSettingsDrawerOpen(false)}
         board={board}
         onUpdate={fetchBoard}
+        workspaceRole={userRole}
         onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
       />
     </motion.div>
