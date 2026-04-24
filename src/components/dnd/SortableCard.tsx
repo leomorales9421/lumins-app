@@ -42,6 +42,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
+    touchAction: 'none',
   };
 
   const checklistItems = card.checklists?.flatMap(cl => cl.items) || [];

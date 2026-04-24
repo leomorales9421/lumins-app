@@ -27,6 +27,7 @@ import {
   DndContext, 
   closestCorners, 
   PointerSensor, 
+  TouchSensor,
   useSensor, 
   useSensors, 
   DragOverlay
@@ -184,10 +185,19 @@ const BoardDetailPage: React.FC = () => {
     window.dispatchEvent(new CustomEvent('toggle-sidebar'));
   };
 
-  const sensors = useSensors(useSensor(PointerSensor, { 
-    activationConstraint: { distance: 5 },
-    disabled: !canEdit
-  }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { 
+      activationConstraint: { distance: 5 },
+      disabled: !canEdit
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+      disabled: !canEdit
+    })
+  );
 
   const findContainer = (lists: List[], id: string) => {
     if (lists.find((list) => list.id === id)) return id;
@@ -478,7 +488,7 @@ const BoardDetailPage: React.FC = () => {
     >
       
       {/* Board Header (Sub-navigation) - Premium Glass Mode */}
-      <header className="h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
+      <header className="h-[60px] md:h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
         {/* Left Side: Sidebar Toggle, Breadcrumbs and Title */}
         <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <button 
@@ -697,7 +707,7 @@ const BoardDetailPage: React.FC = () => {
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className="flex-1 h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-8 transition-all duration-500 bg-transparent snap-x snap-mandatory scrollbar-hide">
+      <main className="flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-500 bg-transparent snap-x snap-mandatory scrollbar-hide">
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 
@@ -705,7 +715,7 @@ const BoardDetailPage: React.FC = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex items-start gap-4 h-full pb-4">
+          <div className="flex items-start gap-3 md:gap-4 h-full pb-4">
             <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
               {lists.map((list) => (
                 <SortableList 
@@ -722,7 +732,7 @@ const BoardDetailPage: React.FC = () => {
             
             {canEdit && (
               isAddingList ? (
-                <form onSubmit={handleAddList} className="min-w-[280px] max-w-[280px] bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
+                <form onSubmit={handleAddList} className="w-[72vw] sm:w-[80vw] md:w-80 flex-shrink-0 bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
                   <input
                     autoFocus
                     placeholder="Nombre de la lista..."
@@ -746,7 +756,7 @@ const BoardDetailPage: React.FC = () => {
                ) : (
                 <button
                   onClick={() => setIsAddingList(true)}
-                  className="min-w-[280px] max-w-[280px] h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
+                  className="w-[72vw] sm:w-[80vw] md:w-80 h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
                 >
                   <div className="p-1 rounded bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
                     <Plus size={18} strokeWidth={3} />

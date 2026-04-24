@@ -48,6 +48,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
+    touchAction: 'none',
   };
 
   const handleAddCard = (e: React.FormEvent) => {
@@ -88,8 +89,8 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       style={style}
       className={`
         cu-column h-fit max-h-full flex flex-col transition-all
-        w-[85vw] md:w-80 flex-shrink-0 snap-center
-        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded border border-white/30 dark:border-white/10 p-4 shadow-xl
+        w-[72vw] sm:w-[80vw] md:w-80 flex-shrink-0 snap-center
+        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded border border-white/30 dark:border-white/10 p-3 md:p-4 shadow-xl
         ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
         ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/30 ring-offset-1' : ''}
       `}
@@ -98,7 +99,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       <div
         {...attributes}
         {...listeners}
-        className="px-1 py-2 mb-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
+        className="px-1 py-1 md:py-2 mb-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-2 flex-1 overflow-hidden">
           {isEditingTitle ? (
@@ -181,7 +182,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       </div>
 
       {/* Cards */}
-      <div className="overflow-y-auto flex flex-col gap-2 min-h-0 custom-scrollbar px-0.5 py-1">
+      <div className="overflow-y-auto flex flex-col gap-1.5 md:gap-2 min-h-0 custom-scrollbar px-0.5 py-1">
         <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
             <SortableCard
@@ -194,7 +195,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       </div>
 
       {canEdit && (
-        <div className="px-2 pt-0.5 pb-2">
+        <div className="px-1 md:px-2 pt-0.5 pb-2">
           {isAddingCard ? (
             <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-zinc-50 dark:bg-[#13151A] rounded border border-zinc-200 dark:border-white/5">
               <textarea
