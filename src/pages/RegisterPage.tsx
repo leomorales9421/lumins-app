@@ -44,13 +44,15 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
-      <AmbientBackground />
+    <div className="min-h-screen flex items-center justify-center sm:p-6 relative font-sans overflow-x-hidden bg-white sm:bg-transparent">
+      <div className="hidden sm:block">
+        <AmbientBackground />
+      </div>
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1000px] min-h-[650px] bg-white/90 backdrop-blur-md border border-white/20 rounded shadow-2xl flex overflow-hidden relative z-10"
+        className="w-full max-w-[1000px] sm:min-h-[650px] bg-white sm:bg-white/90 sm:backdrop-blur-md sm:border sm:border-white/20 sm:rounded-2xl sm:shadow-2xl flex flex-col md:flex-row overflow-hidden relative z-10 min-h-screen sm:min-h-0"
       >
         
         {/* LEFT PANEL: Modern Professional Sidebar (v8.0) */}
@@ -104,9 +106,22 @@ const RegisterPage: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: Registration Form */}
-        <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
+        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-20 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
+          
+          {/* Mobile Logo Branding */}
+          <div className="md:hidden flex flex-col items-center mb-8">
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.8 }}
+               animate={{ opacity: 1, scale: 1 }}
+               className="mb-4"
+             >
+                <img src="/lumins-log.webp" alt="Lumins" className="h-20 w-auto drop-shadow-sm" />
+             </motion.div>
+             <h2 className="brand-logotype text-4xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">LUMINS</h2>
+          </div>
+
           <div className="mb-8 text-center md:text-left">
-              <h2 className="text-xl font-bold text-slate-500 mb-1 tracking-tight uppercase">
+              <h2 className="hidden md:block text-xl font-bold text-slate-500 mb-1 tracking-tight uppercase">
                  Regístrate en <span className="brand-logotype text-4xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] block mt-1">LUMINS</span>
               </h2>
              <p className="text-[#6B7280] font-medium text-lg">Únete a la nueva era de gestión corporativa</p>
@@ -120,8 +135,9 @@ const RegisterPage: React.FC = () => {
                   type="text" 
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
+                  className="w-full h-12 sm:h-11 bg-[#F4F6F9] border border-transparent rounded-xl sm:rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                   placeholder="ej. Leonardo"
+                  autoComplete="given-name"
                   required
                 />
               </div>
@@ -131,8 +147,9 @@ const RegisterPage: React.FC = () => {
                   type="text" 
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
+                  className="w-full h-12 sm:h-11 bg-[#F4F6F9] border border-transparent rounded-xl sm:rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                   placeholder="ej. Morales"
+                  autoComplete="family-name"
                   required
                 />
               </div>
@@ -144,8 +161,10 @@ const RegisterPage: React.FC = () => {
                  type="email" 
                  value={email}
                  onChange={(e) => setEmail(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
+                 className="w-full h-12 sm:h-11 bg-[#F4F6F9] border border-transparent rounded-xl sm:rounded px-4 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-[#9CA3AF]"
                  placeholder="correo@ejemplo.com"
+                 autoComplete="email"
+                 inputMode="email"
                  required
                />
             </div>
@@ -156,8 +175,9 @@ const RegisterPage: React.FC = () => {
                  type="password" 
                  value={password}
                  onChange={(e) => setPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
+                 className="w-full h-12 sm:h-11 bg-[#F4F6F9] border border-transparent rounded-xl sm:rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                  placeholder="••••••••"
+                 autoComplete="new-password"
                  required
                />
             </div>
@@ -168,8 +188,9 @@ const RegisterPage: React.FC = () => {
                  type="password" 
                  value={confirmPassword}
                  onChange={(e) => setConfirmPassword(e.target.value)}
-                 className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
+                 className="w-full h-12 sm:h-11 bg-[#F4F6F9] border border-transparent rounded-xl sm:rounded px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
                  placeholder="••••••••"
+                 autoComplete="new-password"
                  required
                />
             </div>
@@ -183,7 +204,7 @@ const RegisterPage: React.FC = () => {
             <Button 
               type="submit" 
               isLoading={isSubmitting}
-              className="mt-2 h-11 bg-[#4338ca] text-white text-sm font-bold rounded hover:bg-[#312e81] transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
+              className="mt-2 h-12 sm:h-11 bg-[#4338ca] text-white text-sm font-bold rounded-xl sm:rounded hover:bg-[#312e81] transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
             >
               {isSubmitting ? 'Creando cuenta...' : 'Registrarse'}
             </Button>
@@ -196,7 +217,7 @@ const RegisterPage: React.FC = () => {
 
             <button 
               type="button"
-              className="h-11 bg-white border border-zinc-200 rounded text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
+              className="h-12 sm:h-11 bg-white border border-zinc-200 rounded-xl sm:rounded text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
             >
                <svg width="20" height="20" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
