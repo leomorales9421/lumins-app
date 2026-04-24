@@ -52,9 +52,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (isAuthenticated) {
         try {
           await refreshUser();
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to load user:', error);
-          apiClient.clearTokens();
+          // Only clear tokens if it's an explicit authentication error
+          if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            apiClient.clearTokens();
+          }
         }
       }
       setIsLoading(false);

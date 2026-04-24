@@ -66,14 +66,27 @@ class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor to handle token refresh
+    // Response interceptor to handle token refresh and retries
     this.client.interceptors.response.use(
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
-        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean; _retryCount?: number };
+
+        // Handle network errors or server downtime (502, 503, 504)
+        const isRetryableError = !error.response || (error.response.status >= 502 && error.response.status <= 504);
+        
+        if (isRetryableError && (originalRequest._retryCount || 0) < 2) {
+          originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+          const delay = originalRequest._retryCount * 2000;
+          
+          console.warn(`Connection error (${error.message}). Retrying in ${delay}ms... (Attempt ${originalRequest._retryCount}/2)`);
+          
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.client(originalRequest);
+        }
 
         // Skip token refresh for authentication endpoints
-        const isAuthEndpoint = originalRequest.url?.includes('/api/auth/');
+        const isAuthEndpoint = originalRequest?.url?.includes('/api/auth/');
         
         // If error is 401 and we haven't retried yet, and it's not an auth endpoint
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
@@ -105,11 +118,19 @@ class ApiClient {
               Authorization: `Bearer ${newAccessToken}`,
             };
             return this.client(originalRequest);
-          } catch (refreshError) {
+          } catch (refreshError: any) {
             processQueue(refreshError as Error, null);
-            this.clearTokens();
-            // Redirect to login or handle logout
-            window.location.href = '/login';
+            
+            // Only clear tokens and redirect if the server explicitly rejected the refresh token
+            // with a 401 or 403 error. For network errors (no response) or 5xx server errors, 
+            // we keep the session to allow retrying when the server is back up.
+            if (refreshError.response && (refreshError.response.status === 401 || refreshError.response.status === 403)) {
+              this.clearTokens();
+              window.location.href = '/login';
+            } else {
+              console.warn("Server unavailable or temporary error during token refresh. Keeping session...");
+            }
+            
             return Promise.reject(refreshError);
           } finally {
             isRefreshing = false;
@@ -155,8 +176,11 @@ class ApiClient {
         const { accessToken } = response.data.data;
         this.setTokens(accessToken);
         resolve(accessToken);
-      } catch (error) {
-        this.clearTokens();
+      } catch (error: any) {
+        // Only clear tokens if the server explicitly returns an authentication error
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.clearTokens();
+        }
         reject(error);
       }
     });

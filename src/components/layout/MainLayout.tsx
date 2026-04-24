@@ -74,8 +74,16 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         toast.error('Acceso denegado', { 
           description: 'Has sido eliminado de este espacio de trabajo.' 
         });
+
+        // Clean up last active workspace if it was the removed one
+        if (localStorage.getItem('lastActiveWorkspaceId') === resourceId) {
+          localStorage.removeItem('lastActiveWorkspaceId');
+        }
+
+        // If we are currently viewing the removed workspace, go to /app
+        // BoardsPage will then redirect to the next available workspace
         if (workspaceId === resourceId) {
-          navigate('/app');
+          navigate('/app', { replace: true });
         }
       } else if (type === 'BOARD_REMOVED') {
         toast.error('Acceso denegado', { 
@@ -83,16 +91,18 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         });
         // Check if we are currently on that board
         if (location.pathname.includes(`/boards/${resourceId}`)) {
-          navigate('/app');
+          navigate('/app', { replace: true });
         }
       } else {
         toast.info('Permisos actualizados', { 
           description: `Tus permisos en ${type === 'WORKSPACE' ? 'el espacio de trabajo' : 'el tablero'} han cambiado.` 
         });
-        // Refresh workspaces and other data
-        fetchWorkspaces();
-        window.dispatchEvent(new CustomEvent('permission-changed'));
       }
+
+      // Always refresh workspaces and notify other components
+      fetchWorkspaces();
+      window.dispatchEvent(new CustomEvent('workspace-changed'));
+      window.dispatchEvent(new CustomEvent('permission-changed'));
     };
 
     const handleToggleSidebar = () => {
