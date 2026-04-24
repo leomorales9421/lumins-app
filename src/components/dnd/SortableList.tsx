@@ -88,11 +88,11 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       ref={setNodeRef}
       style={style}
       className={`
-        cu-column h-fit max-h-full flex flex-col transition-all
-        w-[72vw] sm:w-[80vw] md:w-80 flex-shrink-0 snap-center
-        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded border border-white/30 dark:border-white/10 p-3 md:p-4 shadow-xl
-        ${isDragging ? 'opacity-40 scale-95 z-50' : ''}
-        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/30 ring-offset-1' : ''}
+        cu-column h-fit max-h-full flex flex-col transition-all duration-300
+        w-[82vw] sm:w-[85vw] md:w-80 flex-shrink-0 snap-center
+        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-3 md:p-4 shadow-xl
+        ${isDragging ? 'opacity-40 scale-[0.98] z-50' : ''}
+        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/30 ring-offset-1 bg-white/95 dark:bg-[#1C1F26]' : ''}
       `}
     >
       {/* Column Header */}

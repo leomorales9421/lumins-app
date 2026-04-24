@@ -210,6 +210,11 @@ const BoardDetailPage: React.FC = () => {
     const container = findContainer(lists, activeId);
     setOriginalContainer(container || null);
     
+    // Haptic feedback for mobile
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(10);
+    }
+
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card);
     }
@@ -707,7 +712,7 @@ const BoardDetailPage: React.FC = () => {
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className="flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-500 bg-transparent snap-x snap-mandatory scrollbar-hide">
+      <main className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent scrollbar-hide ${activeCard ? '' : 'snap-x snap-mandatory'}`}>
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 
@@ -770,9 +775,9 @@ const BoardDetailPage: React.FC = () => {
             <div className="w-8 flex-shrink-0" />
           </div>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={null}>
             {activeCard ? (
-              <div className="w-[280px] rotate-2 shadow-2xl">
+              <div className="w-[280px] rotate-[3deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-90 transition-transform duration-200">
                 <SortableCard card={activeCard} onClick={() => {}} />
               </div>
             ) : null}
