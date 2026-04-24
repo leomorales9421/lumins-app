@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Plus, Trash2, Layout, ClipboardList, Check, Loader2 } from 'lucide-react';
+import { X, Mail, Plus, Trash2, Layout, ClipboardList, Check, Loader2, Lock } from 'lucide-react';
 import apiClient from '../lib/api-client';
 
 interface InviteMembersModalProps {
@@ -23,7 +23,6 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
   workspaceId: initialWorkspaceId,
 }) => {
   const [invites, setInvites] = useState<InviteRow[]>([{ email: '', role: 'MEMBER' }]);
-  const [activeTab, setActiveTab] = useState<'workspaces' | 'boards'>('workspaces');
   const [selectedWorkspaces, setSelectedWorkspaces] = useState<string[]>(initialWorkspaceId ? [initialWorkspaceId] : []);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   
@@ -233,89 +232,93 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 <div className="space-y-4">
                   <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">Asignar a...</h3>
                   
-                  {/* Tabs */}
-                  <div className="flex p-1.5 bg-zinc-100 dark:bg-[#13151A] rounded w-fit">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('workspaces')}
-                      className={`px-4 py-2 rounded text-sm font-bold transition-all ${
-                        activeTab === 'workspaces' 
-                          ? 'bg-white dark:bg-[#1C1F26] shadow-sm text-[#6C5DD3] dark:text-zinc-100' 
-                          : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
-                      }`}
-                    >
-                      Espacios
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('boards')}
-                      className={`px-4 py-2 rounded text-sm font-bold transition-all ${
-                        activeTab === 'boards' 
-                          ? 'bg-white dark:bg-[#1C1F26] shadow-sm text-[#6C5DD3] dark:text-zinc-100' 
-                          : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
-                      }`}
-                    >
-                      Tableros
-                    </button>
-                  </div>
+                  {/* Unified Grouped List */}
+                  <div className="max-h-[300px] overflow-y-auto border border-zinc-200 dark:border-white/10 rounded p-4 custom-scrollbar bg-zinc-50/30 dark:bg-black/10 space-y-6">
+                    {workspaces.map((ws) => {
+                      const workspaceBoards = boards.filter(b => b.workspaceId === ws.id);
+                      const isWsSelected = selectedWorkspaces.includes(ws.id);
 
-                  {/* Multi-Select List */}
-                  <div className="max-h-48 overflow-y-auto border border-zinc-200 dark:border-white/10 rounded p-3 custom-scrollbar bg-zinc-50/30 dark:bg-black/10">
-                    {activeTab === 'workspaces' ? (
-                      <div className="space-y-1.5">
-                        {workspaces.map((ws) => (
+                      return (
+                        <div key={ws.id} className="space-y-3">
+                          {/* Workspace Header */}
                           <div 
-                            key={ws.id}
                             onClick={() => toggleWorkspace(ws.id)}
                             className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-all ${
-                              selectedWorkspaces.includes(ws.id) 
+                              isWsSelected 
                                 ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
                                 : 'hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
                             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                              selectedWorkspaces.includes(ws.id) 
+                              isWsSelected 
                                 ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' 
                                 : 'border-zinc-300 dark:border-white/10'
                             }`}>
-                              {selectedWorkspaces.includes(ws.id) && <Check size={12} strokeWidth={4} />}
+                              {isWsSelected && <Check size={12} strokeWidth={4} />}
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Layout size={18} className="text-zinc-400 dark:text-zinc-500" />
-                              <span className={`text-sm font-bold ${selectedWorkspaces.includes(ws.id) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                                {ws.name}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {boards.map((board) => (
-                          <div 
-                            key={board.id}
-                            onClick={() => toggleBoard(board.id)}
-                            className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-all ${
-                              selectedBoards.includes(board.id) 
-                                ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
-                                : 'hover:bg-zinc-100 dark:hover:bg-white/5'
-                            }`}
-                          >
-                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                              selectedBoards.includes(board.id) 
-                                ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' 
-                                : 'border-zinc-300 dark:border-white/10'
-                            }`}>
-                              {selectedBoards.includes(board.id) && <Check size={12} strokeWidth={4} />}
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <ClipboardList size={18} className="text-zinc-400 dark:text-zinc-500" />
-                              <span className={`text-sm font-bold ${selectedBoards.includes(board.id) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                                {board.name}
-                              </span>
+                            <div className="flex items-center gap-3 flex-1">
+                              <Layout size={18} className="text-[#6C5DD3]" />
+                              <div className="flex flex-col">
+                                <span className={`text-sm font-bold ${isWsSelected ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                                  {ws.name}
+                                </span>
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider">Espacio de Trabajo</span>
+                              </div>
                             </div>
                           </div>
-                        ))}
+
+                          {/* Nested Boards */}
+                          {workspaceBoards.length > 0 && (
+                            <div className="ml-8 space-y-1.5 border-l-2 border-zinc-100 dark:border-white/5 pl-4">
+                              {workspaceBoards.map((board) => {
+                                const isBoardSelected = selectedBoards.includes(board.id);
+                                const isPrivate = board.visibility === 'PRIVATE';
+
+                                return (
+                                  <div 
+                                    key={board.id}
+                                    onClick={() => toggleBoard(board.id)}
+                                    className={`flex items-center gap-3 p-2.5 rounded cursor-pointer transition-all ${
+                                      isBoardSelected 
+                                        ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
+                                        : 'hover:bg-zinc-100 dark:hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                                      isBoardSelected 
+                                        ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' 
+                                        : 'border-zinc-300 dark:border-white/10'
+                                    }`}>
+                                      {isBoardSelected && <Check size={10} strokeWidth={4} />}
+                                    </div>
+                                    <div className="flex items-center gap-2.5 flex-1">
+                                      {isPrivate ? (
+                                        <Lock className="text-zinc-400 dark:text-zinc-500" size={14} />
+                                      ) : (
+                                        <ClipboardList size={14} className="text-zinc-400 dark:text-zinc-500" />
+                                      )}
+                                      <span className={`text-sm font-medium ${isBoardSelected ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                                        {board.name}
+                                      </span>
+                                      {isPrivate && (
+                                        <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
+                                          <Lock size={10} className="text-zinc-400 dark:text-zinc-500" />
+                                          <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">Privado</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {workspaces.length === 0 && !isFetching && (
+                      <div className="py-8 text-center text-zinc-500 dark:text-zinc-500 text-sm italic">
+                        No se encontraron espacios de trabajo disponibles.
                       </div>
                     )}
                   </div>

@@ -43,7 +43,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
     }
   }, [isOpen, workspaces, workspaceId, defaultWorkspaceId]);
 
-  const [visibility, setVisibility] = useState<'PRIVATE' | 'WORKSPACE'>('PRIVATE');
+  const [visibility, setVisibility] = useState<'PRIVATE' | 'WORKSPACE'>('WORKSPACE');
   const [description, setDescription] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
   const handleClose = () => {
     setName('');
     setWorkspaceId(workspaces[0]?.id || '');
-    setVisibility('PRIVATE');
+    setVisibility('WORKSPACE');
     setDescription('');
     setIsDescriptionExpanded(false);
     setError('');

@@ -77,6 +77,14 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         if (workspaceId === resourceId) {
           navigate('/app');
         }
+      } else if (type === 'BOARD_REMOVED') {
+        toast.error('Acceso denegado', { 
+          description: 'Has sido eliminado de este tablero.' 
+        });
+        // Check if we are currently on that board
+        if (location.pathname.includes(`/boards/${resourceId}`)) {
+          navigate('/app');
+        }
       } else {
         toast.info('Permisos actualizados', { 
           description: `Tus permisos en ${type === 'WORKSPACE' ? 'el espacio de trabajo' : 'el tablero'} han cambiado.` 
