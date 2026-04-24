@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon, Lock, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './ui/Button';
 import { Skeleton } from './ui/Skeleton';
 import apiClient from '../lib/api-client';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const CACHE_KEY = 'lumins_board_bg_cache';
 
@@ -61,8 +62,10 @@ interface BoardSettingsSlideOverProps {
     id: string;
     name: string;
     workspaceId: string;
+    ownerId: string;
     description?: string;
     background?: string;
+    visibility: 'PRIVATE' | 'WORKSPACE';
   };
   onUpdate: () => void;
   onUpdateBoard?: (data: Partial<any>) => void;
