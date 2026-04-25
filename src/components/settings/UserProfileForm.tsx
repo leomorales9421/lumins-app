@@ -104,9 +104,9 @@ const UserProfileForm: React.FC = () => {
       return;
     }
 
-    // Validate size (2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarError('La imagen no puede superar los 2MB.');
+    // Validate size (12MB)
+    if (file.size > 12 * 1024 * 1024) {
+      setAvatarError('La imagen no puede superar los 12MB.');
       return;
     }
 
@@ -226,7 +226,7 @@ const UserProfileForm: React.FC = () => {
             </div>
             <div>
               <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base">Tu Avatar</p>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">JPG, GIF o PNG. Máximo 2MB.</p>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">JPG, GIF o PNG. Máximo 12MB.</p>
               {avatarError && <p className="text-xs text-red-500 mt-1">{avatarError}</p>}
             </div>
           </div>

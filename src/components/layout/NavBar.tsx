@@ -34,18 +34,18 @@ const NavBar: React.FC<NavBarProps> = ({
         </button>
 
         {/* Brand/Logo */}
-        <Link to="/app" className="flex items-center gap-3 group flex-shrink-0 mr-2 sm:mr-8 px-1 h-full">
-          <div className="relative flex items-center h-full w-10 sm:w-16">
+        <Link to="/app" className="flex items-center gap-1.5 group flex-shrink-0 mr-2 sm:mr-8 px-1 h-full">
+          <div className="relative flex items-center h-full w-12 sm:w-20">
             <img 
               src="/lumins-log.webp" 
               alt="Lumins Logo" 
-              className="h-8 sm:h-12 w-auto object-contain transition-transform group-hover:scale-110 drop-shadow-xl z-50" 
+              className="h-10 sm:h-16 w-auto object-contain transition-transform group-hover:scale-110 drop-shadow-xl z-50" 
             />
             <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded opacity-0 group-hover:opacity-100 transition-opacity blur-2xl" />
           </div>
           
           {/* Vertical Separator */}
-          <div className="h-8 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-1 sm:block hidden" />
+          <div className="h-8 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-0 sm:block hidden" />
 
           <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] hidden sm:block select-none font-black tracking-tighter">
             LUMINS
