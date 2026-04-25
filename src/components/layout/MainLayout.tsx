@@ -177,6 +177,13 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         backgroundAttachment: 'fixed'
       } : {}}
     >
+      {/* Beta Ribbon */}
+      <div className="fixed top-0 right-0 z-[100] pointer-events-none overflow-hidden w-32 h-32">
+        <div className="bg-[#6C5DD3] text-white text-[10px] font-black uppercase tracking-[0.2em] py-1.5 w-48 text-center absolute top-7 -right-12 rotate-45 shadow-2xl border-y border-white/10 backdrop-blur-sm">
+          Fase Beta
+        </div>
+      </div>
+
       {/* Polarized Filter (Contrast Shield) */}
       {isBoardView && boardBackground?.startsWith('http') && (
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
