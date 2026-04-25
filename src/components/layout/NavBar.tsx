@@ -48,7 +48,7 @@ const NavBar: React.FC<NavBarProps> = ({
           <div className="h-8 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent mx-0 sm:block hidden" />
 
           <div className="flex items-baseline gap-1 hidden sm:flex">
-            <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] select-none font-black tracking-tighter">
+            <span className="brand-logotype text-lg bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] select-none font-black tracking-tighter">
               LUMINS
             </span>
             <span className="text-[10px] font-extrabold text-[#6C5DD3] dark:text-indigo-400 opacity-80 uppercase tracking-tight">
