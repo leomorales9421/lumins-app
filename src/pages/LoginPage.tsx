@@ -127,7 +127,7 @@ const LoginPage: React.FC = () => {
               <img 
                 src="/lumins-log.webp" 
                 alt="Lumins Logo" 
-                className="h-64 w-auto object-contain" 
+                className="h-40 w-auto object-contain" 
               />
            </motion.div>
 
@@ -157,14 +157,14 @@ const LoginPage: React.FC = () => {
                animate={{ opacity: 1, scale: 1 }}
                className="mb-4"
              >
-                <img src="/lumins-log.webp" alt="Lumins" className="h-24 w-auto drop-shadow-sm" />
+                <img src="/lumins-log.webp" alt="Lumins" className="h-16 w-auto drop-shadow-sm" />
              </motion.div>
-             <h2 className="brand-logotype text-3xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">LUMINS</h2>
+             <h2 className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">LUMINS</h2>
           </div>
 
           <div className="mb-10 text-center md:text-left">
               <h2 className="hidden md:block text-xl font-bold text-slate-500 mb-1 tracking-tight uppercase">
-                Ingresa a <span className="brand-logotype text-3xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] block mt-1">LUMINS</span>
+                Ingresa a <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] block mt-1">LUMINS</span>
               </h2>
              <p className="text-[#6B7280] font-medium text-lg">Tu centro de operaciones inteligente</p>
           </div>

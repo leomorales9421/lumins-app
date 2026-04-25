@@ -39,7 +39,7 @@ const NavBar: React.FC<NavBarProps> = ({
             <img 
               src="/lumins-log.webp" 
               alt="Lumins Logo" 
-              className="h-10 sm:h-16 w-auto object-contain transition-transform group-hover:scale-110 drop-shadow-xl z-50" 
+              className="h-8 sm:h-10 w-auto object-contain transition-transform group-hover:scale-110 drop-shadow-xl z-50" 
             />
             <div className="absolute inset-0 bg-[#6C5DD3]/15 rounded opacity-0 group-hover:opacity-100 transition-opacity blur-2xl" />
           </div>
