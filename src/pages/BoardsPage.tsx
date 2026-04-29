@@ -57,22 +57,27 @@ const BoardsPage: React.FC = () => {
 
   // Listen for board creation to refresh
   useEffect(() => {
-    const handleRefresh = () => fetchBoards();
-    window.addEventListener('board-created', handleRefresh);
-    window.addEventListener('lumins:board-updated', handleRefresh);
-    return () => {
-      window.removeEventListener('board-created', handleRefresh);
-      window.removeEventListener('lumins:board-updated', handleRefresh);
+    const handleRefresh = () => {
+      fetchBoards();
+      fetchWorkspaces();
     };
-  }, [fetchBoards]);
+    window.addEventListener('board-created', fetchBoards);
+    window.addEventListener('lumins:board-updated', fetchBoards);
+    window.addEventListener('workspace-changed', handleRefresh);
+    return () => {
+      window.removeEventListener('board-created', fetchBoards);
+      window.removeEventListener('lumins:board-updated', fetchBoards);
+      window.removeEventListener('workspace-changed', handleRefresh);
+    };
+  }, [fetchBoards, fetchWorkspaces]);
 
   useEffect(() => {
-    if (!isLoading && !workspaceId && workspaces.length > 0) {
+    if (!isLoading && !isLoadingWorkspaces && !workspaceId && workspaces.length > 0) {
       const lastId = localStorage.getItem('lastActiveWorkspaceId');
       const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
       navigate(`/w/${targetId}/dashboard`, { replace: true });
     }
-  }, [isLoading, workspaceId, workspaces, navigate]);
+  }, [isLoading, isLoadingWorkspaces, workspaceId, workspaces, navigate]);
 
   return (
     <div className="flex-1 flex flex-col font-sans">

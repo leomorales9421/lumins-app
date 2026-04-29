@@ -62,6 +62,11 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
       await apiClient.delete(`/api/workspaces/${workspaceId}`);
       showSuccess('Éxito', 'El espacio de trabajo ha sido eliminado permanentemente');
       
+      // Clear from localStorage if it's the current one
+      if (localStorage.getItem('lastActiveWorkspaceId') === workspaceId) {
+        localStorage.removeItem('lastActiveWorkspaceId');
+      }
+
       // Dispatch event to refresh workspace lists across the app
       window.dispatchEvent(new CustomEvent('workspace-changed'));
       
