@@ -66,6 +66,7 @@ const BoardDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
+  const [activeList, setActiveList] = useState<List | null>(null);
   const [isAddingList, setIsAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -248,6 +249,10 @@ const BoardDetailPage: React.FC = () => {
 
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card);
+      setActiveList(null);
+    } else if (active.data.current?.type === 'list') {
+      setActiveList(active.data.current.list);
+      setActiveCard(null);
     }
   };
 
@@ -310,6 +315,7 @@ const BoardDetailPage: React.FC = () => {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCard(null);
+    setActiveList(null);
 
     if (!over) {
       setOriginalContainer(null);
@@ -874,6 +880,10 @@ const BoardDetailPage: React.FC = () => {
             {activeCard ? (
               <div className="w-[240px] rotate-[3deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-90 transition-transform duration-200">
                 <SortableCard card={activeCard} onClick={() => {}} />
+              </div>
+            ) : activeList ? (
+              <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-80 rotate-[2deg] scale-105 pointer-events-none shadow-2xl z-[1000]">
+                <SortableList list={activeList} onCardClick={() => {}} canEdit={false} />
               </div>
             ) : null}
           </DragOverlay>

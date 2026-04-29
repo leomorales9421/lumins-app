@@ -49,7 +49,6 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-    touchAction: 'none',
   };
 
   const handleAddCard = (e: React.FormEvent) => {
