@@ -2,7 +2,8 @@ import React from 'react';
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   closestCorners,
@@ -27,10 +28,15 @@ export const DndProvider: React.FC<DndProviderProps> = ({
   overlay,
 }) => {
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
-        // Lower threshold so the drag starts with a small movement
-        distance: 2,
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     })
   );

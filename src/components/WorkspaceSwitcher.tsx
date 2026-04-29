@@ -47,7 +47,14 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
     return () => window.removeEventListener('workspace-changed', handleRefresh);
   }, []);
 
-  const currentWorkspace = workspaces.find(w => w.id === workspaceId) || workspaces[0];
+  const activeWorkspaceId = workspaceId || localStorage.getItem('lastActiveWorkspaceId');
+  const currentWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0];
+
+  useEffect(() => {
+    if (workspaceId && workspaces.some(w => w.id === workspaceId)) {
+      localStorage.setItem('lastActiveWorkspaceId', workspaceId);
+    }
+  }, [workspaceId, workspaces]);
 
   const handleSwitch = (id: string) => {
     localStorage.setItem('lastActiveWorkspaceId', id);
@@ -100,7 +107,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
               <button
                 onClick={() => handleSwitch(workspace.id)}
                 className={`w-full flex items-center gap-3 p-2 rounded transition-all ${
-                  workspace.id === workspaceId 
+                  workspace.id === currentWorkspace?.id 
                     ? 'bg-zinc-100 dark:bg-white/5 text-[#6C5DD3]' 
                     : 'hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
                 }`}
@@ -111,7 +118,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
                 <span className="flex-1 text-left text-[13px] font-bold truncate">
                   {workspace.name}
                 </span>
-                {workspace.id === workspaceId && (
+                {workspace.id === currentWorkspace?.id && (
                   <Check size={14} className="text-[#6C5DD3]" />
                 )}
               </button>
