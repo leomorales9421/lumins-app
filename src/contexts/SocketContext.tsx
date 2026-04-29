@@ -64,6 +64,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         window.dispatchEvent(new CustomEvent('lumins:permission-updated', { detail: payload }));
       });
 
+      // Session revocation listener
+      newSocket.on('session_revoked', (payload) => {
+        console.warn('Session revoked:', payload.message);
+        // We use window.location.href to force a clean logout and avoid state issues
+        logout();
+        window.location.href = '/login?reason=session_revoked';
+      });
+
       setSocket(newSocket);
       
       // Listen for token refresh to update socket authentication
