@@ -64,7 +64,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
         ${isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50' : ''}
       `}
     >
-      <div className="px-3 pt-3 pb-2.5 flex flex-col gap-2.5">
+      <div className="px-2.5 pt-2.5 pb-2 flex flex-col gap-2">
 
         {card.labels && card.labels.length > 0 && (
           <div className="flex flex-wrap gap-1">

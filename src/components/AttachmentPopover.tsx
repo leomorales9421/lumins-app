@@ -5,9 +5,15 @@ interface AttachmentPopoverProps {
   onClose: () => void;
   onUploadFile: (file: File) => void;
   onAttachLink: (url: string, name: string) => void;
+  isUploading?: boolean;
 }
 
-const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUploadFile, onAttachLink }) => {
+const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ 
+  onClose, 
+  onUploadFile, 
+  onAttachLink,
+  isUploading = false
+}) => {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkName, setLinkName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,7 +32,15 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
   };
 
   return (
-    <div className="w-[340px] bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className="w-[340px] bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden relative">
+      {/* Loading Overlay */}
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/60 dark:bg-[#1C1F26]/60 backdrop-blur-[1px] z-50 flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 border-4 border-[#6C5DD3]/20 border-t-[#6C5DD3] rounded-full animate-spin" />
+          <p className="text-[10px] font-black text-[#6C5DD3] uppercase tracking-[0.2em]">Cargando...</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between p-2 mb-6">
         <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
@@ -34,7 +48,8 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         </h3>
         <button 
           onClick={onClose}
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
+          disabled={isUploading}
+          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all disabled:opacity-50"
         >
           <X size={16} />
         </button>
@@ -51,7 +66,8 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
         
         <button 
           onClick={() => fileInputRef.current?.click()}
-          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[#6C5DD3] dark:text-[#8E82E3] font-bold py-5 rounded hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-2 group"
+          disabled={isUploading}
+          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[#6C5DD3] dark:text-[#8E82E3] font-bold py-5 rounded hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="w-10 h-10 bg-[#6C5DD3]/10 rounded flex items-center justify-center group-hover:scale-110 transition-transform">
             <Upload size={20} strokeWidth={2.5} />
@@ -63,6 +79,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
           ref={fileInputRef} 
           className="hidden" 
           onChange={handleFileChange}
+          disabled={isUploading}
         />
       </div>
 
@@ -85,7 +102,8 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
               placeholder="Pega un enlace aquí..."
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded py-3 pl-10 pr-4 text-xs font-bold w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+              disabled={isUploading}
+              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded py-3 pl-10 pr-4 text-xs font-bold w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
             />
           </div>
         </div>
@@ -99,7 +117,8 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
             placeholder="Opcional"
             value={linkName}
             onChange={(e) => setLinkName(e.target.value)}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded py-3 px-4 text-xs font-bold w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+            disabled={isUploading}
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded py-3 px-4 text-xs font-bold w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
           />
         </div>
       </div>
@@ -108,13 +127,14 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ onClose, onUpload
       <div className="flex items-center justify-end gap-3 mt-8 px-2 pb-2">
         <button 
           onClick={onClose}
-          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-4 py-2.5 transition-colors"
+          disabled={isUploading}
+          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-4 py-2.5 transition-colors disabled:opacity-50"
         >
           Cancelar
         </button>
         <button 
           onClick={handleInsertLink}
-          disabled={!linkUrl.trim()}
+          disabled={!linkUrl.trim() || isUploading}
           className="bg-[#6C5DD3] hover:bg-[#312e81] text-white px-6 py-2.5 rounded text-xs font-bold shadow-lg shadow-[#6C5DD3]/20 transition-all disabled:opacity-50 active:scale-95"
         >
           Adjuntar enlace

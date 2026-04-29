@@ -150,21 +150,22 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-[600px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
+            className="w-full max-w-[600px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl p-6 sm:p-8 relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10"
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex justify-between items-start mb-6 sm:mb-8">
               <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Invitar al equipo</h2>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">Invitar al equipo</h2>
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
                   Añade colaboradores y define sus niveles de acceso.
                 </p>
               </div>
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
               >
-                <X size={24} />
+                <X size={20} className="sm:hidden" />
+                <X size={24} className="hidden sm:block" />
               </button>
             </div>
 
@@ -183,7 +184,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                   <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">¿A quién invitas?</h3>
                   <div className="max-h-[200px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
                     {invites.map((invite, index) => (
-                      <div key={index} className="flex items-center gap-3">
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-0 bg-zinc-50/50 dark:bg-white/5 sm:bg-transparent rounded-lg sm:rounded-none border border-zinc-100 dark:border-white/5 sm:border-none">
                         <div className="flex-1">
                           <input 
                             type="email"
@@ -194,26 +195,28 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                             required
                           />
                         </div>
-                        <div className="w-40">
-                          <select 
-                            value={invite.role}
-                            onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
-                            className="w-full bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none"
-                          >
-                            <option value="ADMIN">Administrador</option>
-                            <option value="MEMBER">Miembro</option>
-                            <option value="GUEST">Invitado</option>
-                          </select>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 sm:w-40">
+                            <select 
+                              value={invite.role}
+                              onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
+                              className="w-full bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none"
+                            >
+                              <option value="ADMIN">Administrador</option>
+                              <option value="MEMBER">Miembro</option>
+                              <option value="GUEST">Invitado</option>
+                            </select>
+                          </div>
+                          {invites.length > 1 && (
+                            <button 
+                              type="button"
+                              onClick={() => removeInviteRow(index)}
+                              className="p-3 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          )}
                         </div>
-                        {invites.length > 1 && (
-                          <button 
-                            type="button"
-                            onClick={() => removeInviteRow(index)}
-                            className="p-3 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        )}
                       </div>
                     ))}
                   </div>

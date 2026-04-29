@@ -358,8 +358,8 @@ const BoardDetailPage: React.FC = () => {
           destinationListId: overContainer,
           newPosition: (Math.max(0, newIndexInList) + 1) * 1000
         });
+        logSuccess('Tarjeta movida', 'El movimiento entre listas se ha guardado');
       }
-      logSuccess('Card moved', 'Sync complete');
     } catch (err) {
       toast.error('Error', { description: 'No se pudo guardar el movimiento de la tarjeta' });
 
@@ -451,7 +451,7 @@ const BoardDetailPage: React.FC = () => {
         {/* Canvas Skeleton */}
         <div className="flex-1 p-8 flex gap-6 overflow-hidden">
            {[1, 2, 3, 4].map(i => (
-             <div key={i} className="min-w-[320px] max-w-[320px] h-full flex flex-col gap-4">
+             <div key={i} className="min-w-[272px] max-w-[272px] h-full flex flex-col gap-4">
                 <div className="flex justify-between items-center px-1">
                    <Skeleton className="h-6 w-32 rounded" />
                    <div className="flex gap-1">
@@ -615,7 +615,7 @@ const BoardDetailPage: React.FC = () => {
           {/* Members Group */}
           <div
             onClick={() => setIsMembersModalOpen(true)}
-            className="hidden sm:flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
+            className="flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
           >
             {board.members?.slice(0, 4).map((member) => (
               <div
@@ -700,10 +700,11 @@ const BoardDetailPage: React.FC = () => {
 
             <button 
               onClick={() => setIsMembersModalOpen(true)}
-              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg lg:flex hidden"
+              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+              title="Miembros"
             >
               <Users size={16} strokeWidth={2.5} />
-              <span>Miembros</span>
+              <span className="hidden lg:inline">Miembros</span>
             </button>
 
             {isAdmin && (
@@ -721,7 +722,7 @@ const BoardDetailPage: React.FC = () => {
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent scrollbar-hide ${activeCard ? '' : 'snap-x snap-mandatory'}`}>
+      <main className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent scrollbar-hide ${activeCard ? '' : 'snap-x snap-proximity'}`}>
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 
@@ -746,7 +747,7 @@ const BoardDetailPage: React.FC = () => {
             
             {canEdit && (
               isAddingList ? (
-                <form onSubmit={handleAddList} className="w-[72vw] sm:w-[80vw] md:w-80 flex-shrink-0 bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 h-fit shadow-lg ring-1 ring-black/5">
+                <form onSubmit={handleAddList} className="w-[82vw] sm:w-[85vw] md:w-[272px] flex-shrink-0 bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-3 h-fit shadow-xl snap-start">
                   <input
                     autoFocus
                     placeholder="Nombre de la lista..."
@@ -770,11 +771,9 @@ const BoardDetailPage: React.FC = () => {
                ) : (
                 <button
                   onClick={() => setIsAddingList(true)}
-                  className="w-[72vw] sm:w-[80vw] md:w-80 h-[60px] flex items-center justify-center gap-2 rounded bg-white/40 dark:bg-white/5 border-2 border-dashed border-zinc-300 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3]/50 hover:bg-white dark:hover:bg-white/10 transition-all font-bold text-sm group flex-shrink-0"
+                  className="w-[82vw] sm:w-[85vw] md:w-[272px] h-[52px] flex items-center justify-start px-4 gap-3 rounded-xl md:rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-white/10 transition-all font-bold text-sm flex-shrink-0 snap-start shadow-lg backdrop-blur-md"
                 >
-                  <div className="p-1 rounded bg-zinc-100 dark:bg-white/10 group-hover:bg-indigo-100 dark:group-hover:bg-[#6C5DD3]/20 transition-colors">
-                    <Plus size={18} strokeWidth={3} />
-                  </div>
+                  <Plus size={18} strokeWidth={3} />
                   Añadir otra lista
                 </button>
               )
@@ -786,7 +785,7 @@ const BoardDetailPage: React.FC = () => {
 
           <DragOverlay dropAnimation={null}>
             {activeCard ? (
-              <div className="w-[280px] rotate-[3deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-90 transition-transform duration-200">
+              <div className="w-[240px] rotate-[3deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-90 transition-transform duration-200">
                 <SortableCard card={activeCard} onClick={() => {}} />
               </div>
             ) : null}

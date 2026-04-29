@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { toast } from 'sonner';
-import { Board } from '../types/board';
+import type { Board } from '../types/board';
 
 
 interface List {
@@ -86,9 +86,11 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
         newPosition: (selectedPosition - 1) * 1024 + 1024,
       });
 
-      toast.success('Tarjeta movida', {
-        description: 'La tarjeta se ha movido correctamente.'
-      });
+      if (selectedBoardId !== currentBoardId || selectedListId !== currentListId) {
+        toast.success('Tarjeta movida', {
+          description: 'La tarjeta se ha movido correctamente.'
+        });
+      }
 
       onMoveSuccess(selectedBoardId !== currentBoardId);
       onClose();

@@ -123,19 +123,19 @@ const BoardsPage: React.FC = () => {
                  </div>
 
                  <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
-                       <button className="px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded text-[12px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                    <div className="flex bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
+                       <button className="px-3 sm:px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded text-[12px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                          <Filter size={14} />
-                         Todos
+                         <span className="hidden xs:inline">Todos</span>
                          <ChevronDown size={14} />
                        </button>
                        {(isGodMode || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
                         <button 
                           onClick={() => setShowInviteModal(true)}
-                          className="px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"
+                          className="px-3 sm:px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"
                         >
                           <Users size={14} />
-                          Miembros
+                          <span>Miembros</span>
                         </button>
                        )}
                     </div>

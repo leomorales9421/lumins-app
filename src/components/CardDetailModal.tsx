@@ -439,6 +439,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       // Refresh labels list
       const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
       setBoardLabels(response.data.labels);
+      // Also refresh card details to update badges if this label is on the card
+      fetchCardDetails(true);
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error editing label:', err);
     }
@@ -453,6 +456,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       // Refresh labels list
       const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
       setBoardLabels(response.data.labels);
+      // Refresh card details
+      fetchCardDetails(true);
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting label:', err);
     }
@@ -623,6 +629,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setActivePopover(null);
     } catch (err) {
       console.error('Error uploading file:', err);
+      toast.error('Error al subir el archivo', {
+        description: 'Hubo un problema al procesar tu archivo. Por favor, inténtalo de nuevo.'
+      });
     } finally {
       setIsUploading(false);
     }
@@ -644,6 +653,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setActivePopover(null);
     } catch (err) {
       console.error('Error attaching link:', err);
+      toast.error('Error al adjuntar el enlace', {
+        description: 'No se pudo adjuntar el enlace. Verifica la URL e inténtalo de nuevo.'
+      });
     } finally {
       setIsUploading(false);
     }
@@ -770,6 +782,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     onClose={() => setActivePopover(null)}
                     onUploadFile={handleFileUpload}
                     onAttachLink={handleAttachLink}
+                    isUploading={isUploading}
                   />
                 }
               />
@@ -1041,6 +1054,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                           onClose={() => setActivePopover(null)}
                           onUploadFile={handleFileUpload}
                           onAttachLink={handleAttachLink}
+                          isUploading={isUploading}
                         />
                       )}
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   Layout, 
@@ -10,7 +10,14 @@ import {
   ExternalLink,
   Lock,
   Globe,
-  Database
+  Database,
+  HardDrive,
+  CheckCircle,
+  XCircle,
+  Copy,
+  Check,
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,15 +47,31 @@ interface Workspace {
   createdAt: string;
 }
 
+interface DriveStatus {
+  configured: boolean;
+  connected: boolean;
+  variables: Record<string, boolean>;
+  redirectUri: string | null;
+}
+
 const SystemAdminPage: React.FC = () => {
   const { user } = useAuth();
   const { isGodMode, setGodMode } = usePermission();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [stats, setStats] = useState<Stats | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Drive state
+  const [driveStatus, setDriveStatus] = useState<DriveStatus | null>(null);
+  const [driveLoading, setDriveLoading] = useState(true);
+  const [driveAuthUrl, setDriveAuthUrl] = useState<string | null>(null);
+  const [driveAuthUrlLoading, setDriveAuthUrlLoading] = useState(false);
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (user?.globalRole !== 'SYSTEM_ADMIN') {
@@ -56,23 +79,70 @@ const SystemAdminPage: React.FC = () => {
       return;
     }
 
+    const token = searchParams.get('token');
+    const connected = searchParams.get('drive');
+    if (token && connected === 'connected') {
+      setPendingToken(token);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('token');
+      newParams.delete('drive');
+      setSearchParams(newParams, { replace: true });
+    }
+
     const fetchData = async () => {
       try {
-        const [statsRes, wsRes] = await Promise.all([
+        const [statsRes, wsRes, driveRes] = await Promise.all([
           apiClient.get<{ data: Stats }>('/api/system/stats'),
-          apiClient.get<{ data: { workspaces: Workspace[] } }>('/api/system/workspaces')
+          apiClient.get<{ data: { workspaces: Workspace[] } }>('/api/system/workspaces'),
+          apiClient.get<{ data: DriveStatus }>('/api/system/drive/status')
         ]);
         setStats(statsRes.data);
         setWorkspaces(wsRes.data.workspaces);
+        setDriveStatus(driveRes.data);
       } catch (err) {
         console.error('Failed to fetch system data', err);
       } finally {
         setIsLoading(false);
+        setDriveLoading(false);
       }
     };
 
     fetchData();
-  }, [user, navigate]);
+  }, [user, navigate, searchParams, setSearchParams]);
+
+  const handleGetAuthUrl = useCallback(async () => {
+    setDriveAuthUrlLoading(true);
+    try {
+      const res = await apiClient.get<{ data: { url: string } }>('/api/system/drive/auth-url');
+      const url = new URL(res.data.url);
+      url.searchParams.set('redirect', window.location.href);
+      setDriveAuthUrl(url.toString());
+      window.open(url.toString(), '_blank');
+    } catch (err: any) {
+      console.error('Failed to get Drive auth URL', err);
+    } finally {
+      setDriveAuthUrlLoading(false);
+    }
+  }, []);
+
+  const handleCopyToken = useCallback(async () => {
+    if (pendingToken) {
+      try {
+        await navigator.clipboard.writeText(pendingToken);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        const textarea = document.createElement('textarea');
+        textarea.value = pendingToken;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    }
+  }, [pendingToken]);
 
   const filteredWorkspaces = workspaces.filter(ws => 
     ws.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -128,11 +198,128 @@ const SystemAdminPage: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard title="Usuarios Totales" value={stats?.users || 0} icon={<Users size={20} />} color="text-blue-400" />
           <StatCard title="Espacios" value={stats?.workspaces || 0} icon={<Globe size={20} />} color="text-purple-400" />
           <StatCard title="Tableros" value={stats?.boards || 0} icon={<Layout size={20} />} color="text-emerald-400" />
           <StatCard title="Tarjetas" value={stats?.cards || 0} icon={<Database size={20} />} color="text-orange-400" />
+        </div>
+
+        {/* Google Drive Section */}
+        <div className="bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl mb-8">
+          <div className="p-6 border-b border-white/5">
+            <h2 className="text-xl font-bold flex items-center gap-3">
+              <HardDrive size={20} className="text-emerald-400" />
+              Google Drive Storage
+            </h2>
+          </div>
+          <div className="p-6">
+            {driveLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
+              </div>
+            ) : driveStatus ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <DriveStatusCard
+                    title="Configurado"
+                    ok={driveStatus.configured}
+                    description={driveStatus.configured ? 'Credenciales OK' : 'Faltan variables en .env'}
+                  />
+                  <DriveStatusCard
+                    title="Conectado"
+                    ok={driveStatus.connected}
+                    description={driveStatus.connected ? 'Refresh token presente' : 'Sin refresh token'}
+                  />
+                  <DriveStatusCard
+                    title="Folder ID"
+                    ok={driveStatus.variables.GOOGLE_DRIVE_FOLDER_ID}
+                    description={driveStatus.variables.GOOGLE_DRIVE_FOLDER_ID ? 'Configurado' : 'Falta en .env'}
+                  />
+                </div>
+
+                {pendingToken && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 mb-6"
+                  >
+                    <div className="flex items-center gap-3 text-emerald-400 mb-4">
+                      <CheckCircle size={20} />
+                      <span className="font-bold">Refresh Token obtenido exitosamente</span>
+                    </div>
+                    <p className="text-sm text-zinc-400 mb-3">
+                      Cópialo y pégalo en tu archivo <code className="text-emerald-300 bg-black/30 px-1.5 py-0.5 rounded text-xs">.env</code> como <code className="text-emerald-300 bg-black/30 px-1.5 py-0.5 rounded text-xs">GOOGLE_REFRESH_TOKEN</code>, luego reinicia el servidor.
+                    </p>
+                    <div className="relative">
+                      <pre className="bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre-wrap break-all">
+                        {pendingToken}
+                      </pre>
+                      <button
+                        onClick={handleCopyToken}
+                        className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all"
+                        title="Copiar"
+                      >
+                        {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} className="text-zinc-400" />}
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setPendingToken(null)}
+                      className="mt-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                    >
+                      Descartar
+                    </button>
+                  </motion.div>
+                )}
+
+                {!driveStatus.configured ? (
+                  <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <AlertTriangle size={20} className="text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-400 mb-1">Configuración incompleta</p>
+                      <p className="text-xs text-zinc-400">
+                        Agrega <code className="text-amber-300 bg-black/30 px-1 py-0.5 rounded">GOOGLE_CLIENT_ID</code>,{' '}
+                        <code className="text-amber-300 bg-black/30 px-1 py-0.5 rounded">GOOGLE_CLIENT_SECRET</code>,{' '}
+                        <code className="text-amber-300 bg-black/30 px-1 py-0.5 rounded">GOOGLE_REDIRECT_URI</code> y{' '}
+                        <code className="text-amber-300 bg-black/30 px-1 py-0.5 rounded">GOOGLE_DRIVE_FOLDER_ID</code> en tu archivo .env.
+                      </p>
+                    </div>
+                  </div>
+                ) : driveStatus.connected ? (
+                  <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                    <CheckCircle size={20} className="text-emerald-400 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-emerald-400">Sistema conectado a Google Drive</p>
+                      <p className="text-xs text-zinc-400">Los archivos nuevos se suben automáticamente a Drive.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <button
+                      onClick={handleGetAuthUrl}
+                      disabled={driveAuthUrlLoading}
+                      className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-xl text-sm font-bold transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      {driveAuthUrlLoading ? (
+                        <RefreshCw size={18} className="animate-spin" />
+                      ) : (
+                        <ExternalLink size={18} />
+                      )}
+                      {driveAuthUrlLoading ? 'Generando...' : 'Conectar con Google Drive'}
+                    </button>
+                    <p className="text-xs text-zinc-500">
+                      Se abrirá una nueva pestaña para autenticarte con Google. Luego serás redirigido de vuelta aquí con el token.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <XCircle size={20} className="text-red-400 shrink-0" />
+                <p className="text-sm text-red-400">No se pudo obtener el estado de Google Drive.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Workspaces Table */}
@@ -238,6 +425,18 @@ const StatCard: React.FC<{ title: string; value: number; icon: React.ReactNode; 
       <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{title}</span>
     </div>
     <div className="text-3xl font-black tracking-tighter">{value.toLocaleString()}</div>
+  </div>
+);
+
+const DriveStatusCard: React.FC<{ title: string; ok: boolean; description: string }> = ({ title, ok, description }) => (
+  <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-5 flex items-center gap-4 hover:border-white/10 transition-all">
+    <div className={`p-2.5 rounded-xl ${ok ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+      {ok ? <CheckCircle size={20} /> : <XCircle size={20} />}
+    </div>
+    <div>
+      <div className="font-bold text-sm">{title}</div>
+      <div className="text-xs text-zinc-500">{description}</div>
+    </div>
   </div>
 );
 
