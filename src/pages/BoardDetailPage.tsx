@@ -26,7 +26,7 @@ import { useStructuredLogger } from '../components/NotificationProvider';
 import { 
   DndContext, 
   closestCorners, 
-  PointerSensor, 
+  MouseSensor, 
   TouchSensor,
   useSensor, 
   useSensors, 
@@ -217,7 +217,7 @@ const BoardDetailPage: React.FC = () => {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { 
+    useSensor(MouseSensor, { 
       activationConstraint: { distance: 5 },
       disabled: !canEdit
     }),
