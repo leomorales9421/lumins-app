@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../types/board';
 import { SortableCard } from './SortableCard';
 
@@ -87,12 +88,13 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
     <div
       ref={setNodeRef}
       style={style}
+      data-list-id={list.id}
       className={`
         cu-column h-fit max-h-full flex flex-col transition-all duration-300
-        w-[82vw] sm:w-[85vw] md:w-[272px] flex-shrink-0 snap-start
-        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-2 sm:p-2.5 shadow-xl
+        w-[85vw] sm:w-[85vw] md:w-[300px] flex-shrink-0 snap-center md:snap-start
+        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl md:rounded-lg border border-white/30 dark:border-white/10 p-2 sm:p-3 shadow-xl
         ${isDragging ? 'opacity-40 scale-[0.98] z-50' : ''}
-        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/30 ring-offset-1 bg-white/95 dark:bg-[#1C1F26]' : ''}
+        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/40 ring-offset-1 bg-white/95 dark:bg-[#1C1F26]' : ''}
       `}
     >
       {/* Column Header */}
@@ -148,35 +150,66 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
               <MoreHorizontal size={15} strokeWidth={2.5} />
             </button>
 
-            {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-44 cu-dropdown py-1 z-[100] bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded shadow-xl">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditingTitle(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-[12px] font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 flex items-center gap-2"
-                >
-                  <Pencil size={13} strokeWidth={2.5} className="text-zinc-400 dark:text-zinc-500" />
-                  Editar nombre
-                </button>
-                <div className="h-px bg-zinc-100 dark:bg-white/5 my-0.5 mx-2" />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onDeleteList && window.confirm('¿Eliminar esta lista?')) {
-                      onDeleteList(list.id);
-                    }
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2"
-                >
-                  <Trash2 size={13} strokeWidth={2.5} />
-                  Eliminar lista
-                </button>
-              </div>
-            )}
+            <AnimatePresence>
+              {isMenuOpen && (
+                <>
+                  {/* Overlay for mobile to close when clicking outside */}
+                  <div className="fixed inset-0 z-[90] md:hidden" onClick={() => setIsMenuOpen(false)} />
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Opciones de lista</span>
+                      <button onClick={() => setIsMenuOpen(false)} className="md:hidden p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded">
+                        <X size={14} />
+                      </button>
+                    </div>
+                    
+                    <div className="p-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditingTitle(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] rounded-lg transition-all flex items-center gap-3"
+                      >
+                        <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center">
+                          <Pencil size={14} strokeWidth={2.5} />
+                        </div>
+                        Editar nombre
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onDeleteList && window.confirm('¿Eliminar esta lista?')) {
+                            onDeleteList(list.id);
+                          }
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-3"
+                      >
+                        <div className="w-7 h-7 rounded bg-red-100/50 dark:bg-red-500/5 flex items-center justify-center">
+                          <Trash2 size={14} strokeWidth={2.5} />
+                        </div>
+                        Eliminar lista
+                      </button>
+                    </div>
+
+                    <div className="p-3 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5">
+                      <p className="text-[10px] text-zinc-400 leading-tight italic">
+                        Esta acción no se puede deshacer si la lista tiene tarjetas.
+                      </p>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>

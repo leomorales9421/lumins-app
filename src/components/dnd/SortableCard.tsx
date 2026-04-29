@@ -42,7 +42,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-    touchAction: 'none',
+    touchAction: 'manipulation',
   };
 
   const checklistItems = card.checklists?.flatMap(cl => cl.items) || [];
@@ -61,7 +61,8 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
       {...listeners}
       onClick={onClick}
       className={`cu-card ${priorityClass} cursor-grab active:cursor-grabbing group
-        ${isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50' : ''}
+        rounded-xl md:rounded-lg mb-2 shadow-sm hover:shadow-md transition-all duration-200
+        ${isDragging ? 'opacity-50 scale-105 shadow-2xl z-[1000] rotate-[2deg]' : ''}
       `}
     >
       <div className="px-2.5 pt-2.5 pb-2 flex flex-col gap-2">

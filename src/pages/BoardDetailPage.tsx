@@ -82,9 +82,40 @@ const BoardDetailPage: React.FC = () => {
   const canEdit = canEditContent;
   const isAdmin = canManageBoard;
 
+  const [isListNavOpen, setIsListNavOpen] = useState(false);
   const { logSuccess } = useStructuredLogger();
 
-  
+  const scrollToList = (listId: string) => {
+    const element = document.querySelector(`[data-list-id="${listId}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+    setIsListNavOpen(false);
+  };
+  // Grab to scroll logic
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPanning, setIsPanning] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Only scroll if we're clicking on the main canvas background
+    if ((e.target as HTMLElement).id !== 'board-canvas' && !(e.target as HTMLElement).classList.contains('canvas-spacer')) return;
+    
+    setIsPanning(true);
+    setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isPanning || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollRef.current.offsetLeft || 0);
+    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => setIsPanning(false);
   const listsRef = useRef<List[]>(lists);
   useEffect(() => {
     listsRef.current = lists;
@@ -717,12 +748,68 @@ const BoardDetailPage: React.FC = () => {
                 <span className="hidden lg:inline">Configuración</span>
               </button>
             )}
+
+            {/* List Navigator for quick jump */}
+            <div className="relative group">
+              <button 
+                onClick={() => setIsListNavOpen(!isListNavOpen)}
+                className={`flex items-center justify-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
+                  isListNavOpen 
+                    ? 'bg-white/20 border-white/40 text-white' 
+                    : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/15'
+                }`}
+                title="Navegar por listas"
+              >
+                <Menu size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Listas</span>
+              </button>
+
+              <AnimatePresence>
+                {isListNavOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsListNavOpen(false)} />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded-xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                    >
+                      <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Saltar a lista</span>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto px-2 space-y-1 custom-scrollbar">
+                        {lists.map(list => (
+                          <button 
+                            key={list.id}
+                            onClick={() => scrollToList(list.id)}
+                            className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 rounded-lg transition-all text-sm text-white/70 hover:text-white group"
+                          >
+                            <span className="truncate font-bold">{list.name || list.title}</span>
+                            <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40 group-hover:text-white/60 transition-colors">
+                              {list.cards?.length || 0}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Canvas Area (Lists) */}
-      <main className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent scrollbar-hide ${activeCard ? '' : 'snap-x snap-proximity'}`}>
+      <main 
+        id="board-canvas"
+        ref={scrollRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+      >
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCorners} 
@@ -780,7 +867,7 @@ const BoardDetailPage: React.FC = () => {
             )}
 
             {/* Extra spacer for scroll */}
-            <div className="w-8 flex-shrink-0" />
+            <div className="w-8 flex-shrink-0 canvas-spacer" />
           </div>
 
           <DragOverlay dropAnimation={null}>
