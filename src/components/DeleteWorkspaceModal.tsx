@@ -55,7 +55,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (confirmText !== workspaceName) return;
+    if (confirmText.trim().toLowerCase() !== workspaceName.trim().toLowerCase()) return;
 
     setIsDeleting(true);
     try {
@@ -164,7 +164,7 @@ const DeleteWorkspaceModal: React.FC<DeleteWorkspaceModalProps> = ({
           </button>
           <button
             onClick={handleDelete}
-            disabled={confirmText !== workspaceName || isDeleting}
+            disabled={confirmText.trim().toLowerCase() !== workspaceName.trim().toLowerCase() || isDeleting}
             className="bg-rose-500 text-white font-bold px-4 py-2 rounded shadow-sm hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[100px] flex items-center justify-center"
           >
             {isDeleting ? (

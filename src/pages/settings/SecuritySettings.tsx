@@ -10,7 +10,29 @@ interface Session {
   createdAt: string;
   expiresAt: string;
   isCurrent: boolean;
+  userAgent?: string;
+  ipAddress?: string;
 }
+
+const parseUA = (ua?: string) => {
+  if (!ua) return 'Dispositivo desconocido';
+  if (ua.includes('Mobi')) return 'Dispositivo móvil';
+  if (ua.includes('Windows')) return 'Windows';
+  if (ua.includes('Macintosh')) return 'Mac OS';
+  if (ua.includes('Linux')) return 'Linux';
+  if (ua.includes('Android')) return 'Android';
+  if (ua.includes('iPhone')) return 'iPhone';
+  return 'Navegador Web';
+};
+
+const getBrowser = (ua?: string) => {
+  if (!ua) return '';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+  if (ua.includes('Edge')) return 'Edge';
+  return 'Navegador';
+};
 
 const SecuritySettings: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -26,6 +48,7 @@ const SecuritySettings: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [revokingOthers, setRevokingOthers] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
   const fetchSessions = async () => {
@@ -83,6 +106,21 @@ const SecuritySettings: React.FC = () => {
       setSessionError('No se pudo cerrar la sesión. Inténtalo de nuevo.');
     } finally {
       setRevokingId(null);
+    }
+  };
+
+  const handleRevokeOtherSessions = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres cerrar todas las demás sesiones?')) return;
+    
+    setRevokingOthers(true);
+    setSessionError('');
+    try {
+      await apiClient.delete('/api/auth/sessions/others');
+      setSessions(prev => prev.filter(s => s.isCurrent));
+    } catch (err) {
+      setSessionError('No se pudieron cerrar las otras sesiones.');
+    } finally {
+      setRevokingOthers(false);
     }
   };
 
@@ -167,14 +205,27 @@ const SecuritySettings: React.FC = () => {
 
       {/* Active Sessions Card */}
       <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
-            <Monitor size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
+              <Monitor size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Sesiones Activas</h3>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Dispositivos con acceso a tu cuenta.</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Sesiones Activas</h3>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Dispositivos con acceso a tu cuenta.</p>
-          </div>
+          
+          {!sessionsLoading && sessions.length > 1 && (
+            <button
+              onClick={handleRevokeOtherSessions}
+              disabled={revokingOthers}
+              className="text-xs sm:text-sm font-bold text-rose-500 hover:text-rose-600 flex items-center gap-2 px-3 py-1.5 rounded bg-rose-50 dark:bg-rose-500/10 transition-colors disabled:opacity-50"
+            >
+              {revokingOthers ? <Loader2 size={14} className="animate-spin" /> : <AlertTriangle size={14} />}
+              Cerrar todas las demás sesiones
+            </button>
+          )}
         </div>
 
         {sessionError && (
@@ -184,7 +235,7 @@ const SecuritySettings: React.FC = () => {
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
           {sessionsLoading ? (
             <>
               {[1, 2, 3].map(i => (
@@ -201,16 +252,28 @@ const SecuritySettings: React.FC = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded bg-white dark:bg-[#1C1F26] flex items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-white/10 flex-shrink-0">
-                    <Smartphone size={20} />
+                    {session.userAgent?.includes('Mobi') ? <Smartphone size={20} /> : <Monitor size={20} />}
                   </div>
                   <div>
-                    <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[13px] sm:text-sm leading-tight sm:leading-normal">
-                      Sesión iniciada el{' '}
-                      {format(new Date(session.createdAt), "d 'de' MMMM, yyyy", { locale: es })}
-                    </p>
-                    <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                      Expira el {format(new Date(session.expiresAt), "d 'de' MMMM, yyyy", { locale: es })}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[13px] sm:text-sm leading-tight sm:leading-normal">
+                        {parseUA(session.userAgent)} • {getBrowser(session.userAgent)}
+                      </p>
+                      {session.isCurrent && (
+                        <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase">
+                          Actual
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5 mt-0.5">
+                      <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400">
+                        Iniciada el {format(new Date(session.createdAt), "d 'de' MMMM, HH:mm", { locale: es })}
+                        {session.ipAddress && ` • IP: ${session.ipAddress}`}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                        Expira el {format(new Date(session.expiresAt), "d 'de' MMMM, yyyy", { locale: es })}
+                      </p>
+                    </div>
                   </div>
                 </div>
 

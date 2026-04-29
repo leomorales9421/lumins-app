@@ -9,6 +9,7 @@ export interface Card {
   priority?: 'P0' | 'P1' | 'P2' | 'P3' | null;
   riskLevel?: 'low' | 'med' | 'high' | null;
   module?: string | null;
+  isDone?: boolean;
   createdAt?: string;
   updatedAt?: string;
   labels?: Array<{ id: string; name: string; color: string }>;
@@ -58,6 +59,7 @@ export interface Board {
   members?: BoardMember[];
   lists?: List[];
   background?: string;
+  completedCardsCount?: number;
   workspace?: {
     id: string;
     name: string;

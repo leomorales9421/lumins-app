@@ -10,6 +10,7 @@ interface MetricsData {
     totalCards: number;
     totalLists: number;
     totalMembers: number;
+    completedCards: number;
     lists: Array<{
       id: string;
       name: string;
@@ -155,7 +156,7 @@ const BoardMetrics: React.FC<BoardMetricsProps> = ({ boardId }) => {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-gradient-to-br from-[#1c2327] to-[#111618] border border-white/5 rounded p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">Tarjetas</h3>
@@ -163,6 +164,25 @@ const BoardMetrics: React.FC<BoardMetricsProps> = ({ boardId }) => {
           </div>
           <p className="text-3xl font-bold text-white">{overview.totalCards}</p>
           <p className="text-sm text-[#9db0b9] mt-2">Total de tarjetas en el tablero</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-[#1c2327] to-[#111618] border border-white/5 rounded p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white">Completadas</h3>
+            <span className="material-symbols-outlined text-green-500">task_alt</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-bold text-white">{overview.completedCards}</p>
+            <p className="text-sm text-[#9db0b9]">
+              ({overview.totalCards > 0 ? Math.round((overview.completedCards / overview.totalCards) * 100) : 0}%)
+            </p>
+          </div>
+          <div className="mt-3 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-green-500 rounded-full transition-all duration-500"
+              style={{ width: `${overview.totalCards > 0 ? (overview.completedCards / overview.totalCards) * 100 : 0}%` }}
+            />
+          </div>
         </div>
 
         <div className="bg-gradient-to-br from-[#1c2327] to-[#111618] border border-white/5 rounded p-6">

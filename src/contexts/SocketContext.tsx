@@ -50,6 +50,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       });
 
+      // Listener for user updates (including avatars)
+      newSocket.on('user_updated', (payload) => {
+        console.log('User updated:', payload);
+        window.dispatchEvent(new CustomEvent('lumins:user-updated', { detail: payload }));
+      });
+
       // Global permission update listener
       newSocket.on('permission:updated', (payload) => {
         console.log('Permission updated:', payload);

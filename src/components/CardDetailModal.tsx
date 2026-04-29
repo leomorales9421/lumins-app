@@ -74,6 +74,7 @@ interface CardData {
   priority?: 'P0' | 'P1' | 'P2' | 'P3' | null;
   riskLevel?: 'low' | 'med' | 'high' | null;
   module?: string | null;
+  isDone?: boolean;
 }
 
 // ActivityItem interface is now imported from ../types/activity
@@ -181,7 +182,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         labels: normalizedLabels,
         priority: cardData.priority,
         riskLevel: cardData.riskLevel,
-        module: cardData.module
+        module: cardData.module,
+        isDone: cardData.isDone
       };
       
       setCard(mappedCard);
@@ -605,6 +607,24 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   };
 
+  const handleToggleDone = async () => {
+    if (!cardId || !card) return;
+    
+    const newDoneState = !card.isDone;
+    
+    // Optimistic update
+    setCard({ ...card, isDone: newDoneState });
+    
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, { isDone: newDoneState });
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error toggling done state:', err);
+      // Rollback
+      setCard({ ...card, isDone: card.isDone });
+    }
+  };
+
   const handleFileUpload = async (file: File) => {
     if (!file || !cardId) return;
 
@@ -754,6 +774,21 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 />
               }
             />
+            <button
+              onClick={handleToggleDone}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded font-bold text-[12px] transition-all border ${
+                card?.isDone 
+                  ? 'bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20' 
+                  : 'bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3]'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                card?.isDone ? 'bg-green-500 border-green-500' : 'border-zinc-400 dark:border-zinc-500'
+              }`}>
+                {card?.isDone && <CheckSquare size={10} className="text-white" />}
+              </div>
+              {card?.isDone ? 'Listo' : 'Marcar como listo'}
+            </button>
             {isSaving && <span className="text-[11px] font-semibold text-[#6C5DD3] animate-pulse">Guardando...</span>}
             {isUploading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs font-bold animate-pulse">

@@ -39,6 +39,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 }) => {
   const { user: authUser } = useAuth();
   const [imageError, setImageError] = React.useState(false);
+  const [cachedUrl, setCachedUrl] = React.useState<string | null>(null);
 
   const getInitials = (nameStr: string) => {
     if (!nameStr) return '?';
@@ -52,28 +53,63 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   };
 
   const displayName = propUser?.name || propName || authUser?.name || 'Usuario';
-  // Prioridad: 
-  // 1. avatarUrl pasado por props
-  // 2. avatarUrl del usuario pasado por props
-  // 3. avatarUrl del usuario autenticado (solo si no se pasó lo anterior)
   let displayAvatarUrl = propAvatarUrl || propUser?.avatarUrl || authUser?.avatarUrl;
   const initials = getInitials(displayName);
 
   // Formatear la URL si es relativa
   if (displayAvatarUrl && !displayAvatarUrl.startsWith('http') && !displayAvatarUrl.startsWith('data:')) {
-    // Si no empieza por / , se lo ponemos
     const path = displayAvatarUrl.startsWith('/') ? displayAvatarUrl : `/uploads/avatars/${displayAvatarUrl}`;
     displayAvatarUrl = `${API_BASE_URL}${path}`;
   }
 
+  // Lógica de Cache Persistente
+  React.useEffect(() => {
+    let isMounted = true;
+    
+    const loadCachedImage = async () => {
+      if (displayAvatarUrl && !displayAvatarUrl.startsWith('data:')) {
+        const { getCachedImage } = await import('../../lib/image-cache');
+        const url = await getCachedImage(displayAvatarUrl);
+        if (isMounted) setCachedUrl(url);
+      } else {
+        if (isMounted) setCachedUrl(displayAvatarUrl || null);
+      }
+    };
+
+    loadCachedImage();
+
+    // Escuchar actualizaciones de usuario para invalidar cache si es necesario
+    const handleUserUpdate = (e: any) => {
+      const { userId: updatedUserId, avatarUrl: newUrl } = e.detail;
+      const currentUserId = propUser?.id || (propUser as any)?.id || authUser?.id;
+      
+      if (updatedUserId === currentUserId && newUrl !== displayAvatarUrl) {
+        // Si el usuario cambió su avatar, forzamos recarga
+        setImageError(false);
+        setCachedUrl(null);
+        loadCachedImage();
+      }
+    };
+
+    window.addEventListener('lumins:user-updated', handleUserUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('lumins:user-updated', handleUserUpdate);
+    };
+  }, [displayAvatarUrl, propUser?.id, authUser?.id]);
+
 
   const containerClasses = `relative flex items-center justify-center rounded border border-zinc-100 shadow-sm flex-shrink-0 overflow-hidden bg-zinc-50 ${sizeClasses[size]} ${className}`;
 
-  if (displayAvatarUrl && !imageError) {
+  // Usar cachedUrl si está disponible, sino el original
+  const finalSrc = cachedUrl || displayAvatarUrl;
+
+  if (finalSrc && !imageError) {
     return (
       <div className={containerClasses}>
         <img
-          src={displayAvatarUrl}
+          src={finalSrc}
           alt={displayName}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}

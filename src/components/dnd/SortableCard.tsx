@@ -80,9 +80,16 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
         )}
 
         {/* Title */}
-        <p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100 leading-snug group-hover:text-[#6C5DD3] transition-colors">
-          {card.title}
-        </p>
+        <div className="flex items-start justify-between gap-2">
+          <p className={`text-[13px] font-semibold leading-snug group-hover:text-[#6C5DD3] transition-colors ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}>
+            {card.title}
+          </p>
+          {card.isDone && (
+            <div className="bg-emerald-500 rounded-full p-0.5 shadow-sm flex-shrink-0" title="Tarjeta terminada">
+              <CheckSquare size={10} className="text-white" />
+            </div>
+          )}
+        </div>
 
         {/* Checklist progress bar */}
         {totalItems > 0 && (

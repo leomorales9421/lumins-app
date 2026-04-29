@@ -64,6 +64,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     loadUser();
+
+    // Listen for real-time user updates (from socket or other tabs)
+    const handleUserUpdate = (e: any) => {
+      const updatedUser = e.detail;
+      setUser(prevUser => {
+        if (prevUser && prevUser.id === updatedUser.userId) {
+          return {
+            ...prevUser,
+            ...(updatedUser.avatarUrl && { avatarUrl: updatedUser.avatarUrl }),
+            ...(updatedUser.name && { name: updatedUser.name })
+          };
+        }
+        return prevUser;
+      });
+    };
+
+    window.addEventListener('lumins:user-updated', handleUserUpdate);
+    return () => window.removeEventListener('lumins:user-updated', handleUserUpdate);
   }, []);
 
   const refreshUser = async () => {

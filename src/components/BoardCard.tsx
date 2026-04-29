@@ -16,7 +16,9 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   // For now, if we don't have real progress data from the backend, 
   // we default to 0% for new boards or calculate based on available info.
   // In a real scenario, this would come from a 'progress' or 'stats' field in the API.
-  const progress = board._count?.cards === 0 ? 0 : 0; // Defaulting to 0 for now as we don't have 'closed' count in summary
+  const totalCards = board._count?.cards || 0;
+  const completedCards = board.completedCardsCount || 0;
+  const progress = totalCards === 0 ? 0 : Math.round((completedCards / totalCards) * 100);
 
   return (
     <div
