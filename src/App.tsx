@@ -28,6 +28,7 @@ const ProfileSettings = lazy(() => import('./pages/settings/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/settings/SecuritySettings'));
 const NotificationSettings = lazy(() => import('./pages/settings/NotificationSettings'));
 const PreferenceSettings = lazy(() => import('./pages/settings/PreferenceSettings'));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 
 const PageLoader = () => (
   <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
@@ -101,6 +102,7 @@ function App() {
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/invite" element={<InvitePage />} />
+                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   
                   <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                     <Route path="/app" element={<BoardsPage />} />

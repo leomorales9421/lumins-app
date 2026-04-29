@@ -222,6 +222,9 @@ const LoginPage: React.FC = () => {
 
             <button 
               type="button"
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/google`;
+              }}
               className="h-12 sm:h-11 border border-[#E8E9EC] rounded-xl sm:rounded text-[#374151] font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#F4F5F7] transition-all active:scale-[0.98]"
             >
                <svg width="20" height="20" viewBox="0 0 24 24">

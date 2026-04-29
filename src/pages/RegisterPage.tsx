@@ -217,6 +217,9 @@ const RegisterPage: React.FC = () => {
 
             <button 
               type="button"
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/google`;
+              }}
               className="h-12 sm:h-11 bg-white border border-zinc-200 rounded-xl sm:rounded text-[#111827] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98]"
             >
                <svg width="20" height="20" viewBox="0 0 24 24">
