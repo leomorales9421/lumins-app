@@ -131,7 +131,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
         </div>
 
         {canEdit && (
-          <div className="flex items-center gap-0.5 flex-shrink-0" ref={menuRef}>
+          <div className="relative flex items-center gap-0.5 flex-shrink-0" ref={menuRef}>
             {/* Quick add card */}
             <button
               onClick={(e) => { e.stopPropagation(); setIsAddingCard(true); }}
