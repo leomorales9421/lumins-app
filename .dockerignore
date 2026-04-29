@@ -1,4 +1,4 @@
 node_modules/
 dist/
 .git/
-.env*
+# .env* (Removed to allow build-time env vars)
