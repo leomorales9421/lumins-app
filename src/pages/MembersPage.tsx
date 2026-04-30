@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Users, Search, Mail, Shield, Layout, MoreHorizontal, UserPlus, ChevronRight, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
@@ -18,6 +18,8 @@ const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const { user } = useAuth();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const workspaceRef = useRef<Workspace | null>(null);
+  useEffect(() => { workspaceRef.current = workspace; }, [workspace]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,7 +29,7 @@ const MembersPage: React.FC = () => {
 
   const fetchWorkspace = useCallback(async () => {
     if (!workspaceId) return;
-    if (!workspace) setIsLoading(true);
+    if (!workspaceRef.current) setIsLoading(true);
     else setIsRefreshing(true);
 
     try {
@@ -45,7 +47,7 @@ const MembersPage: React.FC = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [workspaceId, workspace]);
+  }, [workspaceId]); // Removed workspace from dependencies
 
   useEffect(() => {
     fetchWorkspace();

@@ -61,6 +61,8 @@ const BoardDetailPage: React.FC = () => {
   useBoardSocket(id);
   
   const [board, setBoard] = useState<Board | null>(null);
+  const boardRef = useRef<Board | null>(null);
+  useEffect(() => { boardRef.current = board; }, [board]);
   const [userRole, setUserRole] = useState<string>('viewer');
   const [lists, setLists] = useState<List[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,7 +127,7 @@ const BoardDetailPage: React.FC = () => {
 
   const fetchBoard = useCallback(async (silent = false) => {
     if (!id) return;
-    if (!silent && !board) setIsLoading(true);
+    if (!silent && !boardRef.current) setIsLoading(true);
     else setIsRefreshing(true);
 
     try {
@@ -156,7 +158,7 @@ const BoardDetailPage: React.FC = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [id, navigate, filterUserId, board]);
+  }, [id, navigate, filterUserId]); // Removed board from dependencies
 
   useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
 

@@ -25,7 +25,7 @@ const BoardsPage: React.FC = () => {
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
 
   const fetchWorkspaces = useCallback(async () => {
-    if (workspaces.length === 0) setIsLoadingWorkspaces(true);
+    if (workspaces.length === 0 && isLoadingWorkspaces) setIsLoadingWorkspaces(true);
     else setIsRefreshing(true);
     
     try {
@@ -37,10 +37,10 @@ const BoardsPage: React.FC = () => {
       setIsLoadingWorkspaces(false);
       setIsRefreshing(false);
     }
-  }, [workspaces.length]);
+  }, []); // Removed workspaces.length
 
   const fetchBoards = useCallback(async () => {
-    if (boards.length === 0) setIsLoading(true);
+    if (boards.length === 0 && isLoading) setIsLoading(true);
     else setIsRefreshing(true);
 
     try {
@@ -53,7 +53,7 @@ const BoardsPage: React.FC = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [workspaceId, boards.length]);
+  }, [workspaceId]); // Removed boards.length
 
   useEffect(() => { 
     fetchBoards(); 
