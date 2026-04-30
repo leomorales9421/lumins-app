@@ -64,6 +64,7 @@ const BoardDetailPage: React.FC = () => {
   const [userRole, setUserRole] = useState<string>('viewer');
   const [lists, setLists] = useState<List[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
   const [activeList, setActiveList] = useState<List | null>(null);
@@ -122,8 +123,11 @@ const BoardDetailPage: React.FC = () => {
     listsRef.current = lists;
   }, [lists]);
 
-  const fetchBoard = useCallback(async () => {
+  const fetchBoard = useCallback(async (silent = false) => {
     if (!id) return;
+    if (!silent && !board) setIsLoading(true);
+    else setIsRefreshing(true);
+
     try {
       const response = await apiClient.get<{ data: { board: Board, userRole: string } }>(`/api/boards/${id}`);
       setBoard(response.data.board);
@@ -150,8 +154,9 @@ const BoardDetailPage: React.FC = () => {
       navigate('/app');
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  }, [id, navigate, filterUserId]);
+  }, [id, navigate, filterUserId, board]);
 
   useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
 
@@ -633,11 +638,11 @@ const BoardDetailPage: React.FC = () => {
                     </AnimatePresence>
                   </div>
 
-                  {isSaving && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10">
-                      <div className="w-1.5 h-1.5 rounded bg-emerald-400 animate-pulse" />
+                  {(isSaving || isRefreshing) && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10 animate-in fade-in zoom-in duration-300">
+                      <div className={`w-1.5 h-1.5 rounded animate-pulse ${isRefreshing ? 'bg-indigo-400' : 'bg-emerald-400'}`} />
                       <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
-                        Salvando
+                        {isRefreshing ? 'Actualizando' : 'Salvando'}
                       </span>
                     </div>
                   )}

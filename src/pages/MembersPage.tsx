@@ -19,6 +19,7 @@ const MembersPage: React.FC = () => {
   const { user } = useAuth();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<WorkspaceMember | null>(null);
@@ -27,6 +28,8 @@ const MembersPage: React.FC = () => {
   const fetchWorkspace = useCallback(async () => {
     if (!workspaceId) return;
     if (!workspace) setIsLoading(true);
+    else setIsRefreshing(true);
+
     try {
       const response = await apiClient.get<{ data: { workspace: Workspace } }>(`/api/workspaces/${workspaceId}`);
       setWorkspace(response.data.workspace);
@@ -40,8 +43,9 @@ const MembersPage: React.FC = () => {
       console.error('Failed to fetch workspace members', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, workspace]);
 
   useEffect(() => {
     fetchWorkspace();
@@ -147,7 +151,15 @@ const MembersPage: React.FC = () => {
             <Users size={18} strokeWidth={2.5} />
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em]">Gestión de Equipo</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Miembros del Equipo</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Miembros del Equipo</h1>
+            {isRefreshing && (
+               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300">
+                  <Loader2 size={14} className="animate-spin" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
+               </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">

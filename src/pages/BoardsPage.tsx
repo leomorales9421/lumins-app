@@ -9,7 +9,7 @@ import BoardCard from '../components/BoardCard';
 import InviteMembersModal from '../components/InviteMembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Layout } from 'lucide-react';
+import { Users, Filter, ChevronDown, Layout, Loader2 } from 'lucide-react';
 import { Skeleton } from '../components/ui/Skeleton';
 
 const BoardsPage: React.FC = () => {
@@ -20,11 +20,14 @@ const BoardsPage: React.FC = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
 
   const fetchWorkspaces = useCallback(async () => {
-    setIsLoadingWorkspaces(true);
+    if (workspaces.length === 0) setIsLoadingWorkspaces(true);
+    else setIsRefreshing(true);
+    
     try {
       const response = await apiClient.get<{ data: { workspaces: { id: string, name: string }[] } }>('/api/workspaces');
       setWorkspaces(response.data.workspaces || []);
@@ -32,13 +35,14 @@ const BoardsPage: React.FC = () => {
       console.error('Failed to fetch workspaces', err);
     } finally {
       setIsLoadingWorkspaces(false);
+      setIsRefreshing(false);
     }
-  }, []);
+  }, [workspaces.length]);
 
   const fetchBoards = useCallback(async () => {
-    setIsLoading(true);
-    // Removed setBoards([]) to prevent flickering and excessive skeletons
-    // This allows showing stale data while loading new data.
+    if (boards.length === 0) setIsLoading(true);
+    else setIsRefreshing(true);
+
     try {
       const url = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
       const response = await apiClient.get<{ data: { boards: Board[] } }>(url);
@@ -47,8 +51,9 @@ const BoardsPage: React.FC = () => {
       console.error(err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, boards.length]);
 
   useEffect(() => { 
     fetchBoards(); 
@@ -125,6 +130,12 @@ const BoardsPage: React.FC = () => {
                        <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Panel de Control</span>
                     </div>
                     <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Tus Proyectos</h1>
+                    {isRefreshing && (
+                       <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300 w-fit">
+                          <Loader2 size={14} className="animate-spin" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
+                       </div>
+                    )}
                  </div>
 
                  <div className="flex items-center gap-3">

@@ -12,7 +12,8 @@ import {
   Activity,
   Info,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -50,6 +51,7 @@ const WorkspaceActivityPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [activity, setActivity] = useState<CardEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filterBoard, setFilterBoard] = useState('');
   const [filterUser, setFilterUser] = useState('');
   const [filterType, setFilterType] = useState('');
@@ -67,6 +69,7 @@ const WorkspaceActivityPage: React.FC = () => {
   const fetchActivity = useCallback(async () => {
     if (!workspaceId) return;
     if (activity.length === 0) setIsLoading(true);
+    else setIsRefreshing(true);
     try {
       const params = new URLSearchParams();
       if (filterBoard) params.append('boardId', filterBoard);
@@ -86,6 +89,7 @@ const WorkspaceActivityPage: React.FC = () => {
       console.error('Failed to fetch activity', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [workspaceId, filterBoard, filterUser, filterType, currentPage]);
 
@@ -311,7 +315,15 @@ const WorkspaceActivityPage: React.FC = () => {
               </>
             ) : (
               <>
-                <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">Actividad del Espacio</h1>
+                <div className="flex items-center gap-4">
+                  <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">Actividad del Espacio</h1>
+                  {isRefreshing && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300">
+                      <Loader2 size={14} className="animate-spin" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Registro en tiempo real de todos los tableros.</p>
               </>
             )}

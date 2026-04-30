@@ -108,6 +108,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [hasMoreActivities, setHasMoreActivities] = useState(false);
   const [isFetchingMoreActivity, setIsFetchingMoreActivity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [comment, setComment] = useState('');
@@ -165,6 +166,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     if (!cardId) return;
     
     if (!silent) setIsLoading(true);
+    else setIsRefreshing(true);
     try {
       // Get card details
       const response = await apiClient.get<{ data: { card: any } }>(`/api/cards/${cardId}`);
@@ -235,6 +237,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       console.error('Error fetching card details:', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [cardId, initialData]);
 
@@ -789,9 +792,14 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               </div>
               {card?.isDone ? 'Listo' : 'Marcar como listo'}
             </button>
-            {isSaving && <span className="text-[11px] font-semibold text-[#6C5DD3] animate-pulse">Guardando...</span>}
+            {(isSaving || isRefreshing) && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] rounded text-[11px] font-bold animate-in fade-in zoom-in duration-300">
+                <Loader2 size={12} className="animate-spin" />
+                {isRefreshing ? 'Actualizando...' : 'Guardando...'}
+              </div>
+            )}
             {isUploading && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs font-bold animate-pulse">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-[11px] font-bold animate-pulse">
                 <Loader2 size={12} className="animate-spin" />
                 Subiendo...
               </div>
