@@ -41,6 +41,7 @@ import UserAvatar from './ui/UserAvatar';
 import CardModalSkeleton from './ui/CardModalSkeleton';
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useAuth } from '../contexts/AuthContext';
+import { compressAttachment } from '../lib/image-utils';
 
 
 interface Member {
@@ -639,8 +640,21 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
 
 
+
+    let fileToUpload = file;
+    
+    // Si es una imagen, la comprimimos
+    if (file.type.startsWith('image/')) {
+      try {
+        fileToUpload = await compressAttachment(file);
+      } catch (err) {
+        console.error('Error compressing attachment:', err);
+        // Continuamos con el original si falla
+      }
+    }
+
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', fileToUpload);
 
     setIsUploading(true);
     try {

@@ -3,6 +3,7 @@ import { Camera, Save, Loader2, Globe, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import { Skeleton } from '../ui/Skeleton';
+import { compressImage } from '../../lib/image-utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -92,45 +93,44 @@ const UserProfileForm: React.FC = () => {
     }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setAvatarError('');
 
-    // Validate type
+    // Validate type (initial check)
     if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
       setAvatarError('Solo se permiten imágenes JPG, PNG, GIF o WebP.');
       return;
     }
 
-    // Validate size (12MB)
-    if (file.size > 12 * 1024 * 1024) {
-      setAvatarError('La imagen no puede superar los 12MB.');
-      return;
-    }
-
     setAvatarUploading(true);
-    const uploadFormData = new FormData();
-    uploadFormData.append('avatar', file);
+    
+    try {
+      // Comprimir la imagen antes de subirla
+      // Esto reducirá el tamaño significativamente y la convertirá a WebP
+      const compressedFile = await compressImage(file);
+      
+      const uploadFormData = new FormData();
+      uploadFormData.append('avatar', compressedFile);
 
-    apiClient.patch<{ data: { avatarUrl: string } }>('/api/users/avatar', uploadFormData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(response => {
+      const response = await apiClient.patch<{ data: { avatarUrl: string } }>('/api/users/avatar', uploadFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
       const newAvatarUrl = (response.data as any).user.avatarUrl;
       setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
-      // Actualizar el contexto de auth inmediatamente para que el NavBar y otros componentes se enteren
+      
       if (setUser && user) {
         setUser({ ...user, avatarUrl: newAvatarUrl });
       }
-      setAvatarUploading(false);
-    })
-    .catch(err => {
+    } catch (err) {
       console.error('Avatar upload failed', err);
-      setAvatarError('Error al subir la imagen. Intenta de nuevo.');
+      setAvatarError('Error al procesar o subir la imagen. Intenta de nuevo.');
+    } finally {
       setAvatarUploading(false);
-    });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
