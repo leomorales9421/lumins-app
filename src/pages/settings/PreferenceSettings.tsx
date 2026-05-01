@@ -39,7 +39,7 @@ const ThemeCard: React.FC<{
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <span className={`${isActive ? 'text-[#6C5DD3]' : 'text-zinc-500 dark:text-zinc-400'}`}>
-          {React.cloneElement(icon as React.ReactElement, { size: 18 })}
+          {React.cloneElement(icon as any, { size: 18 })}
         </span>
         <span className={`font-bold ${isActive ? 'text-[#6C5DD3]' : 'text-zinc-900 dark:text-zinc-100'}`}>
           {label}

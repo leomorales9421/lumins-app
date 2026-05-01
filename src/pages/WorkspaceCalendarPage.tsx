@@ -31,7 +31,7 @@ interface CalendarEvent {
   id: string;
   title: string;
   start: string;
-  end: string | null;
+  end?: string;
   backgroundColor: string;
   extendedProps: {
     boardId: string;
@@ -136,10 +136,10 @@ const WorkspaceCalendarPage: React.FC = () => {
         startDate: newStartDate ? newStartDate.toISOString() : null,
         dueDate: newDueDate ? newDueDate.toISOString() : null
       });
-      showSuccess('Tarea reprogramada con éxito');
+      showSuccess('Calendario', 'Tarea reprogramada con éxito');
       fetchEvents();
     } catch (err) {
-      showError('No se pudo reprogramar la tarea');
+      showError('Error', 'No se pudo reprogramar la tarea');
       info.revert();
     }
   };
