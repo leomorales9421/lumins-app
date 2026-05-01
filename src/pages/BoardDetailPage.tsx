@@ -822,7 +822,7 @@ const BoardDetailPage: React.FC = () => {
                             onClick={() => scrollToList(list.id)}
                             className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 rounded-lg transition-all text-sm text-white/70 hover:text-white group"
                           >
-                            <span className="truncate font-bold">{list.name || list.title}</span>
+                            <span className="truncate font-bold">{list.name}</span>
                             <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40 group-hover:text-white/60 transition-colors">
                               {list.cards?.length || 0}
                             </span>

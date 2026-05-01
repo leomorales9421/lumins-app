@@ -27,6 +27,7 @@ const ImageOption = ({
   currentBackground: string | null;
   onSelect: (value: string) => void;
   disabled: boolean;
+  key?: React.Key;
 }) => {
   const isActive = currentBackground === img.fullUrl;
 
@@ -75,7 +76,7 @@ interface BoardSettingsSlideOverProps {
     id: string;
     name: string;
     workspaceId: string;
-    ownerId: string;
+    ownerId?: string;
     description?: string;
     background?: string;
     backgroundType?: 'PRESET' | 'IMAGE';

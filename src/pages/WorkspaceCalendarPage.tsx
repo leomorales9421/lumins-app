@@ -463,7 +463,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
               events={filteredEvents}
-              headerToolbar={{ left: '', center: '', right: '' }}
+              headerToolbar={{ start: '', center: '', end: '' }}
               editable={true}
               droppable={true}
               eventDrop={handleEventDrop}

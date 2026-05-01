@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface UserAvatarProps {
   user?: {
+    id?: string;
     name?: string | null;
     avatarUrl?: string | null;
   } | null;

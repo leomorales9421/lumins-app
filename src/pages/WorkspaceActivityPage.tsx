@@ -96,7 +96,7 @@ const WorkspaceActivityPage: React.FC = () => {
   const fetchFiltersData = useCallback(async () => {
     if (!workspaceId) return;
     try {
-      const workspaceRes = await apiClient.get(`/api/workspaces/${workspaceId}`);
+      const workspaceRes = await apiClient.get<{ data: { workspace: any } }>(`/api/workspaces/${workspaceId}`);
       const ws = workspaceRes.data.workspace;
       setBoards(ws.boards.map((b: any) => ({ id: b.id, name: b.name })));
       setMembers(ws.members.map((m: any) => ({ id: m.user.id, name: m.user.name })));

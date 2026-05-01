@@ -29,7 +29,7 @@ export const useBoardPermissions = (boardId: string | undefined, providedRole?: 
 
     const fetchRole = async () => {
       try {
-        const response = await apiClient.get(`/api/boards/${boardId}`);
+        const response = await apiClient.get<{ data: { userRole: string } }>(`/api/boards/${boardId}`);
         setRole(response.data.userRole || 'viewer');
       } catch (error) {
         setRole('viewer');
