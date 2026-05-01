@@ -115,11 +115,11 @@ const UserProfileForm: React.FC = () => {
       const uploadFormData = new FormData();
       uploadFormData.append('avatar', compressedFile);
 
-      const response = await apiClient.patch<{ data: { avatarUrl: string } }>('/api/users/avatar', uploadFormData, {
+      const response = await apiClient.patch<{ data: { user: any } }>('/api/users/avatar', uploadFormData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      const newAvatarUrl = (response.data as any).user.avatarUrl;
+      const newAvatarUrl = response.data.user.avatarUrl;
       setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
       
       if (setUser && user) {

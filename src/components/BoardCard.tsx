@@ -30,11 +30,11 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         {/* Header: Visibility Badge & Options */}
         <div className="flex justify-between items-center mb-4">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-            board.visibility === 'public' 
+            board.visibility === 'WORKSPACE' 
               ? 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400' 
               : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500'
           }`}>
-            {board.visibility === 'public' ? 'Público' : 'Privado'}
+            {board.visibility === 'WORKSPACE' ? 'Público' : 'Privado'}
           </span>
           <button 
             onClick={(e) => e.stopPropagation()}

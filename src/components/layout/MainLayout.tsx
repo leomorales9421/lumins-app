@@ -175,7 +175,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   // Permission Check: OWNER or ADMIN
   const canCreateBoard = currentWorkspace ? (
     currentWorkspace.ownerId === user?.id || 
-    currentWorkspace.members?.some(m => m.userId === user?.id && (m.role === 'OWNER' || m.role === 'ADMIN'))
+    !!currentWorkspace.members?.some(m => m.userId === user?.id && (m.role === 'OWNER' || m.role === 'ADMIN'))
   ) : (workspaces.length > 0);
 
   const handleWorkspaceCreated = (newWorkspace: any) => {

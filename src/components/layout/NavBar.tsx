@@ -7,9 +7,10 @@ import { usePermission } from '../../contexts/PermissionContext';
 
 interface NavBarProps {
   user: any;
-  onCreateBoard: () => void;
-  onCreateWorkspace: () => void;
-  canCreateBoard: boolean;
+  onCreateBoard?: () => void;
+  onCreateWorkspace?: () => void;
+  canCreateBoard?: boolean;
+  isBoardView?: boolean;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ 

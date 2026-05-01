@@ -9,6 +9,7 @@ export interface CardDetail {
   title: string;
   description?: string;
   listId: string;
+  boardId: string;
   position: number;
   dueDate?: string;
   priority?: 'P0' | 'P1' | 'P2';
@@ -639,7 +640,7 @@ const CardModal: React.FC<CardModalProps> = ({
                 <p className="text-red-400 mb-4">{error}</p>
                 <Button
                   onClick={onClose}
-                  variant="outline"
+                  variant="outlined"
                   size="sm"
                 >
                   Cerrar
@@ -657,7 +658,7 @@ const CardModal: React.FC<CardModalProps> = ({
                     {!isEditingDescription && (
                       <Button
                         onClick={() => setIsEditingDescription(true)}
-                        variant="outline"
+                        variant="outlined"
                         size="sm"
                       >
                         {card.description ? 'Editar' : 'Añadir descripción'}
@@ -689,7 +690,7 @@ const CardModal: React.FC<CardModalProps> = ({
                             setEditDescription(card.description || '');
                             setIsEditingDescription(false);
                           }}
-                          variant="outline"
+                          variant="outlined"
                           size="sm"
                           disabled={isSubmitting}
                         >
@@ -728,7 +729,7 @@ const CardModal: React.FC<CardModalProps> = ({
                     {card.dueDate && (
                       <Button
                         onClick={() => handleUpdateDueDate(null)}
-                        variant="outline"
+                        variant="outlined"
                         size="sm"
                         disabled={isSubmitting}
                       >
@@ -816,7 +817,7 @@ const CardModal: React.FC<CardModalProps> = ({
                     </h3>
                     <Button
                       onClick={() => setNewChecklistTitle('Nuevo checklist')}
-                      variant="outline"
+                      variant="outlined"
                       size="sm"
                     >
                       Añadir checklist
@@ -847,7 +848,7 @@ const CardModal: React.FC<CardModalProps> = ({
                         </Button>
                         <Button
                           onClick={() => setNewChecklistTitle('')}
-                          variant="outline"
+                          variant="outlined"
                           size="sm"
                           disabled={isSubmitting}
                         >
@@ -905,7 +906,6 @@ const CardModal: React.FC<CardModalProps> = ({
                             if (e.key === 'Enter') handleAddChecklistItem(checklist.id);
                           }}
                           className="flex-1 mr-3 bg-[#1a2226] border-[#3b4b54] text-white placeholder:text-[#9db0b9] focus:border-[#00a8ff] focus:ring-2 focus:ring-[#00a8ff]/40"
-                          size="sm"
                         />
                         <Button
                           onClick={() => handleAddChecklistItem(checklist.id)}
@@ -1008,7 +1008,7 @@ const CardModal: React.FC<CardModalProps> = ({
                         disabled={isSubmitting}
                       />
                       <Button
-                        variant="outline"
+                        variant="outlined"
                         size="sm"
                         leftIcon={<span className="material-symbols-outlined text-sm">upload</span>}
                         disabled={isSubmitting}

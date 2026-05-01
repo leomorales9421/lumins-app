@@ -29,7 +29,7 @@ const BoardsPage: React.FC = () => {
     else setIsRefreshing(true);
     
     try {
-      const response = await apiClient.get<{ data: { workspaces: { id: string, name: string }[] } }>('/api/workspaces');
+      const response = await apiClient.get<{ data: { workspaces: { id: string, name: string, members?: { role: string }[] }[] } }>('/api/workspaces');
       setWorkspaces(response.data.workspaces || []);
     } catch (err) {
       console.error('Failed to fetch workspaces', err);
