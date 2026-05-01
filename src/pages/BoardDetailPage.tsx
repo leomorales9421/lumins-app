@@ -164,11 +164,15 @@ const BoardDetailPage: React.FC = () => {
 
   // Sync background with MainLayout whenever it changes
   useEffect(() => {
-    if (board?.background) {
-      window.dispatchEvent(new CustomEvent('set-board-background', { 
-        detail: { background: board.background } 
+    window.dispatchEvent(new CustomEvent('set-board-background', {
+      detail: { background: board?.background ?? null }
+    }));
+
+    return () => {
+      window.dispatchEvent(new CustomEvent('set-board-background', {
+        detail: { background: null }
       }));
-    }
+    };
   }, [board?.background]);
 
   // Handle real-time updates from WebSockets

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
@@ -33,6 +33,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [boardBackground, setBoardBackground] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoadingBg, setIsLoadingBg] = useState(false);
+  const bgRequestRef = useRef(0);
 
   const fetchWorkspaces = useCallback(async () => {
     try {
@@ -48,21 +49,24 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   useEffect(() => {
     const handleBgChange = (e: any) => {
       const newBg = e.detail.background;
+      const requestId = ++bgRequestRef.current;
       
       if (newBg?.startsWith('http')) {
         setIsLoadingBg(true);
         const img = new Image();
         img.src = newBg;
         img.onload = () => {
+          if (bgRequestRef.current !== requestId) return;
           setBoardBackground(newBg);
           setIsLoadingBg(false);
         };
         img.onerror = () => {
+          if (bgRequestRef.current !== requestId) return;
           setBoardBackground(newBg);
           setIsLoadingBg(false);
         };
       } else {
-        setBoardBackground(newBg);
+        setBoardBackground(newBg ?? null);
         setIsLoadingBg(false);
       }
     };
@@ -124,6 +128,15 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
+
+  // Ensure stale board background is cleared outside board routes.
+  useEffect(() => {
+    if (!isBoardView) {
+      bgRequestRef.current += 1;
+      setBoardBackground(null);
+      setIsLoadingBg(false);
+    }
+  }, [isBoardView]);
 
 
   useEffect(() => {
