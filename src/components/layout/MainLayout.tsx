@@ -8,6 +8,12 @@ import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
 import { toast } from 'sonner';
+import {
+  DEFAULT_BOARD_BACKGROUND,
+  normalizeBoardBackground,
+  preloadImageUrl,
+  resolveBoardBackground,
+} from '../../lib/board-backgrounds';
 
 interface Workspace {
   id: string;
@@ -32,8 +38,8 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const isBoardView = location.pathname.startsWith('/boards/');
   const [boardBackground, setBoardBackground] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLoadingBg, setIsLoadingBg] = useState(false);
   const bgRequestRef = useRef(0);
+  const resolvedBackground = resolveBoardBackground(boardBackground);
 
   const fetchWorkspaces = useCallback(async () => {
     try {
@@ -48,27 +54,25 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   useEffect(() => {
     const handleBgChange = (e: any) => {
-      const newBg = e.detail.background;
+      const newBg = normalizeBoardBackground(e.detail.background);
       const requestId = ++bgRequestRef.current;
-      
-      if (newBg?.startsWith('http')) {
-        setIsLoadingBg(true);
-        const img = new Image();
-        img.src = newBg;
-        img.onload = () => {
-          if (bgRequestRef.current !== requestId) return;
-          setBoardBackground(newBg);
-          setIsLoadingBg(false);
-        };
-        img.onerror = () => {
-          if (bgRequestRef.current !== requestId) return;
-          setBoardBackground(newBg);
-          setIsLoadingBg(false);
-        };
-      } else {
-        setBoardBackground(newBg ?? null);
-        setIsLoadingBg(false);
+
+      const resolved = resolveBoardBackground(newBg);
+
+      if (resolved.kind === 'none') {
+        setBoardBackground(null);
+        return;
       }
+
+      if (resolved.kind === 'image') {
+        void preloadImageUrl(resolved.value).then((ok) => {
+          if (bgRequestRef.current !== requestId) return;
+          setBoardBackground(ok ? resolved.value : DEFAULT_BOARD_BACKGROUND);
+        });
+        return;
+      }
+
+      setBoardBackground(resolved.value);
     };
     const handlePermissionUpdate = (e: any) => {
       const { type, resourceId, newRole } = e.detail;
@@ -134,7 +138,6 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     if (!isBoardView) {
       bgRequestRef.current += 1;
       setBoardBackground(null);
-      setIsLoadingBg(false);
     }
   }, [isBoardView]);
 
@@ -181,9 +184,9 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   return (
     <div 
-      className={`flex flex-col min-h-[100dvh] overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : boardBackground?.startsWith('http') ? 'bg-zinc-900' : (boardBackground || 'bg-zinc-900 dark:bg-[#13151A]')}`}
-      style={isBoardView && boardBackground?.startsWith('http') ? { 
-        backgroundImage: `url(${boardBackground})`,
+      className={`flex flex-col min-h-[100dvh] overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : resolvedBackground.kind === 'image' ? 'bg-zinc-900' : resolvedBackground.kind === 'preset' ? resolvedBackground.value : DEFAULT_BOARD_BACKGROUND}`}
+      style={isBoardView && resolvedBackground.kind === 'image' ? {
+        backgroundImage: `url(${resolvedBackground.value})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -198,7 +201,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       </div>
 
       {/* Polarized Filter (Contrast Shield) */}
-      {isBoardView && boardBackground?.startsWith('http') && (
+      {isBoardView && resolvedBackground.kind === 'image' && (
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
       )}
 

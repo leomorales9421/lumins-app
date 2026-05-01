@@ -90,6 +90,7 @@ export interface CreateBoardRequest {
   name: string;
   description?: string;
   visibility: 'PRIVATE' | 'WORKSPACE';
+  background?: string;
 }
 
 export interface UpdateBoardRequest {

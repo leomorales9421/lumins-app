@@ -1,41 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon, Lock, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Button from './ui/Button';
 import { Skeleton } from './ui/Skeleton';
 import apiClient from '../lib/api-client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'sonner';
+import {
+  BOARD_BACKGROUND_PRESETS,
+  DEFAULT_BOARD_BACKGROUND,
+  fetchBoardBackgroundGallery,
+  isValidBoardBackground,
+  normalizeBoardBackground,
+  preloadImageUrl,
+  type BoardBackgroundImage,
+} from '../lib/board-backgrounds';
 
-const CACHE_KEY = 'lumins_board_bg_cache';
+const ImageOption = ({
+  img,
+  currentBackground,
+  onSelect,
+  disabled,
+}: {
+  img: BoardBackgroundImage;
+  currentBackground: string | null;
+  onSelect: (value: string) => void;
+  disabled: boolean;
+}) => {
+  const isActive = currentBackground === img.fullUrl;
 
-const ImageOption = ({ img, currentBackground, onSelect }: any) => {
-  const thumbUrl = `https://picsum.photos/id/${img.id}/400/250`;
-  const fullUrl = `https://picsum.photos/id/${img.id}/1920/1080`;
-  const isActive = currentBackground === fullUrl;
-
-  // TRUCO PRO: Pre-cargar solo si es necesario
   const handleMouseEnter = () => {
-    const imgPreload = new Image();
-    imgPreload.src = fullUrl;
+    void preloadImageUrl(img.fullUrl);
   };
 
   return (
     <button
       type="button"
-      onClick={() => onSelect(fullUrl)}
+      onClick={() => onSelect(img.fullUrl)}
       onMouseEnter={handleMouseEnter}
+      disabled={disabled}
       className={`relative w-full h-16 rounded overflow-hidden border-2 transition-all hover:scale-[1.03] group ${
         isActive ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' : 'border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
-      }`}
+      } ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
     >
-      {/* Skeleton de fondo color sólido mientras carga la imagen */}
       <div className="absolute inset-0 bg-zinc-200 dark:bg-white/5 animate-pulse -z-10" />
-      
-      {/* Imagen con lazy loading */}
-      <img 
-        src={thumbUrl} 
-        alt={`Fondo ${img.id}`} 
+
+      <img
+        src={img.thumbUrl}
+        alt={`Fondo ${img.id}`}
         loading="lazy"
         className="w-full h-full object-cover"
       />
@@ -47,9 +59,9 @@ const ImageOption = ({ img, currentBackground, onSelect }: any) => {
       )}
 
       <div className="absolute inset-0 bg-black/10 dark:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-         <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
-           Seleccionar
-         </span>
+        <span className="text-[10px] font-bold text-white bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
+          Seleccionar
+        </span>
       </div>
     </button>
   );
@@ -72,27 +84,6 @@ interface BoardSettingsSlideOverProps {
   workspaceRole?: string;
 }
 
-export const BOARD_BACKGROUNDS = [
-  { id: 'default', value: 'bg-[#F4F6F9]', name: 'Por defecto' },
-  { id: 'ocean', value: 'bg-gradient-to-br from-cyan-500 to-blue-600', name: 'Océano' },
-  { id: 'sunset', value: 'bg-gradient-to-br from-orange-400 to-rose-500', name: 'Atardecer' },
-  { id: 'forest', value: 'bg-gradient-to-br from-emerald-400 to-teal-600', name: 'Bosque' },
-  { id: 'amethyst', value: 'bg-gradient-to-br from-fuchsia-500 to-indigo-600', name: 'Amatista' },
-  { id: 'midnight', value: 'bg-gradient-to-br from-slate-800 to-zinc-900', name: 'Medianoche' },
-  { id: 'candy', value: 'bg-gradient-to-br from-rose-400 to-pink-600', name: 'Gominola' },
-  { id: 'morning', value: 'bg-gradient-to-br from-yellow-200 to-orange-400', name: 'Mañana' },
-  { id: 'deep-sea', value: 'bg-gradient-to-br from-blue-600 to-indigo-900', name: 'Mar Profundo' },
-  { id: 'cyberpunk', value: 'bg-gradient-to-br from-indigo-500 to-fuchsia-600', name: 'Cyberpunk' },
-  { id: 'mint', value: 'bg-gradient-to-br from-emerald-300 to-cyan-500', name: 'Menta' },
-  { id: 'peach', value: 'bg-gradient-to-br from-orange-300 to-rose-400', name: 'Melocotón' },
-  { id: 'autumn', value: 'bg-gradient-to-br from-amber-500 to-orange-700', name: 'Otoño' },
-  { id: 'spring', value: 'bg-gradient-to-br from-lime-400 to-emerald-500', name: 'Primavera' },
-  { id: 'galaxy', value: 'bg-gradient-to-br from-indigo-500 to-indigo-800', name: 'Galaxia' },
-  { id: 'mars', value: 'bg-gradient-to-br from-red-500 to-rose-800', name: 'Marte' },
-  { id: 'silver', value: 'bg-gradient-to-br from-slate-300 to-slate-500', name: 'Plata' },
-  { id: 'lavender', value: 'bg-gradient-to-br from-indigo-200 to-indigo-400', name: 'Lavanda' },
-];
-
 const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({ 
   isOpen, 
   onClose, 
@@ -109,44 +100,56 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
-  const [apiImages, setApiImages] = useState<any[]>([]);
-  const [isLoadingImages, setIsLoadingImages] = useState(true);
+  const [selectedBackground, setSelectedBackground] = useState<string | null>(
+    normalizeBoardBackground(board.background)
+  );
+  const [apiImages, setApiImages] = useState<BoardBackgroundImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isSavingBackground, setIsSavingBackground] = useState(false);
+  const [backgroundError, setBackgroundError] = useState<string | null>(null);
+  const latestBackgroundRequestRef = useRef(0);
+  const confirmedBackgroundRef = useRef<string | null>(normalizeBoardBackground(board.background));
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        // 1. Revisar Caché local
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          setApiImages(JSON.parse(cached));
-          setIsLoadingImages(false);
-          return;
-        }
+    if (!isOpen) return;
 
-        // 2. Si no hay caché, llamar a la API
-        const res = await fetch('https://picsum.photos/v2/list?page=3&limit=12');
-        const data = await res.json();
-        
-        // 3. Guardar en estado y en caché
-        setApiImages(data);
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    const abortController = new AbortController();
+    let mounted = true;
+
+    const loadGallery = async () => {
+      setIsLoadingImages(true);
+      try {
+        const images = await fetchBoardBackgroundGallery(abortController.signal);
+        if (!mounted) return;
+        setApiImages(images);
       } catch (error) {
-        console.error("Error al cargar imágenes", error);
+        if (!mounted) return;
+        console.error('Error al cargar imagenes de fondo', error);
+        setApiImages([]);
       } finally {
-        setIsLoadingImages(false);
+        if (mounted) setIsLoadingImages(false);
       }
     };
-    
-    fetchImages();
-  }, []);
+
+    void loadGallery();
+
+    return () => {
+      mounted = false;
+      abortController.abort();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
+      const normalizedBackground = normalizeBoardBackground(board.background);
       setName(board.name);
       setDescription(board.description || '');
       setVisibility(board.visibility);
       setShowDeleteConfirm(false);
+      setSelectedBackground(normalizedBackground);
+      confirmedBackgroundRef.current = normalizedBackground;
+      setBackgroundError(null);
+      setIsSavingBackground(false);
     }
   }, [isOpen, board]);
 
@@ -170,27 +173,46 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
     }
   };
 
-  const handleBackgroundChange = async (selectedValue: string) => {
-    // Store original for rollback
-    const originalBackground = board.background;
-    
-    // Optimistic Update
-    if (onUpdateBoard) {
-      onUpdateBoard({ background: selectedValue });
+  const handleBackgroundChange = useCallback(async (selectedValue: string) => {
+    const normalizedSelected = normalizeBoardBackground(selectedValue) || DEFAULT_BOARD_BACKGROUND;
+
+    if (!isValidBoardBackground(normalizedSelected)) {
+      toast.error('Fondo no valido', { description: 'Selecciona un fondo de la galeria o un color disponible.' });
+      return;
     }
-    
+
+    if (normalizedSelected === selectedBackground) return;
+
+    const previousConfirmed = confirmedBackgroundRef.current;
+    const requestId = ++latestBackgroundRequestRef.current;
+
+    setSelectedBackground(normalizedSelected);
+    setIsSavingBackground(true);
+    setBackgroundError(null);
+    onUpdateBoard?.({ background: normalizedSelected });
+
     try {
-      await apiClient.patch(`/api/boards/${board.id}`, { 
-        background: selectedValue 
+      await apiClient.patch(`/api/boards/${board.id}`, {
+        background: normalizedSelected,
       });
+
+      if (latestBackgroundRequestRef.current !== requestId) return;
+      confirmedBackgroundRef.current = normalizedSelected;
     } catch (err) {
       console.error('Error updating background', err);
-      // Rollback
-      if (onUpdateBoard) {
-        onUpdateBoard({ background: originalBackground });
+
+      if (latestBackgroundRequestRef.current !== requestId) return;
+
+      setSelectedBackground(previousConfirmed);
+      onUpdateBoard?.({ background: previousConfirmed });
+      setBackgroundError('No pudimos guardar el fondo. Se restauro el valor anterior.');
+      toast.error('No se pudo actualizar el fondo');
+    } finally {
+      if (latestBackgroundRequestRef.current === requestId) {
+        setIsSavingBackground(false);
       }
     }
-  };
+  }, [board.id, onUpdateBoard, selectedBackground]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -326,22 +348,23 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 <div>
                   <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-4 ml-1">Colores y Gradientes</h3>
                   <div className="grid grid-cols-3 gap-3">
-                    {BOARD_BACKGROUNDS.map((bg) => (
+                    {BOARD_BACKGROUND_PRESETS.map((bg) => (
                       <button
                         key={bg.id}
                         type="button"
                         onClick={() => handleBackgroundChange(bg.value)}
+                        disabled={isSavingBackground}
                         className={`
                           w-full h-16 rounded cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
                           ${bg.value}
-                          ${(board.background === bg.value || (!board.background && bg.id === 'default')) 
+                          ${(selectedBackground === bg.value || (!selectedBackground && bg.id === 'default')) 
                             ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' 
                             : 'border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
-                          }
+                          } ${isSavingBackground ? 'opacity-70 cursor-not-allowed' : ''}
                         `}
                         title={bg.name}
                       >
-                        {(board.background === bg.value || (!board.background && bg.id === 'default')) && (
+                        {(selectedBackground === bg.value || (!selectedBackground && bg.id === 'default')) && (
                           <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded p-0.5 shadow-sm z-10">
                             <CheckCircle2 size={12} className="text-[#6C5DD3]" />
                           </div>
@@ -361,9 +384,22 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                     <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Galería de Fotos</h3>
                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
                       <ImageIcon size={10} />
-                      <span className="text-[10px] font-bold">Unsplash / Picsum</span>
+                      <span className="text-[10px] font-bold">Picsum</span>
                     </div>
                   </div>
+
+                  {backgroundError && (
+                    <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400 mb-3 ml-1">
+                      {backgroundError}
+                    </p>
+                  )}
+
+                  {isSavingBackground && (
+                    <div className="mb-3 ml-1 flex items-center gap-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                      <Loader2 size={12} className="animate-spin" />
+                      Guardando fondo...
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-3 gap-2">
                     {isLoadingImages ? (
@@ -375,8 +411,9 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                         <ImageOption 
                           key={img.id} 
                           img={img} 
-                          currentBackground={board.background} 
+                          currentBackground={selectedBackground} 
                           onSelect={handleBackgroundChange} 
+                          disabled={isSavingBackground}
                         />
                       ))
                     )}

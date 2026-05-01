@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Users, ChevronDown, Layout, Loader2, Building2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
+import { DEFAULT_BOARD_BACKGROUND } from '../lib/board-backgrounds';
 
 interface Workspace {
   id: string;
@@ -21,6 +22,7 @@ interface CreateBoardPayload {
   workspaceId: string;
   visibility: 'PRIVATE' | 'WORKSPACE';
   description?: string;
+  background?: string;
 }
 
 const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ 
@@ -61,7 +63,8 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
         name,
         workspaceId,
         visibility,
-        description: description.trim() || undefined
+        description: description.trim() || undefined,
+        background: DEFAULT_BOARD_BACKGROUND,
       };
 
       await apiClient.post('/api/boards', payload);

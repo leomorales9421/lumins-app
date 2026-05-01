@@ -49,6 +49,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePermission } from '../contexts/PermissionContext';
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useBoardSocket } from '../hooks/useBoardSocket';
+import { emitBoardBackgroundChange, normalizeBoardBackground } from '../lib/board-backgrounds';
+
+const getBoardBackgroundCacheKey = (boardId: string) => `lumins_board_background:${boardId}`;
 
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -162,18 +165,36 @@ const BoardDetailPage: React.FC = () => {
 
   useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
 
-  // Sync background with MainLayout whenever it changes
+  // Restore the last known background immediately on re-entry, before the board fetch resolves.
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('set-board-background', {
-      detail: { background: board?.background ?? null }
-    }));
+    if (!id) return;
 
-    return () => {
-      window.dispatchEvent(new CustomEvent('set-board-background', {
-        detail: { background: null }
-      }));
-    };
-  }, [board?.background]);
+    try {
+      const cachedBackground = sessionStorage.getItem(getBoardBackgroundCacheKey(id));
+      if (cachedBackground) {
+        emitBoardBackgroundChange(normalizeBoardBackground(cachedBackground));
+      }
+    } catch {
+      // Ignore sessionStorage read failures.
+    }
+  }, [id]);
+
+  // Sync background with MainLayout whenever it changes.
+  // Do not clear in this cleanup, because React will run it before applying
+  // the next effect and can briefly overwrite a valid background with null.
+  useEffect(() => {
+    if (!board) return;
+
+    const normalizedBackground = normalizeBoardBackground(board.background);
+
+    try {
+      sessionStorage.setItem(getBoardBackgroundCacheKey(board.id), normalizedBackground || '');
+    } catch {
+      // Ignore sessionStorage write failures.
+    }
+
+    emitBoardBackgroundChange(normalizedBackground);
+  }, [board]);
 
   // Handle real-time updates from WebSockets
   useEffect(() => {
@@ -464,7 +485,7 @@ const BoardDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div 
-        className="flex flex-col h-full bg-[#F4F6F9] dark:bg-[#09090B] font-sans overflow-hidden transition-colors duration-500"
+        className="flex flex-col h-full bg-transparent font-sans overflow-hidden transition-colors duration-500"
       >
         {/* Header Skeleton - Matches 72px height */}
         <div className="h-[72px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#13151A] z-30">
