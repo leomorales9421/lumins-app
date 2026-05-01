@@ -28,6 +28,7 @@ const ProfileSettings = lazy(() => import('./pages/settings/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/settings/SecuritySettings'));
 const NotificationSettings = lazy(() => import('./pages/settings/NotificationSettings'));
 const PreferenceSettings = lazy(() => import('./pages/settings/PreferenceSettings'));
+const IntegrationsSettings = lazy(() => import('./pages/settings/IntegrationsSettings'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 
 const PageLoader = () => (
@@ -118,6 +119,7 @@ function App() {
                       <Route path="profile" element={<ProfileSettings />} />
                       <Route path="security" element={<SecuritySettings />} />
                       <Route path="notifications" element={<NotificationSettings />} />
+                      <Route path="integrations" element={<IntegrationsSettings />} />
                       <Route path="preferences" element={<PreferenceSettings />} />
                     </Route>
                   </Route>
