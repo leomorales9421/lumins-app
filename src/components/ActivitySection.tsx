@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import RichTextEditor from './RichTextEditor';
 import type { RichTextEditorRef } from './RichTextEditor';
 import { fixEncoding } from '../lib/encoding';
+import { sanitizeHtmlForRender } from '../lib/sanitize';
 
 interface ActivitySectionProps {
   activities: ActivityItem[];
@@ -174,7 +175,7 @@ const ActivityFeedItem: React.FC<{
           ) : (
              <>
               <div className="text-sm text-zinc-800 dark:text-zinc-100 leading-relaxed break-words prose-mirror-container dark:prose-invert">
-                <div dangerouslySetInnerHTML={{ __html: fixEncoding(item.content) }} />
+                <div dangerouslySetInnerHTML={{ __html: sanitizeHtmlForRender(fixEncoding(item.content)) }} />
               </div>
 
               {(canEdit || canDelete) && (

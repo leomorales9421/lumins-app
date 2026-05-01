@@ -1,32 +1,31 @@
-# Etapa 1: Construcción (Build)
+# Build stage
 FROM node:20-alpine AS build
 
-# Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar los archivos de dependencias
+# Install dependencies
 COPY package*.json ./
+RUN npm ci
 
-# Instalar las dependencias
-RUN npm install
-
-# Copiar el resto del código fuente del frontend
+# Copy source code and build
 COPY . .
+RUN npm run build
 
-# Construir la aplicación para producción (esto generará la carpeta /dist)
-RUN npx vite build
-
-# Etapa 2: Producción (Servir con Nginx)
+# Production stage (Serving with Nginx)
 FROM nginx:alpine
 
-# Copiar los archivos construidos desde la etapa anterior al directorio html de Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copiar una configuración personalizada de Nginx para manejar el enrutamiento de React
+# Security: Add security headers and configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponer el puerto 80 dentro del contenedor
+# Copy built assets from build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port
 EXPOSE 80
 
-# Iniciar Nginx
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost/ || exit 1
+
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

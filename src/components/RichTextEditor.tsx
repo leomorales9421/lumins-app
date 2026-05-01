@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { fixEncoding } from '../lib/encoding';
+import { sanitizeHtmlForRender } from '../lib/sanitize';
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -405,7 +406,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
         {initialContent ? (
           <div 
             className="prose-mirror-container dark:prose-invert max-w-none text-zinc-900 dark:text-zinc-100"
-            dangerouslySetInnerHTML={{ __html: fixEncoding(initialContent) }} 
+            dangerouslySetInnerHTML={{ __html: sanitizeHtmlForRender(fixEncoding(initialContent)) }} 
           />
         ) : (
           <p className="text-zinc-500 dark:text-zinc-400 italic">{placeholder}</p>
