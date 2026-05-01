@@ -8,6 +8,7 @@ import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import {
   DEFAULT_BOARD_BACKGROUND,
   normalizeBoardBackground,
@@ -38,6 +39,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const isBoardView = location.pathname.startsWith('/boards/');
   const [boardBackground, setBoardBackground] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoadingBg, setIsLoadingBg] = useState(false);
   const bgRequestRef = useRef(0);
   const resolvedBackground = resolveBoardBackground(boardBackground);
 
@@ -60,18 +62,22 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       const resolved = resolveBoardBackground(newBg);
 
       if (resolved.kind === 'none') {
+        setIsLoadingBg(false);
         setBoardBackground(null);
         return;
       }
 
       if (resolved.kind === 'image') {
+        setIsLoadingBg(true);
         void preloadImageUrl(resolved.value).then((ok) => {
           if (bgRequestRef.current !== requestId) return;
           setBoardBackground(ok ? resolved.value : DEFAULT_BOARD_BACKGROUND);
+          setIsLoadingBg(false);
         });
         return;
       }
 
+      setIsLoadingBg(false);
       setBoardBackground(resolved.value);
     };
     const handlePermissionUpdate = (e: any) => {
@@ -138,6 +144,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     if (!isBoardView) {
       bgRequestRef.current += 1;
       setBoardBackground(null);
+      setIsLoadingBg(false);
     }
   }, [isBoardView]);
 
@@ -203,6 +210,13 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       {/* Polarized Filter (Contrast Shield) */}
       {isBoardView && resolvedBackground.kind === 'image' && (
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
+      )}
+
+      {isBoardView && isLoadingBg && (
+        <div className="fixed right-4 bottom-4 z-[120] pointer-events-none rounded-full border border-white/10 bg-[#1C1F26]/85 backdrop-blur-md px-3 py-2 text-white shadow-2xl flex items-center gap-2">
+          <Loader2 size={14} className="animate-spin text-[#8E82E3]" />
+          <span className="text-[11px] font-bold tracking-wide">Cargando fondo...</span>
+        </div>
       )}
 
       {/* Background will now load naturally without a full-screen blocking overlay */}

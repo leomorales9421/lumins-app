@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon, Lock, Building2 } from 'lucide-react';
+import { X, Trash2, Save, AlertCircle, Settings, CheckCircle2, Loader2, Image as ImageIcon, Lock, Building2, Upload, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from './ui/Skeleton';
 import apiClient from '../lib/api-client';
@@ -15,6 +15,7 @@ import {
   preloadImageUrl,
   type BoardBackgroundImage,
 } from '../lib/board-backgrounds';
+import { compressImage } from '../lib/image-utils';
 
 const ImageOption = ({
   img,
@@ -77,6 +78,11 @@ interface BoardSettingsSlideOverProps {
     ownerId: string;
     description?: string;
     background?: string;
+    backgroundType?: 'PRESET' | 'IMAGE';
+    backgroundImageUrl?: string | null;
+    backgroundThumbUrl?: string | null;
+    backgroundStorageKey?: string | null;
+    backgroundVersion?: number;
     visibility: 'PRIVATE' | 'WORKSPACE';
   };
   onUpdate: () => void;
@@ -107,8 +113,22 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [isSavingBackground, setIsSavingBackground] = useState(false);
   const [backgroundError, setBackgroundError] = useState<string | null>(null);
+  const [isUploadingBackground, setIsUploadingBackground] = useState(false);
+  const [backgroundUploadProgress, setBackgroundUploadProgress] = useState<number | null>(null);
+  const [backgroundPreviewUrl, setBackgroundPreviewUrl] = useState<string | null>(null);
   const latestBackgroundRequestRef = useRef(0);
   const confirmedBackgroundRef = useRef<string | null>(normalizeBoardBackground(board.background));
+  const backgroundFileInputRef = useRef<HTMLInputElement | null>(null);
+  const isBackgroundBusy = isSavingBackground || isUploadingBackground;
+  const currentCustomBackgroundPreview = backgroundPreviewUrl || board.backgroundThumbUrl || board.backgroundImageUrl || null;
+
+  useEffect(() => {
+    return () => {
+      if (backgroundPreviewUrl) {
+        URL.revokeObjectURL(backgroundPreviewUrl);
+      }
+    };
+  }, [backgroundPreviewUrl]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -150,6 +170,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
       confirmedBackgroundRef.current = normalizedBackground;
       setBackgroundError(null);
       setIsSavingBackground(false);
+      setIsUploadingBackground(false);
+      setBackgroundUploadProgress(null);
+      setBackgroundPreviewUrl((currentPreview) => {
+        if (currentPreview) {
+          URL.revokeObjectURL(currentPreview);
+        }
+        return null;
+      });
     }
   }, [isOpen, board]);
 
@@ -189,7 +217,13 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
     setSelectedBackground(normalizedSelected);
     setIsSavingBackground(true);
     setBackgroundError(null);
-    onUpdateBoard?.({ background: normalizedSelected });
+    onUpdateBoard?.({
+      background: normalizedSelected,
+      backgroundType: /^https?:\/\//.test(normalizedSelected) ? 'IMAGE' : 'PRESET',
+      backgroundImageUrl: null,
+      backgroundThumbUrl: null,
+      backgroundStorageKey: null,
+    });
 
     try {
       await apiClient.patch(`/api/boards/${board.id}`, {
@@ -204,7 +238,13 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
       if (latestBackgroundRequestRef.current !== requestId) return;
 
       setSelectedBackground(previousConfirmed);
-      onUpdateBoard?.({ background: previousConfirmed });
+      onUpdateBoard?.({
+        background: previousConfirmed,
+        backgroundType: board.backgroundType,
+        backgroundImageUrl: board.backgroundImageUrl,
+        backgroundThumbUrl: board.backgroundThumbUrl,
+        backgroundStorageKey: board.backgroundStorageKey,
+      });
       setBackgroundError('No pudimos guardar el fondo. Se restauro el valor anterior.');
       toast.error('No se pudo actualizar el fondo');
     } finally {
@@ -212,7 +252,94 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
         setIsSavingBackground(false);
       }
     }
-  }, [board.id, onUpdateBoard, selectedBackground]);
+  }, [board.backgroundImageUrl, board.backgroundStorageKey, board.backgroundThumbUrl, board.backgroundType, board.id, onUpdateBoard, selectedBackground]);
+
+  const handleCustomBackgroundUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
+    if (!selectedFile.type.startsWith('image/')) {
+      setBackgroundError('Selecciona una imagen valida para el fondo del tablero.');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      setBackgroundError(null);
+      setIsUploadingBackground(true);
+      setBackgroundUploadProgress(0);
+
+      const compressedFile = await compressImage(selectedFile, {
+        maxSizeMB: 2.5,
+        maxWidthOrHeight: 2560,
+        fileType: 'image/webp',
+      });
+
+      setBackgroundPreviewUrl((currentPreview) => {
+        if (currentPreview) {
+          URL.revokeObjectURL(currentPreview);
+        }
+        return URL.createObjectURL(compressedFile);
+      });
+
+      const formData = new FormData();
+      formData.append('background', compressedFile);
+
+      const response = await apiClient.post<{ success: boolean; data: { board: Record<string, unknown> } }>(
+        `/api/boards/${board.id}/background-image`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (!progressEvent.total) return;
+            setBackgroundUploadProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+          },
+        }
+      );
+
+      const updatedBoard = response.data.board;
+      onUpdateBoard?.(updatedBoard);
+      setSelectedBackground(normalizeBoardBackground((updatedBoard as { background?: string }).background));
+      setBackgroundUploadProgress(100);
+      toast.success('Fondo personalizado actualizado');
+    } catch (error) {
+      console.error('Error uploading custom board background', error);
+      setBackgroundError('No se pudo subir la imagen del fondo. Intenta con otra imagen o vuelve a intentar.');
+      toast.error('No se pudo subir el fondo personalizado');
+    } finally {
+      setIsUploadingBackground(false);
+      event.target.value = '';
+      setTimeout(() => setBackgroundUploadProgress(null), 600);
+    }
+  }, [board.id, onUpdateBoard]);
+
+  const handleRemoveCustomBackground = useCallback(async () => {
+    try {
+      setBackgroundError(null);
+      setIsUploadingBackground(true);
+      setBackgroundUploadProgress(null);
+
+      const response = await apiClient.delete<{ success: boolean; data: { board: Record<string, unknown> } }>(`/api/boards/${board.id}/background-image`);
+      const updatedBoard = response.data.board;
+      onUpdateBoard?.(updatedBoard);
+      setSelectedBackground(normalizeBoardBackground((updatedBoard as { background?: string }).background));
+      setBackgroundPreviewUrl((currentPreview) => {
+        if (currentPreview) {
+          URL.revokeObjectURL(currentPreview);
+        }
+        return null;
+      });
+      toast.success('Fondo personalizado eliminado');
+    } catch (error) {
+      console.error('Error removing custom board background', error);
+      setBackgroundError('No se pudo eliminar el fondo personalizado.');
+      toast.error('No se pudo eliminar el fondo personalizado');
+    } finally {
+      setIsUploadingBackground(false);
+    }
+  }, [board.id, onUpdateBoard]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -353,14 +480,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                         key={bg.id}
                         type="button"
                         onClick={() => handleBackgroundChange(bg.value)}
-                        disabled={isSavingBackground}
+                        disabled={isBackgroundBusy}
                         className={`
                           w-full h-16 rounded cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
                           ${bg.value}
                           ${(selectedBackground === bg.value || (!selectedBackground && bg.id === 'default')) 
                             ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' 
                             : 'border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
-                          } ${isSavingBackground ? 'opacity-70 cursor-not-allowed' : ''}
+                          } ${isBackgroundBusy ? 'opacity-70 cursor-not-allowed' : ''}
                         `}
                         title={bg.name}
                       >
@@ -380,6 +507,78 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 </div>
 
                 <div>
+                  <div className="mb-6 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 p-4 space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Imagen personalizada</h3>
+                        <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-1">
+                          Sube una imagen propia. La convertimos a WebP para que pese menos y cargue rapido.
+                        </p>
+                      </div>
+                      <input
+                        ref={backgroundFileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={handleCustomBackgroundUpload}
+                      />
+                    </div>
+
+                    <div className="rounded-lg overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] min-h-[132px]">
+                      {currentCustomBackgroundPreview ? (
+                        <div className="relative h-[132px]">
+                          <img
+                            src={currentCustomBackgroundPreview}
+                            alt="Preview del fondo personalizado"
+                            className="w-full h-full object-cover"
+                          />
+                          {(isUploadingBackground || isSavingBackground) && (
+                            <div className="absolute inset-0 bg-black/35 backdrop-blur-[2px] flex items-center justify-center">
+                              <div className="flex items-center gap-2 rounded-full bg-black/55 px-3 py-2 text-white">
+                                <Loader2 size={14} className="animate-spin" />
+                                <span className="text-[11px] font-bold">
+                                  {isUploadingBackground
+                                    ? backgroundUploadProgress !== null
+                                      ? `Subiendo ${backgroundUploadProgress}%`
+                                      : 'Procesando fondo...'
+                                    : 'Aplicando fondo...'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="h-[132px] flex flex-col items-center justify-center gap-2 text-zinc-400 dark:text-zinc-500">
+                          <ImageIcon size={22} />
+                          <span className="text-[12px] font-medium">Todavia no has subido una imagen personalizada</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => backgroundFileInputRef.current?.click()}
+                        disabled={isBackgroundBusy}
+                        className="flex-1 h-10 rounded-lg bg-[#6C5DD3] text-white font-bold text-sm hover:bg-[#312e81] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isUploadingBackground ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                        {currentCustomBackgroundPreview ? 'Reemplazar imagen' : 'Subir imagen'}
+                      </button>
+                      {board.backgroundType === 'IMAGE' && (board.backgroundImageUrl || backgroundPreviewUrl) && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveCustomBackground}
+                          disabled={isBackgroundBusy}
+                          className="h-10 px-4 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-600 dark:text-zinc-300 font-bold text-sm hover:border-[#6C5DD3] hover:text-[#6C5DD3] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          <RotateCcw size={15} />
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between mb-4 ml-1">
                     <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Galería de Fotos</h3>
                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
@@ -394,10 +593,10 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                     </p>
                   )}
 
-                  {isSavingBackground && (
+                  {isBackgroundBusy && (
                     <div className="mb-3 ml-1 flex items-center gap-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
                       <Loader2 size={12} className="animate-spin" />
-                      Guardando fondo...
+                      {isUploadingBackground ? 'Procesando fondo...' : 'Guardando fondo...'}
                     </div>
                   )}
                   
@@ -413,7 +612,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                           img={img} 
                           currentBackground={selectedBackground} 
                           onSelect={handleBackgroundChange} 
-                          disabled={isSavingBackground}
+                          disabled={isBackgroundBusy}
                         />
                       ))
                     )}

@@ -51,6 +51,7 @@ export interface Board {
   name: string;
   description?: string;
   visibility: 'PRIVATE' | 'WORKSPACE';
+  backgroundType?: 'PRESET' | 'IMAGE';
   workspaceId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -59,6 +60,10 @@ export interface Board {
   members?: BoardMember[];
   lists?: List[];
   background?: string;
+  backgroundImageUrl?: string | null;
+  backgroundThumbUrl?: string | null;
+  backgroundStorageKey?: string | null;
+  backgroundVersion?: number;
   completedCardsCount?: number;
   workspace?: {
     id: string;
