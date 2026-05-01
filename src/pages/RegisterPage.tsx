@@ -7,12 +7,16 @@ import AmbientBackground from '../components/layout/AmbientBackground';
 
 import { motion } from 'framer-motion';
 
+const LEGAL_BASE_URL = (import.meta.env.VITE_LEGAL_BASE_URL || 'https://lumins.tech').replace(/\/$/, '');
+
 const RegisterPage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptsTerms, setAcceptsTerms] = useState(false);
+  const [acceptsPrivacy, setAcceptsPrivacy] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,12 +31,17 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
+    if (!acceptsTerms || !acceptsPrivacy) {
+      setError('Debes aceptar los Términos y la Política de Privacidad para registrarte');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
     
     try {
       const fullName = `${firstName} ${lastName}`.trim();
-      await register(fullName, email, password);
+      await register(fullName, email, password, acceptsTerms, acceptsPrivacy);
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get('redirect') || '/app';
       navigate(redirect);
@@ -193,6 +202,34 @@ const RegisterPage: React.FC = () => {
                  autoComplete="new-password"
                  required
                />
+            </div>
+
+            <div className="mt-1 p-3 rounded-xl border border-[#E8E9EC] bg-[#FAFBFD] space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptsTerms}
+                  onChange={(e) => setAcceptsTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#CBD5E1] text-[#4338ca] focus:ring-[#4338ca]/30"
+                  required
+                />
+                <span className="text-[13px] text-[#475569] leading-relaxed font-medium">
+                  Acepto los <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="text-[#4338ca] font-bold hover:underline">Términos y Condiciones</a>.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptsPrivacy}
+                  onChange={(e) => setAcceptsPrivacy(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#CBD5E1] text-[#4338ca] focus:ring-[#4338ca]/30"
+                  required
+                />
+                <span className="text-[13px] text-[#475569] leading-relaxed font-medium">
+                  Acepto la <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="text-[#4338ca] font-bold hover:underline">Política de Privacidad</a>.
+                </span>
+              </label>
             </div>
 
             {error && (
