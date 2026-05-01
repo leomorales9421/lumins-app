@@ -65,7 +65,7 @@ const ForgotPasswordPage: React.FC = () => {
               <img 
                 src="/lumins-log.webp" 
                 alt="Lumins Logo" 
-                className="h-64 w-auto object-contain" 
+                className="h-40 w-auto object-contain" 
               />
            </motion.div>
 

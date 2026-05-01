@@ -78,7 +78,7 @@ const ResetPasswordPage: React.FC = () => {
               </svg>
            </div>
            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="flex justify-center relative z-10">
-              <img src="/lumins-log.webp" alt="Lumins Logo" className="h-64 w-auto object-contain" />
+              <img src="/lumins-log.webp" alt="Lumins Logo" className="h-40 w-auto object-contain" />
            </motion.div>
            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="relative z-10 text-center">
               <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white/90">Nueva <br/> contraseña.</h1>

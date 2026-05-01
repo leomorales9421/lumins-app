@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'inverted' | 'outlined' | 'danger';
@@ -41,8 +42,17 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled || isLoading}
       {...props}
     >
-      {!isLoading && leftIcon && <span className="mr-3 flex items-center">{leftIcon}</span>}
-      {isLoading ? 'Cargando...' : children}
+      {isLoading ? (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>{children === 'Iniciar sesión' || children === 'Registrarse' ? 'Cargando...' : children}</span>
+        </div>
+      ) : (
+        <>
+          {leftIcon && <span className="mr-3 flex items-center">{leftIcon}</span>}
+          {children}
+        </>
+      )}
     </button>
   );
 };
