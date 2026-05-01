@@ -44,8 +44,8 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
     setIsFetching(true);
     try {
       const [wsRes, boardsRes] = await Promise.all([
-        apiClient.get('/api/workspaces'),
-        apiClient.get('/api/boards')
+        apiClient.get<{ data: { workspaces: any[] } }>('/api/workspaces'),
+        apiClient.get<{ data: { boards: any[] } }>('/api/boards')
       ]);
       setWorkspaces(wsRes?.data?.workspaces || []);
       setBoards(boardsRes?.data?.boards || []);

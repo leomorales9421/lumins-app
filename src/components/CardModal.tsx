@@ -1093,7 +1093,7 @@ const CardModal: React.FC<CardModalProps> = ({
               </Button>
               <Button
                 onClick={onClose}
-                variant="outline"
+                variant="outlined"
                 size="sm"
                 disabled={isSubmitting}
               >

@@ -10,6 +10,8 @@ export interface Card {
   riskLevel?: 'low' | 'med' | 'high' | null;
   module?: string | null;
   isDone?: boolean;
+  startDate?: string | null;
+  dueDate?: string | null;
   createdAt?: string;
   updatedAt?: string;
   labels?: Array<{ id: string; name: string; color: string }>;

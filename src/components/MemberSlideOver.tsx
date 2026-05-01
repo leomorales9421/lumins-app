@@ -21,7 +21,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   onUpdate 
 }) => {
   const [activeBoards, setActiveBoards] = useState<string[]>([]);
-  const [workspaceBoards, setWorkspaceBoards] = useState<{ id: string, name: string }[]>([]);
+  const [workspaceBoards, setWorkspaceBoards] = useState<{ id: string, name: string, visibility?: string }[]>([]);
   const [isLoadingBoards, setIsLoadingBoards] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);

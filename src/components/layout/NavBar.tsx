@@ -15,9 +15,9 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ 
   user, 
-  onCreateBoard, 
-  onCreateWorkspace,
-  canCreateBoard
+  onCreateBoard = () => {}, 
+  onCreateWorkspace = () => {},
+  canCreateBoard = false
 }) => {
   const { isGodMode, setGodMode } = usePermission();
   const navigate = useNavigate();
