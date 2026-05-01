@@ -56,9 +56,18 @@ const BoardsPage: React.FC = () => {
   }, [workspaceId]); // Removed boards.length
 
   useEffect(() => { 
-    fetchBoards(); 
     fetchWorkspaces();
-  }, [fetchBoards, fetchWorkspaces]);
+  }, [fetchWorkspaces]);
+
+  useEffect(() => {
+    if (!isLoadingWorkspaces) {
+      if (workspaceId) {
+        fetchBoards();
+      } else if (workspaces.length === 0) {
+        setIsLoading(false);
+      }
+    }
+  }, [fetchBoards, isLoadingWorkspaces, workspaceId, workspaces.length]);
 
   // Listen for board creation to refresh
   useEffect(() => {
@@ -77,19 +86,19 @@ const BoardsPage: React.FC = () => {
   }, [fetchBoards, fetchWorkspaces]);
 
   useEffect(() => {
-    if (!isLoading && !isLoadingWorkspaces && !workspaceId && workspaces.length > 0) {
+    if (!isLoadingWorkspaces && !workspaceId && workspaces.length > 0) {
       const lastId = localStorage.getItem('lastActiveWorkspaceId');
       const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
       navigate(`/w/${targetId}/dashboard`, { replace: true });
     }
-  }, [isLoading, isLoadingWorkspaces, workspaceId, workspaces, navigate]);
+  }, [isLoadingWorkspaces, workspaceId, workspaces, navigate]);
 
   return (
     <div className="flex-1 flex flex-col font-sans">
       <main className="flex-1 p-4 sm:p-6 lg:p-10">
         <div className="max-w-[1600px] mx-auto w-full">
           
-          {(isLoading || isLoadingWorkspaces) ? (
+          {(isLoadingWorkspaces || (workspaceId && isLoading)) ? (
             <div className="flex-1">
                {/* Header Skeleton */}
                <div className="flex flex-col gap-1 mb-8">
