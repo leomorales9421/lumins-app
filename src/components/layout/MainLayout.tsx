@@ -6,7 +6,9 @@ import NavBar from './NavBar';
 import Sidebar from './Sidebar';
 import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
+import TrelloImportModal from '../TrelloImportModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
+
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import {
@@ -32,6 +34,8 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateBoardModal, setShowCreateBoardModal] = useState(false);
+  const [showTrelloImportModal, setShowTrelloImportModal] = useState(false);
+
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
@@ -160,14 +164,18 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   useEffect(() => {
     const openBoard = () => setShowCreateBoardModal(true);
     const openWorkspace = () => setShowCreateWorkspaceModal(true);
+    const openTrello = () => setShowTrelloImportModal(true);
     
     window.addEventListener('open-create-board', openBoard);
     window.addEventListener('open-create-workspace', openWorkspace);
+    window.addEventListener('open-trello-import', openTrello);
     
     return () => {
       window.removeEventListener('open-create-board', openBoard);
       window.removeEventListener('open-create-workspace', openWorkspace);
+      window.removeEventListener('open-trello-import', openTrello);
     };
+
   }, []);
 
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
@@ -187,7 +195,9 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     // Dispatch event so sub-pages can refresh
     window.dispatchEvent(new CustomEvent('board-created'));
     setShowCreateBoardModal(false);
+    setShowTrelloImportModal(false);
   };
+
 
   return (
     <div 
@@ -263,7 +273,14 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         workspaces={workspaces}
         defaultWorkspaceId={workspaceId}
       />
+
+      <TrelloImportModal
+        isOpen={showTrelloImportModal}
+        onClose={() => setShowTrelloImportModal(false)}
+      />
+
     </div>
+
   );
 };
 

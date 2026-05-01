@@ -12,10 +12,27 @@ const AuthCallbackPage: React.FC = () => {
   
   useEffect(() => {
     const handleCallback = async () => {
+      // Check for Trello token in hash fragment (#token=...)
+      const hash = window.location.hash;
+      if (hash && hash.includes('token=')) {
+        const trelloToken = hash.split('token=')[1];
+        if (trelloToken) {
+          localStorage.setItem('trello_token', trelloToken);
+          // Close the window if it's a popup, otherwise redirect
+          if (window.opener) {
+            window.close();
+          } else {
+            navigate('/app', { replace: true });
+          }
+          return;
+        }
+      }
+
       const token = searchParams.get('token');
       
       if (!token) {
-        navigate('/login?error=auth_failed');
+        // If no token in query or hash, redirect to login
+        if (!hash) navigate('/login?error=auth_failed');
         return;
       }
       
@@ -36,6 +53,7 @@ const AuthCallbackPage: React.FC = () => {
     
     handleCallback();
   }, [searchParams, navigate, refreshUser]);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden bg-[#F4F6F9] dark:bg-[#09090B]">

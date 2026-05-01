@@ -9,7 +9,8 @@ import BoardCard from '../components/BoardCard';
 import InviteMembersModal from '../components/InviteMembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Layout, Loader2 } from 'lucide-react';
+import { Users, Filter, ChevronDown, Layout, Loader2, ExternalLink } from 'lucide-react';
+
 import { Skeleton } from '../components/ui/Skeleton';
 
 const BoardsPage: React.FC = () => {
@@ -163,6 +164,16 @@ const BoardsPage: React.FC = () => {
                           <span>Miembros</span>
                         </button>
                        )}
+                       <button 
+                         onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
+                         className="px-3 sm:px-4 py-2 text-[12px] font-bold text-[#0079BF] hover:bg-[#0079BF]/5 dark:hover:bg-[#0079BF]/10 transition-all flex items-center gap-2 border-l border-zinc-200 dark:border-white/10 group"
+                       >
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="group-hover:scale-110 transition-transform">
+                           <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
+                         </svg>
+                         <span>Importar Trello</span>
+                       </button>
+
                     </div>
                  </div>
               </div>
@@ -175,13 +186,26 @@ const BoardsPage: React.FC = () => {
                     </div>
                     <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No hay proyectos activos</h3>
                     <p className="text-zinc-500 dark:text-zinc-400 mb-6">Comienza creando tu primer tablero para organizar el trabajo.</p>
-                    <Button 
-                     onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
-                     variant="outlined"
-                     className="border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]"
-                    >
-                      Crear tablero
-                    </Button>
+                     <div className="flex gap-4">
+                        <Button 
+                         onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
+                         variant="outlined"
+                         className="border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]"
+                        >
+                          Crear tablero
+                        </Button>
+                        <Button 
+                         onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
+                         variant="outlined"
+                         className="border-[#0079BF]/30 text-[#0079BF] hover:bg-[#0079BF] hover:text-white dark:hover:bg-[#0079BF] dark:hover:text-white transition-all flex items-center gap-2"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
+                          </svg>
+                          Importar de Trello
+                        </Button>
+                     </div>
+
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-12">
