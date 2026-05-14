@@ -15,7 +15,8 @@ import {
   Users,
   Zap,
   Edit2,
-  Plus
+  Plus,
+  Copy
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import RichTextEditor, { type RichTextEditorRef } from './RichTextEditor';
@@ -36,6 +37,7 @@ import AttachmentPopover from './AttachmentPopover';
 import PropertiesPopover from './PropertiesPopover';
 import CardOptionsMenu from './CardOptionsMenu';
 import MoveCardPopover from './MoveCardPopover';
+import DuplicateCardPopover from './DuplicateCardPopover';
 import Popover from './ui/Popover';
 import SmartPopover from './SmartPopover';
 import UserAvatar from './ui/UserAvatar';
@@ -67,6 +69,7 @@ interface CardData {
   title: string;
   listName: string;
   listId: string;
+  position?: number;
   description?: string;
   attachments?: Attachment[];
   labels?: { id: string; name: string; color: string }[];
@@ -116,7 +119,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | 'members_header' | 'dates_badge' | 'attachments_main' | 'labels_main' | 'members_main' | 'dates_main' | 'properties_main' | null>(null);
+  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | 'duplicate' | 'members_header' | 'dates_badge' | 'attachments_main' | 'labels_main' | 'members_main' | 'dates_main' | 'properties_main' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const editorRef = React.useRef<RichTextEditorRef>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
@@ -181,6 +184,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         title: cardData.title,
         listName: cardData.list?.name || initialData?.listName || 'Lista',
         listId: cardData.listId,
+        position: cardData.position,
         description: cardData.description || '',
         attachments: cardData.attachments || [],
         labels: normalizedLabels,
@@ -590,6 +594,31 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setIsSaving(false);
     }
   };
+
+  const handleDuplicateCard = async (payload: {
+    destinationBoardId: string;
+    destinationListId: string;
+    newPosition: number;
+    copyOptions: {
+      copyAssignees: boolean;
+      copyLabels: boolean;
+      copyChecklists: boolean;
+      copyDates: boolean;
+      copyStatusFlags: boolean;
+    };
+  }) => {
+    if (!cardId) return;
+    setIsSaving(true);
+    try {
+      await apiClient.post(`/api/cards/${cardId}/duplicate`, payload);
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error duplicating card:', err);
+      throw err;
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
   const handleUpdateProperties = async (properties: { priority?: string | null; riskLevel?: string | null; module?: string | null }) => {
     if (!cardId) return;
@@ -787,6 +816,37 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       onClose(); // Close modal if moved to another board
                     } else {
                       fetchCardDetails(); // Just refresh if same board
+                    }
+                  }}
+                />
+              }
+            />
+            <SmartPopover
+              isOpen={activePopover === 'duplicate'}
+              onClose={() => setActivePopover(null)}
+              placement="bottom-start"
+              trigger={
+                <button
+                  onClick={() => setActivePopover(activePopover === 'duplicate' ? null : 'duplicate')}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 rounded font-semibold text-[12px] hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-colors border border-zinc-200 dark:border-white/10"
+                >
+                  <Copy size={16} />
+                  Duplicar
+                </button>
+              }
+              content={
+                <DuplicateCardPopover
+                  currentBoardId={boardId || ''}
+                  currentListId={card?.listId || ''}
+                  currentCardPosition={card?.position}
+                  onDuplicate={handleDuplicateCard}
+                  onClose={() => setActivePopover(null)}
+                  onDuplicateSuccess={(duplicatedToAnotherBoard) => {
+                    if (onUpdate) onUpdate();
+                    if (duplicatedToAnotherBoard) {
+                      onClose();
+                    } else {
+                      fetchCardDetails(true);
                     }
                   }}
                 />
