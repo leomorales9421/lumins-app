@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import { Loader2 } from 'lucide-react';
 import AmbientBackground from '../components/layout/AmbientBackground';
 
 const AuthCallbackPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   
@@ -28,17 +27,9 @@ const AuthCallbackPage: React.FC = () => {
         }
       }
 
-      const token = searchParams.get('token');
-      
-      if (!token) {
-        // If no token in query or hash, redirect to login
-        if (!hash) navigate('/login?error=auth_failed');
-        return;
-      }
-      
       try {
-        // Set the new access token
-        apiClient.setTokens(token);
+        const refreshResponse = await apiClient.post<{ data: { accessToken: string } }>('/api/auth/refresh', {});
+        apiClient.setTokens(refreshResponse.data.accessToken);
         
         // Refresh the user context to sync with the new token
         await refreshUser();
@@ -47,12 +38,12 @@ const AuthCallbackPage: React.FC = () => {
         navigate('/app', { replace: true });
       } catch (error) {
         console.error('Failed to handle auth callback:', error);
-        navigate('/login?error=auth_sync_failed');
+        navigate('/login?error=auth_failed');
       }
     };
     
     handleCallback();
-  }, [searchParams, navigate, refreshUser]);
+  }, [navigate, refreshUser]);
 
 
   return (
