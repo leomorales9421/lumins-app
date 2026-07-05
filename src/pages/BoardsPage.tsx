@@ -263,16 +263,7 @@ const BoardsPage: React.FC = () => {
                      </AnimatePresence>
                    </div>
 
-                   {/* Pagination — Bottom */}
-                   {totalPages > 1 && (
-                     <div className="flex justify-center mt-6 mb-12">
-                       <PaginationControls
-                         page={page}
-                         totalPages={totalPages}
-                         onPageChange={goToPage}
-                       />
-                     </div>
-                   )}
+
                  </>
                )}
             </>
@@ -313,7 +304,7 @@ function PaginationControls({ page, totalPages, onPageChange }: {
         className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronLeft size={14} />
-        Prev
+        Anterior
       </button>
 
       <div className="flex items-center gap-1">
@@ -349,7 +340,7 @@ function PaginationControls({ page, totalPages, onPageChange }: {
         disabled={page >= totalPages}
         className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        Next
+        Siguiente
         <ChevronRight size={14} />
       </button>
     </div>

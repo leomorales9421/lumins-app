@@ -32,7 +32,7 @@ export default function BoardCardsModal({
   const fetchCards = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get<any>(`/api/boards/${boardId}/cards`);
+      const res = await apiClient.get<any>(`/api/cards/boards/${boardId}/cards`);
       setCards(res.data?.cards || []);
     } catch (error) {
       console.error('Error fetching board cards:', error);

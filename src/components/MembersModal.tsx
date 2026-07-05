@@ -62,6 +62,7 @@ const MembersModal: React.FC<MembersModalProps> = ({
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [selectedWsMembers, setSelectedWsMembers] = useState<{userId: string; role: string}[]>([]);
 
   // --- Manage state ---
   const [boardMembers, setBoardMembers] = useState<BoardMember[]>([]);
@@ -158,18 +159,43 @@ const MembersModal: React.FC<MembersModalProps> = ({
   const toggleBoard = (id: string) => {
     setSelectedBoards(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
+  const toggleWsMember = (userId: string) => {
+    setSelectedWsMembers(prev => {
+      const exists = prev.find(m => m.userId === userId);
+      if (exists) return prev.filter(m => m.userId !== userId);
+      return [...prev, { userId, role: 'editor' }];
+    });
+  };
+  const updateWsMemberRole = (userId: string, role: string) => {
+    setSelectedWsMembers(prev => prev.map(m => m.userId === userId ? { ...m, role } : m));
+  };
 
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validInvites = invites.filter(i => i.email.trim() !== '');
-    if (validInvites.length === 0) { setError('Añade al menos un email.'); return; }
+    if (validInvites.length === 0 && selectedWsMembers.length === 0) { setError('Añade al menos un email o selecciona miembros del espacio.'); return; }
     if (selectedWorkspaces.length === 0 && selectedBoards.length === 0) { setError('Selecciona al menos un destino.'); return; }
+
+    // Check for duplicate emails against existing board members
+    if (boardId && boardMembers.length > 0) {
+      const boardEmails = new Set(boardMembers.map(m => m.user.email.toLowerCase()));
+      const duplicate = validInvites.find(i => boardEmails.has(i.email.trim().toLowerCase()));
+      if (duplicate) { setError(`"${duplicate.email}" ya es miembro del tablero.`); return; }
+    }
+
     setIsLoading(true); setError('');
     try {
-      await apiClient.post('/api/workspaces/bulk/invites', {
-        invites: validInvites,
-        destinations: { workspaces: selectedWorkspaces, boards: selectedBoards }
-      });
+      if (validInvites.length > 0) {
+        await apiClient.post('/api/workspaces/bulk/invites', {
+          invites: validInvites,
+          destinations: { workspaces: selectedWorkspaces, boards: selectedBoards }
+        });
+      }
+      if (boardId && selectedWsMembers.length > 0) {
+        await Promise.all(selectedWsMembers.map(m =>
+          apiClient.post(`/api/boards/${boardId}/members`, { userId: m.userId, role: m.role })
+        ));
+      }
       setSuccess(true);
       setTimeout(() => handleClose(), 2000);
     } catch (err: any) {
@@ -221,6 +247,8 @@ const MembersModal: React.FC<MembersModalProps> = ({
     !boardMemberIds.has(m.userId) &&
     (m.user.name.toLowerCase().includes(search.toLowerCase()) || m.user.email.toLowerCase().includes(search.toLowerCase()))
   );
+  const addableWsMembers = workspaceMembers.filter(m => !boardMemberIds.has(m.userId));
+
   const filteredBoardMembers = boardMembers.filter(m =>
     m.user.name.toLowerCase().includes(search.toLowerCase()) || m.user.email.toLowerCase().includes(search.toLowerCase())
   );
@@ -244,6 +272,7 @@ const MembersModal: React.FC<MembersModalProps> = ({
     setInvites([{ email: '', role: 'MEMBER' }]);
     setSelectedWorkspaces(initialWorkspaceId ? [initialWorkspaceId] : []);
     setSelectedBoards(boardId ? [boardId] : []);
+    setSelectedWsMembers([]);
     setError(''); setSuccess(false); setSearch('');
     onClose();
   };
@@ -377,20 +406,16 @@ const MembersModal: React.FC<MembersModalProps> = ({
                                     <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">Tableros del espacio</span>
                                     {isWsSelected && <span className="text-[8px] text-emerald-500 font-bold">(acceso automático)</span>}
                                   </div>
-                                  {publicBoards.map(board => {
-                                    const isAutoSelected = isWsSelected;
-                                    return (
-                                    <div key={board.id} onClick={isAutoSelected ? undefined : () => toggleBoard(board.id)}
-                                      className={`flex items-center gap-3 p-2.5 rounded transition-all ${isAutoSelected ? 'opacity-70 cursor-default' : 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-white/5'} ${selectedBoards.includes(board.id) ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' : ''}`}
-                                      title={isAutoSelected ? 'Acceso automático por pertenecer al espacio de trabajo' : undefined}>
+                                  {publicBoards.map(board => (
+                                    <div key={board.id} onClick={() => toggleBoard(board.id)}
+                                      className={`flex items-center gap-3 p-2.5 rounded cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-white/5 ${selectedBoards.includes(board.id) ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' : ''}`}>
                                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${selectedBoards.includes(board.id) ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm' : 'border-zinc-300 dark:border-white/10'}`}>
                                         {selectedBoards.includes(board.id) && <Check size={10} strokeWidth={4} />}
                                       </div>
                                       <ClipboardList size={14} className="text-zinc-400" />
                                       <span className={`text-sm font-medium ${selectedBoards.includes(board.id) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}>{board.name}</span>
                                     </div>
-                                    );
-                                  })}
+                                  ))}
                                 </div>
                               )}
 
@@ -441,6 +466,43 @@ const MembersModal: React.FC<MembersModalProps> = ({
                       )}
                     </div>
 
+                    {boardId && addableWsMembers.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">
+                          Miembros del espacio para añadir al tablero
+                        </h3>
+                        <div className="border border-zinc-200 dark:border-white/10 rounded p-3 space-y-2 bg-zinc-50/30 dark:bg-black/10">
+                          {addableWsMembers.map(member => {
+                            const isSelected = selectedWsMembers.some(m => m.userId === member.userId);
+                            const currentRole = selectedWsMembers.find(m => m.userId === member.userId)?.role || 'editor';
+                            return (
+                              <div key={member.userId} className="flex items-center gap-3 p-2.5 rounded bg-white dark:bg-[#1C1F26] border border-zinc-100 dark:border-white/5">
+                                <div onClick={() => toggleWsMember(member.userId)}
+                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all flex-shrink-0 ${isSelected ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' : 'border-zinc-300 dark:border-white/10'}`}>
+                                  {isSelected && <Check size={12} strokeWidth={4} />}
+                                </div>
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                  <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-xs font-bold text-zinc-500 flex-shrink-0 border border-zinc-200 dark:border-white/10">
+                                    {member.user.name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{member.user.name}</div>
+                                    <div className="text-[11px] text-zinc-500 truncate">{member.user.email}</div>
+                                  </div>
+                                </div>
+                                <select value={currentRole} onChange={(e) => updateWsMemberRole(member.userId, e.target.value)}
+                                  className="bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-1.5 text-[11px] font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer flex-shrink-0">
+                                  <option value="admin">Admin</option>
+                                  <option value="editor">Miembro</option>
+                                  <option value="viewer">Invitado</option>
+                                </select>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {error && (
                       <div className="text-rose-500 text-[13px] font-bold text-center bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20">
                         {error}
@@ -451,8 +513,8 @@ const MembersModal: React.FC<MembersModalProps> = ({
                       <button type="button" onClick={handleClose}
                         className="px-6 py-3 text-zinc-500 font-bold text-sm hover:text-zinc-900 transition-colors">Cancelar</button>
                       <button type="submit"
-                        disabled={isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)}
-                        className={`px-8 py-3 rounded font-bold text-white transition-all shadow-lg ${isLoading || invites.every(i => !i.email.trim()) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0) ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 cursor-not-allowed shadow-none' : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'}`}>
+                        disabled={isLoading || (invites.every(i => !i.email.trim()) && selectedWsMembers.length === 0) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)}
+                        className={`px-8 py-3 rounded font-bold text-white transition-all shadow-lg ${isLoading || (invites.every(i => !i.email.trim()) && selectedWsMembers.length === 0) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0) ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 cursor-not-allowed shadow-none' : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'}`}>
                         {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Enviar Invitaciones'}
                       </button>
                     </div>

@@ -23,7 +23,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   return (
     <div
       onClick={() => navigate(`/boards/${board.id}`)}
-      className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
+      className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1 min-h-[260px]"
     >
       <div className="p-4 flex flex-col flex-1">
         
@@ -54,7 +54,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
               {board.name}
             </h3>
           </div>
-          <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-snug pl-10">
+          <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 truncate leading-snug pl-10" title={board.description || ''}>
             {board.description || 'Sin descripción disponible.'}
           </p>
         </div>
