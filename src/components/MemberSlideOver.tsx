@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Shield, Layout, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Shield, Layout, Trash2, CheckCircle2, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
 import apiClient from '../lib/api-client';
@@ -27,6 +27,8 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const [isLoadingBoards, setIsLoadingBoards] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const isWsOwner = member?.role === 'OWNER';
   const isWsAdmin = member?.role === 'ADMIN';
@@ -38,11 +40,22 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   };
   const canManage = canManageRole(member?.role || '') && member?.userId !== undefined;
 
+  const sortedBoards = useMemo(
+    () => [...workspaceBoards].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [workspaceBoards]
+  );
+  const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(sortedBoards.length / pageSize));
+  const displayBoards = pageSize === 0 ? sortedBoards : sortedBoards.slice((page - 1) * pageSize, page * pageSize);
+
   useEffect(() => {
     if (isOpen && member) {
       fetchData();
     }
   }, [isOpen, member]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize, workspaceBoards]);
 
   const fetchData = async () => {
     setIsLoadingBoards(true);
@@ -221,7 +234,20 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
 
               {/* Boards Access Section */}
               <section>
-                <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-4 px-1">Acceso a Tableros</h3>
+                <div className="flex items-center justify-between mb-4 px-1">
+                  <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Acceso a Tableros</h3>
+                  {!isLoadingBoards && workspaceBoards.length > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-400">
+                      {[10, 30, 50].map(size => (
+                        <button key={size} onClick={() => setPageSize(size)}
+                          className={`px-1.5 py-0.5 rounded transition-colors ${pageSize === size ? 'text-[#6C5DD3] bg-[#6C5DD3]/10' : 'hover:text-zinc-600 dark:hover:text-zinc-300'}`}>{size}</button>
+                      ))}
+                      <span className="text-zinc-300 mx-0.5">|</span>
+                      <button onClick={() => setPageSize(0)}
+                        className={`px-1.5 py-0.5 rounded transition-colors ${pageSize === 0 ? 'text-[#6C5DD3] bg-[#6C5DD3]/10' : 'hover:text-zinc-600 dark:hover:text-zinc-300'}`}>Todas</button>
+                    </div>
+                  )}
+                </div>
                 {isLoadingBoards ? (
                   <div className="flex flex-col items-center justify-center py-12 text-zinc-400 dark:text-zinc-500 gap-3">
                     <Loader2 className="animate-spin text-[#6C5DD3]" size={24} />
@@ -229,7 +255,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    {workspaceBoards.map((board) => {
+                    {displayBoards.map((board) => {
                       const isPrivate = board.visibility === 'PRIVATE';
                       const hasExplicitAccess = activeBoards.includes(board.id);
 
@@ -288,6 +314,35 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                         </div>
                       );
                     })}
+                  </div>
+                )}
+                {!isLoadingBoards && sortedBoards.length > 10 && pageSize > 0 && totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-3 px-1">
+                    <span className="text-[10px] text-zinc-400 font-medium">
+                      {sortedBoards.length > 0
+                        ? `Mostrando ${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, sortedBoards.length)} de ${sortedBoards.length}`
+                        : '0 tableros'}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page <= 1}
+                        className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                        <ChevronLeft size={14} />
+                      </button>
+                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                        const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                        const p = start + i;
+                        return p <= totalPages ? (
+                          <button key={p} onClick={() => setPage(p)}
+                            className={`w-6 h-6 rounded text-[11px] font-bold transition-colors ${p === page ? 'bg-[#6C5DD3] text-white' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5'}`}>{p}</button>
+                        ) : null;
+                      })}
+                      <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 )}
               </section>
