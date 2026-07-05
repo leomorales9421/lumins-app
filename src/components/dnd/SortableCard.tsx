@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
+import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock, Archive } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Card } from '../../types/board';
@@ -10,6 +10,7 @@ import UserAvatar from '../ui/UserAvatar';
 interface SortableCardProps {
   card: Card;
   onClick: () => void;
+  onArchive?: () => void;
 }
 
 const PRIORITY_BORDER: Record<string, string> = {
@@ -26,7 +27,7 @@ const PRIORITY_DOT: Record<string, string> = {
   P3: '#94A3B8',
 };
 
-export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => {
+export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArchive }) => {
   const {
     attributes,
     listeners,
@@ -50,7 +51,7 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
   const doneItems = checklistItems.filter(i => i.done).length;
   const checklistPct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
 
-  const isOverdue = card.dueDate ? new Date(card.dueDate) < new Date() : false;
+  const isOverdue = card.dueDate ? new Date(card.dueDate) < new Date() && !card.isDone && !card.isDueDateDone : false;
   const priorityClass = card.priority ? PRIORITY_BORDER[card.priority] : '';
 
   return (
@@ -81,15 +82,29 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => 
         )}
 
         {/* Title */}
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 relative">
           <p className={`text-[13px] font-semibold leading-snug group-hover:text-[#6C5DD3] transition-colors ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}>
             {card.title}
           </p>
-          {card.isDone && (
-            <div className="bg-emerald-500 rounded-full p-0.5 shadow-sm flex-shrink-0" title="Tarjeta terminada">
-              <CheckSquare size={10} className="text-white" />
-            </div>
-          )}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {onArchive && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive();
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded transition-all"
+                title="Archivar tarjeta"
+              >
+                <Archive size={14} />
+              </button>
+            )}
+            {card.isDone && (
+              <div className="bg-emerald-500 rounded-full p-0.5 shadow-sm" title="Tarjeta terminada">
+                <CheckSquare size={10} className="text-white" />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Checklist progress bar */}

@@ -4,7 +4,7 @@ import { Users, Search, Mail, Shield, Layout, MoreHorizontal, UserPlus, ChevronR
 import apiClient from '../lib/api-client';
 import type { Workspace } from '../types/workspace';
 import Button from '../components/ui/Button';
-import InviteMembersModal from '../components/InviteMembersModal';
+import MembersModal from '../components/MembersModal';
 import MemberSlideOver from '../components/MemberSlideOver';
 import { motion } from 'framer-motion';
 import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
@@ -55,6 +55,11 @@ const MembersPage: React.FC = () => {
 
   const currentUserRole = workspace?.members.find(m => m.userId === user?.id)?.role;
   const canManage = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
+  const canManageRole = (targetRole: WorkspaceRole) => {
+    if (currentUserRole === 'OWNER') return true;
+    if (currentUserRole === 'ADMIN') return targetRole !== 'OWNER' && targetRole !== 'ADMIN';
+    return false;
+  };
 
   const handleRoleChange = async (targetUserId: string, newRole: WorkspaceRole) => {
     if (!workspaceId) return;
@@ -227,7 +232,7 @@ const MembersPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {canManage && member.role !== 'OWNER' && member.userId !== user?.id ? (
+                    {canManage && member.role !== 'OWNER' && member.userId !== user?.id && canManageRole(member.role) ? (
                       <select 
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.userId, e.target.value as WorkspaceRole)}
@@ -261,7 +266,7 @@ const MembersPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                       {canManage && member.role !== 'OWNER' && member.userId !== user?.id && (
+                       {canManage && member.role !== 'OWNER' && member.userId !== user?.id && canManageRole(member.role) && (
                         <button 
                           onClick={() => handleRemoveMember(member.userId, member.user.name)}
                           className="p-2 text-rose-400/60 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded transition-all"
@@ -332,7 +337,7 @@ const MembersPage: React.FC = () => {
         )}
       </div>
 
-      <InviteMembersModal 
+      <MembersModal 
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         workspaceId={workspaceId!}

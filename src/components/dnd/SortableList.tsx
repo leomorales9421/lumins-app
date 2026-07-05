@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoreHorizontal, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, X, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../types/board';
 import { SortableCard } from './SortableCard';
@@ -16,11 +16,13 @@ interface SortableListProps {
   onCardClick: (cardId: string) => void;
   onAddCard?: (listId: string, title: string) => void;
   onUpdateList?: (listId: string, name: string) => void;
+  onArchiveList?: (listId: string) => void;
   onDeleteList?: (listId: string) => void;
+  onArchiveCard?: (cardId: string) => void;
   canEdit?: boolean;
 }
 
-export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, onAddCard, onUpdateList, onDeleteList, canEdit = true }) => {
+export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, onAddCard, onUpdateList, onArchiveList, onDeleteList, onArchiveCard, canEdit = true }) => {
   const [isAddingCard, setIsAddingCard] = React.useState(false);
   const [newCardTitle, setNewCardTitle] = React.useState('');
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
@@ -186,6 +188,22 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (onArchiveList && window.confirm('¿Archivar esta lista? (Podrá ser restaurada después)')) {
+                            onArchiveList(list.id);
+                          }
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-all flex items-center gap-3"
+                      >
+                        <div className="w-7 h-7 rounded bg-orange-100/50 dark:bg-orange-500/5 flex items-center justify-center">
+                          <Archive size={14} strokeWidth={2.5} />
+                        </div>
+                        Archivar lista
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (onDeleteList && window.confirm('¿Eliminar esta lista?')) {
                             onDeleteList(list.id);
                           }
@@ -221,6 +239,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
               key={card.id}
               card={card}
               onClick={() => onCardClick(card.id)}
+              onArchive={onArchiveCard ? () => onArchiveCard(card.id) : undefined}
             />
           ))}
         </SortableContext>

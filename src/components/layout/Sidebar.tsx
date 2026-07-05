@@ -8,7 +8,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  BarChart2
 } from 'lucide-react';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
 
@@ -127,6 +128,13 @@ const Sidebar: React.FC<SidebarProps> = ({
               to={workspaceId ? `/w/${workspaceId}/activity` : "/activity"} 
               icon={<Activity size={18} />} 
               label="Actividad" 
+              isCollapsed={isCollapsed} 
+              isFloating={isFloating}
+            />
+            <SidebarItem 
+              to={workspaceId ? `/w/${workspaceId}/insights` : "/insights"} 
+              icon={<BarChart2 size={18} />} 
+              label="Insights" 
               isCollapsed={isCollapsed} 
               isFloating={isFloating}
             />

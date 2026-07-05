@@ -30,6 +30,7 @@ const NotificationSettings = lazy(() => import('./pages/settings/NotificationSet
 const PreferenceSettings = lazy(() => import('./pages/settings/PreferenceSettings'));
 const IntegrationsSettings = lazy(() => import('./pages/settings/IntegrationsSettings'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 
 const PageLoader = () => (
   <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
@@ -111,6 +112,7 @@ function App() {
                     <Route path="/w/:workspaceId/members" element={<MembersPage />} />
                     <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
                     <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
+                    <Route path="/w/:workspaceId/insights" element={<InsightsPage />} />
                     <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
                     <Route path="/boards/:id" element={<BoardDetailPage />} />
                     
@@ -126,6 +128,7 @@ function App() {
 
                   <Route path="/calendar" element={<ProtectedRoute><WorkspaceRedirect to="calendar" /></ProtectedRoute>} />
                   <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
+                  <Route path="/insights" element={<ProtectedRoute><WorkspaceRedirect to="insights" /></ProtectedRoute>} />
                   <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
 
                   <Route path="/" element={<Navigate to="/app" replace />} />

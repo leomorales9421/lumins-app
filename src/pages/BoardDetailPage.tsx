@@ -42,7 +42,7 @@ import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard } from '../components/dnd/SortableCard';
 import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
-import ManageBoardMembersModal from '../components/ManageBoardMembersModal';
+import MembersModal from '../components/MembersModal';
 import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -482,6 +482,28 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
+  const handleArchiveList = async (listId: string) => {
+    try {
+      await apiClient.patch(`/api/lists/${listId}/archive`);
+      fetchBoard();
+      toast.success('Lista archivada exitosamente');
+    } catch (err) {
+      console.error('Error archiving list:', err);
+      toast.error('Error', { description: 'No se pudo archivar la lista' });
+    }
+  };
+
+  const handleArchiveCardFromBoard = async (cardId: string) => {
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, { status: 'closed' });
+      fetchBoard();
+      toast.success('Tarjeta archivada');
+    } catch (err) {
+      console.error('Error archiving card:', err);
+      toast.error('Error', { description: 'No se pudo archivar la tarjeta' });
+    }
+  };
+
   if (isLoading) {
     return (
       <div 
@@ -864,7 +886,9 @@ const BoardDetailPage: React.FC = () => {
                   onCardClick={setSelectedCardId}
                   onAddCard={handleAddCard}
                   onUpdateList={handleUpdateList}
+                  onArchiveList={handleArchiveList}
                   onDeleteList={handleDeleteList}
+                  onArchiveCard={handleArchiveCardFromBoard}
                   canEdit={canEditContent}
                 />
               ))}
@@ -934,12 +958,12 @@ const BoardDetailPage: React.FC = () => {
         } : undefined}
       />
 
-      <ManageBoardMembersModal
+      <MembersModal
         isOpen={isMembersModalOpen}
         onClose={() => setIsMembersModalOpen(false)}
         boardId={board.id}
+        boardName={board.name}
         workspaceId={board.workspaceId}
-        currentMembers={board.members || []}
         onUpdate={fetchBoard}
       />
 

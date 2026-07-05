@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Users, ChevronDown, Layout, Loader2, Building2 } from 'lucide-react';
 import apiClient from '../lib/api-client';
-import { DEFAULT_BOARD_BACKGROUND } from '../lib/board-backgrounds';
+import { BOARD_BACKGROUND_PRESETS } from '../lib/board-backgrounds';
 
 interface Workspace {
   id: string;
@@ -59,12 +59,15 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
     setError('');
 
     try {
+      const colorfulPresets = BOARD_BACKGROUND_PRESETS.filter(p => p.id !== 'default');
+      const randomBackground = colorfulPresets[Math.floor(Math.random() * colorfulPresets.length)].value;
+
       const payload: CreateBoardPayload = {
         name,
         workspaceId,
         visibility,
         description: description.trim() || undefined,
-        background: DEFAULT_BOARD_BACKGROUND,
+        background: randomBackground,
       };
 
       await apiClient.post('/api/boards', payload);

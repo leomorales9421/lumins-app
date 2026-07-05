@@ -12,6 +12,7 @@ export interface Card {
   isDone?: boolean;
   startDate?: string | null;
   dueDate?: string | null;
+  isDueDateDone?: boolean;
   createdAt?: string;
   updatedAt?: string;
   labels?: Array<{ id: string; name: string; color: string }>;

@@ -7,6 +7,8 @@
 
 const CACHE_NAME = 'lumins-avatar-cache-v1';
 
+const inFlightRequests = new Map<string, Promise<string>>();
+
 /**
  * Gets an image from the cache or fetches and stores it if not present.
  * Returns a Blob URL that can be used as an <img> src.
@@ -19,31 +21,49 @@ export async function getCachedImage(url: string): Promise<string> {
     return url;
   }
 
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    let response = await cache.match(url);
-
-    if (!response) {
-      // Not in cache, fetch it
-      response = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit' // Google Drive public links don't need credentials
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.statusText}`);
-      }
-
-      // Store in cache
-      await cache.put(url, response.clone());
-    }
-
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  } catch (error) {
-    console.warn(`Persistent cache failed for ${url}, falling back to direct URL:`, error);
+  // Skip Cache Storage for Google Avatars to avoid 429 Too Many Requests from fetch()
+  // The browser's native HTTP cache will handle these much better in <img> tags.
+  if (url.includes('googleusercontent.com') || url.includes('ui-avatars.com')) {
     return url;
   }
+
+  // If there's already an ongoing fetch for this URL, wait for it
+  if (inFlightRequests.has(url)) {
+    return inFlightRequests.get(url)!;
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      let response = await cache.match(url);
+
+      if (!response) {
+        // Not in cache, fetch it
+        response = await fetch(url, {
+          mode: 'cors',
+          credentials: 'omit' // Google Drive public links don't need credentials
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.statusText}`);
+        }
+
+        // Store in cache
+        await cache.put(url, response.clone());
+      }
+
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.warn(`Persistent cache failed for ${url}, falling back to direct URL:`, error);
+      return url;
+    } finally {
+      inFlightRequests.delete(url);
+    }
+  })();
+
+  inFlightRequests.set(url, fetchPromise);
+  return fetchPromise;
 }
 
 /**

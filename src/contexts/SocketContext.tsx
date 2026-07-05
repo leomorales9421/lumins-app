@@ -41,12 +41,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.log('Socket disconnected');
       });
 
-      newSocket.on('connect_error', (err) => {
+      newSocket.on('connect_error', async (err) => {
         console.error('Socket connection error:', err.message);
         if (err.message === 'Authentication error: Invalid or expired token') {
-          // If token is invalid, we might want to refresh it or logout
-          console.warn('Socket authentication failed. Forcing logout.');
-          // logout();
+          console.warn('Socket token expired. Requesting token refresh...');
+          try {
+            await apiClient.refreshAccessToken();
+          } catch (error) {
+            console.error('Failed to refresh token for socket. Forcing logout.');
+            logout();
+          }
         }
       });
 

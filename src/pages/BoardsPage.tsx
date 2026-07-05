@@ -6,7 +6,7 @@ import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
 import Button from '../components/ui/Button';
 import BoardCard from '../components/BoardCard';
-import InviteMembersModal from '../components/InviteMembersModal';
+import MembersModal from '../components/MembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Filter, ChevronDown, Layout, Loader2, ExternalLink } from 'lucide-react';
@@ -243,7 +243,7 @@ const BoardsPage: React.FC = () => {
       </main>
 
       {workspaces.length > 0 && (
-        <InviteMembersModal 
+        <MembersModal 
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
           workspaceId={workspaceId || workspaces[0].id}

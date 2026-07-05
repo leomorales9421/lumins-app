@@ -26,7 +26,8 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const isWsAdmin = member?.role === 'OWNER' || member?.role === 'ADMIN';
+  const isWsOwner = member?.role === 'OWNER';
+  const isWsAdmin = member?.role === 'ADMIN';
   const isWsMember = member?.role === 'MEMBER';
 
   useEffect(() => {
@@ -38,31 +39,41 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const fetchData = async () => {
     setIsLoadingBoards(true);
     try {
-      // 1. Fetch all boards in workspace
       const boardsRes = await apiClient.get<{ data: { boards: any[] } }>(`/api/boards?workspaceId=${workspaceId}`);
       const boards = boardsRes.data.boards;
       setWorkspaceBoards(boards);
 
-      // 2. For each board, check if user is a member
       const memberBoards: string[] = [];
-      // Fetch details for each board to see members list
       const detailsPromises = boards.map(board => apiClient.get<{ data: { board: any } }>(`/api/boards/${board.id}`));
       const detailsResponses = await Promise.all(detailsPromises);
-      
+
       detailsResponses.forEach((res, index) => {
         const boardDetail = res.data.board;
         const isExplicitMember = boardDetail.members.some((m: any) => m.userId === member?.userId);
         const isOwner = boardDetail.ownerId === member?.userId;
-        
-        // Effective access: Direct member, Board Owner, or Workspace Inherited (Admin or Member for WORKSPACE boards)
-        const isInheritedAdmin = isWsAdmin;
-        const isInheritedMember = isWsMember && (boardDetail.visibility === 'WORKSPACE' || boardDetail.visibility === 'team');
-        
-        if (isExplicitMember || isOwner || isInheritedAdmin || isInheritedMember) {
+        const isPrivate = boardDetail.visibility === 'PRIVATE';
+
+        // WS OWNER always has access to ALL boards
+        if (isWsOwner) {
           memberBoards.push(boards[index].id);
+          return;
         }
+
+        // Explicit member or board owner
+        if (isExplicitMember || isOwner) {
+          memberBoards.push(boards[index].id);
+          return;
+        }
+
+        // For WORKSPACE boards: WS ADMIN and MEMBER have inherited access
+        if (!isPrivate) {
+          if (isWsAdmin || isWsMember) {
+            memberBoards.push(boards[index].id);
+          }
+        }
+        // For PRIVATE boards: WS ADMIN/MEMBER have NO inherited access
       });
-      
+
       setActiveBoards(memberBoards);
     } catch (err) {
       console.error('Error fetching member board access', err);
@@ -211,40 +222,58 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                 ) : (
                   <div className="space-y-1">
                     {workspaceBoards.map((board) => {
-                      const isInherited = isWsAdmin || (isWsMember && (board.visibility === 'WORKSPACE' || board.visibility === 'team'));
-                      const hasAccess = activeBoards.includes(board.id) || isInherited;
-                      const isDisabled = member?.role === 'OWNER' || isInherited;
-                      
+                      const isPrivate = board.visibility === 'PRIVATE';
+                      const hasExplicitAccess = activeBoards.includes(board.id);
+
+                      // WS OWNER always has access (cannot toggle)
+                      const isOwnerInherited = isWsOwner;
+                      // WS ADMIN/MEMBER get inherited access for WORKSPACE boards only
+                      const isWsInherited = !isPrivate && (isWsAdmin || isWsMember);
+
+                      const hasEffectiveAccess = hasExplicitAccess || isOwnerInherited || isWsInherited;
+
+                      // Toggle is disabled for: owner (always has access), or WS inherited access
+                      const isToggleDisabled = isOwnerInherited || isWsInherited;
+
                       return (
                         <div 
                           key={board.id}
                           className="flex items-center justify-between p-3.5 hover:bg-zinc-50 dark:hover:bg-white/5 rounded transition-all group"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-400 dark:text-zinc-500 group-hover:bg-[#6C5DD3]/10 group-hover:text-[#6C5DD3] transition-all">
+                            <div className={`w-10 h-10 rounded bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 flex items-center justify-center transition-all ${isPrivate ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'} group-hover:bg-[#6C5DD3]/10 group-hover:text-[#6C5DD3]`}>
                               <Layout size={18} />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">{board.name}</span>
-                              {isInherited && (
+                              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                                {board.name}
+                                {isPrivate && <span className="ml-2 text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Privado</span>}
+                              </span>
+                              {isOwnerInherited && (
+                                <span className="text-[10px] text-[#6C5DD3] font-medium">Acceso como propietario del espacio</span>
+                              )}
+                              {isWsInherited && (
                                 <span className="text-[10px] text-[#6C5DD3] font-medium">Acceso por espacio de trabajo</span>
+                              )}
+                              {!isOwnerInherited && !isWsInherited && isPrivate && (
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 italic">Requiere invitación explícita</span>
                               )}
                             </div>
                           </div>
                           
                           <button
-                            disabled={isDisabled}
-                            onClick={() => toggleBoardAccess(board.id, activeBoards.includes(board.id))}
+                            disabled={isToggleDisabled}
+                            onClick={() => toggleBoardAccess(board.id, hasExplicitAccess)}
                             className={`
                               relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
-                              ${hasAccess ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}
-                              ${isDisabled && 'opacity-50 cursor-not-allowed'}
+                              ${hasEffectiveAccess ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}
+                              ${isToggleDisabled && 'opacity-50 cursor-not-allowed'}
                             `}
                           >
                             <span
                               className={`
                                 pointer-events-none inline-block h-5 w-5 transform rounded bg-white shadow ring-0 transition duration-200 ease-in-out
-                                ${hasAccess ? 'translate-x-5' : 'translate-x-0'}
+                                ${hasEffectiveAccess ? 'translate-x-5' : 'translate-x-0'}
                               `}
                             />
                           </button>

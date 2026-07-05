@@ -233,13 +233,15 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
 
                 {/* Section 2: Destinations */}
                 <div className="space-y-4">
-                  <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">Asignar a...</h3>
+                  <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">Asignar acceso a...</h3>
                   
-                  {/* Unified Grouped List */}
                   <div className="max-h-[300px] overflow-y-auto border border-zinc-200 dark:border-white/10 rounded p-4 custom-scrollbar bg-zinc-50/30 dark:bg-black/10 space-y-6">
                     {workspaces.map((ws) => {
                       const workspaceBoards = boards.filter(b => b.workspaceId === ws.id);
+                      const publicBoards = workspaceBoards.filter(b => b.visibility !== 'PRIVATE');
+                      const privateBoards = workspaceBoards.filter(b => b.visibility === 'PRIVATE');
                       const isWsSelected = selectedWorkspaces.includes(ws.id);
+                      const hasPrivateSelected = privateBoards.some(b => selectedBoards.includes(b.id));
 
                       return (
                         <div key={ws.id} className="space-y-3">
@@ -248,7 +250,7 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                             onClick={() => toggleWorkspace(ws.id)}
                             className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-all ${
                               isWsSelected 
-                                ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10' 
+                                ? 'bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 ring-1 ring-[#6C5DD3]/20' 
                                 : 'hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
@@ -268,15 +270,26 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                                 <span className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider">Espacio de Trabajo</span>
                               </div>
                             </div>
+                            {isWsSelected && (
+                              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded">
+                                Acceso al espacio
+                              </span>
+                            )}
                           </div>
 
-                          {/* Nested Boards */}
-                          {workspaceBoards.length > 0 && (
+                          {/* Public Boards (inherited via workspace) */}
+                          {publicBoards.length > 0 && (
                             <div className="ml-8 space-y-1.5 border-l-2 border-zinc-100 dark:border-white/5 pl-4">
-                              {workspaceBoards.map((board) => {
+                              <div className="flex items-center gap-2 px-2.5 py-1">
+                                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">
+                                  Tableros del espacio
+                                </span>
+                                {isWsSelected && (
+                                  <span className="text-[8px] text-emerald-500 font-bold">(acceso automático)</span>
+                                )}
+                              </div>
+                              {publicBoards.map((board) => {
                                 const isBoardSelected = selectedBoards.includes(board.id);
-                                const isPrivate = board.visibility === 'PRIVATE';
-
                                 return (
                                   <div 
                                     key={board.id}
@@ -295,20 +308,56 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                                       {isBoardSelected && <Check size={10} strokeWidth={4} />}
                                     </div>
                                     <div className="flex items-center gap-2.5 flex-1">
-                                      {isPrivate ? (
-                                        <Lock className="text-zinc-400 dark:text-zinc-500" size={14} />
-                                      ) : (
-                                        <ClipboardList size={14} className="text-zinc-400 dark:text-zinc-500" />
-                                      )}
+                                      <ClipboardList size={14} className="text-zinc-400 dark:text-zinc-500" />
                                       <span className={`text-sm font-medium ${isBoardSelected ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
                                         {board.name}
                                       </span>
-                                      {isPrivate && (
-                                        <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
-                                          <Lock size={10} className="text-zinc-400 dark:text-zinc-500" />
-                                          <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">Privado</span>
-                                        </div>
-                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Private Boards (require explicit invite) */}
+                          {privateBoards.length > 0 && (
+                            <div className="ml-8 space-y-1.5 border-l-2 border-amber-200 dark:border-amber-500/20 pl-4">
+                              <div className="flex items-center gap-2 px-2.5 py-1">
+                                <Lock size={10} className="text-amber-500" />
+                                <span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">
+                                  Tableros Privados
+                                </span>
+                                <span className="text-[8px] text-amber-500/70 italic">(requiere selección manual)</span>
+                              </div>
+                              {privateBoards.map((board) => {
+                                const isBoardSelected = selectedBoards.includes(board.id);
+                                return (
+                                  <div 
+                                    key={board.id}
+                                    onClick={() => toggleBoard(board.id)}
+                                    className={`flex items-center gap-3 p-2.5 rounded cursor-pointer transition-all ${
+                                      isBoardSelected 
+                                        ? 'bg-amber-50 dark:bg-amber-500/10 ring-1 ring-amber-500/20' 
+                                        : 'hover:bg-amber-50/50 dark:hover:bg-amber-500/5'
+                                    }`}
+                                    title="Este tablero es privado. Los miembros del espacio no tienen acceso automático. Selecciona este board para invitarlos explícitamente."
+                                  >
+                                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                                      isBoardSelected 
+                                        ? 'bg-amber-500 border-amber-500 text-white shadow-sm' 
+                                        : 'border-zinc-300 dark:border-white/10'
+                                    }`}>
+                                      {isBoardSelected && <Check size={10} strokeWidth={4} />}
+                                    </div>
+                                    <div className="flex items-center gap-2.5 flex-1">
+                                      <Lock size={14} className="text-amber-400" />
+                                      <span className={`text-sm font-medium ${isBoardSelected ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                                        {board.name}
+                                      </span>
+                                      <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                        <Lock size={10} className="text-amber-500" />
+                                        <span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Privado</span>
+                                      </div>
                                     </div>
                                   </div>
                                 );
@@ -325,6 +374,23 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                       </div>
                     )}
                   </div>
+
+                  {/* Summary */}
+                  {(selectedWorkspaces.length > 0 || selectedBoards.length > 0) && (
+                    <div className="px-4 py-3 rounded bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[11px] space-y-1">
+                      <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 font-medium">
+                        <span className="w-2 h-2 rounded bg-[#6C5DD3]" />
+                        {selectedWorkspaces.length} espacio(s) de trabajo seleccionado(s)
+                      </div>
+                      <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 font-medium">
+                        <span className="w-2 h-2 rounded bg-amber-500" />
+                        {selectedBoards.length} tablero(s) privado(s) seleccionado(s)
+                      </div>
+                      <p className="text-zinc-400 dark:text-zinc-500 italic mt-1">
+                        Los tableros del espacio se heredan automáticamente. Los tableros privados deben seleccionarse individualmente.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {error && (

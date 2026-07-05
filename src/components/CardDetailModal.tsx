@@ -80,6 +80,7 @@ interface CardData {
   riskLevel?: 'low' | 'med' | 'high' | null;
   module?: string | null;
   isDone?: boolean;
+  isDueDateDone?: boolean;
 }
 
 // ActivityItem interface is now imported from ../types/activity
@@ -1034,7 +1035,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                         <span>
                           {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
                           {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
-                          {card.dueDate && new Date(card.dueDate) < new Date() && (
+                          {card.dueDate && new Date(card.dueDate) < new Date() && !card.isDone && !card.isDueDateDone && (
                             <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
                           )}
                         </span>

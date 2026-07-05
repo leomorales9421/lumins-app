@@ -53,8 +53,15 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       .substring(0, 2);
   };
 
-  const displayName = propUser?.name || propName || authUser?.name || 'Usuario';
-  let displayAvatarUrl = propAvatarUrl || propUser?.avatarUrl || authUser?.avatarUrl;
+  const isExplicitUser = propUser !== undefined || propName !== undefined || propAvatarUrl !== undefined;
+  
+  const displayName = isExplicitUser 
+    ? (propUser?.name || propName || 'Usuario') 
+    : (authUser?.name || 'Usuario');
+
+  let displayAvatarUrl = isExplicitUser 
+    ? (propAvatarUrl || propUser?.avatarUrl) 
+    : (authUser?.avatarUrl);
   const initials = getInitials(displayName);
 
   // Formatear la URL si es relativa
