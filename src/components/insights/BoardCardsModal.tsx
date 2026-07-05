@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle2, Circle, Users, ListTodo, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2, Circle, Users, ListTodo, ExternalLink, Calendar, Clock } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 
 interface CardData {
@@ -10,6 +10,19 @@ interface CardData {
   assignees: { user: { id: string; name: string; avatarUrl: string | null } }[];
   labels: { label: { name: string; color: string } }[];
   dueDate: string | null;
+  createdAt: string;
+}
+
+function formatDateTime(dateStr: string) {
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12 || 12;
+  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
 }
 
 export default function BoardCardsModal({
@@ -131,6 +144,14 @@ export default function BoardCardsModal({
                           <p className={`text-sm font-bold truncate ${card.isDone ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'} group-hover:text-[#6C5DD3] transition-colors`}>
                             {card.title}
                           </p>
+                          {card.createdAt && (
+                            <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
+                              <Calendar size={10} />
+                              <span>{formatDateTime(card.createdAt).split(' ')[0]}</span>
+                              <Clock size={10} />
+                              <span>{formatDateTime(card.createdAt).split(' ').slice(1).join(' ')}</span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-3 mt-1">
                             {card.assignees && card.assignees.length > 0 && (
                               <div className="flex -space-x-1.5">
