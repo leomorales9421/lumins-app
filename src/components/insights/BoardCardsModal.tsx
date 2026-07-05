@@ -13,6 +13,24 @@ interface CardData {
   createdAt: string;
 }
 
+function getCardUrgency(card: CardData): number {
+  if (!card.dueDate || card.isDone) return 2;
+  const now = Date.now();
+  const due = new Date(card.dueDate).getTime();
+  if (due < now) return 0;
+  if (due - now < 48 * 60 * 60 * 1000) return 1;
+  return 2;
+}
+
+function getUrgencyLabel(card: CardData): { label: string; border: string; badge: string } | null {
+  if (!card.dueDate || card.isDone) return null;
+  const now = Date.now();
+  const due = new Date(card.dueDate).getTime();
+  if (due < now) return { label: 'Atrasada', border: 'border-l-red-500', badge: 'bg-red-500/10 text-red-600 dark:text-red-400' };
+  if (due - now < 48 * 60 * 60 * 1000) return { label: 'Por vencer', border: 'border-l-amber-400', badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' };
+  return null;
+}
+
 function formatDateTime(dateStr: string) {
   const d = new Date(dateStr);
   const day = String(d.getDate()).padStart(2, '0');
@@ -66,6 +84,7 @@ export default function BoardCardsModal({
     acc[listName].push(card);
     return acc;
   }, {});
+  Object.values(groupedByList).forEach(list => list.sort((a, b) => getCardUrgency(a) - getCardUrgency(b)));
 
   const totalCards = cards.length;
   const doneCards = cards.filter(c => c.isDone).length;
@@ -127,13 +146,15 @@ export default function BoardCardsModal({
                     <span className="text-zinc-300 font-normal">({listCards.length})</span>
                   </h4>
                   <div className="space-y-2">
-                    {listCards.map(card => (
+                    {listCards.map(card => {
+                      const urgency = getUrgencyLabel(card);
+                      return (
                       <a
                         key={card.id}
                         href={`/boards/${boardId}?cardId=${card.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md transition-all group"
+                        className={`flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md transition-all group ${urgency?.border || ''} border-l-2`}
                       >
                         {card.isDone ? (
                           <CheckCircle2 size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
@@ -141,9 +162,16 @@ export default function BoardCardsModal({
                           <Circle size={18} className="text-zinc-300 dark:text-zinc-600 mt-0.5 flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-bold truncate ${card.isDone ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'} group-hover:text-[#6C5DD3] transition-colors`}>
-                            {card.title}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-sm font-bold truncate ${card.isDone ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'} group-hover:text-[#6C5DD3] transition-colors`}>
+                              {card.title}
+                            </p>
+                            {urgency && (
+                              <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${urgency.badge}`}>
+                                {urgency.label}
+                              </span>
+                            )}
+                          </div>
                           {card.createdAt && (
                             <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
                               <Calendar size={10} />
@@ -188,7 +216,8 @@ export default function BoardCardsModal({
                         </div>
                         <ExternalLink size={14} className="text-zinc-300 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
                       </a>
-                    ))}
+                    );
+                    })}
                   </div>
                 </div>
               ))}
