@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import apiClient from '../../lib/api-client';
 import { 
   BarChart2, 
@@ -16,8 +17,20 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
   const [boards, setBoards] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [selectedBoardId, setSelectedBoardId] = useState<string>('');
-  const [selectedBoardCards, setSelectedBoardCards] = useState<{ id: string; name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const boardCardsId = searchParams.get('boardCards');
+  const boardCardsBoard = boardCardsId ? boards.find(b => b.id === boardCardsId) : null;
+
+  const openBoardCards = useCallback((id: string) => {
+    setSearchParams({ boardCards: id });
+  }, [setSearchParams]);
+
+  const closeBoardCards = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('boardCards');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     fetchData();
@@ -88,7 +101,7 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
                   {boards.map(board => (
                     <div
                       key={board.id}
-                      onClick={() => setSelectedBoardCards({ id: board.id, name: board.name })}
+                      onClick={() => openBoardCards(board.id)}
                       className="cursor-pointer group hover:bg-zinc-50 dark:hover:bg-white/[0.02] rounded-lg p-2 -mx-2 transition-colors"
                     >
                       <div className="flex justify-between text-sm mb-2">
@@ -106,11 +119,11 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
                     </div>
                   ))}
                 </div>
-                {selectedBoardCards && (
+                {boardCardsBoard && (
                   <BoardCardsModal
-                    boardId={selectedBoardCards.id}
-                    boardName={selectedBoardCards.name}
-                    onClose={() => setSelectedBoardCards(null)}
+                    boardId={boardCardsBoard.id}
+                    boardName={boardCardsBoard.name}
+                    onClose={closeBoardCards}
                   />
                 )}
              </div>
