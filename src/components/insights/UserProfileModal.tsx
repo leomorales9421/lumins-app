@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, PieChart, Clock, CheckSquare } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, PieChart, Clock, CheckSquare, AlertCircle } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 
 export default function UserProfileModal({ userId, boardId, onClose }: { userId: string, boardId?: string, onClose: () => void }) {
@@ -21,6 +21,21 @@ export default function UserProfileModal({ userId, boardId, onClose }: { userId:
       setIsLoading(false);
     }
   };
+
+  const sortedTasks = useMemo(() => {
+    if (!profile?.currentTasks) return [];
+    return [...profile.currentTasks].sort((a: any, b: any) => {
+      const now = new Date();
+      const aOverdue = a.dueDate && !a.isDone && new Date(a.dueDate) < now;
+      const bOverdue = b.dueDate && !b.isDone && new Date(b.dueDate) < now;
+      if (aOverdue && !bOverdue) return -1;
+      if (!aOverdue && bOverdue) return 1;
+      if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return 0;
+    });
+  }, [profile?.currentTasks]);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm p-4 pt-8 sm:pt-16">
@@ -103,21 +118,32 @@ export default function UserProfileModal({ userId, boardId, onClose }: { userId:
                    {profile.currentTasks.length === 0 ? (
                      <p className="text-sm text-zinc-500 col-span-full">El usuario no tiene tareas pendientes en estos proyectos.</p>
                    ) : (
-                     profile.currentTasks.map((task: any) => (
-                       <a 
-                         key={task.id}
-                          href={`/boards/${task.boardId}?cardId=${task.id}`}
-                         target="_blank"
-                         rel="noreferrer"
-                         className="block p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md transition-all bg-[#F8FAFC] dark:bg-zinc-800/50 group"
-                       >
-                         <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2 group-hover:text-[#6C5DD3] transition-colors">{task.title}</p>
-                         <div className="mt-2 flex justify-between text-xs text-zinc-500 font-medium">
-                           <span className="truncate max-w-[120px]">{task.board.name}</span>
-                           <span className="truncate ml-2">{task.list.name}</span>
-                         </div>
-                       </a>
-                     ))
+                     sortedTasks.map((task: any) => {
+                       const isOverdue = task.dueDate && !task.isDone && new Date(task.dueDate) < new Date();
+                       return (
+                         <a 
+                           key={task.id}
+                           href={`/boards/${task.boardId}?cardId=${task.id}`}
+                           target="_blank"
+                           rel="noreferrer"
+                           className={`block p-3 rounded-lg border transition-all bg-[#F8FAFC] dark:bg-zinc-800/50 group ${isOverdue ? 'border-red-200 dark:border-red-500/20 hover:border-red-400 dark:hover:border-red-400' : 'border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md'}`}
+                         >
+                           <div className="flex items-start justify-between gap-2">
+                             <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2 group-hover:text-[#6C5DD3] transition-colors">{task.title}</p>
+                             {isOverdue && (
+                               <span className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">
+                                 <AlertCircle size={10} />
+                                 Atrasada
+                               </span>
+                             )}
+                           </div>
+                           <div className="mt-2 flex justify-between text-xs text-zinc-500 font-medium">
+                             <span className="truncate max-w-[120px]">{task.board.name}</span>
+                             <span className="truncate ml-2">{task.list.name}</span>
+                           </div>
+                         </a>
+                       );
+                     })
                    )}
                 </div>
               </div>
