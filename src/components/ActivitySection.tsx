@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,7 @@ import { MessageSquare, Loader2 } from 'lucide-react';
 import type { ActivityItem } from '../types/activity';
 import UserAvatar from './ui/UserAvatar';
 import { useAuth } from '../contexts/AuthContext';
+import apiClient from '../lib/api-client';
 import RichTextEditor from './RichTextEditor';
 import type { RichTextEditorRef } from './RichTextEditor';
 import { fixEncoding } from '../lib/encoding';
@@ -222,11 +223,27 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
   isReadOnly,
   canModerate
 }) => {
-  const [showAllActivity, setShowAllActivity] = useState(true);
+  const { user, setUser } = useAuth();
+  const [showAllActivity, setShowAllActivity] = useState(user?.preferences?.showCardDetails ?? true);
+
+  useEffect(() => {
+    setShowAllActivity(user?.preferences?.showCardDetails ?? true);
+  }, [user?.preferences?.showCardDetails]);
 
   const filteredActivities = showAllActivity 
     ? activities 
     : activities.filter(item => item.type === 'COMMENT');
+
+  const handleToggleDetails = async () => {
+    const newValue = !showAllActivity;
+    setShowAllActivity(newValue);
+    try {
+      const res = await apiClient.patch('/api/auth/me', { preferences: { showCardDetails: newValue } });
+      if (setUser) setUser(res.data.data.user);
+    } catch (err) {
+      setShowAllActivity(!newValue);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -236,7 +253,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
           <h3 className="text-lg font-extrabold tracking-tight">Actividad</h3>
         </div>
          <button 
-          onClick={() => setShowAllActivity(!showAllActivity)}
+          onClick={handleToggleDetails}
           className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:bg-zinc-100 dark:hover:bg-white/5 px-2 py-1 rounded transition-colors cursor-pointer"
         >
           {showAllActivity ? 'Ocultar detalles' : 'Mostrar detalles'}

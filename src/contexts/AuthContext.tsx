@@ -14,6 +14,7 @@ interface User {
   theme?: string;
   language?: string;
   notificationPrefs?: Record<string, boolean> | string;
+  preferences?: Record<string, any>;
 }
 
 interface AuthContextType {
