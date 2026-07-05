@@ -106,7 +106,7 @@ export default function UserProfileModal({ userId, boardId, onClose }: { userId:
                      profile.currentTasks.map((task: any) => (
                        <a 
                          key={task.id}
-                         href={`/boards/${task.boardId}?card=${task.id}`}
+                          href={`/boards/${task.boardId}?cardId=${task.id}`}
                          target="_blank"
                          rel="noreferrer"
                          className="block p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md transition-all bg-[#F8FAFC] dark:bg-zinc-800/50 group"

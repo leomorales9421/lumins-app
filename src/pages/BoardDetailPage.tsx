@@ -231,7 +231,7 @@ const BoardDetailPage: React.FC = () => {
 
   // Handle opening card from URL on initial load
   useEffect(() => {
-    const cardId = searchParams.get('cardId');
+    const cardId = searchParams.get('cardId') || searchParams.get('card');
     if (cardId) {
       setSelectedCardId(cardId);
     }

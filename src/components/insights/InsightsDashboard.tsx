@@ -10,11 +10,13 @@ import {
   Activity
 } from 'lucide-react';
 import WorkloadDirectory from './WorkloadDirectory';
+import BoardCardsModal from './BoardCardsModal';
 
 export default function InsightsDashboard({ workspaceId }: { workspaceId?: string }) {
   const [boards, setBoards] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [selectedBoardId, setSelectedBoardId] = useState<string>('');
+  const [selectedBoardCards, setSelectedBoardCards] = useState<{ id: string; name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -82,24 +84,35 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
                <h3 className="text-lg font-bold mb-5 flex items-center gap-2">
                  <Activity className="text-[#6C5DD3]" size={18} /> Salud de Proyectos
                </h3>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 {boards.map(board => (
-                   <div key={board.id}>
-                     <div className="flex justify-between text-sm mb-2">
-                       <span className="font-bold text-zinc-700 dark:text-zinc-200 truncate pr-4">{board.name}</span>
-                       <span className="text-zinc-500 whitespace-nowrap">{board.progress}% ({board.completedCards}/{board.totalCards})</span>
-                     </div>
-                     <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2.5 overflow-hidden">
-                       <div 
-                         className={`h-full transition-all duration-1000 ease-out ${
-                           board.progress > 80 ? 'bg-green-500' : board.progress > 40 ? 'bg-yellow-500' : 'bg-rose-500'
-                         }`}
-                         style={{ width: `${board.progress}%` }}
-                       />
-                     </div>
-                   </div>
-                 ))}
-               </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {boards.map(board => (
+                    <div
+                      key={board.id}
+                      onClick={() => setSelectedBoardCards({ id: board.id, name: board.name })}
+                      className="cursor-pointer group hover:bg-zinc-50 dark:hover:bg-white/[0.02] rounded-lg p-2 -mx-2 transition-colors"
+                    >
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="font-bold text-zinc-700 dark:text-zinc-200 truncate pr-4 group-hover:text-[#6C5DD3] transition-colors">{board.name}</span>
+                        <span className="text-zinc-500 whitespace-nowrap">{board.progress}% ({board.completedCards}/{board.totalCards})</span>
+                      </div>
+                      <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-1000 ease-out ${
+                            board.progress > 80 ? 'bg-green-500' : board.progress > 40 ? 'bg-yellow-500' : 'bg-rose-500'
+                          }`}
+                          style={{ width: `${board.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {selectedBoardCards && (
+                  <BoardCardsModal
+                    boardId={selectedBoardCards.id}
+                    boardName={selectedBoardCards.name}
+                    onClose={() => setSelectedBoardCards(null)}
+                  />
+                )}
              </div>
           )}
 
