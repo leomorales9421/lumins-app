@@ -8,8 +8,12 @@ import AmbientBackground from '../components/layout/AmbientBackground';
 const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+  const hasRun = React.useRef(false);
   
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const handleCallback = async () => {
       // Check for Trello token in hash fragment (#token=...)
       const hash = window.location.hash;
