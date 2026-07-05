@@ -211,7 +211,7 @@ class ApiClient {
   }
 
   // Refresh token logic
-  private async refreshAccessToken(): Promise<string> {
+  public async refreshAccessToken(): Promise<string> {
     // If already refreshing, return the existing promise
     if (this.refreshPromise) {
       return this.refreshPromise;
