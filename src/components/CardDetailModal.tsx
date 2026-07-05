@@ -6,6 +6,7 @@ import {
   MoreHorizontal, 
   Paperclip, 
   Tag, 
+  Calendar,
   Clock, 
   CheckSquare, 
   AlignLeft, 
@@ -79,6 +80,7 @@ interface CardData {
   priority?: 'P0' | 'P1' | 'P2' | 'P3' | null;
   riskLevel?: 'low' | 'med' | 'high' | null;
   module?: string | null;
+  createdAt?: string;
   isDone?: boolean;
   isDueDateDone?: boolean;
 }
@@ -192,6 +194,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         priority: cardData.priority,
         riskLevel: cardData.riskLevel,
         module: cardData.module,
+        createdAt: cardData.createdAt,
         isDone: cardData.isDone
       };
       
@@ -958,6 +961,19 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               disabled={isLoading}
             />
           </div>
+
+          {card?.createdAt && (
+            <div className="flex items-center gap-3 mb-6 text-xs text-zinc-400 dark:text-zinc-500 px-2">
+              <span className="flex items-center gap-1.5">
+                <Calendar size={12} />
+                {new Date(card.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Clock size={12} />
+                {new Date(card.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
 
           {/* Labels & Members Display (Phase 2 & 3) */}
           <div className="flex flex-wrap items-center gap-8 mb-6">
