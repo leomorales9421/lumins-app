@@ -349,6 +349,7 @@ const MembersPage: React.FC = () => {
         onClose={() => setSelectedMember(null)}
         member={selectedMember}
         workspaceId={workspaceId!}
+        currentUserRole={currentUserRole}
         onUpdate={fetchWorkspace}
       />
     </motion.div>

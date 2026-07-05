@@ -10,6 +10,7 @@ interface MemberSlideOverProps {
   onClose: () => void;
   member: WorkspaceMember | null;
   workspaceId: string;
+  currentUserRole?: string;
   onUpdate: () => void;
 }
 
@@ -18,6 +19,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   onClose, 
   member, 
   workspaceId,
+  currentUserRole,
   onUpdate 
 }) => {
   const [activeBoards, setActiveBoards] = useState<string[]>([]);
@@ -29,6 +31,12 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const isWsOwner = member?.role === 'OWNER';
   const isWsAdmin = member?.role === 'ADMIN';
   const isWsMember = member?.role === 'MEMBER';
+  const canManageRole = (targetRole: string) => {
+    if (currentUserRole === 'OWNER') return true;
+    if (currentUserRole === 'ADMIN') return targetRole !== 'OWNER' && targetRole !== 'ADMIN';
+    return false;
+  };
+  const canManage = canManageRole(member?.role || '') && member?.userId !== undefined;
 
   useEffect(() => {
     if (isOpen && member) {
@@ -178,14 +186,14 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
                   {(['ADMIN', 'MEMBER', 'GUEST'] as WorkspaceRole[]).map((role) => (
                     <button
                       key={role}
-                      disabled={isUpdating || member?.role === 'OWNER'}
+                      disabled={isUpdating || member?.role === 'OWNER' || !canManage}
                       onClick={() => handleRoleChange(role)}
                       className={`
                         flex items-center justify-between p-4 rounded border transition-all text-left
                         ${member?.role === role 
                           ? 'bg-[#6C5DD3]/5 border-[#6C5DD3] text-[#6C5DD3] dark:text-zinc-100' 
                           : 'bg-zinc-50/50 dark:bg-[#13151A] border-zinc-100 dark:border-white/5 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}
-                        ${(isUpdating || member?.role === 'OWNER') && 'opacity-50 cursor-not-allowed'}
+                        ${(isUpdating || member?.role === 'OWNER' || !canManage) && 'opacity-50 cursor-not-allowed'}
                       `}
                     >
                       <div className="flex flex-col items-start">
@@ -289,15 +297,17 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
             <div className="p-6 border-t border-zinc-200 dark:border-white/10 bg-rose-50/30 dark:bg-rose-500/5 mt-auto">
               <h3 className="text-[10px] font-bold text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em] mb-4 px-1">Zona de Peligro</h3>
               <button
-                disabled={isRemoving || member?.role === 'OWNER'}
+                disabled={isRemoving || member?.role === 'OWNER' || !canManage}
                 onClick={handleRemoveMember}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded border-2 border-rose-100 dark:border-rose-500/20 bg-white dark:bg-[#13151A] text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Trash2 size={18} />
                 {isRemoving ? 'Eliminando...' : 'Eliminar del espacio'}
               </button>
-              {member?.role === 'OWNER' && (
-                <p className="text-[10px] text-rose-400 dark:text-rose-500 mt-2 text-center italic font-medium">No puedes eliminar al propietario principal.</p>
+              {(member?.role === 'OWNER' || !canManage) && (
+                <p className="text-[10px] text-rose-400 dark:text-rose-500 mt-2 text-center italic font-medium">
+                  {member?.role === 'OWNER' ? 'No puedes eliminar al propietario principal.' : 'No tienes permisos para eliminar a este miembro.'}
+                </p>
               )}
             </div>
           </motion.div>
