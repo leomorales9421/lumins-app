@@ -33,6 +33,23 @@ const AuthCallbackPage: React.FC = () => {
         
         // Refresh the user context to sync with the new token
         await refreshUser();
+
+        const queryParams = new URLSearchParams(window.location.search);
+        const queryRedirect = queryParams.get('redirect');
+        const postLoginRedirect = queryRedirect || localStorage.getItem('lumins_post_login_redirect');
+        if (postLoginRedirect) {
+          localStorage.removeItem('lumins_post_login_redirect');
+          if (
+            postLoginRedirect.startsWith('http://') ||
+            postLoginRedirect.startsWith('https://')
+          ) {
+            window.location.href = postLoginRedirect;
+            return;
+          }
+
+          navigate(postLoginRedirect, { replace: true });
+          return;
+        }
         
         // Redirect to dashboard
         navigate('/app', { replace: true });

@@ -17,12 +17,26 @@ const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  const resolveRedirectTarget = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('redirect') || '/app';
+  };
+
+  const redirectToTarget = (target: string) => {
+    if (target.startsWith('http://') || target.startsWith('https://')) {
+      window.location.href = target;
+      return;
+    }
+
+    navigate(target, { replace: true });
+  };
+
   // Redirect if already authenticated
   React.useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigate('/app', { replace: true });
+      redirectToTarget(resolveRedirectTarget());
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -76,9 +90,7 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get('redirect') || '/app';
-      navigate(redirect);
+      redirectToTarget(resolveRedirectTarget());
     } catch (err: any) {
       setError('Credenciales incorrectas');
     } finally {
@@ -223,7 +235,12 @@ const LoginPage: React.FC = () => {
             <button 
               type="button"
               onClick={() => {
-                window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/auth/google`;
+                const redirect = resolveRedirectTarget();
+                localStorage.setItem('lumins_post_login_redirect', redirect);
+                const baseApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+                const googleAuthUrl = new URL(`${baseApiUrl}/api/auth/google`);
+                googleAuthUrl.searchParams.set('redirect', redirect);
+                window.location.href = googleAuthUrl.toString();
               }}
               className="h-12 sm:h-11 border border-[#E8E9EC] rounded-xl sm:rounded text-[#374151] font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#F4F5F7] transition-all active:scale-[0.98]"
             >
