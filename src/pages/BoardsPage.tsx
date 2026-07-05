@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermission } from '../contexts/PermissionContext';
@@ -9,9 +9,11 @@ import BoardCard from '../components/BoardCard';
 import MembersModal from '../components/MembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Layout, Loader2, ExternalLink } from 'lucide-react';
+import { Users, Filter, ChevronDown, Layout, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Skeleton } from '../components/ui/Skeleton';
+
+const ITEMS_PER_PAGE = 8;
 
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
@@ -24,6 +26,14 @@ const BoardsPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
+  const [page, setPage] = useState(1);
+  const [isPaginating, setIsPaginating] = useState(false);
+
+  const totalPages = Math.max(1, Math.ceil(boards.length / ITEMS_PER_PAGE));
+  const currentBoards = useMemo(
+    () => boards.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
+    [boards, page]
+  );
 
   const fetchWorkspaces = useCallback(async () => {
     if (workspaces.length === 0 && isLoadingWorkspaces) setIsLoadingWorkspaces(true);
@@ -69,6 +79,18 @@ const BoardsPage: React.FC = () => {
       }
     }
   }, [fetchBoards, isLoadingWorkspaces, workspaceId, workspaces.length]);
+
+  // Reset to page 1 when boards list changes
+  useEffect(() => {
+    setPage(1);
+  }, [boards.length]);
+
+  const goToPage = useCallback((newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setIsPaginating(true);
+    setPage(newPage);
+    setTimeout(() => setIsPaginating(false), 400);
+  }, [totalPages]);
 
   // Listen for board creation to refresh
   useEffect(() => {
@@ -178,64 +200,80 @@ const BoardsPage: React.FC = () => {
                  </div>
               </div>
 
-               {/* Board Grid */}
-               {boards.length === 0 ? (
-                 <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
-                    <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
-                       <Layout size={32} />
-                    </div>
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No hay proyectos activos</h3>
-                    <p className="text-zinc-500 dark:text-zinc-400 mb-6">Comienza creando tu primer tablero para organizar el trabajo.</p>
-                     <div className="flex gap-4">
-                        <Button 
-                         onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
-                         variant="outlined"
-                         className="border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]"
-                        >
-                          Crear tablero
-                        </Button>
-                        <Button 
-                         onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
-                         variant="outlined"
-                         className="border-[#0079BF]/30 text-[#0079BF] hover:bg-[#0079BF] hover:text-white dark:hover:bg-[#0079BF] dark:hover:text-white transition-all flex items-center gap-2"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
-                          </svg>
-                          Importar de Trello
-                        </Button>
+                {/* Board Grid */}
+                {boards.length === 0 ? (
+                  <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
+                     <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
+                        <Layout size={32} />
                      </div>
-
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-12">
-                  <AnimatePresence mode="popLayout">
-                    {boards.map((board, index) => (
-                      <motion.div
-                        key={board.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.04 }}
-                      >
-                        <BoardCard board={board} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
-
-               {/* Pagination */}
-               {boards.length > 8 && (
-                 <div className="flex justify-center mt-10">
-                   <div className="flex items-center gap-1.5 bg-white dark:bg-[#1C1F26] p-1.5 rounded border border-zinc-200 dark:border-white/10 shadow-soft text-[13px] font-bold">
-                      <button className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30">Prev</button>
-                      <div className="flex items-center gap-1">
-                         <button className="w-8 h-8 bg-[#6C5DD3] text-white rounded shadow-sm">1</button>
-                         <button className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">2</button>
+                     <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No hay proyectos activos</h3>
+                     <p className="text-zinc-500 dark:text-zinc-400 mb-6">Comienza creando tu primer tablero para organizar el trabajo.</p>
+                      <div className="flex gap-4">
+                         <Button 
+                          onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
+                          variant="outlined"
+                          className="border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]"
+                         >
+                           Crear tablero
+                         </Button>
+                         <Button 
+                          onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
+                          variant="outlined"
+                          className="border-[#0079BF]/30 text-[#0079BF] hover:bg-[#0079BF] hover:text-white dark:hover:bg-[#0079BF] dark:hover:text-white transition-all flex items-center gap-2"
+                         >
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
+                           </svg>
+                           Importar de Trello
+                         </Button>
                       </div>
-                      <button className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Next</button>
-                   </div>
+
                  </div>
+               ) : (
+                 <>
+                   {/* Pagination — Top */}
+                   {totalPages > 1 && (
+                     <div className="flex justify-center mb-6">
+                       <PaginationControls
+                         page={page}
+                         totalPages={totalPages}
+                         onPageChange={goToPage}
+                       />
+                     </div>
+                   )}
+
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-4 min-h-[300px]">
+                     <AnimatePresence mode="popLayout">
+                       {isPaginating ? (
+                         <div className="col-span-full flex items-center justify-center py-20">
+                           <Loader2 size={32} className="animate-spin text-[#6C5DD3]" />
+                         </div>
+                       ) : (
+                         currentBoards.map((board, index) => (
+                           <motion.div
+                             key={board.id}
+                             initial={{ opacity: 0, y: 16 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             transition={{ duration: 0.35, delay: index * 0.04 }}
+                           >
+                             <BoardCard board={board} />
+                           </motion.div>
+                         ))
+                       )}
+                     </AnimatePresence>
+                   </div>
+
+                   {/* Pagination — Bottom */}
+                   {totalPages > 1 && (
+                     <div className="flex justify-center mt-6 mb-12">
+                       <PaginationControls
+                         page={page}
+                         totalPages={totalPages}
+                         onPageChange={goToPage}
+                       />
+                     </div>
+                   )}
+                 </>
                )}
             </>
           )}
@@ -253,5 +291,69 @@ const BoardsPage: React.FC = () => {
     </div>
   );
 };
+
+function PaginationControls({ page, totalPages, onPageChange }: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
+  const pages = useMemo(() => {
+    const range: number[] = [];
+    const start = Math.max(1, page - 1);
+    const end = Math.min(totalPages, page + 1);
+    for (let i = start; i <= end; i++) range.push(i);
+    return range;
+  }, [page, totalPages]);
+
+  return (
+    <div className="flex items-center gap-1.5 bg-white dark:bg-[#1C1F26] p-1.5 rounded border border-zinc-200 dark:border-white/10 shadow-soft text-[13px] font-bold">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page <= 1}
+        className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft size={14} />
+        Prev
+      </button>
+
+      <div className="flex items-center gap-1">
+        {pages[0] > 1 && (
+          <>
+            <button onClick={() => onPageChange(1)} className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">1</button>
+            {pages[0] > 2 && <span className="px-1 text-zinc-400">...</span>}
+          </>
+        )}
+        {pages.map(p => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className={`w-8 h-8 rounded transition-colors ${
+              p === page
+                ? 'bg-[#6C5DD3] text-white shadow-sm'
+                : 'hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400'
+            }`}
+          >
+            {p}
+          </button>
+        ))}
+        {pages[pages.length - 1] < totalPages && (
+          <>
+            {pages[pages.length - 1] < totalPages - 1 && <span className="px-1 text-zinc-400">...</span>}
+            <button onClick={() => onPageChange(totalPages)} className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">{totalPages}</button>
+          </>
+        )}
+      </div>
+
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page >= totalPages}
+        className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        Next
+        <ChevronRight size={14} />
+      </button>
+    </div>
+  );
+}
 
 export default BoardsPage;

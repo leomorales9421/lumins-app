@@ -25,10 +25,10 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
       onClick={() => navigate(`/boards/${board.id}`)}
       className="group flex flex-col cursor-pointer bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1"
     >
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 flex flex-col flex-1">
         
         {/* Header: Visibility Badge & Options */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-3">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
             board.visibility === 'WORKSPACE' 
               ? 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400' 
@@ -45,7 +45,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         </div>
 
         {/* Content */}
-        <div className="flex flex-col gap-1.5 mb-6">
+        <div className="flex flex-col gap-1.5 mb-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-white/5 text-[#6C5DD3] flex items-center justify-center group-hover:bg-[#6C5DD3] group-hover:text-white transition-all">
                <Layout size={18} strokeWidth={2.5} />
@@ -60,7 +60,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         </div>
 
         {/* Progress Bar */}
-         <div className="mt-auto mb-5 pl-10">
+         <div className="mt-auto mb-4 pl-10">
             <div className="flex justify-between items-center mb-1.5">
                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">Progreso</span>
                <span className="text-[10px] font-bold text-[#6C5DD3]">{progress}%</span>
