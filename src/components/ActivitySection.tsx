@@ -239,7 +239,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
     setShowAllActivity(newValue);
     try {
       const res = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', { preferences: { showCardDetails: newValue } });
-      if (setUser) setUser(res.data.data.user);
+      if (setUser) setUser(res.data.user);
     } catch (err) {
       setShowAllActivity(!newValue);
     }
