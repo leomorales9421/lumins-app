@@ -540,7 +540,7 @@ const BoardDetailPage: React.FC = () => {
         </div>
 
         {/* Canvas Skeleton */}
-        <div className="flex-1 p-8 flex gap-6 overflow-hidden">
+        <div className="flex-1 p-6 md:p-10 flex gap-6 overflow-hidden">
            {[1, 2, 3, 4].map(i => (
              <div key={i} className="min-w-[272px] max-w-[272px] h-full flex flex-col gap-4">
                 <div className="flex justify-between items-center px-1">
@@ -868,7 +868,7 @@ const BoardDetailPage: React.FC = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-4 md:p-8 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-6 md:p-10 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
       >
         <DndContext 
           sensors={sensors} 
@@ -877,7 +877,7 @@ const BoardDetailPage: React.FC = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex items-start gap-3 md:gap-4 h-full pb-4">
+          <div className="flex items-start gap-4 md:gap-6 h-full pb-4">
             <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
               {lists.map((list) => (
                 <SortableList 

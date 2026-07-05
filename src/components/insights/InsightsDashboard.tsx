@@ -23,7 +23,7 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
   const boardCardsBoard = boardCardsId ? boards.find(b => b.id === boardCardsId) : null;
 
   const openBoardCards = useCallback((id: string) => {
-    setSearchParams({ boardCards: id });
+    setSearchParams({ boardCards: id }, { replace: true });
   }, [setSearchParams]);
 
   const closeBoardCards = useCallback(() => {
