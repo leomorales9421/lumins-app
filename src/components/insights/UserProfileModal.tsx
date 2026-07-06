@@ -38,8 +38,10 @@ export default function UserProfileModal({ userId, boardId, onClose }: { userId:
   }, [profile?.currentTasks]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm p-4 pt-8 sm:pt-16">
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+    <div className="fixed inset-0 z-[200] overflow-y-auto">
+      <div className="flex min-h-full items-start justify-center p-4 pt-8 sm:pt-16">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
         <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-[#F8FAFC] dark:bg-zinc-900">
           <div className="flex items-center gap-3">
             {!isLoading && profile?.user && (
@@ -152,6 +154,7 @@ export default function UserProfileModal({ userId, boardId, onClose }: { userId:
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

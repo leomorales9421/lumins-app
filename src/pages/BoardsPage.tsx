@@ -9,12 +9,9 @@ import BoardCard from '../components/BoardCard';
 import MembersModal from '../components/MembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Layout, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Filter, ChevronDown, Layout, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import { Skeleton } from '../components/ui/Skeleton';
-
-const ITEMS_PER_PAGE = 8;
-
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
   const { isGodMode } = usePermission();
@@ -27,12 +24,23 @@ const BoardsPage: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isPaginating, setIsPaginating] = useState(false);
 
-  const totalPages = Math.max(1, Math.ceil(boards.length / ITEMS_PER_PAGE));
+  const filteredBoards = useMemo(() => {
+    if (!searchQuery.trim()) return boards;
+    const lowerQuery = searchQuery.toLowerCase();
+    return boards.filter(b => b.name.toLowerCase().includes(lowerQuery));
+  }, [boards, searchQuery]);
+
+  const totalPages = itemsPerPage === -1 ? 1 : Math.max(1, Math.ceil(filteredBoards.length / itemsPerPage));
   const currentBoards = useMemo(
-    () => boards.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
-    [boards, page]
+    () => {
+      if (itemsPerPage === -1) return filteredBoards;
+      return filteredBoards.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    },
+    [filteredBoards, page, itemsPerPage]
   );
 
   const fetchWorkspaces = useCallback(async () => {
@@ -83,7 +91,7 @@ const BoardsPage: React.FC = () => {
   // Reset to page 1 when boards list changes
   useEffect(() => {
     setPage(1);
-  }, [boards.length]);
+  }, [filteredBoards.length]);
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -172,10 +180,38 @@ const BoardsPage: React.FC = () => {
 
                  <div className="flex items-center gap-3">
                     <div className="flex bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
-                       <button className="px-3 sm:px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded text-[12px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                       <div className="relative flex items-center border-r border-zinc-200 dark:border-white/10 mr-1 pr-1">
+                         <Search size={14} className="absolute left-2.5 text-zinc-400" />
+                         <input 
+                           type="text"
+                           placeholder="Buscar tablero..."
+                           value={searchQuery}
+                           onChange={(e) => {
+                             setSearchQuery(e.target.value);
+                             setPage(1);
+                           }}
+                           className="pl-8 pr-3 py-2 bg-transparent text-[12px] font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none w-[130px] sm:w-[160px] transition-all focus:w-[160px] sm:focus:w-[200px]"
+                         />
+                       </div>
+                       <div className="relative flex items-center">
+                         <select 
+                           value={itemsPerPage}
+                           onChange={(e) => {
+                             setItemsPerPage(Number(e.target.value));
+                             setPage(1);
+                           }}
+                           className="appearance-none bg-zinc-100 dark:bg-white/5 rounded pl-3 pr-8 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer focus:outline-none focus:ring-0 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
+                         >
+                           <option value={10} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">10 tableros</option>
+                           <option value={20} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">20 tableros</option>
+                           <option value={50} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">50 tableros</option>
+                           <option value={-1} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">Todos</option>
+                         </select>
+                         <ChevronDown size={14} className="absolute right-2 pointer-events-none text-zinc-500" />
+                       </div>
+                       <button className="px-3 sm:px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2 border-l border-zinc-200 dark:border-white/10 ml-1">
                          <Filter size={14} />
-                         <span className="hidden xs:inline">Todos</span>
-                         <ChevronDown size={14} />
+                         <span className="hidden xs:inline">Filtros</span>
                        </button>
                        {(isGodMode || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
                         <button 
