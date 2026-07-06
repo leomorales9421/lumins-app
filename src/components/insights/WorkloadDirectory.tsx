@@ -3,19 +3,22 @@ import apiClient from '../../lib/api-client';
 import { Users, ArrowUpDown } from 'lucide-react';
 import UserProfileModal from './UserProfileModal';
 
-export default function WorkloadDirectory({ selectedBoardId }: { selectedBoardId?: string }) {
+export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { selectedBoardId?: string; workspaceId?: string }) {
   const [workload, setWorkload] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   useEffect(() => {
     fetchWorkload();
-  }, [selectedBoardId]);
+  }, [selectedBoardId, workspaceId]);
 
   const fetchWorkload = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get<any>(`/api/analytics/workload${selectedBoardId ? `?boardId=${selectedBoardId}` : ''}`);
+      const wsParam = workspaceId ? `workspaceId=${workspaceId}` : '';
+      const boardParam = selectedBoardId ? `boardId=${selectedBoardId}` : '';
+      const params = [wsParam, boardParam].filter(Boolean).join('&');
+      const res = await apiClient.get<any>(`/api/analytics/workload${params ? `?${params}` : ''}`);
       setWorkload(res.data);
     } catch (error) {
       console.error('Error fetching workload:', error);
@@ -157,6 +160,7 @@ export default function WorkloadDirectory({ selectedBoardId }: { selectedBoardId
         <UserProfileModal 
           userId={selectedUser} 
           boardId={selectedBoardId} 
+          workspaceId={workspaceId}
           onClose={() => setSelectedUser(null)} 
         />
       )}

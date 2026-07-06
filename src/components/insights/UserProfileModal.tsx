@@ -2,18 +2,21 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, PieChart, Clock, CheckSquare, AlertCircle } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 
-export default function UserProfileModal({ userId, boardId, onClose }: { userId: string, boardId?: string, onClose: () => void }) {
+export default function UserProfileModal({ userId, boardId, workspaceId, onClose }: { userId: string; boardId?: string; workspaceId?: string; onClose: () => void }) {
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchProfile();
-  }, [userId, boardId]);
+  }, [userId, boardId, workspaceId]);
 
   const fetchProfile = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get<any>(`/api/analytics/users/${userId}${boardId ? `?boardId=${boardId}` : ''}`);
+      const wsParam = workspaceId ? `workspaceId=${workspaceId}` : '';
+      const boardParam = boardId ? `boardId=${boardId}` : '';
+      const params = [wsParam, boardParam].filter(Boolean).join('&');
+      const res = await apiClient.get<any>(`/api/analytics/users/${userId}${params ? `?${params}` : ''}`);
       setProfile(res.data);
     } catch (error) {
       console.error(error);

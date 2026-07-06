@@ -34,14 +34,17 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
 
   useEffect(() => {
     fetchData();
-  }, [selectedBoardId]);
+  }, [selectedBoardId, workspaceId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const wsParam = workspaceId ? `workspaceId=${workspaceId}` : '';
+      const boardParam = selectedBoardId ? `boardId=${selectedBoardId}` : '';
+      const params = [wsParam, boardParam].filter(Boolean).join('&');
       const [boardsRes, summaryRes] = await Promise.all<any>([
-        apiClient.get<any>('/api/analytics/boards'),
-        apiClient.get<any>(`/api/analytics/summary${selectedBoardId ? `?boardId=${selectedBoardId}` : ''}`)
+        apiClient.get<any>(`/api/analytics/boards${wsParam ? `?${wsParam}` : ''}`),
+        apiClient.get<any>(`/api/analytics/summary${params ? `?${params}` : ''}`)
       ]);
       setBoards(boardsRes.data);
       setSummary(summaryRes.data);
@@ -129,7 +132,7 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
              </div>
           )}
 
-          <WorkloadDirectory selectedBoardId={selectedBoardId} />
+          <WorkloadDirectory selectedBoardId={selectedBoardId} workspaceId={workspaceId} />
         </>
       )}
     </div>
