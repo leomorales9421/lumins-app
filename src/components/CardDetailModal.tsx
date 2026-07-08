@@ -306,6 +306,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setActivities([]);
       setActivityPage(1);
       setHasMoreActivities(false);
+      setIsEditingDescription(false);
+      setEditDescription('');
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
 

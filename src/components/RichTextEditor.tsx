@@ -360,11 +360,13 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
   }));
 
   useEffect(() => {
-    if (editor && initialContent !== editor.getHTML() && !isEditing) {
-      editor.commands.setContent(fixEncoding(initialContent));
-      setHasUnsavedChanges(false);
+    if (editor && initialContent !== editor.getHTML()) {
+      if (!isEditing || alwaysEditing) {
+        editor.commands.setContent(fixEncoding(initialContent));
+        setHasUnsavedChanges(false);
+      }
     }
-  }, [initialContent, editor, isEditing]);
+  }, [initialContent, editor, isEditing, alwaysEditing]);
 
   const handleSave = () => {
     if (editor) {
