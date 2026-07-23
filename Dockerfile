@@ -16,6 +16,10 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY tsconfig*.json vite.config.* index.html postcss.config.* tailwind.config.* eslint.config.js ./
 COPY public ./public
 COPY src ./src
+
+# Copy env files for VITE_* variables used at build time
+COPY .env* ./
+
 RUN npm run build
 
 # Production stage (Serving with Nginx)
