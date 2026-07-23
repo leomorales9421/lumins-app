@@ -46,6 +46,7 @@ import CardModalSkeleton from './ui/CardModalSkeleton';
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { compressAttachment } from '../lib/image-utils';
+import ConfirmActionModal from './ConfirmActionModal';
 
 
 interface Member {
@@ -83,6 +84,7 @@ interface CardData {
   createdAt?: string;
   isDone?: boolean;
   isDueDateDone?: boolean;
+  status?: string;
 }
 
 // ActivityItem interface is now imported from ../types/activity
@@ -134,6 +136,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
 
   // Fetch board labels
   useEffect(() => {
@@ -308,6 +311,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setHasMoreActivities(false);
       setIsEditingDescription(false);
       setEditDescription('');
+      setIsArchiveConfirmOpen(false);
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
 
@@ -587,15 +591,37 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   };
 
   const handleArchiveCard = async () => {
+    setIsArchiveConfirmOpen(true);
+  };
+
+  const confirmArchiveCard = async () => {
     if (!cardId) return;
     setIsSaving(true);
     try {
       // According to schema, status 'closed' is used for archiving
       await apiClient.patch(`/api/cards/${cardId}`, { status: 'closed' });
       if (onUpdate) onUpdate();
+      setIsArchiveConfirmOpen(false);
       onClose(); // Close modal after archiving
     } catch (err) {
       console.error('Error archiving card:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRestoreCard = async () => {
+    if (!cardId) return;
+    setIsSaving(true);
+    try {
+      await apiClient.patch(`/api/cards/${cardId}`, { status: 'open' });
+      toast.success('Tarjeta restaurada con éxito');
+      if (onUpdate) onUpdate();
+      setCard((prev: any) => prev ? { ...prev, status: 'open' } : null);
+      setActivePopover(null);
+    } catch (err) {
+      console.error('Error restoring card:', err);
+      toast.error('Error al restaurar la tarjeta');
     } finally {
       setIsSaving(false);
     }
@@ -929,6 +955,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   assignedMemberIds={assignedMemberIds}
                   onToggleJoin={handleToggleMember}
                   onArchive={handleArchiveCard}
+                  onRestore={handleRestoreCard}
+                  status={card?.status}
                   onClose={() => setActivePopover(null)}
                   canModerate={canModerate}
                 />
@@ -1427,8 +1455,20 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           </div>
         </div>
       )}
+      </div>
+      <ConfirmActionModal
+        isOpen={isArchiveConfirmOpen}
+        title="Archivar tarjeta"
+        description={`La tarjeta \"${card?.title || 'sin título'}\" pasará a archivadas. Puedes restaurarla más tarde.`}
+        confirmLabel="Sí, archivar"
+        cancelLabel="Cancelar"
+        isLoading={isSaving}
+        onClose={() => {
+          if (!isSaving) setIsArchiveConfirmOpen(false);
+        }}
+        onConfirm={confirmArchiveCard}
+      />
     </div>
-  </div>
   );
 };
 

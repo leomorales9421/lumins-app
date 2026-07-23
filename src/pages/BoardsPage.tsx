@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { usePermission } from '../contexts/PermissionContext';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
 import Button from '../components/ui/Button';
@@ -14,7 +13,6 @@ import { Users, Filter, ChevronDown, Layout, Loader2, ChevronLeft, ChevronRight,
 import { Skeleton } from '../components/ui/Skeleton';
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
-  const { isGodMode } = usePermission();
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [boards, setBoards] = useState<Board[]>([]);
@@ -213,7 +211,7 @@ const BoardsPage: React.FC = () => {
                          <Filter size={14} />
                          <span className="hidden xs:inline">Filtros</span>
                        </button>
-                       {(isGodMode || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
+                       {(workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
                         <button 
                           onClick={() => setShowInviteModal(true)}
                           className="px-3 sm:px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"

@@ -70,7 +70,18 @@ export const isRemoteImageBackground = (input?: string | null): boolean => {
 export const isPresetBackground = (input?: string | null): boolean => {
   const normalized = normalizeBoardBackground(input);
   if (!normalized) return false;
-  return BOARD_BACKGROUND_PRESETS.some((preset) => preset.value === normalized);
+  const baseValue = normalized.split('?')[0];
+  return BOARD_BACKGROUND_PRESETS.some((preset) => preset.value === baseValue);
+};
+
+export const parseBackgroundConfig = (input: string) => {
+  const [base, query] = input.split('?');
+  const params = new URLSearchParams(query || '');
+  return {
+    base,
+    tone: 'dark' as const, // Always use dark tone as requested
+    lava: params.get('lava') !== 'false' // default to true
+  };
 };
 
 export const isValidBoardBackground = (input?: string | null): boolean => {
@@ -81,7 +92,7 @@ export const isValidBoardBackground = (input?: string | null): boolean => {
 
 export type ResolvedBoardBackground =
   | { kind: 'none'; value: null }
-  | { kind: 'preset'; value: string }
+  | { kind: 'preset'; value: string; tone: 'light' | 'dark'; lava: boolean; rawValue: string }
   | { kind: 'image'; value: string };
 
 export const resolveBoardBackground = (input?: string | null): ResolvedBoardBackground => {
@@ -89,10 +100,13 @@ export const resolveBoardBackground = (input?: string | null): ResolvedBoardBack
 
   if (!normalized) return { kind: 'none', value: null };
   if (isRemoteImageBackground(normalized)) return { kind: 'image', value: normalized };
-  if (isPresetBackground(normalized)) return { kind: 'preset', value: normalized };
+  if (isPresetBackground(normalized)) {
+    const config = parseBackgroundConfig(normalized);
+    return { kind: 'preset', value: config.base, tone: config.tone, lava: config.lava, rawValue: normalized };
+  }
 
   // Defensive fallback: unknown values degrade to default preset.
-  return { kind: 'preset', value: DEFAULT_BOARD_BACKGROUND };
+  return { kind: 'preset', value: DEFAULT_BOARD_BACKGROUND, tone: 'dark', lava: true, rawValue: DEFAULT_BOARD_BACKGROUND };
 };
 
 const mapPicsumImage = (img: PicsumApiImage): BoardBackgroundImage => ({

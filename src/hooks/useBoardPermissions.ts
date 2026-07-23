@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../lib/api-client';
-import { usePermission } from '../contexts/PermissionContext';
 
 interface BoardPermissions {
   canManageBoard: boolean;
@@ -13,7 +12,6 @@ interface BoardPermissions {
 export const useBoardPermissions = (boardId: string | undefined, providedRole?: string): BoardPermissions => {
   const [role, setRole] = useState<string>('viewer');
   const [loading, setLoading] = useState<boolean>(true);
-  const { isGodMode } = usePermission();
 
   useEffect(() => {
     if (providedRole) {
@@ -41,14 +39,11 @@ export const useBoardPermissions = (boardId: string | undefined, providedRole?: 
     fetchRole();
   }, [boardId, providedRole]);
 
-  // If God Mode is active, grant all permissions
-  const effectiveRole = isGodMode ? 'admin' : role;
-
   return {
-    canManageBoard: effectiveRole === 'admin',
-    canEditContent: ['admin', 'editor'].includes(effectiveRole),
-    canModerate: effectiveRole === 'admin',
-    isReadOnly: !['admin', 'editor'].includes(effectiveRole),
+    canManageBoard: role === 'admin',
+    canEditContent: ['admin', 'editor'].includes(role),
+    canModerate: role === 'admin',
+    isReadOnly: !['admin', 'editor'].includes(role),
     loading,
   };
 };

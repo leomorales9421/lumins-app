@@ -17,7 +17,8 @@ import {
   Globe,
   Building2,
   Trash2,
-  Check
+  Check,
+  ArchiveRestore
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -44,9 +45,10 @@ import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
 import MembersModal from '../components/MembersModal';
 import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
+import ConfirmActionModal from '../components/ConfirmActionModal';
+import ArchivedItemsModal from '../components/ArchivedItemsModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { usePermission } from '../contexts/PermissionContext';
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useBoardSocket } from '../hooks/useBoardSocket';
 import { emitBoardBackgroundChange, normalizeBoardBackground } from '../lib/board-backgrounds';
@@ -57,7 +59,6 @@ const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isGodMode } = usePermission();
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize Socket.io for this board
@@ -82,8 +83,11 @@ const BoardDetailPage: React.FC = () => {
   const [filterUserId, setFilterUserId] = useState<string | null>(null);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isVisibilityDropdownOpen, setIsVisibilityDropdownOpen] = useState(false);
+  const [archiveCardCandidate, setArchiveCardCandidate] = useState<{ id: string; title: string } | null>(null);
+  const [isArchivingCard, setIsArchivingCard] = useState(false);
 
   const { canManageBoard, canEditContent, isReadOnly } = useBoardPermissions(board?.id, userRole);
   const canEdit = canEditContent;
@@ -493,14 +497,28 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  const handleArchiveCardFromBoard = async (cardId: string) => {
+  const requestArchiveCardFromBoard = (cardId: string) => {
+    const cardTitle = listsRef.current
+      .flatMap((list) => list.cards || [])
+      .find((card) => card.id === cardId)?.title || 'esta tarjeta';
+
+    setArchiveCardCandidate({ id: cardId, title: cardTitle });
+  };
+
+  const handleArchiveCardFromBoard = async () => {
+    if (!archiveCardCandidate) return;
+
+    setIsArchivingCard(true);
     try {
-      await apiClient.patch(`/api/cards/${cardId}`, { status: 'closed' });
+      await apiClient.patch(`/api/cards/${archiveCardCandidate.id}`, { status: 'closed' });
       fetchBoard();
       toast.success('Tarjeta archivada');
+      setArchiveCardCandidate(null);
     } catch (err) {
       console.error('Error archiving card:', err);
       toast.error('Error', { description: 'No se pudo archivar la tarjeta' });
+    } finally {
+      setIsArchivingCard(false);
     }
   };
 
@@ -736,6 +754,15 @@ const BoardDetailPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <button 
+              onClick={() => setIsArchivedModalOpen(true)}
+              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded border border-white/10 bg-white/5 text-white/80 text-sm font-bold transition-all hover:text-white hover:bg-white/15 hover:border-white/20 active:scale-95 shadow-lg"
+              title="Ver archivo"
+            >
+              <ArchiveRestore size={16} strokeWidth={2.5} />
+              <span className="hidden lg:inline">Archivo</span>
+            </button>
+
             <div className="relative">
               <button 
                 onClick={() => setIsFiltersOpen(!isFiltersOpen)}
@@ -888,7 +915,7 @@ const BoardDetailPage: React.FC = () => {
                   onUpdateList={handleUpdateList}
                   onArchiveList={handleArchiveList}
                   onDeleteList={handleDeleteList}
-                  onArchiveCard={handleArchiveCardFromBoard}
+                  onArchiveCard={requestArchiveCardFromBoard}
                   canEdit={canEditContent}
                 />
               ))}
@@ -975,6 +1002,27 @@ const BoardDetailPage: React.FC = () => {
         workspaceRole={userRole}
         onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
       />
+
+      <ConfirmActionModal
+        isOpen={!!archiveCardCandidate}
+        title="Archivar tarjeta"
+        description={`La tarjeta \"${archiveCardCandidate?.title || ''}\" pasará a archivadas. Puedes restaurarla más tarde.`}
+        confirmLabel="Sí, archivar"
+        cancelLabel="Cancelar"
+        isLoading={isArchivingCard}
+        onClose={() => {
+          if (!isArchivingCard) setArchiveCardCandidate(null);
+        }}
+        onConfirm={handleArchiveCardFromBoard}
+      />
+
+      {isArchivedModalOpen && board && (
+        <ArchivedItemsModal
+          boardId={board.id}
+          onClose={() => setIsArchivedModalOpen(false)}
+          onRestore={() => fetchBoard()}
+        />
+      )}
     </motion.div>
   );
 };

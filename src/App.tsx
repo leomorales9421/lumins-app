@@ -31,6 +31,7 @@ const PreferenceSettings = lazy(() => import('./pages/settings/PreferenceSetting
 const IntegrationsSettings = lazy(() => import('./pages/settings/IntegrationsSettings'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage'));
+const InsightsBoardDetailPage = lazy(() => import('./pages/InsightsBoardDetailPage'));
 
 const PageLoader = () => (
   <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
@@ -113,6 +114,7 @@ function App() {
                     <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
                     <Route path="/w/:workspaceId/calendar" element={<WorkspaceCalendarPage />} />
                     <Route path="/w/:workspaceId/insights" element={<InsightsPage />} />
+                    <Route path="/w/:workspaceId/insights/boards/:boardId" element={<InsightsBoardDetailPage />} />
                     <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
                     <Route path="/boards/:id" element={<BoardDetailPage />} />
                     

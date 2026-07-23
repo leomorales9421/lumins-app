@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Layout, Search, Bell, MessageSquare, Menu, Shield, ShieldAlert, Settings } from 'lucide-react';
+import { Layout, Search, Bell, MessageSquare, Menu, Shield, Settings } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
 import UserAvatar from '../ui/UserAvatar';
-import { usePermission } from '../../contexts/PermissionContext';
 
 interface NavBarProps {
   user: any;
@@ -19,7 +18,6 @@ const NavBar: React.FC<NavBarProps> = ({
   onCreateWorkspace = () => {},
   canCreateBoard = false
 }) => {
-  const { isGodMode, setGodMode } = usePermission();
   const navigate = useNavigate();
 
   return (
@@ -70,25 +68,10 @@ const NavBar: React.FC<NavBarProps> = ({
               <button
                 onClick={() => navigate('/w/global/system-admin')}
                 className="flex items-center justify-center p-2 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:text-[#6C5DD3] transition-all border border-transparent hover:border-[#6C5DD3]/20"
-                title="Panel de Control Global"
+                title="Panel interno de plataforma"
               >
                 <Settings size={18} />
                 <span className="hidden xl:block text-xs font-bold uppercase tracking-wider ml-2">Sistema</span>
-              </button>
-
-              {/* God Mode Toggle */}
-              <button
-                onClick={() => setGodMode(!isGodMode)}
-                className={`flex items-center justify-center p-2 rounded-lg transition-all ${
-                  isGodMode 
-                    ? 'bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]' 
-                    : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 border border-transparent'
-                }`}
-                title={isGodMode ? 'Desactivar Modo Dios' : 'Activar Modo Dios'}
-              >
-                {isGodMode ? <ShieldAlert size={18} /> : <Shield size={18} />}
-                <span className="hidden md:block text-xs font-bold uppercase tracking-wider ml-2">GOD</span>
-                {isGodMode && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-1" />}
               </button>
             </div>
           )}

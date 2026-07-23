@@ -73,12 +73,6 @@ class ApiClient {
           }
         }
 
-        // Add God Mode header if active
-        const isGodMode = localStorage.getItem('lumins_god_mode') === 'true';
-        if (isGodMode) {
-          config.headers['X-God-Mode'] = 'true';
-        }
-
         // Add Workspace ID header if available
         const workspaceId = localStorage.getItem('lastActiveWorkspaceId');
         if (workspaceId) {

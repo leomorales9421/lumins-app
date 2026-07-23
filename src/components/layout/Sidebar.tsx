@@ -51,7 +51,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   logout
 }) => {
   const { workspaceId: urlWorkspaceId } = useParams<{ workspaceId: string }>();
-  const workspaceId = urlWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
+  const effectiveWorkspaceId = urlWorkspaceId === 'global' ? null : urlWorkspaceId;
+  const workspaceId = effectiveWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarClasses = `

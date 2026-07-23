@@ -1,14 +1,21 @@
+# syntax=docker/dockerfile:1.7
+
 # Build stage
 FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Enable better npm cache reuse across Docker builds
+ENV npm_config_cache=/root/.npm
+
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
-# Copy source code and build
-COPY . .
+# Copy only build-relevant files so the cache is not invalidated by docs/tests/artifacts
+COPY tsconfig*.json vite.config.* index.html postcss.config.* tailwind.config.* eslint.config.js ./
+COPY public ./public
+COPY src ./src
 RUN npm run build
 
 # Production stage (Serving with Nginx)

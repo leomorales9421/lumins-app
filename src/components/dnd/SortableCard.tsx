@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock, Archive } from 'lucide-react';
+import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Card } from '../../types/board';
@@ -87,18 +87,6 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArc
             {card.title}
           </p>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {onArchive && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onArchive();
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded transition-all"
-                title="Archivar tarjeta"
-              >
-                <Archive size={14} />
-              </button>
-            )}
             {card.isDone && (
               <div className="bg-emerald-500 rounded-full p-0.5 shadow-sm" title="Tarjeta terminada">
                 <CheckSquare size={10} className="text-white" />

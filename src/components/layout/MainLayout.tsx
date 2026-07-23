@@ -8,6 +8,7 @@ import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
 import TrelloImportModal from '../TrelloImportModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
+import { motion } from 'framer-motion';
 
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -82,7 +83,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       }
 
       setIsLoadingBg(false);
-      setBoardBackground(resolved.value);
+      setBoardBackground(resolved.rawValue);
     };
     const handlePermissionUpdate = (e: any) => {
       const { type, resourceId, newRole } = e.detail;
@@ -213,6 +214,72 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       {/* Polarized Filter (Contrast Shield) */}
       {isBoardView && resolvedBackground.kind === 'image' && (
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
+      )}
+
+      {/* Soft Glass Effect & Lava Animation for Preset Colors to reduce visual weight and add life */}
+      {isBoardView && resolvedBackground.kind === 'preset' && resolvedBackground.value !== DEFAULT_BOARD_BACKGROUND && (
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          {/* Animated Lava Blobs (Lava lamp effect blending with underlying preset gradient) */}
+          {resolvedBackground.lava && (
+            <div className="absolute inset-0 opacity-100 mix-blend-overlay pointer-events-none overflow-hidden">
+              {/* Rising White Blob */}
+              <motion.div
+                animate={{ 
+                  y: ['80%', '-40%', '80%'], 
+                  x: ['-10%', '20%', '-10%'],
+                  scale: [1, 1.5, 1],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-[5%] w-[45%] h-[45%] bg-white/40 dark:bg-white/15 rounded-[40%_60%_70%_30%] blur-[80px] will-change-transform"
+              />
+              {/* Falling Dark Blob */}
+              <motion.div
+                animate={{ 
+                  y: ['-40%', '80%', '-40%'], 
+                  x: ['20%', '-10%', '20%'],
+                  scale: [1.2, 0.8, 1.2],
+                  rotate: [360, 180, 0]
+                }}
+                transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-[10%] w-[50%] h-[50%] bg-black/30 dark:bg-black/50 rounded-[60%_40%_30%_70%] blur-[90px] will-change-transform"
+              />
+              {/* Floating White Blob 2 */}
+              <motion.div
+                animate={{ 
+                  y: ['60%', '-20%', '60%'], 
+                  x: ['10%', '-20%', '10%'],
+                  scale: [0.9, 1.3, 0.9],
+                  rotate: [0, -180, -360]
+                }}
+                transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-[30%] w-[40%] h-[40%] bg-white/30 dark:bg-white/10 rounded-[30%_70%_70%_30%] blur-[70px] will-change-transform"
+              />
+              {/* Floating Dark Blob 2 */}
+              <motion.div
+                animate={{ 
+                  y: ['-20%', '60%', '-20%'], 
+                  x: ['-20%', '10%', '-20%'],
+                  scale: [1.3, 1, 1.3],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-[30%] w-[55%] h-[55%] bg-black/20 dark:bg-black/40 rounded-[70%_30%_50%_50%] blur-[80px] will-change-transform"
+              />
+            </div>
+          )}
+
+          {/* Frosted Glass Overlay */}
+          <div className={`absolute inset-0 backdrop-blur-[60px] ${resolvedBackground.tone === 'light' ? 'bg-white/50 dark:bg-white/20' : 'bg-black/30 dark:bg-[#13151A]/60'}`} />
+          
+          {/* Subtle static vignette */}
+          <div 
+            className="absolute inset-0 opacity-40 mix-blend-overlay"
+            style={{
+              background: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(0,0,0,0.4) 0%, transparent 50%)'
+            }}
+          />
+        </div>
       )}
 
       {isBoardView && isLoadingBg && (

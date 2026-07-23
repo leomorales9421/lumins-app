@@ -13,6 +13,8 @@ import {
   isValidBoardBackground,
   normalizeBoardBackground,
   preloadImageUrl,
+  parseBackgroundConfig,
+  isPresetBackground,
   type BoardBackgroundImage,
 } from '../lib/board-backgrounds';
 import { compressImage } from '../lib/image-utils';
@@ -117,6 +119,9 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
   const [isUploadingBackground, setIsUploadingBackground] = useState(false);
   const [backgroundUploadProgress, setBackgroundUploadProgress] = useState<number | null>(null);
   const [backgroundPreviewUrl, setBackgroundPreviewUrl] = useState<string | null>(null);
+  
+  const [lava, setLava] = useState<boolean>(true);
+
   const latestBackgroundRequestRef = useRef(0);
   const confirmedBackgroundRef = useRef<string | null>(normalizeBoardBackground(board.background));
   const backgroundFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -179,6 +184,11 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
         }
         return null;
       });
+
+      if (normalizedBackground) {
+        const config = parseBackgroundConfig(normalizedBackground);
+        setLava(config.lava);
+      }
     }
   }, [isOpen, board]);
 
@@ -254,6 +264,14 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
       }
     }
   }, [board.backgroundImageUrl, board.backgroundStorageKey, board.backgroundThumbUrl, board.backgroundType, board.id, onUpdateBoard, selectedBackground]);
+
+  const handleLavaChange = useCallback((newLava: boolean) => {
+    setLava(newLava);
+    if (selectedBackground && isPresetBackground(selectedBackground)) {
+      const config = parseBackgroundConfig(selectedBackground);
+      handleBackgroundChange(`${config.base}?tone=dark&lava=${newLava}`);
+    }
+  }, [selectedBackground, handleBackgroundChange]);
 
   const handleCustomBackgroundUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -476,23 +494,25 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                 <div>
                   <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-4 ml-1">Colores y Gradientes</h3>
                   <div className="grid grid-cols-3 gap-3">
-                    {BOARD_BACKGROUND_PRESETS.map((bg) => (
+                    {BOARD_BACKGROUND_PRESETS.map((bg) => {
+                      const isActive = (selectedBackground && selectedBackground.startsWith(bg.value)) || (!selectedBackground && bg.id === 'default');
+                      return (
                       <button
                         key={bg.id}
                         type="button"
-                        onClick={() => handleBackgroundChange(bg.value)}
+                        onClick={() => handleBackgroundChange(`${bg.value}?tone=dark&lava=${lava}`)}
                         disabled={isBackgroundBusy}
                         className={`
                           w-full h-16 rounded cursor-pointer transition-all hover:scale-[1.03] border-2 relative group
                           ${bg.value}
-                          ${(selectedBackground === bg.value || (!selectedBackground && bg.id === 'default')) 
+                          ${isActive
                             ? 'border-[#6C5DD3] shadow-md ring-4 ring-[#6C5DD3]/15' 
                             : 'border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
                           } ${isBackgroundBusy ? 'opacity-70 cursor-not-allowed' : ''}
                         `}
                         title={bg.name}
                       >
-                        {(selectedBackground === bg.value || (!selectedBackground && bg.id === 'default')) && (
+                        {isActive && (
                           <div className="absolute top-1 right-1 bg-white dark:bg-[#1C1F26] rounded p-0.5 shadow-sm z-10">
                             <CheckCircle2 size={12} className="text-[#6C5DD3]" />
                           </div>
@@ -503,8 +523,26 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
                            </span>
                         </div>
                       </button>
-                    ))}
+                    )})}
                   </div>
+
+                  {selectedBackground && isPresetBackground(selectedBackground) && (
+                    <div className="mt-4 p-4 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 space-y-5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Efecto Lava</p>
+                          <p className="text-[10px] text-zinc-500">Anima suavemente los colores</p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => handleLavaChange(!lava)}
+                          className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${lava ? 'bg-[#6C5DD3]' : 'bg-zinc-300 dark:bg-white/20'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${lava ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

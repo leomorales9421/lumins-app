@@ -3,8 +3,6 @@ import { useAuth } from './AuthContext';
 import { useParams, useLocation } from 'react-router-dom';
 
 interface PermissionContextType {
-  isGodMode: boolean;
-  setGodMode: (active: boolean) => void;
   can: (action: string, contextId?: string) => boolean;
   roleInContext: (contextType: 'workspace' | 'board', contextId: string) => string | null;
 }
@@ -21,19 +19,8 @@ export const usePermission = () => {
 
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [isGodMode, setGodMode] = useState(() => {
-    return localStorage.getItem('lumins_god_mode') === 'true';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('lumins_god_mode', isGodMode.toString());
-  }, [isGodMode]);
-
-  // God Mode Level 0 check
-  const hasGodModeAccess = user?.globalRole === 'SYSTEM_ADMIN';
 
   const can = (action: string, contextId?: string): boolean => {
-    if (hasGodModeAccess && isGodMode) return true;
     if (!user) return false;
 
     // TODO: Implement more granular checks by fetching memberships from state/cache
@@ -42,7 +29,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     switch (action) {
       case 'access_system_admin':
-        return hasGodModeAccess;
+        return user.globalRole === 'SYSTEM_ADMIN';
       case 'delete_workspace':
         // Only owner or system admin
         return false; // Needs workspace membership check
@@ -57,8 +44,6 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const value: PermissionContextType = {
-    isGodMode: hasGodModeAccess && isGodMode,
-    setGodMode: (active: boolean) => hasGodModeAccess && setGodMode(active),
     can,
     roleInContext,
   };

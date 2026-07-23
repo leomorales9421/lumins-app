@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api-client';
 import { 
   BarChart2, 
@@ -11,26 +11,18 @@ import {
   Activity
 } from 'lucide-react';
 import WorkloadDirectory from './WorkloadDirectory';
-import BoardCardsModal from './BoardCardsModal';
+
 
 export default function InsightsDashboard({ workspaceId }: { workspaceId?: string }) {
   const [boards, setBoards] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [selectedBoardId, setSelectedBoardId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const boardCardsId = searchParams.get('boardCards');
-  const boardCardsBoard = boardCardsId ? boards.find(b => b.id === boardCardsId) : null;
+  const navigate = useNavigate();
 
   const openBoardCards = useCallback((id: string) => {
-    setSearchParams({ boardCards: id }, { replace: true });
-  }, [setSearchParams]);
-
-  const closeBoardCards = useCallback(() => {
-    const next = new URLSearchParams(searchParams);
-    next.delete('boardCards');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(`/w/${workspaceId}/insights/boards/${id}`);
+  }, [navigate, workspaceId]);
 
   useEffect(() => {
     fetchData();
@@ -122,13 +114,6 @@ export default function InsightsDashboard({ workspaceId }: { workspaceId?: strin
                     </div>
                   ))}
                 </div>
-                {boardCardsBoard && (
-                  <BoardCardsModal
-                    boardId={boardCardsBoard.id}
-                    boardName={boardCardsBoard.name}
-                    onClose={closeBoardCards}
-                  />
-                )}
              </div>
           )}
 

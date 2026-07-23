@@ -115,7 +115,7 @@ const RegisterPage: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: Registration Form */}
-        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-20 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
+        <div className="flex-1 md:flex-[1.2] p-8 sm:p-8 md:p-10 lg:p-12 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
           
           {/* Mobile Logo Branding */}
           <div className="md:hidden flex flex-col items-center mb-8">
@@ -129,14 +129,14 @@ const RegisterPage: React.FC = () => {
              <h2 className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">LUMINS</h2>
           </div>
 
-          <div className="mb-10 text-center md:text-left">
+          <div className="mb-6 text-center md:text-left">
               <h2 className="text-3xl font-black text-[#1E293B] leading-tight">
                  Regístrate en <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] block mt-1">LUMINS</span>
               </h2>
              <p className="text-[#6B7280] font-medium text-lg">Únete a la nueva era de gestión corporativa</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-[450px] mx-auto md:mx-0">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-[450px] mx-auto md:mx-0">
             <div className="flex gap-4">
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-bold text-zinc-700 ml-1">Nombre</label>
@@ -204,7 +204,7 @@ const RegisterPage: React.FC = () => {
                />
             </div>
 
-            <div className="mt-1 p-3 rounded-xl border border-[#E8E9EC] bg-[#FAFBFD] space-y-3">
+            <div className="mt-1 px-3 py-2 rounded-xl border border-[#E8E9EC] bg-[#FAFBFD] space-y-2">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -269,7 +269,7 @@ const RegisterPage: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center md:text-left">
+          <div className="mt-6 text-center md:text-left">
              <p className="text-sm text-[#6B7280] font-medium">
                 ¿Ya tienes cuenta? <Link to="/login" className="text-[#6C5DD3] font-bold hover:underline">Inicia sesión</Link>
              </p>

@@ -11,6 +11,8 @@ interface CardData {
   labels: { label: { name: string; color: string } }[];
   dueDate: string | null;
   createdAt: string;
+  updatedAt: string;
+  status: string;
 }
 
 function getCardUrgency(card: CardData): number {
@@ -54,7 +56,7 @@ export default function BoardCardsModal({
 }) {
   const [cards, setCards] = useState<CardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'done'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'done-active' | 'done-archived'>('all');
 
   useEffect(() => {
     fetchCards();
@@ -73,8 +75,9 @@ export default function BoardCardsModal({
   };
 
   const filteredCards = cards.filter(c => {
-    if (filter === 'done') return c.isDone;
     if (filter === 'pending') return !c.isDone;
+    if (filter === 'done-active') return c.isDone && c.status !== 'closed';
+    if (filter === 'done-archived') return c.isDone && c.status === 'closed';
     return true;
   });
 
@@ -104,18 +107,18 @@ export default function BoardCardsModal({
           </button>
         </div>
 
-        <div className="px-5 py-3 border-b border-zinc-200 dark:border-zinc-800 flex gap-2">
-          {(['all', 'pending', 'done'] as const).map(f => (
+        <div className="px-5 py-3 border-b border-zinc-200 dark:border-zinc-800 flex gap-2 overflow-x-auto custom-scrollbar">
+          {(['all', 'pending', 'done-active', 'done-archived'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-colors ${
+              className={`whitespace-nowrap px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-colors ${
                 filter === f
                   ? 'bg-[#6C5DD3] text-white'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
-              {f === 'all' ? 'Todas' : f === 'done' ? 'Completadas' : 'Pendientes'}
+              {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendientes' : f === 'done-active' ? 'Completadas (No Archivadas)' : 'Completadas (Archivadas)'}
             </button>
           ))}
         </div>
@@ -133,9 +136,9 @@ export default function BoardCardsModal({
               <p className="font-bold">
                 {filter === 'all'
                   ? 'No hay tarjetas en este proyecto'
-                  : filter === 'done'
-                  ? 'No hay tarjetas completadas'
-                  : 'No hay tarjetas pendientes'}
+                  : filter === 'pending'
+                  ? 'No hay tarjetas pendientes'
+                  : 'No hay tarjetas completadas con este filtro'}
               </p>
             </div>
           ) : (
@@ -174,14 +177,26 @@ export default function BoardCardsModal({
                               </span>
                             )}
                           </div>
-                          {card.createdAt && (
-                            <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
-                              <Calendar size={10} />
-                              <span>{formatDateTime(card.createdAt).split(' ')[0]}</span>
-                              <Clock size={10} />
-                              <span>{formatDateTime(card.createdAt).split(' ').slice(1).join(' ')}</span>
-                            </div>
-                          )}
+                          <div className="flex flex-col gap-1 mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
+                            {card.createdAt && (
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-zinc-500 dark:text-zinc-400">Creada:</span>
+                                <Calendar size={10} />
+                                <span>{formatDateTime(card.createdAt).split(' ')[0]}</span>
+                                <Clock size={10} />
+                                <span>{formatDateTime(card.createdAt).split(' ').slice(1).join(' ')}</span>
+                              </div>
+                            )}
+                            {card.isDone && card.updatedAt && (
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-zinc-500 dark:text-zinc-400">Finalizada:</span>
+                                <Calendar size={10} />
+                                <span>{formatDateTime(card.updatedAt).split(' ')[0]}</span>
+                                <Clock size={10} />
+                                <span>{formatDateTime(card.updatedAt).split(' ').slice(1).join(' ')}</span>
+                              </div>
+                            )}
+                          </div>
                           <div className="flex items-center gap-3 mt-1">
                             {card.assignees && card.assignees.length > 0 && (
                               <div className="flex -space-x-1.5">
