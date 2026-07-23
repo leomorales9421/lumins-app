@@ -22,7 +22,12 @@ const BoardsPage: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
   const [page, setPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
+    const saved = localStorage.getItem('lumins_boards_per_page');
+    if (saved) return Number(saved);
+    if (user?.preferences?.boardsPerPage) return Number(user.preferences.boardsPerPage);
+    return 10;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [isPaginating, setIsPaginating] = useState(false);
 
@@ -194,9 +199,20 @@ const BoardsPage: React.FC = () => {
                        <div className="relative flex items-center">
                          <select 
                            value={itemsPerPage}
-                           onChange={(e) => {
-                             setItemsPerPage(Number(e.target.value));
+                           onChange={async (e) => {
+                             const val = Number(e.target.value);
+                             setItemsPerPage(val);
+                             localStorage.setItem('lumins_boards_per_page', val.toString());
                              setPage(1);
+                             
+                             if (user) {
+                               try {
+                                 const updatedPreferences = { ...(user.preferences || {}), boardsPerPage: val };
+                                 await apiClient.patch('/api/auth/me', { preferences: updatedPreferences });
+                               } catch (err) {
+                                 console.error('Failed to save preference to DB', err);
+                               }
+                             }
                            }}
                            className="appearance-none bg-zinc-100 dark:bg-white/5 rounded pl-3 pr-8 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer focus:outline-none focus:ring-0 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
                          >
