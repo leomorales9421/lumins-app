@@ -27,13 +27,14 @@ import { useStructuredLogger } from '../components/NotificationProvider';
 import { 
   DndContext, 
   closestCorners, 
+  closestCenter,
   MouseSensor, 
   TouchSensor,
   useSensor, 
   useSensors, 
   DragOverlay
 } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection } from '@dnd-kit/core';
 import { 
   SortableContext, 
   horizontalListSortingStrategy, 
@@ -285,6 +286,23 @@ const BoardDetailPage: React.FC = () => {
     return lists.find((list) => (list.cards || []).some((card) => card.id === id))?.id;
   };
 
+  const collisionDetectionStrategy: CollisionDetection = useCallback(
+    (args) => {
+      if (args.active.data.current?.type === 'list') {
+        return closestCenter({
+          ...args,
+          droppableContainers: args.droppableContainers.filter(
+            (container) =>
+              container.data.current?.type === 'list' ||
+              lists.some((l) => l.id === container.id)
+          ),
+        });
+      }
+      return closestCorners(args);
+    },
+    [lists]
+  );
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const activeId = active.id as string;
@@ -376,24 +394,31 @@ const BoardDetailPage: React.FC = () => {
     const activeType = active.data.current?.type;
     
     if (activeType === 'list') {
-      if (activeId !== overId) {
+      const targetListId = lists.some((l) => l.id === overId)
+        ? overId
+        : findContainer(lists, overId);
+
+      if (targetListId && activeId !== targetListId) {
         const oldIndex = lists.findIndex((l) => l.id === activeId);
-        const newIndex = lists.findIndex((l) => l.id === overId);
-        const newListsOrder = arrayMove(lists, oldIndex, newIndex);
+        const newIndex = lists.findIndex((l) => l.id === targetListId);
         
-        setLists(newListsOrder);
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newListsOrder = arrayMove(lists, oldIndex, newIndex);
+          
+          setLists(newListsOrder);
 
-        try {
-          setIsSaving(true);
-          await apiClient.post(`/api/lists/boards/${id}/lists/reorder`, {
-            lists: newListsOrder.map((l, index) => ({ id: l.id, position: (index + 1) * 1000 }))
-          });
-        } catch (err) {
-          toast.error('Error', { description: 'No se pudo guardar el nuevo orden de las listas' });
+          try {
+            setIsSaving(true);
+            await apiClient.post(`/api/lists/boards/${id}/lists/reorder`, {
+              lists: newListsOrder.map((l, index) => ({ id: l.id, position: (index + 1) * 1000 }))
+            });
+          } catch (err) {
+            toast.error('Error', { description: 'No se pudo guardar el nuevo orden de las listas' });
 
-          fetchBoard();
-        } finally {
-          setIsSaving(false);
+            fetchBoard();
+          } finally {
+            setIsSaving(false);
+          }
         }
       }
       setOriginalContainer(null);
@@ -919,7 +944,7 @@ const BoardDetailPage: React.FC = () => {
       >
         <DndContext 
           sensors={sensors} 
-          collisionDetection={closestCorners} 
+          collisionDetection={collisionDetectionStrategy} 
           onDragStart={handleDragStart} 
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
