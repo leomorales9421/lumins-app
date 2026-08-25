@@ -28,6 +28,7 @@ import {
   DndContext, 
   closestCorners, 
   closestCenter,
+  pointerWithin,
   MouseSensor, 
   TouchSensor,
   useSensor, 
@@ -41,7 +42,7 @@ import {
   arrayMove 
 } from '@dnd-kit/sortable';
 import { SortableList } from '../components/dnd/SortableList';
-import { SortableCard } from '../components/dnd/SortableCard';
+import { SortableCard, CardView } from '../components/dnd/SortableCard';
 import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
 import MembersModal from '../components/MembersModal';
@@ -288,16 +289,61 @@ const BoardDetailPage: React.FC = () => {
 
   const collisionDetectionStrategy: CollisionDetection = useCallback(
     (args) => {
+      // 1. If dragging a list (horizontal column reordering)
       if (args.active.data.current?.type === 'list') {
-        return closestCenter({
+        const listContainers = args.droppableContainers.filter(
+          (container) =>
+            container.data.current?.type === 'list' ||
+            lists.some((l) => l.id === container.id)
+        );
+
+        // Check if pointer is within any list container
+        const pointerCollisions = pointerWithin({
           ...args,
-          droppableContainers: args.droppableContainers.filter(
-            (container) =>
-              container.data.current?.type === 'list' ||
-              lists.some((l) => l.id === container.id)
-          ),
+          droppableContainers: listContainers,
         });
+
+        if (pointerCollisions.length > 0) {
+          return pointerCollisions;
+        }
+
+        // Horizontal-only distance calculation
+        // Fixes bug where tall lists (many cards) have centers far down (large Y offset),
+        // which caused Euclidean 2D distance to skip tall lists.
+        const activeRect = args.active.rect.current.translated;
+        if (activeRect) {
+          const activeCenterX = activeRect.left + activeRect.width / 2;
+          let closestContainer: any = null;
+          let minDistance = Infinity;
+
+          for (const container of listContainers) {
+            const rect = args.droppableRects.get(container.id);
+            if (rect) {
+              const containerCenterX = rect.left + rect.width / 2;
+              const distance = Math.abs(activeCenterX - containerCenterX);
+              if (distance < minDistance) {
+                minDistance = distance;
+                closestContainer = container;
+              }
+            }
+          }
+
+          if (closestContainer) {
+            return [{ id: closestContainer.id }];
+          }
+        }
+
+        return closestCenter({ ...args, droppableContainers: listContainers });
       }
+
+      // 2. If dragging a card (multi-container / vertical reordering)
+      // Check pointer collisions first to hit exact card or list directly under pointer
+      const pointerCollisions = pointerWithin(args);
+      if (pointerCollisions.length > 0) {
+        return pointerCollisions;
+      }
+
+      // Fallback to closest corners when pointer is between items
       return closestCorners(args);
     },
     [lists]
@@ -326,6 +372,9 @@ const BoardDetailPage: React.FC = () => {
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
+
+    // Do nothing for list dragging in drag-over
+    if (active.data.current?.type === 'list') return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -1006,12 +1055,27 @@ const BoardDetailPage: React.FC = () => {
 
           <DragOverlay dropAnimation={null}>
             {activeCard ? (
-              <div className="w-[240px] rotate-[2deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-95 select-none will-change-transform">
-                <SortableCard card={activeCard} onClick={() => {}} />
+              <div className="w-[260px] rotate-[2deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-95 select-none will-change-transform">
+                <CardView card={activeCard} isDragging={false} />
               </div>
             ) : activeList ? (
-              <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-90 rotate-[1deg] scale-105 pointer-events-none shadow-2xl z-[1000] select-none will-change-transform">
-                <SortableList list={activeList} onCardClick={() => {}} canEdit={false} />
+              <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-90 rotate-[1deg] scale-105 pointer-events-none shadow-2xl z-[1000] select-none will-change-transform bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl md:rounded-lg border border-white/30 dark:border-white/10 p-3">
+                <div className="flex items-center justify-between font-bold text-zinc-900 dark:text-zinc-100 text-[14px] mb-2 px-1">
+                  <span className="truncate">{activeList.name || activeList.title}</span>
+                  <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded bg-white/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold border border-zinc-200 dark:border-white/5">
+                    {activeList.cards?.length || 0}
+                  </span>
+                </div>
+                <div className="space-y-1.5 max-h-[300px] overflow-hidden opacity-70 pointer-events-none">
+                  {(activeList.cards || []).slice(0, 3).map((card) => (
+                    <CardView key={card.id} card={card} />
+                  ))}
+                  {(activeList.cards || []).length > 3 && (
+                    <p className="text-[11px] text-center text-zinc-400 py-1 font-medium">
+                      +{(activeList.cards || []).length - 3} tarjetas más...
+                    </p>
+                  )}
+                </div>
               </div>
             ) : null}
           </DragOverlay>

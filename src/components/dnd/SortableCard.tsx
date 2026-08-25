@@ -27,25 +27,7 @@ const PRIORITY_DOT: Record<string, string> = {
   P3: '#94A3B8',
 };
 
-export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArchive }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: card.id,
-    data: { type: 'card', card },
-  });
-
-  const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
-    transition: isDragging ? undefined : transition,
-    touchAction: 'manipulation',
-  };
-
+export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card, isDragging }) => {
   const checklistItems = card.checklists?.flatMap(cl => cl.items) || [];
   const totalItems = checklistItems.length;
   const doneItems = checklistItems.filter(i => i.done).length;
@@ -56,18 +38,12 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArc
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onClick={onClick}
-      className={`cu-card ${priorityClass} cursor-grab active:cursor-grabbing group
+      className={`cu-card ${priorityClass} group
         rounded-xl md:rounded-lg mb-2 shadow-sm hover:shadow-md
         ${isDragging ? 'opacity-40 scale-105 shadow-2xl z-[1000] rotate-[1deg] !transition-none' : 'transition-shadow duration-150'}
       `}
     >
       <div className="px-2.5 pt-2.5 pb-2 flex flex-col gap-2">
-
         {card.labels && card.labels.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {card.labels.map((item: any, idx: number) => (
@@ -113,7 +89,6 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArc
         {/* Footer: metadata */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 flex-wrap">
-
             {/* Due date */}
             {card.dueDate && (
               <span
@@ -200,6 +175,39 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArc
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArchive }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: card.id,
+    data: { type: 'card', card },
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? undefined : transition,
+    touchAction: 'manipulation',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={onClick}
+      className="cursor-grab active:cursor-grabbing"
+    >
+      <CardView card={card} isDragging={isDragging} />
     </div>
   );
 };
