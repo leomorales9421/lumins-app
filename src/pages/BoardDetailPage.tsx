@@ -33,9 +33,10 @@ import {
   TouchSensor,
   useSensor, 
   useSensors, 
-  DragOverlay
+  DragOverlay,
+  defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection, DropAnimation } from '@dnd-kit/core';
 import { 
   SortableContext, 
   horizontalListSortingStrategy, 
@@ -268,9 +269,21 @@ const BoardDetailPage: React.FC = () => {
     window.dispatchEvent(new CustomEvent('toggle-sidebar'));
   };
 
+  const dropAnimationConfig: DropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: {
+        active: {
+          opacity: '0.4',
+        },
+      },
+    }),
+    duration: 250,
+    easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+  };
+
   const sensors = useSensors(
     useSensor(MouseSensor, { 
-      activationConstraint: { distance: 5 },
+      activationConstraint: { distance: 8 },
       disabled: !canEdit
     }),
     useSensor(TouchSensor, {
@@ -289,7 +302,7 @@ const BoardDetailPage: React.FC = () => {
 
   const collisionDetectionStrategy: CollisionDetection = useCallback(
     (args) => {
-      // 1. If dragging a list (horizontal column reordering)
+      // 1. If dragging a list (smooth horizontal column reordering by center overlap)
       if (args.active.data.current?.type === 'list') {
         const listContainers = args.droppableContainers.filter(
           (container) =>
@@ -297,19 +310,9 @@ const BoardDetailPage: React.FC = () => {
             lists.some((l) => l.id === container.id)
         );
 
-        // Check if pointer is within any list container
-        const pointerCollisions = pointerWithin({
-          ...args,
-          droppableContainers: listContainers,
-        });
-
-        if (pointerCollisions.length > 0) {
-          return pointerCollisions;
-        }
-
-        // Horizontal-only distance calculation
-        // Fixes bug where tall lists (many cards) have centers far down (large Y offset),
-        // which caused Euclidean 2D distance to skip tall lists.
+        // Smooth horizontal-only center distance calculation:
+        // Requires dragging column past center threshold (~50%) before displacing adjacent list,
+        // preventing premature or jittery swaps.
         const activeRect = args.active.rect.current.translated;
         if (activeRect) {
           const activeCenterX = activeRect.left + activeRect.width / 2;
@@ -337,13 +340,11 @@ const BoardDetailPage: React.FC = () => {
       }
 
       // 2. If dragging a card (multi-container / vertical reordering)
-      // Check pointer collisions first to hit exact card or list directly under pointer
       const pointerCollisions = pointerWithin(args);
       if (pointerCollisions.length > 0) {
         return pointerCollisions;
       }
 
-      // Fallback to closest corners when pointer is between items
       return closestCorners(args);
     },
     [lists]
@@ -989,7 +990,7 @@ const BoardDetailPage: React.FC = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar p-6 md:p-10 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar px-4 sm:px-6 md:px-8 pt-3 md:pt-4 pb-6 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
       >
         <DndContext 
           sensors={sensors} 
@@ -1053,7 +1054,7 @@ const BoardDetailPage: React.FC = () => {
             <div className="w-8 flex-shrink-0 canvas-spacer" />
           </div>
 
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay dropAnimation={dropAnimationConfig}>
             {activeCard ? (
               <div className="w-[260px] rotate-[2deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-95 select-none will-change-transform">
                 <CardView card={activeCard} isDragging={false} />
@@ -1061,7 +1062,7 @@ const BoardDetailPage: React.FC = () => {
             ) : activeList ? (
               <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-90 rotate-[1deg] scale-105 pointer-events-none shadow-2xl z-[1000] select-none will-change-transform bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl md:rounded-lg border border-white/30 dark:border-white/10 p-3">
                 <div className="flex items-center justify-between font-bold text-zinc-900 dark:text-zinc-100 text-[14px] mb-2 px-1">
-                  <span className="truncate">{activeList.name || activeList.title}</span>
+                  <span className="truncate">{activeList.name}</span>
                   <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded bg-white/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold border border-zinc-200 dark:border-white/5">
                     {activeList.cards?.length || 0}
                   </span>

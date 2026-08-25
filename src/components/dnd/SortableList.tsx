@@ -44,13 +44,17 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
   } = useSortable({
     id: list.id,
     data: { type: 'list', list: { ...list, cards } },
+    transition: {
+      duration: 300,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
   });
 
   const isDraggingCardOver = isOver && active?.data.current?.type === 'card';
 
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
-    transition: isDragging ? undefined : transition,
+    transition: isDragging ? undefined : (transition || 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)'),
   };
 
   const [isSubmittingCard, setIsSubmittingCard] = React.useState(false);

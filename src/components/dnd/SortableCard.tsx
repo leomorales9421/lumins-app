@@ -190,11 +190,15 @@ export const SortableCard: React.FC<SortableCardProps> = ({ card, onClick, onArc
   } = useSortable({
     id: card.id,
     data: { type: 'card', card },
+    transition: {
+      duration: 250,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
   });
 
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
-    transition: isDragging ? undefined : transition,
+    transition: isDragging ? undefined : (transition || 'transform 250ms cubic-bezier(0.25, 1, 0.5, 1)'),
     touchAction: 'manipulation',
   };
 
