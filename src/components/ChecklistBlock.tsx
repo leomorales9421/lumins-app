@@ -24,17 +24,49 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
 
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const editInputRef = React.useRef<HTMLTextAreaElement>(null);
+
   const completedItems = checklist.items.filter(item => item.done).length;
   const totalItems = checklist.items.length;
   const progress = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [newItemTitle, isAddingItem]);
+
+  React.useEffect(() => {
+    if (editInputRef.current) {
+      editInputRef.current.style.height = 'auto';
+      editInputRef.current.style.height = `${editInputRef.current.scrollHeight}px`;
+    }
+  }, [editingTitle, editingItemId]);
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (newItemTitle.trim()) {
       onAddItem(checklist.id, newItemTitle.trim());
       setNewItemTitle('');
-      setIsAddingItem(false);
+      // Keep isAddingItem true so the user can continuously type items rapidly with 0 latency
     }
+  };
+
+  const handleStartEditItem = (item: ChecklistItem) => {
+    if (isReadOnly) return;
+    setEditingItemId(item.id);
+    setEditingTitle(item.title);
+  };
+
+  const handleSaveEditItem = (itemId: string) => {
+    if (editingTitle.trim()) {
+      onUpdateItemTitle(itemId, editingTitle.trim());
+    }
+    setEditingItemId(null);
   };
 
   return (
@@ -81,14 +113,34 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                 className={`peer w-4 h-4 accent-[#6C5DD3] rounded border-zinc-300 dark:border-white/10 transition-all bg-white dark:bg-[#1C1F26] ${isReadOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110 active:scale-95'}`}
               />
             </div>
-                        <div className="flex-1 min-w-0">
-              <p 
-                className={`text-sm text-zinc-900 dark:text-zinc-100 break-words transition-all ${
-                  item.done ? 'line-through text-zinc-400 dark:text-zinc-500 opacity-70' : ''
-                }`}
-              >
-                {item.title}
-              </p>
+            <div className="flex-1 min-w-0">
+              {editingItemId === item.id ? (
+                <textarea
+                  ref={editInputRef}
+                  autoFocus
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  onBlur={() => handleSaveEditItem(item.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSaveEditItem(item.id);
+                    }
+                    if (e.key === 'Escape') setEditingItemId(null);
+                  }}
+                  className="w-full bg-white dark:bg-[#13151A] border border-[#6C5DD3] rounded px-2.5 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none resize-none overflow-hidden min-h-[32px] shadow-sm leading-relaxed"
+                  rows={1}
+                />
+              ) : (
+                <p 
+                  onClick={() => handleStartEditItem(item)}
+                  className={`text-sm text-zinc-900 dark:text-zinc-100 break-words transition-all whitespace-pre-wrap leading-relaxed py-0.5 ${
+                    item.done ? 'line-through text-zinc-400 dark:text-zinc-500 opacity-70' : ''
+                  } ${!isReadOnly ? 'cursor-text hover:text-[#6C5DD3]' : ''}`}
+                >
+                  {item.title}
+                </p>
+              )}
             </div>
 
              {!isReadOnly && (
@@ -109,8 +161,9 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
           {isAddingItem ? (
             <form onSubmit={handleAddItem} className="space-y-2 animate-in slide-in-from-top-2 duration-200">
               <textarea
+                ref={textareaRef}
                 autoFocus
-                placeholder="Añadir un elemento..."
+                placeholder="Añadir un elemento (Enter para añadir)..."
                 value={newItemTitle}
                 onChange={(e) => setNewItemTitle(e.target.value)}
                 onKeyDown={(e) => {
@@ -122,8 +175,8 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                     setIsAddingItem(false);
                   }
                 }}
-                 className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all resize-none shadow-sm"
-                rows={2}
+                 className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all resize-none overflow-hidden shadow-sm min-h-[44px] leading-relaxed"
+                rows={1}
               />
                <div className="flex items-center gap-2">
                 <button
@@ -137,7 +190,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                   onClick={() => setIsAddingItem(false)}
                   className="text-zinc-500 dark:text-zinc-400 text-sm font-bold hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                  Cancelar
+                  Listo
                 </button>
               </div>
             </form>

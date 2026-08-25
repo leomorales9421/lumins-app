@@ -611,6 +611,20 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   };
 
+  const handleUpdateChecklistItemTitle = async (itemId: string, title: string) => {
+    if (!title.trim()) return;
+    setChecklists(prev => prev.map(cl => ({
+      ...cl,
+      items: cl.items.map(item => item.id === itemId ? { ...item, title } : item)
+    })));
+
+    try {
+      await apiClient.patch(`/api/checklist-items/${itemId}`, { title });
+    } catch (err) {
+      console.error('Error updating checklist item title:', err);
+    }
+  };
+
   const handleUpdateDates = async (dates: { startDate: string | null, dueDate: string | null }) => {
     if (!cardId) return;
     setIsSaving(true);
@@ -1468,7 +1482,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   onToggleItem={handleToggleChecklistItem}
                   onDeleteItem={handleDeleteChecklistItem}
                   onDeleteChecklist={handleDeleteChecklist}
-                  onUpdateItemTitle={(itemId, title) => console.log('Update title', itemId, title)}
+                  onUpdateItemTitle={handleUpdateChecklistItemTitle}
                   isReadOnly={isReadOnly}
                 />
               ))}
