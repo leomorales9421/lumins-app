@@ -458,10 +458,17 @@ const BoardDetailPage: React.FC = () => {
 
   const handleAddCard = async (listId: string, title: string) => {
     try {
-      await apiClient.post(`/api/cards/lists/${listId}/cards`, { title });
+      const res = await apiClient.post<{ data: { card: any } }>(`/api/cards/lists/${listId}/cards`, { title });
+      if (res.data?.card) {
+        setLists(prev => prev.map(l => {
+          if (l.id !== listId) return l;
+          return { ...l, cards: [...(l.cards || []), res.data.card] };
+        }));
+      }
       fetchBoard();
     } catch (err) {
       console.error('Error adding card:', err);
+      throw err;
     }
   };
 

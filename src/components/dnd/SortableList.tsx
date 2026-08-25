@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoreHorizontal, Plus, Pencil, Trash2, X, Archive } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, X, Archive, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../types/board';
 import { SortableCard } from './SortableCard';
@@ -53,12 +53,41 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
     transition: isDragging ? undefined : transition,
   };
 
-  const handleAddCard = (e: React.FormEvent) => {
+  const [isSubmittingCard, setIsSubmittingCard] = React.useState(false);
+  const cardsContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleAddCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newCardTitle.trim() && onAddCard) {
-      onAddCard(list.id, newCardTitle.trim());
-      setNewCardTitle('');
-      setIsAddingCard(false);
+    if (newCardTitle.trim() && onAddCard && !isSubmittingCard) {
+      const title = newCardTitle.trim();
+      setIsSubmittingCard(true);
+      
+      // Immediate smooth scroll down so user sees where the card is being created
+      if (cardsContainerRef.current) {
+        cardsContainerRef.current.scrollTo({
+          top: cardsContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+
+      try {
+        await onAddCard(list.id, title);
+        setNewCardTitle('');
+        setIsAddingCard(false);
+        // Ensure scroll reaches the newly created card
+        setTimeout(() => {
+          if (cardsContainerRef.current) {
+            cardsContainerRef.current.scrollTo({
+              top: cardsContainerRef.current.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+        }, 60);
+      } catch (err) {
+        console.error('Error adding card:', err);
+      } finally {
+        setIsSubmittingCard(false);
+      }
     }
   };
 
@@ -232,7 +261,10 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       </div>
 
       {/* Cards */}
-      <div className="overflow-y-auto flex flex-col gap-1.5 min-h-0 custom-scrollbar px-0.5 py-1">
+      <div 
+        ref={cardsContainerRef}
+        className="overflow-y-auto flex flex-col gap-1.5 min-h-0 custom-scrollbar px-0.5 py-1 scroll-smooth"
+      >
         <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
             <SortableCard
@@ -243,6 +275,14 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
             />
           ))}
         </SortableContext>
+
+        {/* Creating Card Loader Placeholder */}
+        {isSubmittingCard && (
+          <div className="bg-white/90 dark:bg-[#1C1F26]/90 p-3 rounded-lg border border-[#6C5DD3]/30 shadow-md flex items-center gap-2.5 animate-pulse">
+            <Loader2 size={15} className="animate-spin text-[#6C5DD3]" />
+            <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Creando tarjeta...</span>
+          </div>
+        )}
       </div>
 
       {canEdit && (
@@ -267,12 +307,21 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
               <div className="flex items-center gap-2">
                 <button
                   type="submit"
-                  className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded text-[12px] font-semibold hover:bg-[#312e81] transition-colors"
+                  disabled={isSubmittingCard || !newCardTitle.trim()}
+                  className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded text-[12px] font-semibold hover:bg-[#5b4ebf] disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-sm"
                 >
-                  Añadir
+                  {isSubmittingCard ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" />
+                      <span>Añadiendo...</span>
+                    </>
+                  ) : (
+                    <span>Añadir</span>
+                  )}
                 </button>
                 <button
                   type="button"
+                  disabled={isSubmittingCard}
                   onClick={handleCancel}
                   className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 p-1 transition-colors text-[12px] font-medium"
                 >
