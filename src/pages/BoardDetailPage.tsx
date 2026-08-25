@@ -55,6 +55,9 @@ import { emitBoardBackgroundChange, normalizeBoardBackground } from '../lib/boar
 
 const getBoardBackgroundCacheKey = (boardId: string) => `lumins_board_background:${boardId}`;
 
+// In-memory cache for instant 0ms board re-entry (Stale-While-Revalidate)
+const boardMemoryCache = new Map<string, { board: Board; userRole: string }>();
+
 const BoardDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -64,12 +67,19 @@ const BoardDetailPage: React.FC = () => {
   // Initialize Socket.io for this board
   useBoardSocket(id);
   
-  const [board, setBoard] = useState<Board | null>(null);
-  const boardRef = useRef<Board | null>(null);
+  const cachedData = id ? boardMemoryCache.get(id) : null;
+  const [board, setBoard] = useState<Board | null>(cachedData ? cachedData.board : null);
+  const boardRef = useRef<Board | null>(board);
   useEffect(() => { boardRef.current = board; }, [board]);
-  const [userRole, setUserRole] = useState<string>('viewer');
-  const [lists, setLists] = useState<List[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>(cachedData ? cachedData.userRole : 'viewer');
+  const [lists, setLists] = useState<List[]>(() => {
+    if (!cachedData?.board?.lists) return [];
+    return (cachedData.board.lists || []).map(list => ({
+      ...list,
+      cards: (list.cards || []).filter(card => card.status === 'open')
+    }));
+  });
+  const [isLoading, setIsLoading] = useState(!cachedData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
@@ -141,6 +151,9 @@ const BoardDetailPage: React.FC = () => {
       const response = await apiClient.get<{ data: { board: Board, userRole: string } }>(`/api/boards/${id}`);
       setBoard(response.data.board);
       setUserRole(response.data.userRole);
+      
+      // Update memory cache
+      boardMemoryCache.set(id, { board: response.data.board, userRole: response.data.userRole });
       
       // Filter out archived (closed) cards
       let filteredLists = (response.data.board.lists || []).map(list => ({
@@ -961,11 +974,11 @@ const BoardDetailPage: React.FC = () => {
 
           <DragOverlay dropAnimation={null}>
             {activeCard ? (
-              <div className="w-[240px] rotate-[3deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-90 transition-transform duration-200">
+              <div className="w-[240px] rotate-[2deg] scale-105 shadow-2xl z-[1000] pointer-events-none opacity-95 select-none will-change-transform">
                 <SortableCard card={activeCard} onClick={() => {}} />
               </div>
             ) : activeList ? (
-              <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-80 rotate-[2deg] scale-105 pointer-events-none shadow-2xl z-[1000]">
+              <div className="w-[85vw] sm:w-[85vw] md:w-[300px] opacity-90 rotate-[1deg] scale-105 pointer-events-none shadow-2xl z-[1000] select-none will-change-transform">
                 <SortableList list={activeList} onCardClick={() => {}} canEdit={false} />
               </div>
             ) : null}
@@ -974,12 +987,22 @@ const BoardDetailPage: React.FC = () => {
       </main>
 
       <CardDetailModal
+        key={selectedCardId || 'empty'}
         isOpen={!!selectedCardId}
         onClose={handleCloseModal}
         cardId={selectedCardId}
         boardId={id}
         onUpdate={fetchBoard}
-        initialData={selectedCardId ? {
+        userRole={userRole}
+        boardLabels={board?.labels}
+        boardMembers={board?.members?.map(m => ({
+          id: m.user.id,
+          name: m.user.name,
+          email: m.user.email,
+          avatarUrl: m.user.avatarUrl,
+          initials: (m.user.name || 'U').charAt(0).toUpperCase()
+        }))}
+        initialData={selectedCardId && board ? {
           title: (board.lists || []).flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
           listName: (board.lists || []).find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
         } : undefined}

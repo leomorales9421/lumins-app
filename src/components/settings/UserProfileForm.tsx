@@ -139,11 +139,12 @@ const UserProfileForm: React.FC = () => {
     setSuccess(false);
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      const currentAvatar = formData.avatarUrl || user?.avatarUrl;
       const response = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', {
         name: fullName,
         phone: formData.phone,
         country: formData.country,
-        avatarUrl: formData.avatarUrl,
+        ...(currentAvatar ? { avatarUrl: currentAvatar } : {}),
       });
       if (setUser) {
         setUser(response.data.user);

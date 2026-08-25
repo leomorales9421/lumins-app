@@ -46,50 +46,31 @@ const BoardsPage: React.FC = () => {
     [filteredBoards, page, itemsPerPage]
   );
 
-  const fetchWorkspaces = useCallback(async () => {
-    if (workspaces.length === 0 && isLoadingWorkspaces) setIsLoadingWorkspaces(true);
-    else setIsRefreshing(true);
+  const loadData = useCallback(async () => {
+    if (workspaces.length === 0) setIsLoadingWorkspaces(true);
+    if (boards.length === 0) setIsLoading(true);
+    setIsRefreshing(true);
     
     try {
-      const response = await apiClient.get<{ data: { workspaces: { id: string, name: string, members?: { role: string }[] }[] } }>('/api/workspaces');
-      setWorkspaces(response.data.workspaces || []);
+      const boardsUrl = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
+      const [wsRes, boardsRes] = await Promise.all([
+        apiClient.get<{ data: { workspaces: { id: string, name: string, members?: { role: string }[] }[] } }>('/api/workspaces'),
+        apiClient.get<{ data: { boards: Board[] } }>(boardsUrl)
+      ]);
+      setWorkspaces(wsRes.data.workspaces || []);
+      setBoards(boardsRes.data.boards || []);
     } catch (err) {
-      console.error('Failed to fetch workspaces', err);
+      console.error('Failed to load boards/workspaces data', err);
     } finally {
       setIsLoadingWorkspaces(false);
-      setIsRefreshing(false);
-    }
-  }, []); // Removed workspaces.length
-
-  const fetchBoards = useCallback(async () => {
-    if (boards.length === 0 && isLoading) setIsLoading(true);
-    else setIsRefreshing(true);
-
-    try {
-      const url = workspaceId ? `/api/boards?workspaceId=${workspaceId}` : '/api/boards';
-      const response = await apiClient.get<{ data: { boards: Board[] } }>(url);
-      setBoards(response.data.boards || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [workspaceId]); // Removed boards.length
+  }, [workspaceId]);
 
   useEffect(() => { 
-    fetchWorkspaces();
-  }, [fetchWorkspaces]);
-
-  useEffect(() => {
-    if (!isLoadingWorkspaces) {
-      if (workspaceId) {
-        fetchBoards();
-      } else if (workspaces.length === 0) {
-        setIsLoading(false);
-      }
-    }
-  }, [fetchBoards, isLoadingWorkspaces, workspaceId, workspaces.length]);
+    loadData();
+  }, [loadData]);
 
   // Reset to page 1 when boards list changes
   useEffect(() => {
@@ -106,18 +87,17 @@ const BoardsPage: React.FC = () => {
   // Listen for board creation to refresh
   useEffect(() => {
     const handleRefresh = () => {
-      fetchBoards();
-      fetchWorkspaces();
+      loadData();
     };
-    window.addEventListener('board-created', fetchBoards);
-    window.addEventListener('lumins:board-updated', fetchBoards);
+    window.addEventListener('board-created', handleRefresh);
+    window.addEventListener('lumins:board-updated', handleRefresh);
     window.addEventListener('workspace-changed', handleRefresh);
     return () => {
-      window.removeEventListener('board-created', fetchBoards);
-      window.removeEventListener('lumins:board-updated', fetchBoards);
+      window.removeEventListener('board-created', handleRefresh);
+      window.removeEventListener('lumins:board-updated', handleRefresh);
       window.removeEventListener('workspace-changed', handleRefresh);
     };
-  }, [fetchBoards, fetchWorkspaces]);
+  }, [loadData]);
 
   useEffect(() => {
     if (!isLoadingWorkspaces && !workspaceId && workspaces.length > 0) {

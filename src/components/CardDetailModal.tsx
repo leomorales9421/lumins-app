@@ -30,7 +30,7 @@ import ChecklistBlock from './ChecklistBlock';
 import DatesPopover from './DatesPopover';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { Checklist } from '../types/board';
+import type { Checklist, ChecklistItem } from '../types/board';
 import ActivitySection from './ActivitySection';
 import type { ActivityItem } from '../types/activity';
 import AttachmentsSection from './AttachmentsSection';
@@ -95,6 +95,9 @@ interface CardDetailModalProps {
   cardId?: string | null;
   boardId?: string;
   onUpdate?: () => void;
+  userRole?: string;
+  boardLabels?: { id: string; name: string; color: string }[];
+  boardMembers?: Member[];
   // Prop for initial fast display
   initialData?: {
     title: string;
@@ -108,10 +111,13 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   cardId, 
   boardId,
   onUpdate,
+  userRole,
+  boardLabels: propBoardLabels,
+  boardMembers: propBoardMembers,
   initialData 
 }) => {
   const { user } = useAuth();
-  const { canModerate, isReadOnly } = useBoardPermissions(boardId);
+  const { canModerate, isReadOnly } = useBoardPermissions(boardId, userRole);
   const [card, setCard] = useState<CardData | null>(null);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [activityPage, setActivityPage] = useState(1);
@@ -128,8 +134,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const editorRef = React.useRef<RichTextEditorRef>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
-  const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>([]);
-  const [boardMembers, setBoardMembers] = useState<Member[]>([]);
+  const [boardLabels, setBoardLabels] = useState<{ id: string; name: string; color: string }[]>(propBoardLabels || []);
+  const [boardMembers, setBoardMembers] = useState<Member[]>(propBoardMembers || []);
   const [assignedMemberIds, setAssignedMemberIds] = useState<string[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const checklistsEndRef = React.useRef<HTMLDivElement>(null);
@@ -138,10 +144,24 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
 
-  // Fetch board labels
+  // Sync board data from props if provided, or fetch only if missing
   useEffect(() => {
+    if (propBoardLabels && propBoardLabels.length > 0) {
+      setBoardLabels(propBoardLabels);
+    }
+    if (propBoardMembers && propBoardMembers.length > 0) {
+      setBoardMembers(propBoardMembers);
+    }
+  }, [propBoardLabels, propBoardMembers]);
+
+  // Fetch board labels & members only if not provided by parent
+  useEffect(() => {
+    if (!isOpen || !boardId) return;
+    if (propBoardLabels && propBoardLabels.length > 0 && propBoardMembers && propBoardMembers.length > 0) {
+      return; // Already provided by board parent, skip network calls
+    }
+
     const fetchBoardData = async () => {
-      if (!boardId) return;
       try {
         const [labelsRes, membersRes] = await Promise.all([
           apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`),
@@ -157,17 +177,14 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           initials: (m.user.name || 'U').charAt(0).toUpperCase()
         }));
         
-        console.log('[DEBUG] Mapped Members:', mappedMembers);
         setBoardMembers(mappedMembers);
       } catch (err) {
         console.error('Error fetching board data:', err);
       }
     };
 
-    if (isOpen && boardId) {
-      fetchBoardData();
-    }
-  }, [isOpen, boardId]);
+    fetchBoardData();
+  }, [isOpen, boardId, propBoardLabels, propBoardMembers]);
 
   // Handle click outside to close popover
   // Removed in favor of Radix UI internal handling
@@ -302,15 +319,32 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
   useEffect(() => {
     if (isOpen && cardId) {
-      fetchCardDetails();
-      fetchChecklists();
-    } else {
+      // Clear previous card states immediately to prevent stale data flicker
       setCard(null);
+      setEditTitle(initialData?.title && initialData.title !== 'Cargando...' ? initialData.title : '');
+      setEditDescription('');
+      setSelectedLabelIds([]);
+      setAssignedMemberIds([]);
+      setChecklists([]);
       setActivities([]);
       setActivityPage(1);
       setHasMoreActivities(false);
       setIsEditingDescription(false);
+      setIsArchiveConfirmOpen(false);
+
+      fetchCardDetails();
+      fetchChecklists();
+    } else {
+      setCard(null);
+      setEditTitle('');
       setEditDescription('');
+      setSelectedLabelIds([]);
+      setAssignedMemberIds([]);
+      setChecklists([]);
+      setActivities([]);
+      setActivityPage(1);
+      setHasMoreActivities(false);
+      setIsEditingDescription(false);
       setIsArchiveConfirmOpen(false);
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
@@ -345,17 +379,20 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   // Handle updates
   const handleUpdateTitle = async () => {
     if (!cardId || !editTitle.trim() || (card && editTitle === card.title)) return;
+    const previousTitle = card?.title;
     
-    setIsSaving(true);
+    // Optimistic UI update (0ms latency)
+    if (card) setCard({ ...card, title: editTitle });
+    
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { title: editTitle });
-      if (card) setCard({ ...card, title: editTitle });
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating title:', err);
-      if (card) setEditTitle(card.title);
-    } finally {
-      setIsSaving(false);
+      if (card && previousTitle) {
+        setCard({ ...card, title: previousTitle });
+        setEditTitle(previousTitle);
+      }
     }
   };
 
@@ -363,62 +400,48 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     const descriptionToSave = newContent !== undefined ? newContent : editDescription;
     if (!cardId || (card && descriptionToSave === card.description)) return;
     
-    setIsSaving(true);
+    // Optimistic UI update (0ms latency)
+    if (card) {
+      setCard({ ...card, description: descriptionToSave });
+    }
+    setEditDescription(descriptionToSave);
+
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { description: descriptionToSave });
-      if (card) {
-        setCard({ ...card, description: descriptionToSave });
-        setEditDescription(descriptionToSave);
-      }
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating description:', err);
       if (card) setEditDescription(card.description || '');
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleAddComment = async (text: string) => {
     if (!cardId || !text.trim()) return;
     
-    setIsSaving(true);
     try {
       await apiClient.post(`/api/cards/${cardId}/comments`, { content: text });
       fetchCardDetails(true); // Refresh silently to show new comment
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error adding comment:', err);
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleUpdateComment = async (commentId: string, text: string) => {
     if (!text.trim()) return;
     
-    setIsSaving(true);
     try {
       await apiClient.put(`/api/comments/${commentId}`, { content: text });
       fetchCardDetails(true); // Refresh silently to show updated comment
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating comment:', err);
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    setIsSaving(true);
     try {
       await apiClient.delete(`/api/comments/${commentId}`);
       fetchCardDetails(true); // Refresh silently to remove deleted comment
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting comment:', err);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -427,27 +450,29 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     
     const isSelected = selectedLabelIds.includes(labelId);
     
+    // Optimistic update
+    setSelectedLabelIds(prev => isSelected ? prev.filter(id => id !== labelId) : [...prev, labelId]);
+
     try {
       if (isSelected) {
         await apiClient.delete(`/api/cards/${cardId}/labels/${labelId}`);
-        setSelectedLabelIds(prev => prev.filter(id => id !== labelId));
       } else {
         await apiClient.post(`/api/cards/${cardId}/labels`, { labelId });
-        setSelectedLabelIds(prev => [...prev, labelId]);
       }
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error toggling label:', err);
+      setSelectedLabelIds(prev => isSelected ? [...prev, labelId] : prev.filter(id => id !== labelId));
     }
   };
 
   const handleCreateLabel = async (name: string, color: string) => {
     if (!boardId) return;
     try {
-      await apiClient.post(`/api/boards/${boardId}/labels`, { name, color });
-      // Refresh labels list
-      const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
-      setBoardLabels(response.data.labels);
+      const res = await apiClient.post<{ data: { label: any } }>(`/api/boards/${boardId}/labels`, { name, color });
+      if (res.data?.label) {
+        setBoardLabels(prev => [...prev, res.data.label]);
+      }
     } catch (err) {
       console.error('Error creating label:', err);
     }
@@ -455,14 +480,10 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
   const handleEditLabel = async (labelId: string, name: string, color: string) => {
     if (!boardId) return;
+    setBoardLabels(prev => prev.map(l => l.id === labelId ? { ...l, name, color } : l));
     try {
       await apiClient.patch(`/api/boards/${boardId}/labels/${labelId}`, { name, color });
-      // Refresh labels list
-      const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
-      setBoardLabels(response.data.labels);
-      // Also refresh card details to update badges if this label is on the card
       fetchCardDetails(true);
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error editing label:', err);
     }
@@ -470,16 +491,11 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
   const handleDeleteLabel = async (labelId: string) => {
     if (!boardId) return;
+    setBoardLabels(prev => prev.filter(l => l.id !== labelId));
+    setSelectedLabelIds(prev => prev.filter(id => id !== labelId));
     try {
       await apiClient.delete(`/api/boards/${boardId}/labels/${labelId}`);
-      // Update selected labels locally if it was selected
-      setSelectedLabelIds(prev => prev.filter(id => id !== labelId));
-      // Refresh labels list
-      const response = await apiClient.get<{ data: { labels: any[] } }>(`/api/boards/${boardId}/labels`);
-      setBoardLabels(response.data.labels);
-      // Refresh card details
       fetchCardDetails(true);
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting label:', err);
     }
@@ -489,77 +505,109 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     if (!cardId) return;
     
     const isAssigned = assignedMemberIds.includes(userId);
-    
+    setAssignedMemberIds(prev => isAssigned ? prev.filter(id => id !== userId) : [...prev, userId]);
+
     try {
       if (isAssigned) {
         await apiClient.delete(`/api/cards/${cardId}/assignees/${userId}`);
-        setAssignedMemberIds(prev => prev.filter(id => id !== userId));
       } else {
         await apiClient.post(`/api/cards/${cardId}/assignees`, { userId });
-        setAssignedMemberIds(prev => [...prev, userId]);
       }
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error toggling member:', err);
+      setAssignedMemberIds(prev => isAssigned ? [...prev, userId] : prev.filter(id => id !== userId));
     }
   };
 
   const handleAddChecklist = async (title: string = 'Checklist') => {
     if (!cardId) return;
-    setIsSaving(true);
+    const tempId = 'temp-' + Date.now();
+    const newChecklist = { id: tempId, title, items: [] };
+    setChecklists(prev => [...prev, newChecklist]);
+    
     try {
-      await apiClient.post(`/api/cards/${cardId}/checklists`, { title });
-      await fetchChecklists();
-      if (onUpdate) onUpdate();
+      const res = await apiClient.post<{ data: { checklist: any } }>(`/api/cards/${cardId}/checklists`, { title });
+      if (res.data?.checklist?.id) {
+        setChecklists(prev => prev.map(cl => cl.id === tempId ? res.data.checklist : cl));
+      }
     } catch (err) {
       console.error('Error creating checklist:', err);
-    } finally {
-      setIsSaving(false);
+      setChecklists(prev => prev.filter(cl => cl.id !== tempId));
     }
   };
 
   const handleDeleteChecklist = async (id: string) => {
+    const previous = checklists;
+    setChecklists(prev => prev.filter(cl => cl.id !== id));
     try {
       await apiClient.delete(`/api/checklists/${id}`);
-      setChecklists(prev => prev.filter(cl => cl.id !== id));
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting checklist:', err);
+      setChecklists(previous);
     }
   };
 
   const handleAddChecklistItem = async (checklistId: string, title: string) => {
+    const tempItemId = 'temp-item-' + Date.now();
+    const tempItem: ChecklistItem = { id: tempItemId, title, done: false, position: Date.now() };
+    
+    // Instant 0ms optimistic append
+    setChecklists(prev => prev.map(cl => {
+      if (cl.id !== checklistId) return cl;
+      return { ...cl, items: [...cl.items, tempItem] };
+    }));
+
     try {
-      await apiClient.post(`/api/checklists/${checklistId}/items`, { title });
-      await fetchChecklists();
-      if (onUpdate) onUpdate();
+      const res = await apiClient.post<{ data: { item: any } }>(`/api/checklists/${checklistId}/items`, { title });
+      if (res.data?.item?.id) {
+        setChecklists(prev => prev.map(cl => {
+          if (cl.id !== checklistId) return cl;
+          return {
+            ...cl,
+            items: cl.items.map(it => it.id === tempItemId ? res.data.item : it)
+          };
+        }));
+      }
     } catch (err) {
       console.error('Error adding checklist item:', err);
+      setChecklists(prev => prev.map(cl => {
+        if (cl.id !== checklistId) return cl;
+        return { ...cl, items: cl.items.filter(it => it.id !== tempItemId) };
+      }));
     }
   };
 
   const handleToggleChecklistItem = async (itemId: string, done: boolean) => {
+    // Instant 0ms optimistic checkbox toggle
+    setChecklists(prev => prev.map(cl => ({
+      ...cl,
+      items: cl.items.map(item => item.id === itemId ? { ...item, done } : item)
+    })));
+
     try {
-      // Optimistic update
-      setChecklists(prev => prev.map(cl => ({
-        ...cl,
-        items: cl.items.map(item => item.id === itemId ? { ...item, done } : item)
-      })));
       await apiClient.patch(`/api/checklist-items/${itemId}`, { done });
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error toggling checklist item:', err);
-      await fetchChecklists(); // Rollback on error
+      setChecklists(prev => prev.map(cl => ({
+        ...cl,
+        items: cl.items.map(item => item.id === itemId ? { ...item, done: !done } : item)
+      })));
     }
   };
 
   const handleDeleteChecklistItem = async (itemId: string) => {
+    const previous = checklists;
+    setChecklists(prev => prev.map(cl => ({
+      ...cl,
+      items: cl.items.filter(item => item.id !== itemId)
+    })));
+
     try {
       await apiClient.delete(`/api/checklist-items/${itemId}`);
-      await fetchChecklists();
-      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error deleting checklist item:', err);
+      setChecklists(previous);
     }
   };
 
@@ -973,7 +1021,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        {isLoading && !card ? (
+        {isLoading || !card ? (
           <CardModalSkeleton />
         ) : (
           <div className="flex-1 overflow-y-auto p-6 pt-5 custom-scrollbar">

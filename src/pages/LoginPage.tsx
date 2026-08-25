@@ -31,8 +31,24 @@ const LoginPage: React.FC = () => {
     navigate(target, { replace: true });
   };
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated and check for URL errors
   React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get('error');
+    const urlMessage = params.get('message');
+
+    if (urlMessage) {
+      setError(decodeURIComponent(urlMessage));
+    } else if (urlError) {
+      if (urlError === 'oauth_expired' || urlError === 'oauth_invalid_transaction') {
+        setError('La sesión con Google expiró o ya fue completada. Intenta ingresar nuevamente.');
+      } else if (urlError === 'oauth_mismatch') {
+        setError('Conflicto de sesión detectado. Por favor presiona Iniciar con Google nuevamente.');
+      } else {
+        setError('No se pudo completar el inicio de sesión con Google. Intenta de nuevo.');
+      }
+    }
+
     if (!isLoading && isAuthenticated) {
       redirectToTarget(resolveRedirectTarget());
     }

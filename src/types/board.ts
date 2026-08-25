@@ -62,6 +62,7 @@ export interface Board {
   ownerId?: string;
   members?: BoardMember[];
   lists?: List[];
+  labels?: Array<{ id: string; name: string; color: string }>;
   background?: string;
   backgroundImageUrl?: string | null;
   backgroundThumbUrl?: string | null;
