@@ -380,14 +380,16 @@ const BoardDetailPage: React.FC = () => {
     const activeId = active.id as string;
     const overId = over.id as string;
 
+    const currentLists = listsRef.current;
+    const activeContainer = findContainer(currentLists, activeId);
+    const overContainer = findContainer(currentLists, overId);
+
+    // If both are in the same container or either not found, exit early WITHOUT triggering setLists
+    if (!activeContainer || !overContainer || activeContainer === overContainer) {
+      return;
+    }
+
     setLists((prev) => {
-      const activeContainer = findContainer(prev, activeId);
-      const overContainer = findContainer(prev, overId);
-
-      if (!activeContainer || !overContainer || activeContainer === overContainer) {
-        return prev;
-      }
-
       const activeList = prev.find((l) => l.id === activeContainer);
       const overList = prev.find((l) => l.id === overContainer);
 
@@ -401,7 +403,7 @@ const BoardDetailPage: React.FC = () => {
 
       if (activeIndex === -1) return prev;
 
-      let newIndex;
+      let newIndex: number;
       if (prev.some(l => l.id === overId)) {
         newIndex = overItems.length;
       } else {
@@ -476,7 +478,7 @@ const BoardDetailPage: React.FC = () => {
     }
 
     const currentLists = listsRef.current;
-    const overContainer = findContainer(lists, overId);
+    const overContainer = findContainer(currentLists, overId);
 
     if (!overContainer) {
       setOriginalContainer(null);
