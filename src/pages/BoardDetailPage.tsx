@@ -135,8 +135,19 @@ const BoardDetailPage: React.FC = () => {
     if (!isPanning || !scrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - (scrollRef.current.offsetLeft || 0);
-    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    const walk = x - startX; // 1:1 direct tracking for natural grab-to-scroll
     scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!scrollRef.current) return;
+    const target = e.target as HTMLElement;
+    // Scroll horizontally if wheeling over canvas background or spacers
+    if (target.id === 'board-canvas' || target.classList.contains('canvas-spacer')) {
+      if (e.deltaY !== 0) {
+        scrollRef.current.scrollLeft += e.deltaY;
+      }
+    }
   };
 
   const handleMouseUp = () => setIsPanning(false);
@@ -992,7 +1003,8 @@ const BoardDetailPage: React.FC = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar px-4 sm:px-6 md:px-8 pt-3 md:pt-4 pb-6 transition-all duration-300 bg-transparent ${activeCard ? '' : 'snap-x snap-proximity scroll-smooth'} ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+        onWheel={handleWheel}
+        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar px-4 sm:px-6 md:px-8 pt-3 md:pt-4 pb-6 transition-all duration-300 bg-transparent ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
       >
         <DndContext 
           sensors={sensors} 
@@ -1020,7 +1032,7 @@ const BoardDetailPage: React.FC = () => {
             
             {canEdit && (
               isAddingList ? (
-                <form onSubmit={handleAddList} className="w-[82vw] sm:w-[85vw] md:w-[272px] flex-shrink-0 bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-3 h-fit shadow-xl snap-start">
+                <form onSubmit={handleAddList} className="w-[82vw] sm:w-[85vw] md:w-[272px] flex-shrink-0 bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-3 h-fit shadow-xl">
                   <input
                     autoFocus
                     placeholder="Nombre de la lista..."
@@ -1044,7 +1056,7 @@ const BoardDetailPage: React.FC = () => {
                ) : (
                 <button
                   onClick={() => setIsAddingList(true)}
-                  className="w-[82vw] sm:w-[85vw] md:w-[272px] h-[52px] flex items-center justify-start px-4 gap-3 rounded-xl md:rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-white/10 transition-all font-bold text-sm flex-shrink-0 snap-start shadow-lg backdrop-blur-md"
+                  className="w-[82vw] sm:w-[85vw] md:w-[272px] h-[52px] flex items-center justify-start px-4 gap-3 rounded-xl md:rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-white/10 transition-all font-bold text-sm flex-shrink-0 shadow-lg backdrop-blur-md"
                 >
                   <Plus size={18} strokeWidth={3} />
                   Añadir otra lista

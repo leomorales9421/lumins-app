@@ -125,7 +125,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
       data-list-id={list.id}
       className={`
         cu-column h-fit max-h-full flex flex-col
-        w-[85vw] sm:w-[85vw] md:w-[300px] flex-shrink-0 snap-center md:snap-start
+        w-[85vw] sm:w-[85vw] md:w-[300px] flex-shrink-0
         bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl md:rounded-lg border border-white/30 dark:border-white/10 p-2 sm:p-3 shadow-xl
         ${isDragging ? 'opacity-40 scale-[0.98] z-50 !transition-none' : 'transition-shadow duration-150'}
         ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/40 ring-offset-1 bg-white/95 dark:bg-[#1C1F26]' : ''}
