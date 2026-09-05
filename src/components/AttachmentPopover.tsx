@@ -6,13 +6,15 @@ interface AttachmentPopoverProps {
   onUploadFile: (file: File) => void;
   onAttachLink: (url: string, name: string) => void;
   isUploading?: boolean;
+  className?: string;
 }
 
 const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({ 
   onClose, 
   onUploadFile, 
   onAttachLink,
-  isUploading = false
+  isUploading = false,
+  className
 }) => {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkName, setLinkName] = useState('');
@@ -32,7 +34,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
   };
 
   return (
-    <div className="w-[340px] bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden relative">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col p-4 max-h-full overflow-hidden relative ${className || 'w-[340px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Loading Overlay */}
       {isUploading && (
         <div className="absolute inset-0 bg-white/60 dark:bg-[#1C1F26]/60 backdrop-blur-[1px] z-50 flex flex-col items-center justify-center gap-3">

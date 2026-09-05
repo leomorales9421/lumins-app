@@ -295,10 +295,13 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
             <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-zinc-50 dark:bg-[#13151A] rounded border border-zinc-200 dark:border-white/5">
               <textarea
                 autoFocus
-                rows={2}
                 placeholder="Nombre de la tarjeta..."
                 value={newCardTitle}
-                onChange={(e) => setNewCardTitle(e.target.value)}
+                onChange={(e) => {
+                  setNewCardTitle(e.target.value);
+                  e.target.style.height = '0px';
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 180)}px`;
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -306,7 +309,13 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                   }
                   if (e.key === 'Escape') handleCancel();
                 }}
-                className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded px-2.5 py-2 text-[13px] text-zinc-900 dark:text-zinc-100 outline-none w-full resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-[#6C5DD3] focus:ring-2 focus:ring-[#6C5DD3]/10"
+                style={{
+                  minHeight: '54px',
+                  maxHeight: '180px',
+                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere'
+                }}
+                className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded px-2.5 py-2 text-[13px] text-zinc-900 dark:text-zinc-100 outline-none w-full resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-[#6C5DD3] focus:ring-2 focus:ring-[#6C5DD3]/10 no-scrollbar leading-snug transition-[border-color,box-shadow]"
               />
               <div className="flex items-center gap-2">
                 <button

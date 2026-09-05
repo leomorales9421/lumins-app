@@ -58,8 +58,11 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
         )}
 
         {/* Title */}
-        <div className="flex items-start justify-between gap-2 relative">
-          <p className={`text-[13px] font-semibold leading-snug group-hover:text-[#6C5DD3] transition-colors ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}>
+        <div className="flex items-start justify-between gap-2 relative min-w-0">
+          <p 
+            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+            className={`text-[13px] font-semibold leading-snug group-hover:text-[#6C5DD3] transition-colors whitespace-pre-wrap break-all sm:break-words min-w-0 flex-1 ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}
+          >
             {card.title}
           </p>
           <div className="flex items-center gap-1 flex-shrink-0">

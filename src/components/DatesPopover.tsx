@@ -12,6 +12,7 @@ interface DatesPopoverProps {
   dueDate: string | null;
   onSaveDates: (dates: { startDate: string | null; dueDate: string | null }) => void;
   onRemoveDates: () => void;
+  className?: string;
 }
 
 const DatesPopover: React.FC<DatesPopoverProps> = ({
@@ -20,6 +21,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   dueDate: initialDueDate,
   onSaveDates,
   onRemoveDates,
+  className,
 }) => {
   const [range, setRange] = useState<DateRange | undefined>(() => {
     const from = initialStartDate ? parseISO(initialStartDate) : (initialDueDate ? parseISO(initialDueDate) : undefined);
@@ -48,7 +50,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-[320px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button 

@@ -17,7 +17,8 @@ import {
   Zap,
   Edit2,
   Plus,
-  Copy
+  Copy,
+  ChevronRight
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import RichTextEditor, { type RichTextEditorRef } from './RichTextEditor';
@@ -129,8 +130,23 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
+  const titleTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const adjustTitleHeight = (el?: HTMLTextAreaElement | null) => {
+    const target = el || titleTextareaRef.current;
+    if (target) {
+      target.style.height = '0px';
+      const nextHeight = Math.max(target.scrollHeight, 38);
+      target.style.height = `${nextHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTitleHeight();
+  }, [editTitle, card?.title]);
+
   const [editDescription, setEditDescription] = useState('');
-  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | 'duplicate' | 'members_header' | 'dates_badge' | 'attachments_main' | 'labels_main' | 'members_main' | 'dates_main' | 'properties_main' | null>(null);
+  const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | 'duplicate' | 'members_header' | 'dates_badge' | 'attachments_main' | 'labels_main' | 'members_main' | 'dates_main' | 'properties_main' | 'mobile_duplicate' | 'mobile_members' | 'mobile_properties' | 'mobile_dates' | 'mobile_labels' | 'mobile_move' | 'mobile_attachments' | 'mobile_options' | null>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const editorRef = React.useRef<RichTextEditorRef>(null);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
@@ -143,6 +159,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+  const currentCardIdRef = React.useRef<string | null>(null);
+  const initialDataRef = React.useRef(initialData);
+
+  useEffect(() => {
+    initialDataRef.current = initialData;
+  }, [initialData]);
 
   // Sync board data from props if provided, or fetch only if missing
   useEffect(() => {
@@ -205,7 +227,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       const mappedCard: CardData = {
         id: cardData.id,
         title: cardData.title,
-        listName: cardData.list?.name || initialData?.listName || 'Lista',
+        listName: cardData.list?.name || initialDataRef.current?.listName || 'Lista',
         listId: cardData.listId,
         position: cardData.position,
         description: cardData.description || '',
@@ -269,7 +291,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [cardId, initialData]);
+  }, [cardId]);
 
   const fetchChecklists = useCallback(async () => {
     if (!cardId) return;
@@ -318,23 +340,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen && cardId) {
-      // Clear previous card states immediately to prevent stale data flicker
-      setCard(null);
-      setEditTitle(initialData?.title && initialData.title !== 'Cargando...' ? initialData.title : '');
-      setEditDescription('');
-      setSelectedLabelIds([]);
-      setAssignedMemberIds([]);
-      setChecklists([]);
-      setActivities([]);
-      setActivityPage(1);
-      setHasMoreActivities(false);
-      setIsEditingDescription(false);
-      setIsArchiveConfirmOpen(false);
-
-      fetchCardDetails();
-      fetchChecklists();
-    } else {
+    if (!isOpen || !cardId) {
+      currentCardIdRef.current = null;
       setCard(null);
       setEditTitle('');
       setEditDescription('');
@@ -346,26 +353,44 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setHasMoreActivities(false);
       setIsEditingDescription(false);
       setIsArchiveConfirmOpen(false);
+      return;
+    }
+
+    // Only do full reset & skeleton load when opening a new or different card
+    if (currentCardIdRef.current !== cardId) {
+      currentCardIdRef.current = cardId;
+      setCard(null);
+      setEditTitle(initialDataRef.current?.title && initialDataRef.current.title !== 'Cargando...' ? initialDataRef.current.title : '');
+      setEditDescription('');
+      setSelectedLabelIds([]);
+      setAssignedMemberIds([]);
+      setChecklists([]);
+      setActivities([]);
+      setActivityPage(1);
+      setHasMoreActivities(false);
+      setIsEditingDescription(false);
+      setIsArchiveConfirmOpen(false);
+
+      fetchCardDetails(false);
+      fetchChecklists();
     }
   }, [isOpen, cardId, fetchCardDetails, fetchChecklists]);
 
-  // Listen for real-time updates
+  // Listen for real-time updates (card-specific)
   useEffect(() => {
     const handleCardUpdate = (e: any) => {
       const { cardId: updatedCardId } = e.detail;
       if (updatedCardId === cardId && isOpen) {
         console.log('CardDetailModal: Real-time update received');
-        fetchCardDetails(true); // silent refresh
+        fetchCardDetails(true); // silent refresh in background
         fetchChecklists();
       }
     };
 
     window.addEventListener('lumins:card-updated', handleCardUpdate);
-    window.addEventListener('lumins:board-updated', handleCardUpdate); // Some board events affect cards too
     
     return () => {
       window.removeEventListener('lumins:card-updated', handleCardUpdate);
-      window.removeEventListener('lumins:board-updated', handleCardUpdate);
     };
   }, [cardId, isOpen, fetchCardDetails, fetchChecklists]);
 
@@ -742,7 +767,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     } catch (err) {
       console.error('Error updating properties:', err);
       // Rollback on error
-      fetchCardDetails();
+      fetchCardDetails(true);
     }
   };
 
@@ -870,7 +895,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 md:p-10"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 md:p-10"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -890,11 +915,76 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         onClick={onClose}
       />
 
-      {/* Modal Container */}
-      <div className="relative w-full sm:max-w-5xl h-full sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#1C1F26] sm:rounded shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200 sm:border border-zinc-200 dark:border-white/10">
+      {/* Modal Container: Native Bottom Sheet on Mobile, Centered Modal on Desktop */}
+      <div className="relative w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:animate-in sm:fade-in sm:zoom-in sm:duration-200 border-t sm:border border-zinc-200 dark:border-white/10">
         
-        {/* Header */}
-        <div className="border-b border-zinc-200 dark:border-white/5 px-6 py-4 flex items-center justify-between flex-shrink-0 bg-white dark:bg-[#1C1F26]">
+        {/* Mobile Pull/Drag Indicator Pill */}
+        <div 
+          className="sm:hidden w-full flex flex-col items-center pt-2.5 pb-1 bg-white dark:bg-[#1C1F26] cursor-pointer touch-none select-none flex-shrink-0"
+          onClick={onClose}
+        >
+          <div className="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 active:scale-95 transition-transform" />
+        </div>
+
+        {/* Mobile App Bar / Header (sm:hidden) */}
+        <div className="sm:hidden border-b border-zinc-100 dark:border-white/5 px-4 py-2 flex items-center justify-between flex-shrink-0 bg-white dark:bg-[#1C1F26]">
+          {/* Close button on the left - clean native style */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/20 active:scale-95 transition-all shadow-xs flex-shrink-0"
+            aria-label="Cerrar modal"
+          >
+            <X size={18} />
+          </button>
+
+          {/* List pill selector in the center */}
+          <button
+            type="button"
+            onClick={() => setActivePopover(activePopover === 'mobile_move' ? null : 'mobile_move')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 rounded-full font-semibold text-[11px] hover:bg-zinc-200 dark:hover:bg-white/10 active:scale-95 transition-all border border-zinc-200/60 dark:border-white/10 max-w-[170px]"
+          >
+            <span className="text-zinc-400 font-normal">En:</span>
+            <span className="text-[#6C5DD3] font-bold truncate">{displayListName}</span>
+            <ChevronDown size={13} className="text-zinc-400 flex-shrink-0" />
+          </button>
+
+          {/* Right actions: attachments + options menu */}
+          <div className="flex items-center gap-1">
+            {(isSaving || isRefreshing) && (
+              <div className="p-1 text-[#6C5DD3] animate-spin">
+                <Loader2 size={16} />
+              </div>
+            )}
+            {!isReadOnly && (
+              <button 
+                type="button"
+                onClick={() => setActivePopover(activePopover === 'mobile_attachments' ? null : 'mobile_attachments')}
+                className={`w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-all ${
+                  activePopover === 'mobile_attachments' 
+                    ? 'bg-zinc-100 dark:bg-white/10 text-[#6C5DD3]' 
+                    : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10'
+                }`}
+              >
+                <Paperclip size={18} />
+              </button>
+            )}
+            <button 
+              type="button"
+              onClick={() => setActivePopover(activePopover === 'mobile_options' ? null : 'mobile_options')}
+              className={`w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-all ${
+                activePopover === 'mobile_options' 
+                  ? 'bg-zinc-100 dark:bg-white/10 text-[#6C5DD3]' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10'
+              }`}
+            >
+              <MoreHorizontal size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Header (hidden sm:flex) */}
+        <div className="hidden sm:flex border-b border-zinc-200 dark:border-white/5 px-6 py-4 items-center justify-between flex-shrink-0 bg-white dark:bg-[#1C1F26]">
           <div className="flex items-center gap-2">
             <SmartPopover
               isOpen={activePopover === 'move'}
@@ -920,7 +1010,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     if (movedToAnotherBoard) {
                       onClose(); // Close modal if moved to another board
                     } else {
-                      fetchCardDetails(); // Just refresh if same board
+                      fetchCardDetails(true); // Just refresh silently if same board
                     }
                   }}
                 />
@@ -1049,17 +1139,35 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         {isLoading || !card ? (
           <CardModalSkeleton />
         ) : (
-          <div className="flex-1 overflow-y-auto p-6 pt-5 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-6 pt-3 sm:pt-5 custom-scrollbar pb-24 sm:pb-6">
             
             {/* Card Title */}
-          <div className="mb-8">
-            <input 
-              type="text"
+          <div className="mb-4 sm:mb-6 min-w-0 w-full max-w-full">
+            <textarea 
+              ref={titleTextareaRef}
               value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
+              onChange={(e) => {
+                setEditTitle(e.target.value);
+                adjustTitleHeight(e.target);
+              }}
               onBlur={handleUpdateTitle}
-              onKeyDown={(e) => e.key === 'Enter' && handleUpdateTitle()}
-              className="w-full text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight outline-none focus:bg-zinc-100 dark:focus:bg-white/5 rounded px-2 -ml-2 transition-colors border-none ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleUpdateTitle();
+                  e.currentTarget.blur();
+                }
+              }}
+              style={{
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+                whiteSpace: 'pre-wrap',
+                minHeight: '38px',
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box'
+              }}
+              className="w-full max-w-full text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight outline-none focus:bg-zinc-100 dark:focus:bg-white/5 rounded px-2 -ml-2 transition-colors border-none ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent resize-none overflow-hidden leading-snug block break-all sm:break-words [word-break:break-word] [overflow-wrap:anywhere]"
               placeholder="Título de la tarjeta"
               disabled={isLoading}
             />
@@ -1078,8 +1186,273 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             </div>
           )}
 
-          {/* Labels & Members Display (Phase 2 & 3) */}
-          <div className="flex flex-wrap items-center gap-8 mb-6">
+          {/* NATIVE MOBILE & TABLET PROPERTY SHEET (md:hidden) */}
+          <div className="md:hidden bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden divide-y divide-zinc-200/60 dark:divide-white/5 mb-6 shadow-xs">
+            {/* Row 1: Responsables */}
+            <div
+              onClick={() => setActivePopover(activePopover === 'mobile_members' ? null : 'mobile_members')}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center">
+                  <Users size={15} />
+                </div>
+                <span className="text-xs font-semibold">Responsables</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {assignedMemberIds.length > 0 ? (
+                  <div className="flex items-center -space-x-1.5">
+                    {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(member => (
+                      <div key={member.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#1C1F26] shadow-xs">
+                        <UserAvatar name={member.name} avatarUrl={member.avatarUrl} size="sm" />
+                      </div>
+                    ))}
+                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-2.5">
+                      {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(m => m.name.split(' ')[0]).join(', ')}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Asignar</span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
+
+            {/* Row 2: Prioridad & Riesgo */}
+            <div
+              onClick={() => setActivePopover(activePopover === 'mobile_properties' ? null : 'mobile_properties')}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <Zap size={15} />
+                </div>
+                <span className="text-xs font-semibold">Propiedades</span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                {card?.priority ? (
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${
+                    card.priority === 'P0' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
+                    card.priority === 'P1' ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20' :
+                    card.priority === 'P2' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
+                    'bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10'
+                  }`}>
+                    {card.priority === 'P0' ? '⚡ P0' : card.priority === 'P1' ? '⚡ P1' : card.priority === 'P2' ? '⚡ P2 - Media' : 'P3'}
+                  </span>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Prioridad</span>
+                )}
+                {card?.riskLevel && (
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                    card.riskLevel === 'high' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                    card.riskLevel === 'med' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                    'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                  }`}>
+                    Riesgo {card.riskLevel === 'high' ? 'Alto' : card.riskLevel === 'med' ? 'Medio' : 'Bajo'}
+                  </span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
+
+            {/* Row 3: Fechas */}
+            <div
+              onClick={() => setActivePopover(activePopover === 'mobile_dates' ? null : 'mobile_dates')}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                  <Clock size={15} />
+                </div>
+                <span className="text-xs font-semibold">Fechas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {(card?.startDate || card?.dueDate) ? (
+                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
+                    {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
+                    {card.dueDate && new Date(card.dueDate) < new Date() && !card.isDone && (
+                      <span className="bg-red-500/15 text-red-600 border border-red-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">Vencido</span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Asignar fechas</span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
+
+            {/* Row 4: Etiquetas */}
+            <div
+              onClick={() => setActivePopover(activePopover === 'mobile_labels' ? null : 'mobile_labels')}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                  <Tag size={15} />
+                </div>
+                <span className="text-xs font-semibold">Etiquetas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedLabelIds.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 justify-end max-w-[200px]">
+                    {boardLabels.filter(l => selectedLabelIds.includes(l.id)).map(label => (
+                      <span 
+                        key={label.id} 
+                        style={{ backgroundColor: label.color }}
+                        className="px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-xs"
+                      >
+                        {label.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Añadir etiquetas</span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
+
+            {/* Row 5: Checklist */}
+            <div
+              onClick={() => handleAddChecklist()}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                  <CheckSquare size={15} />
+                </div>
+                <span className="text-xs font-semibold">Checklist</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {checklists.length > 0 ? (
+                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                    {checklists.reduce((acc, cl) => acc + (cl.items?.filter(i => i.isCompleted)?.length || 0), 0)} / {checklists.reduce((acc, cl) => acc + (cl.items?.length || 0), 0)} completados
+                  </span>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Crear checklist</span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
+          </div>
+
+          {/* NATIVE MOBILE ACTION SHEET (md:hidden) */}
+          {activePopover && [
+            'mobile_members', 
+            'mobile_properties', 
+            'mobile_dates', 
+            'mobile_labels',
+            'mobile_move',
+            'mobile_attachments',
+            'mobile_options'
+          ].includes(activePopover) && (
+            <div className="md:hidden fixed inset-0 z-[9999] flex items-end justify-center">
+              {/* Dark Backdrop with blur */}
+              <div 
+                className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+                onClick={() => setActivePopover(null)}
+              />
+              
+              {/* Bottom Sheet that slides up smoothly */}
+              <div className="relative w-full bg-white dark:bg-[#1C1F26] rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.3)] overflow-hidden z-10 animate-in slide-in-from-bottom duration-300 border-t border-zinc-200/80 dark:border-white/10 flex flex-col max-h-[85vh]">
+                {/* Pull Handle */}
+                <div 
+                  className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer select-none"
+                  onClick={() => setActivePopover(null)}
+                >
+                  <div className="w-10 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                </div>
+
+                <div className="overflow-y-auto px-4 pb-8 pt-1 w-full custom-scrollbar">
+                  {activePopover === 'mobile_members' && (
+                    <MembersPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      onClose={() => setActivePopover(null)}
+                      boardMembers={boardMembers}
+                      assignedMemberIds={assignedMemberIds}
+                      onToggleMember={handleToggleMember}
+                    />
+                  )}
+                  {activePopover === 'mobile_properties' && (
+                    <PropertiesPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      onClose={() => setActivePopover(null)}
+                      onBack={() => setActivePopover(null)}
+                      currentPriority={card?.priority}
+                      currentRiskLevel={card?.riskLevel}
+                      currentModule={card?.module}
+                      onUpdate={handleUpdateProperties}
+                    />
+                  )}
+                  {activePopover === 'mobile_dates' && (
+                    <DatesPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      onClose={() => setActivePopover(null)}
+                      onSaveDates={handleUpdateDates}
+                      onRemoveDates={handleRemoveDates}
+                      startDate={card?.startDate || null}
+                      dueDate={card?.dueDate || null}
+                    />
+                  )}
+                  {activePopover === 'mobile_labels' && (
+                    <LabelsPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      onClose={() => setActivePopover(null)}
+                      selectedLabelIds={selectedLabelIds}
+                      labels={boardLabels}
+                      onToggleLabel={handleToggleLabel}
+                      onEditLabel={handleEditLabel}
+                      onCreateLabel={handleCreateLabel}
+                      onDeleteLabel={handleDeleteLabel}
+                    />
+                  )}
+                  {activePopover === 'mobile_move' && (
+                    <MoveCardPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      cardId={cardId || ''}
+                      currentBoardId={boardId || ''}
+                      currentListId={card?.listId || ''}
+                      onClose={() => setActivePopover(null)}
+                      onMoveSuccess={(movedToAnotherBoard) => {
+                        if (onUpdate) onUpdate();
+                        if (movedToAnotherBoard) {
+                          onClose();
+                        } else {
+                          fetchCardDetails(true);
+                        }
+                      }}
+                    />
+                  )}
+                  {activePopover === 'mobile_attachments' && (
+                    <AttachmentPopover 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      onClose={() => setActivePopover(null)}
+                      onUploadFile={handleFileUpload}
+                      onAttachLink={handleAttachLink}
+                      isUploading={isUploading}
+                    />
+                  )}
+                  {activePopover === 'mobile_options' && (
+                    <CardOptionsMenu 
+                      className="w-full border-0 shadow-none rounded-none bg-transparent"
+                      cardId={cardId || ''}
+                      assignedMemberIds={assignedMemberIds}
+                      onToggleJoin={handleToggleMember}
+                      onArchive={handleArchiveCard}
+                      onRestore={handleRestoreCard}
+                      status={card?.status}
+                      onClose={() => setActivePopover(null)}
+                      canModerate={canModerate}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Labels & Members Display (Phase 2 & 3) - Desktop Only (hidden md:flex) */}
+          <div className="hidden md:flex flex-wrap items-center gap-8 mb-6">
             {selectedLabelIds.length > 0 && (
               <div className="flex flex-col gap-2">
                 <span className="cu-section-label">Etiquetas</span>
@@ -1247,8 +1620,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             <div className="space-y-10">
               
               {/* Quick Actions Bar */}
+              {/* Quick Actions Bar - Desktop Only (hidden md:flex) */}
               {!isReadOnly && (
-              <div className="flex flex-wrap gap-3 relative">
+              <div className="hidden md:flex flex-wrap gap-3 relative">
                 <SmartPopover
                   isOpen={activePopover === 'add' || activePopover === 'attachments_main' || activePopover === 'labels_main' || activePopover === 'members_main' || activePopover === 'dates_main' || activePopover === 'properties_main'}
                   onClose={() => setActivePopover(null)}
@@ -1256,9 +1630,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'add' ? null : 'add')}
-                      className="flex items-center justify-center gap-2 min-w-[125px] px-4 py-2.5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-bold text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm"
+                      className="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold sm:font-bold text-xs sm:text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                     >
-                      <Plus size={18} /> Añadir
+                      <Plus size={16} className="text-[#6C5DD3]" /> Añadir
                     </button>
                   }
                   content={
@@ -1347,9 +1721,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'labels' ? null : 'labels')}
-                      className="flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-bold text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm"
+                      className="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold sm:font-bold text-xs sm:text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                     >
-                      <Tag size={16} /> Etiquetas
+                      <Tag size={15} /> Etiquetas
                     </button>
                   }
                   content={
@@ -1371,9 +1745,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
-                      className="flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-bold text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm"
+                      className="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold sm:font-bold text-xs sm:text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                     >
-                      <Users size={16} /> Miembros
+                      <Users size={15} /> Miembros
                     </button>
                   }
                   content={
@@ -1392,9 +1766,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   trigger={
                     <button 
                       onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                      className="flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-bold text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm"
+                      className="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold sm:font-bold text-xs sm:text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                     >
-                      <Clock size={16} /> Fechas
+                      <Clock size={15} /> Fechas
                     </button>
                   }
                   content={
@@ -1410,9 +1784,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 
                 <button 
                   onClick={() => handleAddChecklist()}
-                  className="flex items-center justify-center gap-2 min-w-[125px] px-3 py-2.5 rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-bold text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm"
+                  className="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold sm:font-bold text-xs sm:text-sm hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                 >
-                  <CheckSquare size={16} /> Checklist
+                  <CheckSquare size={15} /> Checklist
                 </button>
               </div>
               )}
@@ -1529,6 +1903,60 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           </div>
         </div>
       )}
+
+        {/* Sticky Mobile Bottom Bar */}
+        {!isLoading && card && (
+          <div className="sm:hidden border-t border-zinc-200/80 dark:border-white/10 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-md px-4 py-3 flex items-center gap-2.5 flex-shrink-0 z-20">
+            <button
+              onClick={handleToggleDone}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs shadow-sm transition-all active:scale-[0.98] ${
+                card?.isDone
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                  : 'bg-[#6C5DD3] text-white hover:bg-[#5b4eb8] shadow-[#6C5DD3]/20 shadow-md'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-md flex items-center justify-center transition-all ${
+                card?.isDone ? 'bg-emerald-500 text-white' : 'border-2 border-white/70'
+              }`}>
+                {card?.isDone && <CheckSquare size={12} className="text-white" />}
+              </div>
+              <span>{card?.isDone ? 'Completada' : 'Marcar como lista'}</span>
+            </button>
+
+            <SmartPopover
+              isOpen={activePopover === 'mobile_duplicate'}
+              onClose={() => setActivePopover(null)}
+              placement="top-end"
+              trigger={
+                <button
+                  onClick={() => setActivePopover(activePopover === 'mobile_duplicate' ? null : 'mobile_duplicate')}
+                  className="px-3 py-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-all"
+                  title="Duplicar tarjeta"
+                >
+                  <Copy size={15} />
+                  <span>Duplicar</span>
+                </button>
+              }
+              content={
+                <DuplicateCardPopover
+                  currentBoardId={boardId || ''}
+                  currentListId={card?.listId || ''}
+                  currentCardPosition={card?.position}
+                  onDuplicate={handleDuplicateCard}
+                  onClose={() => setActivePopover(null)}
+                  onDuplicateSuccess={(duplicatedToAnotherBoard) => {
+                    if (onUpdate) onUpdate();
+                    if (duplicatedToAnotherBoard) {
+                      onClose();
+                    } else {
+                      fetchCardDetails(true);
+                    }
+                  }}
+                />
+              }
+            />
+          </div>
+        )}
       </div>
       <ConfirmActionModal
         isOpen={isArchiveConfirmOpen}

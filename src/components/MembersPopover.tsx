@@ -16,6 +16,7 @@ interface MembersPopoverProps {
   boardMembers: Member[];
   assignedMemberIds: string[];
   onToggleMember: (userId: string) => void;
+  className?: string;
 }
 
 const MembersPopover: React.FC<MembersPopoverProps> = ({
@@ -24,6 +25,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
   boardMembers,
   assignedMemberIds,
   onToggleMember,
+  className,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -36,7 +38,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
   const uniqueMembers = Array.from(new Map(filteredMembers.map(m => [m.id, m])).values());
 
   return (
-    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-72 rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         {onBack ? (

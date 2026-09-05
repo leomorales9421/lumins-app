@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
@@ -6,6 +6,7 @@ import type { Board, List, Card as CardType } from '../types/board';
 import { Skeleton } from '../components/ui/Skeleton';
 import { 
   ChevronLeft, 
+  ChevronRight,
   Filter, 
   Users, 
   Settings, 
@@ -18,7 +19,8 @@ import {
   Building2,
   Trash2,
   Check,
-  ArchiveRestore
+  ArchiveRestore,
+  X
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -98,6 +100,7 @@ const BoardDetailPage: React.FC = () => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isMobileBoardMenuOpen, setIsMobileBoardMenuOpen] = useState(false);
   const [isVisibilityDropdownOpen, setIsVisibilityDropdownOpen] = useState(false);
   const [archiveCardCandidate, setArchiveCardCandidate] = useState<{ id: string; title: string } | null>(null);
   const [isArchivingCard, setIsArchivingCard] = useState(false);
@@ -265,14 +268,25 @@ const BoardDetailPage: React.FC = () => {
     const cardId = searchParams.get('cardId') || searchParams.get('card');
     if (cardId) {
       setSelectedCardId(cardId);
+    } else {
+      setSelectedCardId(null);
     }
   }, [searchParams]);
 
+  const handleOpenCard = (cardId: string) => {
+    setSelectedCardId(cardId);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('cardId', cardId);
+    newParams.delete('card');
+    setSearchParams(newParams, { replace: true });
+  };
+
   const handleCloseModal = () => {
     setSelectedCardId(null);
-    // Remove cardId from URL when closing modal
+    // Remove both cardId and legacy card from URL when closing modal
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('cardId');
+    newParams.delete('card');
     setSearchParams(newParams, { replace: true });
   };
 
@@ -630,6 +644,24 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
+  const modalInitialData = useMemo(() => {
+    if (!selectedCardId || !board) return undefined;
+    return {
+      title: (board.lists || []).flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
+      listName: (board.lists || []).find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
+    };
+  }, [selectedCardId, board]);
+
+  const modalBoardMembers = useMemo(() => {
+    return board?.members?.map(m => ({
+      id: m.user.id,
+      name: m.user.name,
+      email: m.user.email,
+      avatarUrl: m.user.avatarUrl,
+      initials: (m.user.name || 'U').charAt(0).toUpperCase()
+    }));
+  }, [board?.members]);
+
   if (isLoading) {
     return (
       <div 
@@ -710,55 +742,55 @@ const BoardDetailPage: React.FC = () => {
     >
       
       {/* Board Header (Sub-navigation) - Premium Glass Mode */}
-      <header className="h-[60px] md:h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
+      <header className="h-[56px] sm:h-[60px] md:h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-3 sm:px-6 md:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
         {/* Left Side: Sidebar Toggle, Breadcrumbs and Title */}
-        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0 flex-1 sm:flex-initial mr-2 sm:mr-0">
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-            className="p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded text-white/90 transition-all border border-white/10 shadow-sm group"
+            className="p-2 sm:p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded text-white/90 transition-all border border-white/10 shadow-sm flex-shrink-0 group"
             title="Toggle Sidebar"
           >
-            <Menu size={20} className="group-hover:text-white transition-colors" />
+            <Menu size={18} className="sm:w-5 sm:h-5 text-white/90 group-hover:text-white transition-colors" />
           </button>
 
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
             <Link 
               to={`/w/${board.workspaceId}/dashboard`} 
-              className="hidden md:flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white transition-all hover:translate-x-[-2px]"
+              className="hidden md:flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white transition-all hover:translate-x-[-2px] flex-shrink-0"
             >
               <ChevronLeft size={14} strokeWidth={3} />
               Tableros
             </Link>
             
-            <span className="hidden md:block text-white/10 font-thin text-2xl">|</span>
+            <span className="hidden md:block text-white/10 font-thin text-2xl flex-shrink-0">|</span>
             
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
-                <span className="font-black text-sm">{board.name.charAt(0).toUpperCase()}</span>
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
+                <span className="font-black text-xs sm:text-sm">{board.name.charAt(0).toUpperCase()}</span>
               </div>
               
-                <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <h1 className="text-lg sm:text-xl font-black text-white truncate drop-shadow-md tracking-tight">
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <h1 className="text-sm sm:text-lg md:text-xl font-black text-white truncate drop-shadow-md tracking-tight">
                     {board.name}
                   </h1>
 
                   {/* Visibility Selector */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     {isAdmin ? (
                       <button 
                         onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
-                        className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
+                        className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
                         title={board.visibility === 'PRIVATE' ? 'Click para cambiar visibilidad (Privado)' : 'Click para cambiar visibilidad (Espacio de trabajo)'}
                       >
-                        {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
+                        {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
                       </button>
                     ) : (
                       <div 
-                        className="p-1.5 rounded-[4px] bg-white/5 border border-white/10 text-white/40 flex items-center gap-2 cursor-default"
+                        className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 text-white/40 flex items-center gap-2 cursor-default"
                         title={board.visibility === 'PRIVATE' ? 'Este tablero es Privado' : 'Este tablero es visible para el Espacio de Trabajo'}
                       >
-                        {board.visibility === 'PRIVATE' ? <Lock size={14} /> : <Building2 size={14} />}
+                        {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
                       </div>
                     )}
 
@@ -780,7 +812,7 @@ const BoardDetailPage: React.FC = () => {
                             </div>
                             <div className="p-1">
                               <button 
-                                onClick={() => handleUpdateVisibility('PRIVATE')}
+                                onClick={() => { handleUpdateVisibility('PRIVATE'); setIsVisibilityDropdownOpen(false); }}
                                 className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'PRIVATE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
                               >
                                 <div className="flex items-center gap-2">
@@ -790,7 +822,7 @@ const BoardDetailPage: React.FC = () => {
                                 {board.visibility === 'PRIVATE' && <Check size={14} />}
                               </button>
                               <button 
-                                onClick={() => handleUpdateVisibility('WORKSPACE')}
+                                onClick={() => { handleUpdateVisibility('WORKSPACE'); setIsVisibilityDropdownOpen(false); }}
                                 className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'WORKSPACE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
                               >
                                 <div className="flex items-center gap-2">
@@ -814,7 +846,7 @@ const BoardDetailPage: React.FC = () => {
                   </div>
 
                   {(isSaving || isRefreshing) && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10 animate-in fade-in zoom-in duration-300">
+                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10 animate-in fade-in zoom-in duration-300 flex-shrink-0">
                       <div className={`w-1.5 h-1.5 rounded animate-pulse ${isRefreshing ? 'bg-indigo-400' : 'bg-emerald-400'}`} />
                       <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
                         {isRefreshing ? 'Actualizando' : 'Salvando'}
@@ -827,70 +859,31 @@ const BoardDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Side: Members & Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Members Group */}
-          <div
-            onClick={() => setIsMembersModalOpen(true)}
-            className="flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
-          >
-            {board.members?.slice(0, 4).map((member) => (
-              <div
-                key={member.userId}
-                className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
-              >
-                <UserAvatar
-                  name={member.user.name}
-                  avatarUrl={member.user.avatarUrl}
-                  size="sm"
-                />
-              </div>
-            ))}
-            {(board.members?.length || 0) > 4 && (
-              <div className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
-                +{(board.members?.length || 0) - 4}
-              </div>
-            )}
-          </div>
-
-          {/* My role badge */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/70">
-            <span>{userRole === 'admin' ? 'Administrador' : userRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
-          </div>
-
-          <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
+        {/* Mobile Right Actions (md:hidden) */}
+        <div className="flex md:hidden items-center gap-1.5 flex-shrink-0">
+          {/* Quick Filter */}
+          <div className="relative">
             <button 
-              onClick={() => setIsArchivedModalOpen(true)}
-              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded border border-white/10 bg-white/5 text-white/80 text-sm font-bold transition-all hover:text-white hover:bg-white/15 hover:border-white/20 active:scale-95 shadow-lg"
-              title="Ver archivo"
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded border text-sm font-bold transition-all active:scale-95 shadow-sm ${
+                filterUserId || isFiltersOpen 
+                  ? 'bg-white/20 border-white/40 text-white ring-2 ring-white/10' 
+                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/15'
+              }`}
+              title="Filtrar tarjetas"
             >
-              <ArchiveRestore size={16} strokeWidth={2.5} />
-              <span className="hidden lg:inline">Archivo</span>
+              <Filter size={15} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
             </button>
 
-            <div className="relative">
-              <button 
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
-                  filterUserId || isFiltersOpen 
-                    ? 'bg-white/20 border-white/40 text-white ring-4 ring-white/5' 
-                    : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20'
-                }`}
-              >
-                <Filter size={16} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
-                <span className="hidden lg:inline">{filterUserId ? 'Filtrado' : 'Filtros'}</span>
-              </button>
-
-              <AnimatePresence>
-                {isFiltersOpen && (
+            <AnimatePresence>
+              {isFiltersOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsFiltersOpen(false)} />
                   <motion.div 
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                    className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto sm:mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
                   >
                     <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
                       <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
@@ -920,13 +913,148 @@ const BoardDetailPage: React.FC = () => {
                       ))}
                     </div>
                   </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Members Button (tap to open Members modal) */}
+          <button
+            onClick={() => setIsMembersModalOpen(true)}
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded border border-white/10 bg-white/5 text-white/80 hover:bg-white/15 active:scale-95 shadow-sm relative"
+            title="Miembros del tablero"
+          >
+            {board.members && board.members.length > 0 ? (
+              <div className="w-6 h-6 rounded overflow-hidden">
+                <UserAvatar
+                  name={board.members[0].user.name}
+                  avatarUrl={board.members[0].user.avatarUrl}
+                  size="xs"
+                />
+              </div>
+            ) : (
+              <Users size={15} strokeWidth={2.5} />
+            )}
+            {(board.members?.length || 0) > 1 && (
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-0.5 bg-[#6C5DD3] text-white text-[9px] font-black rounded-full flex items-center justify-center border border-zinc-900 shadow">
+                {board.members?.length}
+              </span>
+            )}
+          </button>
+
+          {/* More Options Button (...) */}
+          <button
+            onClick={() => setIsMobileBoardMenuOpen(true)}
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded border border-white/10 bg-white/5 text-white/80 hover:bg-white/15 active:scale-95 shadow-sm"
+            title="Más opciones del tablero"
+          >
+            <MoreHorizontal size={17} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        {/* Desktop Right Actions (hidden md:flex) */}
+        <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-shrink-0">
+          {/* Members Group */}
+          <div
+            onClick={() => setIsMembersModalOpen(true)}
+            className="flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
+          >
+            {board.members?.slice(0, 4).map((member) => (
+              <div
+                key={member.userId}
+                className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
+              >
+                <UserAvatar
+                  name={member.user.name}
+                  avatarUrl={member.user.avatarUrl}
+                  size="sm"
+                />
+              </div>
+            ))}
+            {(board.members?.length || 0) > 4 && (
+              <div className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
+                +{(board.members?.length || 0) - 4}
+              </div>
+            )}
+          </div>
+
+          {/* My role badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/70">
+            <span>{userRole === 'admin' ? 'Administrador' : userRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
+          </div>
+
+          <div className="w-px h-8 bg-white/10 mx-1" />
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button 
+              onClick={() => setIsArchivedModalOpen(true)}
+              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded border border-white/10 bg-white/5 text-white/80 text-sm font-bold transition-all hover:text-white hover:bg-white/15 hover:border-white/20 active:scale-95 shadow-lg"
+              title="Ver archivo"
+            >
+              <ArchiveRestore size={16} strokeWidth={2.5} />
+              <span className="hidden lg:inline">Archivo</span>
+            </button>
+
+            <div className="relative">
+              <button 
+                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
+                  filterUserId || isFiltersOpen 
+                    ? 'bg-white/20 border-white/40 text-white ring-4 ring-white/5' 
+                    : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20'
+                }`}
+              >
+                <Filter size={16} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
+                <span className="hidden lg:inline">{filterUserId ? 'Filtrado' : 'Filtros'}</span>
+              </button>
+
+              <AnimatePresence>
+                {isFiltersOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsFiltersOpen(false)} />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                    >
+                      <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
+                        {filterUserId && (
+                          <button onClick={() => setFilterUserId(null)} className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter hover:underline">Limpiar</button>
+                        )}
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
+                        <button 
+                          onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
+                          className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded transition-colors text-sm text-white/70"
+                        >
+                          <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
+                          Todos los miembros
+                        </button>
+                        {board.members?.map(member => (
+                          <button 
+                            key={member.userId}
+                            onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
+                            className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
+                          >
+                            <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
+                              <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
+                            </div>
+                            <span className="truncate">{member.user.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
             </div>
 
             <button 
               onClick={() => setIsMembersModalOpen(true)}
-              className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+              className="flex items-center justify-center gap-2 h-10 px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
               title="Miembros"
             >
               <Users size={16} strokeWidth={2.5} />
@@ -936,7 +1064,7 @@ const BoardDetailPage: React.FC = () => {
             {isAdmin && (
               <button 
                 onClick={() => setIsSettingsDrawerOpen(true)}
-                className="flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
+                className="flex items-center justify-center gap-2 h-10 px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
                 title="Configuración"
               >
                 <Settings size={18} strokeWidth={2.5} />
@@ -995,6 +1123,197 @@ const BoardDetailPage: React.FC = () => {
         </div>
       </header>
 
+      {/* Native Mobile Board Options Sheet (md:hidden) */}
+      <AnimatePresence>
+        {isMobileBoardMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-[100] flex items-end justify-center">
+            {/* Dark Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+              onClick={() => setIsMobileBoardMenuOpen(false)}
+            />
+
+            {/* Bottom Sheet */}
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="relative w-full bg-[#1C1F26] text-white rounded-t-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-white/10 z-10 max-h-[85vh] flex flex-col overflow-hidden"
+            >
+              {/* Pull handle */}
+              <div 
+                className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer"
+                onClick={() => setIsMobileBoardMenuOpen(false)}
+              >
+                <div className="w-10 h-1.5 rounded-full bg-white/20" />
+              </div>
+
+              {/* Sheet Header */}
+              <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow">
+                    {board.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm text-white truncate">{board.name}</h3>
+                    <p className="text-[11px] text-white/50 flex items-center gap-1.5">
+                      {board.visibility === 'PRIVATE' ? <Lock size={11} /> : <Building2 size={11} />}
+                      <span>{board.visibility === 'PRIVATE' ? 'Tablero Privado' : 'Espacio de Trabajo'}</span>
+                      <span>•</span>
+                      <span>{userRole === 'admin' ? 'Administrador' : userRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsMobileBoardMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 active:scale-95"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Sheet Body */}
+              <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
+                {/* List Navigator */}
+                <div>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                    Saltar a lista ({lists.length})
+                  </span>
+                  <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar p-1 bg-white/5 rounded-xl border border-white/5">
+                    {lists.map(list => (
+                      <button
+                        key={list.id}
+                        onClick={() => {
+                          scrollToList(list.id);
+                          setIsMobileBoardMenuOpen(false);
+                        }}
+                        className="w-full px-3 py-2 rounded-lg flex items-center justify-between text-left hover:bg-white/10 active:bg-white/15 transition-all group"
+                      >
+                        <span className="text-xs font-semibold text-white/80 group-hover:text-white truncate">
+                          {list.name}
+                        </span>
+                        <span className="text-[10px] font-bold bg-white/10 px-1.5 py-0.5 rounded text-white/50">
+                          {list.cards?.length || 0}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Board Actions */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                    Acciones del tablero
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      setIsMobileBoardMenuOpen(false);
+                      setIsArchivedModalOpen(true);
+                    }}
+                    className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                        <ArchiveRestore size={16} />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-xs font-bold text-white">Elementos archivados</div>
+                        <div className="text-[11px] text-white/50">Ver o restaurar tarjetas y listas</div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-white/30" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsMobileBoardMenuOpen(false);
+                      setIsMembersModalOpen(true);
+                    }}
+                    className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                        <Users size={16} />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-xs font-bold text-white">Miembros del tablero</div>
+                        <div className="text-[11px] text-white/50">{board.members?.length || 0} personas colaborando</div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-white/30" />
+                  </button>
+
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        setIsMobileBoardMenuOpen(false);
+                        setIsSettingsDrawerOpen(true);
+                      }}
+                      className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                          <Settings size={16} />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-xs font-bold text-white">Configuración del tablero</div>
+                          <div className="text-[11px] text-white/50">Fondo, permisos y administración</div>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} className="text-white/30" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Visibility Toggle if Admin */}
+                {isAdmin && (
+                  <div className="pt-2 border-t border-white/5">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                      Visibilidad
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          handleUpdateVisibility('PRIVATE');
+                          setIsMobileBoardMenuOpen(false);
+                        }}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                          board.visibility === 'PRIVATE'
+                            ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        <Lock size={14} />
+                        <span>Privado</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleUpdateVisibility('WORKSPACE');
+                          setIsMobileBoardMenuOpen(false);
+                        }}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                          board.visibility === 'WORKSPACE'
+                            ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        <Building2 size={14} />
+                        <span>Espacio de Trabajo</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Canvas Area (Lists) */}
       <main 
         id="board-canvas"
@@ -1019,7 +1338,7 @@ const BoardDetailPage: React.FC = () => {
                 <SortableList 
                   key={list.id} 
                   list={list} 
-                  onCardClick={setSelectedCardId}
+                  onCardClick={handleOpenCard}
                   onAddCard={handleAddCard}
                   onUpdateList={handleUpdateList}
                   onArchiveList={handleArchiveList}
@@ -1103,20 +1422,11 @@ const BoardDetailPage: React.FC = () => {
         onClose={handleCloseModal}
         cardId={selectedCardId}
         boardId={id}
-        onUpdate={fetchBoard}
+        onUpdate={() => fetchBoard(true)}
         userRole={userRole}
         boardLabels={board?.labels}
-        boardMembers={board?.members?.map(m => ({
-          id: m.user.id,
-          name: m.user.name,
-          email: m.user.email,
-          avatarUrl: m.user.avatarUrl,
-          initials: (m.user.name || 'U').charAt(0).toUpperCase()
-        }))}
-        initialData={selectedCardId && board ? {
-          title: (board.lists || []).flatMap(l => l.cards || []).find(c => c.id === selectedCardId)?.title || 'Cargando...',
-          listName: (board.lists || []).find(l => (l.cards || []).some(c => c.id === selectedCardId))?.name || 'Desconocida'
-        } : undefined}
+        boardMembers={modalBoardMembers}
+        initialData={modalInitialData}
       />
 
       <MembersModal

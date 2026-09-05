@@ -162,6 +162,15 @@
     scrollbar-color: #E2E8F0 transparent;
   }
 
+  /* No scrollbar utility */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Standard card styles */
   .brand-card {
     @apply bg-white rounded shadow-soft border border-brand-primary/5;

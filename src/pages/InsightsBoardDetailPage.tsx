@@ -302,7 +302,7 @@ export default function InsightsBoardDetailPage() {
                         
                         <div className="flex items-center md:flex-col justify-end md:justify-center gap-2 border-t md:border-t-0 md:border-l border-zinc-100 dark:border-zinc-800 pt-3 md:pt-0 md:pl-4">
                            <button 
-                            onClick={() => navigate(`/boards/${boardId}?card=${card.id}`)}
+                            onClick={() => navigate(`/boards/${boardId}?cardId=${card.id}`)}
                             className="text-xs font-bold text-[#6C5DD3] hover:text-[#5b4eb3] bg-[#6C5DD3]/10 px-4 py-2 rounded-lg transition-colors w-full md:w-auto text-center"
                            >
                              Ver en tablero

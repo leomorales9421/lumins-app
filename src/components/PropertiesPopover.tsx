@@ -8,6 +8,7 @@ interface PropertiesPopoverProps {
   currentRiskLevel?: 'low' | 'med' | 'high' | null;
   currentModule?: string | null;
   onUpdate: (properties: { priority?: string | null; riskLevel?: string | null; module?: string | null }) => void;
+  className?: string;
 }
 
 const PRIORITIES = [
@@ -32,6 +33,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
   currentRiskLevel,
   currentModule,
   onUpdate,
+  className,
 }) => {
   const [priority, setPriority] = useState(currentPriority);
   const [riskLevel, setRiskLevel] = useState(currentRiskLevel);
@@ -69,7 +71,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
   };
 
   return (
-    <div className="w-[300px] bg-white dark:bg-[#1C1F26] rounded shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-y-auto scrollbar-thin">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-y-auto scrollbar-thin ${className || 'w-[300px] rounded shadow-dropdown border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="p-4 pb-2 flex items-center justify-between">
         <button onClick={onBack} className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-colors">

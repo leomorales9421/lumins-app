@@ -15,6 +15,7 @@ interface LabelsPopoverProps {
   onEditLabel: (labelId: string, name: string, color: string) => void;
   onCreateLabel: (name: string, color: string) => void;
   onDeleteLabel: (labelId: string) => void;
+  className?: string;
 }
 
 const PRESET_COLORS = [
@@ -39,7 +40,8 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   onToggleLabel,
   onEditLabel,
   onCreateLabel,
-  onDeleteLabel
+  onDeleteLabel,
+  className
 }) => {
   const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit'>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +88,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   if (currentView === 'create' || currentView === 'edit') {
     const isEdit = currentView === 'edit';
     return (
-      <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 p-4 animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+      <div className={`bg-white dark:bg-[#1C1F26] p-4 max-h-full overflow-hidden ${className || 'w-72 rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button 
@@ -178,7 +180,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   }
 
   return (
-    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded shadow-xl border border-zinc-200 dark:border-white/10 flex flex-col animate-in fade-in zoom-in duration-200 max-h-full overflow-hidden">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-72 rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       <div className="flex items-center justify-between p-4 pb-2">
         <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
           Etiquetas

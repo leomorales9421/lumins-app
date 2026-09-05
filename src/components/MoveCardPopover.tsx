@@ -19,6 +19,7 @@ interface MoveCardPopoverProps {
   currentListId: string;
   onClose: () => void;
   onMoveSuccess: (movedToAnotherBoard: boolean) => void;
+  className?: string;
 }
 
 const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
@@ -27,6 +28,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
   currentListId,
   onClose,
   onMoveSuccess,
+  className,
 }) => {
 
   const [boards, setBoards] = useState<Board[]>([]);
@@ -120,14 +122,14 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
 
   if (isLoading) {
     return (
-      <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-200 dark:border-white/10 p-8 flex items-center justify-center">
+      <div className={`bg-white dark:bg-[#1C1F26] p-8 flex items-center justify-center ${className || 'w-[320px] rounded shadow-2xl border border-zinc-200 dark:border-white/10'}`}>
         <Loader2 className="animate-spin text-zinc-400 dark:text-zinc-500" />
       </div>
     );
   }
 
   return (
-    <div className="w-[320px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-200 dark:border-white/10 flex flex-col p-4 animate-in fade-in zoom-in duration-200">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col p-4 ${className || 'w-[320px] rounded shadow-2xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 text-center">

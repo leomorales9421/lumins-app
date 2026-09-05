@@ -18,6 +18,7 @@ interface CardOptionsMenuProps {
   onClose: () => void;
   canModerate?: boolean;
   status?: string;
+  className?: string;
 }
 
 const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
@@ -28,7 +29,8 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   onRestore,
   onClose,
   canModerate,
-  status
+  status,
+  className
 }) => {
   const { user } = useAuth();
   const [copied, setCopied] = React.useState(false);
@@ -61,7 +63,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
   };
 
   return (
-    <div className="w-56 bg-white dark:bg-[#1C1F26] rounded shadow-dropdown border border-zinc-200 dark:border-white/10 flex flex-col py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col py-2 z-50 ${className || 'w-56 rounded shadow-dropdown border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200 origin-top-right'}`}>
       {/* Join / Leave */}
       <button 
         onClick={handleJoinClick}
@@ -104,10 +106,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       {/* Archive */}
       {canModerate && status !== 'closed' && (
         <button 
-          onClick={async () => {
-            await onArchive();
-            onClose();
-          }}
+          onClick={handleArchiveClick}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer group"
         >
           <Archive size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-rose-500 dark:group-hover:text-rose-400" />
@@ -122,9 +121,9 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
             await onRestore();
             onClose();
           }}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors cursor-pointer group"
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer group"
         >
-          <ArchiveRestore size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400" />
+          <ArchiveRestore size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
           <span>Restaurar tarjeta</span>
         </button>
       )}
