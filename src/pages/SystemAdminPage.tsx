@@ -1022,6 +1022,9 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                 </div>
 
               </div>
+            </div>
+          )}
+
           {/* TELEMETRY TAB */}
           {activeTab === 'telemetry' && (
             <div className="space-y-6">
