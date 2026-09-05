@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { 
@@ -916,7 +917,11 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       />
 
       {/* Modal Container: Native Bottom Sheet on Mobile, Centered Modal on Desktop */}
-      <div className="relative w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:animate-in sm:fade-in sm:zoom-in sm:duration-200 border-t sm:border border-zinc-200 dark:border-white/10">
+      <motion.div
+        layout
+        layoutRoot
+        className="relative w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:animate-in sm:fade-in sm:zoom-in sm:duration-200 border-t sm:border border-zinc-200 dark:border-white/10"
+      >
         
         {/* Mobile Pull/Drag Indicator Pill */}
         <div 
@@ -1135,11 +1140,28 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Scrollable Content — cross-fade between skeleton and real content */}
+        <AnimatePresence mode="wait" initial={false}>
         {isLoading || !card ? (
-          <CardModalSkeleton />
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeInOut' }}
+            className="flex-1 overflow-y-auto"
+          >
+            <CardModalSkeleton />
+          </motion.div>
         ) : (
-          <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-6 pt-3 sm:pt-5 custom-scrollbar pb-24 sm:pb-6">
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-6 pt-3 sm:pt-5 custom-scrollbar pb-24 sm:pb-6"
+          >
             
             {/* Card Title */}
           <div className="mb-4 sm:mb-6 min-w-0 w-full max-w-full">
@@ -1901,8 +1923,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               />
             </div>
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+        </AnimatePresence>
 
         {/* Sticky Mobile Bottom Bar */}
         {!isLoading && card && (
@@ -1957,7 +1980,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             />
           </div>
         )}
-      </div>
+      </motion.div>
       <ConfirmActionModal
         isOpen={isArchiveConfirmOpen}
         title="Archivar tarjeta"

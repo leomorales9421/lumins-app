@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Layout, Shield, Search, ChevronRight, ExternalLink, Globe, Database, HardDrive, CheckCircle,
   XCircle, Copy, Check, RefreshCw, AlertTriangle, Layers3, Building2, BadgeInfo, Clock3, UserRound,
-  UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3
+  UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3, Zap, AlertOctagon, Sparkles
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
@@ -51,7 +51,38 @@ interface DriveStatus {
   redirectUri: string | null;
 }
 
-type Tab = 'dashboard' | 'users' | 'workspaces' | 'activity' | 'settings';
+interface TelemetryBoardStat {
+  boardId: string;
+  boardName: string;
+  workspaceId?: string;
+  health: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+  reasons: string[];
+  samplesCount: number;
+  avgLoadTimeMs: number;
+  maxLoadTimeMs: number;
+  avgFps: number;
+  minFps: number;
+  avgPayloadKb: number;
+  maxPayloadKb: number;
+  cardCount: number;
+  listCount: number;
+  avgSocketPingMs: number;
+  lastSeen: string;
+  lastUser?: { id: string; name: string; email: string };
+  recentLogs?: any[];
+}
+
+interface TelemetrySummary {
+  totalSamples: number;
+  monitoredBoardsCount: number;
+  globalAvgLoadMs: number;
+  globalAvgFps: number;
+  criticalBoardsCount: number;
+  warningBoardsCount: number;
+  healthyBoardsCount: number;
+}
+
+type Tab = 'dashboard' | 'users' | 'workspaces' | 'activity' | 'settings' | 'telemetry';
 
 // Mock global activities since endpoint might not exist yet
 const generateMockActivities = () => {
@@ -208,6 +239,16 @@ const SystemAdminPage: React.FC = () => {
   const [actPage, setActPage] = useState(1);
   const [actPerPage, setActPerPage] = useState(10);
 
+  // Telemetry state
+  const [telemetryData, setTelemetryData] = useState<{
+    summary: TelemetrySummary;
+    boards: TelemetryBoardStat[];
+    recentEvents: any[];
+  } | null>(null);
+  const [telemetryLoading, setTelemetryLoading] = useState(false);
+  const [telemetryCopied, setTelemetryCopied] = useState(false);
+  const [telemetrySearch, setTelemetrySearch] = useState('');
+
   // Drive state
   const [driveStatus, setDriveStatus] = useState<DriveStatus | null>(null);
   const [driveLoading, setDriveLoading] = useState(true);
@@ -348,11 +389,88 @@ const SystemAdminPage: React.FC = () => {
     navigate(`/w/${wsId}/dashboard`);
   };
 
+  const fetchTelemetry = useCallback(async () => {
+    setTelemetryLoading(true);
+    try {
+      const res = await apiClient.get<{ data: { summary: TelemetrySummary; boards: TelemetryBoardStat[]; recentEvents: any[] } }>('/api/system/telemetry/summary');
+      setTelemetryData(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch telemetry summary', err);
+    } finally {
+      setTelemetryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'telemetry') {
+      fetchTelemetry();
+    }
+  }, [activeTab, fetchTelemetry]);
+
+  const handleExportTelemetryForAI = useCallback(() => {
+    if (!telemetryData) return;
+    const { summary, boards } = telemetryData;
+    const markdownReport = `# INFORME DE TELEMETRÍA Y RENDIMIENTO - LUMINS BOARDS
+Fecha de extracción: ${new Date().toLocaleString('es-ES')}
+Muestras analizadas: ${summary.totalSamples}
+Tableros monitoreados: ${summary.monitoredBoardsCount}
+
+## Resumen Global
+- Carga promedio global: ${summary.globalAvgLoadMs} ms
+- FPS de arrastre promedio: ${summary.globalAvgFps} FPS
+- Tableros Críticos: ${summary.criticalBoardsCount}
+- Tableros con Advertencia: ${summary.warningBoardsCount}
+- Tableros Óptimos: ${summary.healthyBoardsCount}
+
+## Diagnóstico por Tablero
+${boards.map(b => `### Tablero: "${b.boardName}" (ID: ${b.boardId})
+- Estado: [${b.health}]
+- Problemas detectados: ${b.reasons && b.reasons.length > 0 ? b.reasons.join(', ') : 'Ninguno. Rendimiento óptimo.'}
+- Tiempo de carga: Promedio ${b.avgLoadTimeMs}ms | Máximo ${b.maxLoadTimeMs}ms
+- Fluidez de arrastre (FPS): Promedio ${b.avgFps} FPS | Mínimo ${b.minFps} FPS
+- Volumen de datos: ${b.avgPayloadKb} KB (máx ${b.maxPayloadKb} KB)
+- Elementos: ${b.cardCount} tarjetas en ${b.listCount} listas
+- Latencia Socket.io: ${b.avgSocketPingMs} ms
+- Muestras registradas: ${b.samplesCount}
+- Último acceso: ${new Date(b.lastSeen).toLocaleString('es-ES')} por ${b.lastUser ? `${b.lastUser.name} (${b.lastUser.email})` : 'Desconocido'}
+`).join('\n')}
+
+---
+**Instrucción para el Agente IA:**
+Analiza los datos anteriores. Identifica cuellos de botella específicos (por ejemplo si el lag se debe a exceso de tarjetas/payload JSON pesado, imágenes de fondo pesadas, caída de FPS por re-renders innecesarios en dnd-kit, o latencia de red/socket) y sugiere optimizaciones puntuales en el código.
+`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(markdownReport);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = markdownReport;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    setTelemetryCopied(true);
+    setTimeout(() => setTelemetryCopied(false), 3000);
+  }, [telemetryData]);
+
+  const filteredTelemetryBoards = useMemo(() => {
+    if (!telemetryData) return [];
+    if (!telemetrySearch.trim()) return telemetryData.boards;
+    const term = telemetrySearch.toLowerCase();
+    return telemetryData.boards.filter(b => 
+      b.boardName.toLowerCase().includes(term) ||
+      b.boardId.toLowerCase().includes(term) ||
+      b.reasons.some(r => r.toLowerCase().includes(term))
+    );
+  }, [telemetryData, telemetrySearch]);
+
   const tabsMenu = [
     { id: 'dashboard', label: 'Resumen', icon: <BarChart3 size={18} /> },
     { id: 'users', label: 'Usuarios', icon: <Users size={18} /> },
     { id: 'workspaces', label: 'Espacios', icon: <Building2 size={18} /> },
     { id: 'activity', label: 'Actividad', icon: <Activity size={18} /> },
+    { id: 'telemetry', label: 'Vigilante de Rendimiento', icon: <CircleGauge size={18} /> },
     { id: 'settings', label: 'Configuraciones', icon: <Settings size={18} /> },
   ];
 
@@ -903,6 +1021,254 @@ const SystemAdminPage: React.FC = () => {
                   </div>
                 </div>
 
+              </div>
+          {/* TELEMETRY TAB */}
+          {activeTab === 'telemetry' && (
+            <div className="space-y-6">
+              {/* Telemetry Header */}
+              <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 text-cyan-500 font-black text-xs uppercase tracking-widest mb-1">
+                      <CircleGauge size={18} />
+                      Vigilante Activo
+                    </div>
+                    <h2 className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                      Rendimiento & Telemetría en Tiempo Real
+                    </h2>
+                    <p className="text-sm text-cu-muted dark:text-zinc-400 mt-1 max-w-2xl">
+                      Métricas recolectadas de forma silenciosa e imperceptible dentro de los tableros. Diagnostica caídas de FPS al arrastrar, tiempos de carga lentos y sobrecarga de datos.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <button
+                      onClick={fetchTelemetry}
+                      disabled={telemetryLoading}
+                      className="px-4 py-2.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-cu-border dark:border-white/10"
+                      title="Actualizar datos"
+                    >
+                      <RefreshCw size={14} className={telemetryLoading ? 'animate-spin' : ''} />
+                      {telemetryLoading ? 'Actualizando...' : 'Refrescar'}
+                    </button>
+                    <button
+                      onClick={handleExportTelemetryForAI}
+                      className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm shadow-cyan-500/25 active:scale-95"
+                      title="Copiar diagnóstico listo para ser analizado por un Agente IA"
+                    >
+                      {telemetryCopied ? (
+                        <>
+                          <Check size={16} className="text-white" />
+                          ¡Informe Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={16} className="text-amber-300" />
+                          Exportar para Agente IA
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                  <div className="bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 rounded-2xl p-4">
+                    <div className="flex items-center justify-between text-cu-muted dark:text-zinc-400 mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider">Carga Promedio</span>
+                      <Clock3 size={16} className="text-blue-400" />
+                    </div>
+                    <div className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                      {telemetryData ? `${telemetryData.summary.globalAvgLoadMs} ms` : '—'}
+                    </div>
+                    <p className="text-[11px] text-cu-muted dark:text-zinc-500 mt-1">Tiempo de montaje del tablero</p>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 rounded-2xl p-4">
+                    <div className="flex items-center justify-between text-cu-muted dark:text-zinc-400 mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider">FPS Arrastre (DnD)</span>
+                      <Zap size={16} className="text-emerald-400" />
+                    </div>
+                    <div className={`text-2xl font-black ${
+                      (telemetryData?.summary.globalAvgFps || 60) >= 50 ? 'text-emerald-500' :
+                      (telemetryData?.summary.globalAvgFps || 60) >= 30 ? 'text-amber-500' : 'text-rose-500'
+                    }`}>
+                      {telemetryData ? `${telemetryData.summary.globalAvgFps} FPS` : '—'}
+                    </div>
+                    <p className="text-[11px] text-cu-muted dark:text-zinc-500 mt-1">Fluidez en drag-and-drop</p>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 rounded-2xl p-4">
+                    <div className="flex items-center justify-between text-cu-muted dark:text-zinc-400 mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider">Tableros con Alerta</span>
+                      <AlertTriangle size={16} className="text-amber-400" />
+                    </div>
+                    <div className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                      {telemetryData ? (
+                        <span>
+                          {telemetryData.summary.criticalBoardsCount + telemetryData.summary.warningBoardsCount}
+                          <span className="text-xs font-normal text-cu-muted dark:text-zinc-500 ml-1.5">
+                            de {telemetryData.summary.monitoredBoardsCount}
+                          </span>
+                        </span>
+                      ) : '—'}
+                    </div>
+                    <p className="text-[11px] text-cu-muted dark:text-zinc-500 mt-1">
+                      {telemetryData?.summary.criticalBoardsCount || 0} críticos · {telemetryData?.summary.warningBoardsCount || 0} advertencias
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 rounded-2xl p-4">
+                    <div className="flex items-center justify-between text-cu-muted dark:text-zinc-400 mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider">Muestras Totales</span>
+                      <Activity size={16} className="text-purple-400" />
+                    </div>
+                    <div className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                      {telemetryData ? telemetryData.summary.totalSamples : '—'}
+                    </div>
+                    <p className="text-[11px] text-cu-muted dark:text-zinc-500 mt-1">
+                      Eventos registrados en auditoría
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table of Monitored Boards */}
+              <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-cu-text dark:text-zinc-100">
+                      Diagnóstico de Tableros Monitoreados
+                    </h3>
+                    <p className="text-xs text-cu-muted dark:text-zinc-500 mt-0.5">
+                      Ordenados por prioridad de problemas detectados
+                    </p>
+                  </div>
+                  <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cu-muted dark:text-zinc-500" size={16} />
+                    <input
+                      type="text"
+                      placeholder="Buscar por tablero o síntoma..."
+                      value={telemetrySearch}
+                      onChange={(e) => setTelemetrySearch(e.target.value)}
+                      className="w-full bg-slate-100 dark:bg-white/5 border border-cu-border dark:border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs focus:bg-slate-200 dark:bg-white/10 focus:border-cyan-500/50 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto rounded-2xl border border-cu-border dark:border-dark-border">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-white/5 text-[10px] uppercase tracking-widest text-cu-muted dark:text-zinc-400 border-b border-cu-border dark:border-dark-border">
+                        <th className="py-3 px-4 font-black">Tablero</th>
+                        <th className="py-3 px-4 font-black">Estado de Salud</th>
+                        <th className="py-3 px-4 font-black">Carga</th>
+                        <th className="py-3 px-4 font-black">FPS Arrastre</th>
+                        <th className="py-3 px-4 font-black">Peso Datos</th>
+                        <th className="py-3 px-4 font-black">Tarjetas / Listas</th>
+                        <th className="py-3 px-4 font-black">Ping Socket</th>
+                        <th className="py-3 px-4 font-black">Muestras</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-white/5">
+                      {filteredTelemetryBoards.length > 0 ? (
+                        filteredTelemetryBoards.map((b) => (
+                          <tr key={b.boardId} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                            <td className="py-3.5 px-4 font-semibold text-cu-text dark:text-zinc-100">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-sm truncate max-w-[200px]" title={b.boardName}>{b.boardName}</span>
+                                <span className="text-[10px] text-cu-muted dark:text-zinc-500 font-mono truncate max-w-[160px]">
+                                  {b.boardId}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex flex-col items-start gap-1">
+                                {b.health === 'CRITICAL' ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                    Crítico
+                                  </span>
+                                ) : b.health === 'WARNING' ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                    Advertencia
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Óptimo
+                                  </span>
+                                )}
+                                {b.reasons && b.reasons.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1 max-w-[260px]">
+                                    {b.reasons.map((r, ri) => (
+                                      <span key={ri} className="px-1.5 py-0.5 rounded text-[9px] bg-slate-100 dark:bg-white/5 text-cu-muted dark:text-zinc-400 font-medium">
+                                        {r}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex flex-col">
+                                <span className={`font-bold ${b.avgLoadTimeMs > 2000 ? 'text-rose-400' : b.avgLoadTimeMs > 1200 ? 'text-amber-400' : 'text-cu-text dark:text-zinc-200'}`}>
+                                  {b.avgLoadTimeMs} ms
+                                </span>
+                                <span className="text-[10px] text-cu-muted dark:text-zinc-500">
+                                  máx {b.maxLoadTimeMs} ms
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex flex-col">
+                                <span className={`font-bold ${b.avgFps < 30 ? 'text-rose-500' : b.avgFps < 45 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                  {b.avgFps} FPS
+                                </span>
+                                <span className="text-[10px] text-cu-muted dark:text-zinc-500">
+                                  mín {b.minFps} FPS
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex flex-col">
+                                <span className={`font-semibold ${b.avgPayloadKb > 500 ? 'text-amber-500' : 'text-cu-text dark:text-zinc-300'}`}>
+                                  {b.avgPayloadKb} KB
+                                </span>
+                                {b.maxPayloadKb > b.avgPayloadKb && (
+                                  <span className="text-[10px] text-cu-muted dark:text-zinc-500">
+                                    máx {b.maxPayloadKb} KB
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-slate-700 dark:text-zinc-300">
+                              <span className="font-bold">{b.cardCount}</span> cards / <span className="font-medium text-cu-muted dark:text-zinc-400">{b.listCount} listas</span>
+                            </td>
+                            <td className="py-3.5 px-4 text-slate-700 dark:text-zinc-300 font-mono">
+                              {b.avgSocketPingMs > 0 ? `${b.avgSocketPingMs} ms` : '—'}
+                            </td>
+                            <td className="py-3.5 px-4 text-cu-muted dark:text-zinc-400 font-mono text-center">
+                              {b.samplesCount}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={8} className="py-14 text-center text-cu-muted dark:text-zinc-500">
+                            <CircleGauge size={32} className="opacity-20 mx-auto mb-3" />
+                            <p className="font-medium">
+                              {telemetryLoading ? 'Cargando datos del vigilante...' : 'Aún no hay datos de telemetría registrados.'}
+                            </p>
+                            <p className="text-[11px] opacity-75 mt-1 max-w-sm mx-auto">
+                              A medida que los usuarios abran tableros o muevan tarjetas, el vigilante recopilará y catalogará el rendimiento aquí automáticamente.
+                            </p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

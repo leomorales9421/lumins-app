@@ -56,6 +56,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useBoardSocket } from '../hooks/useBoardSocket';
+import { useBoardTelemetry } from '../hooks/useBoardTelemetry';
 import { emitBoardBackgroundChange, normalizeBoardBackground } from '../lib/board-backgrounds';
 
 const getBoardBackgroundCacheKey = (boardId: string) => `lumins_board_background:${boardId}`;
@@ -93,6 +94,14 @@ const BoardDetailPage: React.FC = () => {
   const [newListTitle, setNewListTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [originalContainer, setOriginalContainer] = useState<string | null>(null);
+
+  // Real-time Board Performance Sentinel (Vigilante)
+  useBoardTelemetry({
+    board,
+    lists,
+    isLoading,
+    isDragging: !!activeCard || !!activeList
+  });
   
   // New States for Logic
   const [filterUserId, setFilterUserId] = useState<string | null>(null);
