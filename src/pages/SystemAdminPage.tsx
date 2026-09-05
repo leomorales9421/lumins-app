@@ -392,8 +392,12 @@ const SystemAdminPage: React.FC = () => {
   const fetchTelemetry = useCallback(async () => {
     setTelemetryLoading(true);
     try {
-      const res = await apiClient.get<{ data: { summary: TelemetrySummary; boards: TelemetryBoardStat[]; recentEvents: any[] } }>('/api/system/telemetry/summary');
-      setTelemetryData(res.data.data);
+      const res = await apiClient.get<any>('/api/system/telemetry/summary');
+      if (res?.data) {
+        setTelemetryData(res.data);
+      } else if (res?.summary) {
+        setTelemetryData(res);
+      }
     } catch (err) {
       console.error('Failed to fetch telemetry summary', err);
     } finally {

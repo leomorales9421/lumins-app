@@ -1349,7 +1349,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               <div className="flex items-center gap-2">
                 {checklists.length > 0 ? (
                   <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    {checklists.reduce((acc, cl) => acc + (cl.items?.filter(i => i.isCompleted)?.length || 0), 0)} / {checklists.reduce((acc, cl) => acc + (cl.items?.length || 0), 0)} completados
+                    {checklists.reduce((acc, cl) => acc + (cl.items?.filter(i => i.done || (i as any).isCompleted)?.length || 0), 0)} / {checklists.reduce((acc, cl) => acc + (cl.items?.length || 0), 0)} completados
                   </span>
                 ) : (
                   <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Crear checklist</span>

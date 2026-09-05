@@ -113,7 +113,7 @@ export const useBoardTelemetry = ({
         const cards = list.cards || [];
         totalCards += cards.length;
         for (const card of cards) {
-          totalAttachments += card.attachments?.length || 0;
+          totalAttachments += (card as any).attachments?.length || 0;
         }
       }
 
