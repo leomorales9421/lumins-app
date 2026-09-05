@@ -282,47 +282,63 @@ const MembersModal: React.FC<MembersModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={handleClose} className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-md" />
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-md"
+          />
 
-          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-[780px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl relative overflow-hidden z-10 border border-zinc-200 dark:border-white/10 flex flex-col max-h-[90vh]">
+          <motion.div
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+            className="w-full sm:max-w-[780px] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl relative overflow-hidden z-10 border-t sm:border border-zinc-200 dark:border-white/10 flex flex-col h-[88vh] sm:h-auto sm:max-h-[90vh]"
+          >
+            {/* Mobile Pull Bar */}
+            <div className="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0 bg-zinc-50/50 dark:bg-white/5">
+              <div className="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            </div>
 
             {/* Header */}
-            <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center">
+            <div className="px-5 py-3.5 sm:p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl sm:rounded bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shrink-0">
                   <Shield size={20} />
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight truncate">
                     {boardId ? `Miembros del tablero` : 'Invitar al equipo'}
                   </h2>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[230px] sm:max-w-md">
                     {boardId 
                       ? `Gestiona quién tiene acceso a "${boardName || currentBoard?.name || ''}"`
                       : 'Añade colaboradores y define sus niveles de acceso.'}
                   </p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/10 rounded transition-colors">
+              <button
+                onClick={handleClose}
+                aria-label="Cerrar modal"
+                className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/10 active:scale-95 rounded-full sm:rounded transition-all shrink-0"
+              >
                 <X size={20} />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex px-6 pt-4 gap-6 border-b border-zinc-100 dark:border-white/5">
+            <div className="flex px-4 sm:px-6 pt-3 sm:pt-4 gap-4 sm:gap-6 border-b border-zinc-100 dark:border-white/5 shrink-0 overflow-x-auto no-scrollbar">
               <button onClick={() => { setActiveTab('invite'); setSearch(''); }}
-                className={`pb-3 text-sm font-bold transition-all relative ${activeTab === 'invite' ? 'text-[#6C5DD3]' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}>
+                className={`pb-3 text-xs sm:text-sm font-bold transition-all relative shrink-0 ${activeTab === 'invite' ? 'text-[#6C5DD3]' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}>
                 Invitar por email
                 {activeTab === 'invite' && <motion.div layoutId="mtab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C5DD3]" />}
               </button>
               {boardId && (
                 <button onClick={() => { setActiveTab('manage'); setSearch(''); }}
-                  className={`pb-3 text-sm font-bold transition-all relative ${activeTab === 'manage' ? 'text-[#6C5DD3]' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}>
+                  className={`pb-3 text-xs sm:text-sm font-bold transition-all relative shrink-0 ${activeTab === 'manage' ? 'text-[#6C5DD3]' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}>
                   Gestionar ({boardMembers.length})
                   {activeTab === 'manage' && <motion.div layoutId="mtab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C5DD3]" />}
                 </button>
@@ -330,7 +346,7 @@ const MembersModal: React.FC<MembersModalProps> = ({
             </div>
 
             {activeTab === 'invite' && (
-              <form onSubmit={handleInviteSubmit} className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
+              <form onSubmit={handleInviteSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
                 {success ? (
                   <div className="py-12 text-center space-y-4">
                     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded flex items-center justify-center mx-auto mb-6 shadow-sm">
@@ -346,23 +362,25 @@ const MembersModal: React.FC<MembersModalProps> = ({
                       <h3 className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] px-1">¿A quién invitas?</h3>
                       <div className="space-y-3">
                         {invites.map((invite, index) => (
-                          <div key={index} className="flex items-center gap-2 p-3 sm:p-0 bg-zinc-50/50 dark:bg-white/5 sm:bg-transparent rounded sm:rounded-none border border-zinc-100 dark:border-white/5 sm:border-none">
+                          <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 sm:p-0 bg-zinc-50/50 dark:bg-white/5 sm:bg-transparent rounded-xl sm:rounded-none border border-zinc-100 dark:border-white/5 sm:border-none">
                             <div className="flex-1">
                               <input type="email" value={invite.email}
                                 onChange={(e) => updateInviteRow(index, 'email', e.target.value)}
                                 placeholder="nombre@empresa.com"
-                                className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all" required />
+                                className="w-full bg-white sm:bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg sm:rounded p-2.5 sm:p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all" required />
                             </div>
-                            <select value={invite.role} onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
-                              className="bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded p-3 text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 appearance-none w-[130px]">
-                              <option value="ADMIN">Administrador</option>
-                              <option value="MEMBER">Miembro</option>
-                              <option value="GUEST">Invitado</option>
-                            </select>
-                            {invites.length > 1 && (
-                              <button type="button" onClick={() => removeInviteRow(index)}
-                                className="p-2 text-zinc-400 hover:text-rose-500 transition-colors"><Trash2 size={18} /></button>
-                            )}
+                            <div className="flex items-center gap-2">
+                              <select value={invite.role} onChange={(e) => updateInviteRow(index, 'role', e.target.value as Role)}
+                                className="flex-1 sm:flex-none bg-white sm:bg-zinc-50 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 rounded-lg sm:rounded p-2.5 sm:p-3 text-xs sm:text-sm font-bold border border-zinc-200 dark:border-white/10 outline-none cursor-pointer focus:ring-4 focus:ring-[#6C5DD3]/10 sm:w-[130px]">
+                                <option value="ADMIN">Administrador</option>
+                                <option value="MEMBER">Miembro</option>
+                                <option value="GUEST">Invitado</option>
+                              </select>
+                              {invites.length > 1 && (
+                                <button type="button" onClick={() => removeInviteRow(index)}
+                                  className="p-2.5 sm:p-2 text-zinc-400 hover:text-rose-500 active:scale-95 transition-colors"><Trash2 size={18} /></button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -509,13 +527,13 @@ const MembersModal: React.FC<MembersModalProps> = ({
                       </div>
                     )}
 
-                    <div className="flex justify-end items-center gap-4 pt-2">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 sm:gap-4 pt-2">
                       <button type="button" onClick={handleClose}
-                        className="px-6 py-3 text-zinc-500 font-bold text-sm hover:text-zinc-900 transition-colors">Cancelar</button>
+                        className="px-6 py-2.5 sm:py-3 text-zinc-500 font-bold text-xs sm:text-sm hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-center">Cancelar</button>
                       <button type="submit"
                         disabled={isLoading || (invites.every(i => !i.email.trim()) && selectedWsMembers.length === 0) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0)}
-                        className={`px-8 py-3 rounded font-bold text-white transition-all shadow-lg ${isLoading || (invites.every(i => !i.email.trim()) && selectedWsMembers.length === 0) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0) ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 cursor-not-allowed shadow-none' : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'}`}>
-                        {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Enviar Invitaciones'}
+                        className={`px-8 py-3 rounded-xl sm:rounded font-bold text-xs sm:text-sm text-white transition-all shadow-lg flex items-center justify-center gap-2 ${isLoading || (invites.every(i => !i.email.trim()) && selectedWsMembers.length === 0) || (selectedWorkspaces.length === 0 && selectedBoards.length === 0) ? 'bg-zinc-200 dark:bg-white/5 text-zinc-400 cursor-not-allowed shadow-none' : 'bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-[#6C5DD3]/25 active:scale-[0.98]'}`}>
+                        {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Enviar Invitaciones'}
                       </button>
                     </div>
                   </>
@@ -524,19 +542,27 @@ const MembersModal: React.FC<MembersModalProps> = ({
             )}
 
             {activeTab === 'manage' && boardId && (
-              <div className="p-6 flex-1 overflow-hidden flex flex-col">
-                <div className="relative mb-4">
+              <div className="p-4 sm:p-6 flex-1 overflow-hidden flex flex-col pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
+                <div className="relative mb-3 sm:mb-4 shrink-0">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                   <input type="text" placeholder="Buscar miembros..." value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-100/50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded text-sm text-zinc-900 dark:text-zinc-100 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all placeholder:text-zinc-400 font-medium" />
+                    className="w-full pl-10 pr-9 py-2 sm:py-2.5 bg-zinc-100/50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-xl sm:rounded text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] outline-none transition-all placeholder:text-zinc-400 font-medium" />
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-0.5"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-1">
+                <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-2">
                   {isLoadingMembers ? (
                     [1, 2, 3].map(i => (
                       <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
-                        <div className="w-10 h-10 rounded bg-zinc-100 dark:bg-white/5" />
+                        <div className="w-10 h-10 rounded-xl sm:rounded bg-zinc-100 dark:bg-white/5" />
                         <div className="flex-1 space-y-2">
                           <div className="h-4 bg-zinc-100 dark:bg-white/5 rounded w-1/2" />
                           <div className="h-3 bg-zinc-100 dark:bg-white/5 rounded w-3/4" />
@@ -546,19 +572,19 @@ const MembersModal: React.FC<MembersModalProps> = ({
                   ) : (
                     <>
                       {/* Board members */}
-                      <div className="space-y-1">
-                        <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] px-1 py-2">Miembros del tablero</h4>
+                      <div className="space-y-1.5">
+                        <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] px-1 py-1.5">Miembros del tablero</h4>
                         {filteredBoardMembers.length > 0 ? filteredBoardMembers.map((member) => {
                           const isMe = member.userId === me?.id;
                           const isInherited = !!member.inheritedFrom;
                           const displayRole = member.wsRole || member.role;
                           return (
-                            <div key={member.userId} className="flex items-center justify-between p-3 rounded hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-zinc-100 dark:hover:border-white/10">
+                            <div key={member.userId} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-3 rounded-2xl sm:rounded bg-zinc-50/70 dark:bg-white/[0.03] sm:bg-transparent sm:dark:bg-transparent hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border border-zinc-100 dark:border-white/5 sm:border-transparent sm:hover:border-zinc-100 sm:dark:hover:border-white/10">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className={`w-10 h-10 rounded flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0 ${isInherited ? 'bg-gradient-to-br from-slate-400 to-slate-600' : 'bg-gradient-to-br from-[#6C5DD3] to-[#312e81]'}`}>
+                                <div className={`w-10 h-10 rounded-xl sm:rounded flex items-center justify-center text-white text-xs font-bold shadow-sm shrink-0 ${isInherited ? 'bg-gradient-to-br from-slate-400 to-slate-600' : 'bg-gradient-to-br from-[#6C5DD3] to-[#312e81]'}`}>
                                   {member.user.name.charAt(0).toUpperCase()}
                                 </div>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{member.user.name}</span>
                                     {isMe && <span className="text-[9px] font-black text-[#6C5DD3] uppercase tracking-tighter bg-[#6C5DD3]/10 px-1.5 py-0.5 rounded">Tú</span>}
@@ -566,38 +592,38 @@ const MembersModal: React.FC<MembersModalProps> = ({
                                   <div className="text-[11px] text-zinc-500 font-medium truncate">{member.user.email}</div>
                                   {isInherited && (
                                     <div className="flex items-center gap-1 mt-0.5">
-                                      <Building2 size={9} className="text-zinc-400" />
-                                      <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">
+                                      <Building2 size={10} className="text-zinc-400 shrink-0" />
+                                      <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter truncate">
                                         {member.inheritedFrom === 'owner' ? 'Propietario del tablero' : `Vía Espacio · ${member.wsRole === 'ADMIN' ? 'Administrador' : member.wsRole === 'MEMBER' ? 'Miembro' : member.wsRole === 'GUEST' ? 'Invitado' : member.wsRole}`}
                                       </span>
                                     </div>
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                              <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-200/60 dark:border-white/5 shrink-0">
                                 {isInherited ? (
-                                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${roleColors[displayRole] || roleColors.viewer}`}>
-                                    <Lock size={9} />
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg sm:rounded border text-[10px] font-bold uppercase tracking-wider ${roleColors[displayRole] || roleColors.viewer}`}>
+                                    <Lock size={10} />
                                     {displayRole === 'OWNER' ? 'Propietario' : displayRole === 'ADMIN' ? 'Administrador' : displayRole === 'MEMBER' || displayRole === 'editor' ? 'Miembro' : displayRole === 'GUEST' || displayRole === 'viewer' ? 'Invitado' : displayRole}
                                   </span>
                                 ) : (
                                   <>
                                     {canEditMember(member) && (
                                       <select value={member.role} onChange={(e) => handleUpdateRole(member.userId, e.target.value)}
-                                        className="bg-transparent text-[11px] font-bold text-zinc-500 border border-zinc-200 dark:border-white/10 rounded px-2 py-1 outline-none focus:border-[#6C5DD3] transition-all hover:bg-white dark:hover:bg-white/5 uppercase tracking-tighter">
+                                        className="bg-white sm:bg-transparent text-[11px] font-bold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 rounded-lg sm:rounded px-2.5 py-1 outline-none focus:border-[#6C5DD3] transition-all hover:bg-white dark:hover:bg-white/5 uppercase tracking-tighter">
                                         <option value="admin">Administrador</option>
                                         <option value="editor">Miembro</option>
                                         <option value="viewer">Invitado</option>
                                       </select>
                                     )}
                                     {(isMe || !canEditMember(member)) && (
-                                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${member.isBoardOwner ? roleColors.OWNER : roleColors[member.role] || roleColors.viewer}`}>
+                                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg sm:rounded border text-[10px] font-bold uppercase tracking-wider ${member.isBoardOwner ? roleColors.OWNER : roleColors[member.role] || roleColors.viewer}`}>
                                         {member.isBoardOwner ? 'Propietario' : member.role === 'admin' ? 'Administrador' : member.role === 'editor' ? 'Miembro' : 'Invitado'}
                                       </span>
                                     )}
                                     {canEditMember(member) && (
                                       <button onClick={() => handleRemoveMember(member.userId, member.user.name)}
-                                        className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded transition-all" title="Eliminar del tablero">
+                                        className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 active:scale-95 rounded-lg sm:rounded transition-all" title="Eliminar del tablero">
                                         <Trash2 size={16} />
                                       </button>
                                     )}
@@ -616,25 +642,25 @@ const MembersModal: React.FC<MembersModalProps> = ({
 
                       {/* Addable WS members */}
                       {filteredAddable.length > 0 && (
-                        <div className="space-y-1 pt-4 border-t border-zinc-100 dark:border-white/5">
-                          <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] px-1 py-2">Añadir desde el espacio</h4>
+                        <div className="space-y-1.5 pt-4 border-t border-zinc-100 dark:border-white/5">
+                          <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] px-1 py-1.5">Añadir desde el espacio</h4>
                           {filteredAddable.map((member) => (
-                            <div key={member.userId} className="flex items-center justify-between p-3 rounded hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-zinc-100 dark:hover:border-white/10">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 text-xs font-bold border border-zinc-200 dark:border-white/10">
+                            <div key={member.userId} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-3 rounded-2xl sm:rounded bg-zinc-50/70 dark:bg-white/[0.03] sm:bg-transparent sm:dark:bg-transparent hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border border-zinc-100 dark:border-white/5 sm:border-transparent sm:hover:border-zinc-100 sm:dark:hover:border-white/10">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-xl sm:rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 text-xs font-bold border border-zinc-200 dark:border-white/10 shrink-0">
                                   {member.user.name.charAt(0).toUpperCase()}
                                 </div>
-                                <div>
-                                  <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{member.user.name}</div>
-                                  <div className="text-[11px] text-zinc-500 font-medium">{member.user.email}</div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{member.user.name}</div>
+                                  <div className="text-[11px] text-zinc-500 font-medium truncate">{member.user.email}</div>
                                   <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-tighter px-1.5 py-0.5 rounded border mt-0.5 ${roleColors[member.role] || roleColors.viewer}`}>
                                     {member.role === 'OWNER' ? 'Propietario' : member.role === 'ADMIN' ? 'Administrador' : member.role === 'MEMBER' ? 'Miembro' : 'Invitado'} en espacio
                                   </span>
                                 </div>
                               </div>
                               <button onClick={() => handleAddMember(member.userId)} disabled={isAdding === member.userId}
-                                className={`h-8 px-4 rounded text-[11px] font-bold transition-all flex items-center gap-2 uppercase tracking-wider ${isAdding === member.userId ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed' : 'bg-[#6C5DD3] text-white hover:bg-[#312e81] shadow-lg shadow-[#6C5DD3]/20 active:scale-95'}`}>
-                                {isAdding === member.userId ? 'Añadiendo...' : <><UserPlus size={14} strokeWidth={2.5} />Añadir</>}
+                                className={`w-full sm:w-auto h-9 sm:h-8 px-4 rounded-xl sm:rounded text-xs sm:text-[11px] font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wider shrink-0 ${isAdding === member.userId ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed' : 'bg-[#6C5DD3] text-white hover:bg-[#312e81] shadow-lg shadow-[#6C5DD3]/20 active:scale-95'}`}>
+                                {isAdding === member.userId ? 'Añadiendo...' : <><UserPlus size={14} strokeWidth={2.5} />Añadir al tablero</>}
                               </button>
                             </div>
                           ))}
@@ -657,9 +683,9 @@ const MembersModal: React.FC<MembersModalProps> = ({
             )}
 
             {/* Footer */}
-            <div className="p-4 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5 flex justify-between items-center px-6">
+            <div className="p-3.5 sm:p-4 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5 flex justify-between items-center px-4 sm:px-6 shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4">
               <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Lumins Access Control</span>
-              <button onClick={handleClose} className="px-4 py-2 text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+              <button onClick={handleClose} className="px-4 py-2 text-xs sm:text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
                 Cerrar
               </button>
             </div>
