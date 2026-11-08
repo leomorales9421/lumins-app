@@ -108,9 +108,9 @@ const BoardsPage: React.FC = () => {
   }, [isLoadingWorkspaces, workspaceId, workspaces, navigate]);
 
   return (
-    <div className="flex-1 flex flex-col font-sans">
-      <main className="flex-1 p-4 sm:p-6 lg:p-10">
-        <div className="max-w-[1600px] mx-auto w-full">
+    <div className="flex-1 flex flex-col font-sans min-w-0 w-full overflow-x-hidden">
+      <main className="flex-1 p-3.5 sm:p-6 lg:p-10 min-w-0 w-full">
+        <div className="max-w-[1600px] mx-auto w-full min-w-0">
           
           {(isLoadingWorkspaces || (workspaceId && isLoading)) ? (
             <div className="flex-1">
@@ -146,86 +146,91 @@ const BoardsPage: React.FC = () => {
           ) : (
             <>
               {/* Header: ClickUp Style */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                 <div className="flex flex-col gap-1">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-8 w-full min-w-0">
+                 <div className="flex flex-col gap-1 w-full md:w-auto">
                     <div className="flex items-center gap-2 text-[#6C5DD3] mb-1">
                        <Layout size={18} strokeWidth={2.5} />
                        <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Panel de Control</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Tus Proyectos</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Tus Proyectos</h1>
                     {isRefreshing && (
-                       <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300 w-fit">
+                       <div className="flex items-center gap-2 mt-1 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300 w-fit">
                           <Loader2 size={14} className="animate-spin" />
                           <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
                        </div>
                     )}
                  </div>
 
-                 <div className="flex items-center gap-3">
-                    <div className="flex bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-1 shadow-soft">
-                       <div className="relative flex items-center border-r border-zinc-200 dark:border-white/10 mr-1 pr-1">
-                         <Search size={14} className="absolute left-2.5 text-zinc-400" />
-                         <input 
-                           type="text"
-                           placeholder="Buscar tablero..."
-                           value={searchQuery}
-                           onChange={(e) => {
-                             setSearchQuery(e.target.value);
-                             setPage(1);
-                           }}
-                           className="pl-8 pr-3 py-2 bg-transparent text-[12px] font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none w-[130px] sm:w-[160px] transition-all focus:w-[160px] sm:focus:w-[200px]"
-                         />
-                       </div>
-                       <div className="relative flex items-center">
-                         <select 
-                           value={itemsPerPage}
-                           onChange={async (e) => {
-                             const val = Number(e.target.value);
-                             setItemsPerPage(val);
-                             localStorage.setItem('lumins_boards_per_page', val.toString());
-                             setPage(1);
-                             
-                             if (user) {
-                               try {
-                                 const updatedPreferences = { ...(user.preferences || {}), boardsPerPage: val };
-                                 await apiClient.patch('/api/auth/me', { preferences: updatedPreferences });
-                               } catch (err) {
-                                 console.error('Failed to save preference to DB', err);
-                               }
-                             }
-                           }}
-                           className="appearance-none bg-zinc-100 dark:bg-white/5 rounded pl-3 pr-8 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer focus:outline-none focus:ring-0 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
-                         >
-                           <option value={10} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">10 tableros</option>
-                           <option value={20} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">20 tableros</option>
-                           <option value={50} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">50 tableros</option>
-                           <option value={-1} className="bg-white dark:bg-[#1C1F26] text-zinc-700 dark:text-zinc-300">Todos</option>
-                         </select>
-                         <ChevronDown size={14} className="absolute right-2 pointer-events-none text-zinc-500" />
-                       </div>
-                       <button className="px-3 sm:px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2 border-l border-zinc-200 dark:border-white/10 ml-1">
-                         <Filter size={14} />
-                         <span className="hidden xs:inline">Filtros</span>
-                       </button>
-                       {(workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
-                        <button 
-                          onClick={() => setShowInviteModal(true)}
-                          className="px-3 sm:px-4 py-2 text-[12px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors flex items-center gap-2"
-                        >
-                          <Users size={14} />
-                          <span>Miembros</span>
-                        </button>
-                       )}
-                       <button 
-                         onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
-                         className="px-3 sm:px-4 py-2 text-[12px] font-bold text-[#0079BF] hover:bg-[#0079BF]/5 dark:hover:bg-[#0079BF]/10 transition-all flex items-center gap-2 border-l border-zinc-200 dark:border-white/10 group"
-                       >
-                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="group-hover:scale-110 transition-transform">
-                           <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
-                         </svg>
-                         <span>Importar Trello</span>
-                       </button>
+                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto min-w-0">
+                    {/* Search bar */}
+                    <div className="relative flex items-center bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 px-3 py-2 shadow-soft w-full sm:w-[220px]">
+                      <Search size={15} className="text-zinc-400 mr-2 shrink-0" />
+                      <input 
+                        type="text"
+                        placeholder="Buscar tablero..."
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-transparent text-[13px] font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
+                      />
+                    </div>
 
+                    {/* Action buttons row - scrollable on mobile */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 min-w-0">
+                      <div className="relative flex items-center shrink-0">
+                        <select 
+                          value={itemsPerPage}
+                          onChange={async (e) => {
+                            const val = Number(e.target.value);
+                            setItemsPerPage(val);
+                            localStorage.setItem('lumins_boards_per_page', val.toString());
+                            setPage(1);
+                            
+                            if (user) {
+                              try {
+                                const updatedPreferences = { ...(user.preferences || {}), boardsPerPage: val };
+                                await apiClient.patch('/api/auth/me', { preferences: updatedPreferences });
+                              } catch (err) {
+                                console.error('Failed to save preference to DB', err);
+                              }
+                            }
+                          }}
+                          className="appearance-none bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg pl-3 pr-8 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer focus:outline-none shadow-soft hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors"
+                        >
+                          <option value={10}>10 tableros</option>
+                          <option value={20}>20 tableros</option>
+                          <option value={50}>50 tableros</option>
+                          <option value={-1}>Todos</option>
+                        </select>
+                        <ChevronDown size={14} className="absolute right-2.5 pointer-events-none text-zinc-500" />
+                      </div>
+
+                      <button className="shrink-0 px-3 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:text-[#6C5DD3] hover:border-[#6C5DD3]/30 transition-colors flex items-center gap-1.5">
+                        <Filter size={14} />
+                        <span>Filtros</span>
+                      </button>
+
+                      {(workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
+                       <button 
+                         onClick={() => setShowInviteModal(true)}
+                         className="shrink-0 px-3 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:text-[#6C5DD3] hover:border-[#6C5DD3]/30 transition-colors flex items-center gap-1.5"
+                       >
+                         <Users size={14} />
+                         <span>Miembros</span>
+                       </button>
+                      )}
+
+                      <button 
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
+                        className="shrink-0 px-3 py-2 text-[12px] font-bold text-[#0079BF] bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:bg-[#0079BF]/5 dark:hover:bg-[#0079BF]/10 transition-all flex items-center gap-1.5 group"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="group-hover:scale-110 transition-transform">
+                          <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
+                        </svg>
+                        <span>Importar Trello</span>
+                      </button>
                     </div>
                  </div>
               </div>

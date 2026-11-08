@@ -91,14 +91,14 @@ export const ProductUpdatesModal: React.FC = () => {
             </button>
 
             {/* Badges superiores con espacio limpio para el botón cerrar */}
-            <div className="flex flex-wrap items-center gap-2 mb-2.5 sm:mb-3 pr-14 sm:pr-16">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2.5 sm:mb-3 pr-12 sm:pr-16">
+              <span className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white">
                 <Sparkles size={11} /> {currentRelease.badge}
               </span>
               <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] sm:text-[11px] font-bold text-white/95">
                 {currentRelease.version}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] sm:text-[11px] font-medium text-white/85">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] sm:text-[11px] font-medium text-white/85">
                 {currentRelease.releaseDate}
               </span>
             </div>
@@ -170,16 +170,16 @@ export const ProductUpdatesModal: React.FC = () => {
           </div>
 
           {/* Footer con botones de acción estilo App Nativa */}
-          <div className="py-3 sm:py-4 px-5 sm:px-8 pb-[max(1rem,env(safe-area-inset-bottom))] bg-zinc-50/90 dark:bg-black/40 border-t border-zinc-100 dark:border-white/5 flex flex-col-reverse sm:flex-row items-center justify-between gap-2.5 sm:gap-4 shrink-0 backdrop-blur-md">
+          <div className="py-2.5 sm:py-4 px-4 sm:px-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-zinc-50/90 dark:bg-black/40 border-t border-zinc-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 shrink-0 backdrop-blur-md">
             <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium hidden sm:inline">
               Puedes volver a abrir este resumen pulsando la campana de notificaciones.
             </span>
 
-            <div className="flex flex-col-reverse sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={closeUpdates}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-white/10 transition-colors text-center"
+                className="flex-1 sm:flex-initial sm:w-auto px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-white/10 transition-colors text-center"
               >
                 Cerrar
               </button>
@@ -188,7 +188,7 @@ export const ProductUpdatesModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAction}
-                  className="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-black transition-all shadow-md shadow-[#6C5DD3]/25 flex items-center justify-center gap-2 active:scale-95"
+                  className="flex-[2] sm:flex-initial sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-black transition-all shadow-md shadow-[#6C5DD3]/25 flex items-center justify-center gap-2 active:scale-95"
                 >
                   <span>{currentRelease.ctaText}</span>
                   <ArrowRight size={14} />

@@ -302,7 +302,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
           isBoardView={isBoardView}
         />
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden min-w-0 w-full">
           {/* Sidebar - Conditional behavior */}
           <Sidebar 
             onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
@@ -312,7 +312,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
             logout={logout}
           />
           
-          <main className="flex-1 overflow-y-auto custom-scrollbar relative">
+          <main className="flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden custom-scrollbar relative">
             <PageTransitionWrapper>
               <Outlet />
             </PageTransitionWrapper>

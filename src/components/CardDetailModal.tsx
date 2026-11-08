@@ -1160,7 +1160,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-6 pt-3 sm:pt-5 custom-scrollbar pb-24 sm:pb-6"
+            className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-6 pt-3 sm:pt-5 no-scrollbar sm:custom-scrollbar pb-28 sm:pb-6"
           >
             
             {/* Card Title */}
@@ -1947,7 +1947,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
         {/* Sticky Mobile Bottom Bar */}
         {!isLoading && card && (
-          <div className="sm:hidden border-t border-zinc-200/80 dark:border-white/10 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-md px-4 py-3 flex items-center gap-2.5 flex-shrink-0 z-20">
+          <div className="sm:hidden border-t border-zinc-200/80 dark:border-white/10 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-md px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-2.5 flex-shrink-0 z-20">
             <button
               onClick={handleToggleDone}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs shadow-sm transition-all active:scale-[0.98] ${
@@ -1961,7 +1961,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               }`}>
                 {card?.isDone && <CheckSquare size={12} className="text-white" />}
               </div>
-              <span>{card?.isDone ? 'Completada' : 'Marcar como lista'}</span>
+              <span>{card?.isDone ? 'Completada' : 'Completar tarea'}</span>
             </button>
 
             <SmartPopover
