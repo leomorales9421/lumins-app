@@ -462,10 +462,6 @@ const WorkspacesDirectoryPage: React.FC = () => {
           onClose={() => setWorkspaceToDelete(null)}
           workspaceId={workspaceToDelete.id}
           workspaceName={workspaceToDelete.name}
-          onWorkspaceDeleted={() => {
-            setWorkspaceToDelete(null);
-            fetchWorkspaces();
-          }}
         />
       )}
     </div>
@@ -473,3 +469,4 @@ const WorkspacesDirectoryPage: React.FC = () => {
 };
 
 export default WorkspacesDirectoryPage;
+
