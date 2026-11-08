@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Plus, Trash2, Layout, ClipboardList, Check, Loader2, Lock, Search, UserPlus, Shield, User, Building2, Crown } from 'lucide-react';
+import { 
+  X, Mail, Plus, Trash2, Layout, ClipboardList, Check, Loader2, Lock, 
+  Search, UserPlus, Shield, User, Building2, Crown, CheckCircle2, Globe, Users, ArrowRight, RotateCcw
+} from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,6 +28,14 @@ interface WorkspaceMember {
   userId: string;
   role: string;
   user: { id: string; name: string; email: string; avatarUrl?: string };
+}
+
+interface SentSummary {
+  invites: Array<{ email: string; role: Role }>;
+  addedMembers: Array<{ name: string; email: string; role: string }>;
+  workspaces: Array<{ id: string; name: string }>;
+  publicBoards: Array<{ id: string; name: string; workspaceName?: string }>;
+  privateBoards: Array<{ id: string; name: string; workspaceName?: string }>;
 }
 
 const roleColors: Record<string, string> = {
@@ -62,6 +73,7 @@ const MembersModal: React.FC<MembersModalProps> = ({
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [sentSummary, setSentSummary] = useState<SentSummary | null>(null);
   const [selectedWsMembers, setSelectedWsMembers] = useState<{userId: string; role: string}[]>([]);
 
   // --- Manage state ---
@@ -196,11 +208,70 @@ const MembersModal: React.FC<MembersModalProps> = ({
           apiClient.post(`/api/boards/${boardId}/members`, { userId: m.userId, role: m.role })
         ));
       }
+
+      // Prepare rich sent summary
+      const invitedWs = workspaces
+        .filter(w => selectedWorkspaces.includes(w.id))
+        .map(w => ({ id: w.id, name: w.name }));
+
+      const invitedBoardsList = boards.filter(b => selectedBoards.includes(b.id));
+      if (boardId && selectedBoards.includes(boardId) && !invitedBoardsList.some(b => b.id === boardId)) {
+        invitedBoardsList.push({
+          id: boardId,
+          name: boardName || currentBoard?.name || 'Tablero actual',
+          visibility: currentBoard?.visibility || 'PRIVATE',
+          workspaceId: initialWorkspaceId
+        });
+      }
+
+      const pubBoards = invitedBoardsList
+        .filter(b => b.visibility !== 'PRIVATE')
+        .map(b => {
+          const ws = workspaces.find(w => w.id === b.workspaceId);
+          return { id: b.id, name: b.name, workspaceName: ws?.name };
+        });
+
+      const privBoards = invitedBoardsList
+        .filter(b => b.visibility === 'PRIVATE')
+        .map(b => {
+          const ws = workspaces.find(w => w.id === b.workspaceId);
+          return { id: b.id, name: b.name, workspaceName: ws?.name };
+        });
+
+      const addedFromWs = selectedWsMembers.map(m => {
+        const mem = workspaceMembers.find(w => w.userId === m.userId);
+        return {
+          name: mem?.user?.name || 'Usuario',
+          email: mem?.user?.email || '',
+          role: m.role
+        };
+      });
+
+      setSentSummary({
+        invites: [...validInvites],
+        addedMembers: addedFromWs,
+        workspaces: invitedWs,
+        publicBoards: pubBoards,
+        privateBoards: privBoards
+      });
+
       setSuccess(true);
-      setTimeout(() => handleClose(), 2000);
+      onUpdate?.();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al enviar invitaciones');
-    } finally { setIsLoading(false); }
+    } finally { 
+      setIsLoading(false); 
+    }
+  };
+
+  const handleResetInviteForm = () => {
+    setInvites([{ email: '', role: 'MEMBER' }]);
+    setSelectedWorkspaces(initialWorkspaceId ? [initialWorkspaceId] : []);
+    setSelectedBoards(boardId ? [boardId] : []);
+    setSelectedWsMembers([]);
+    setError('');
+    setSuccess(false);
+    setSentSummary(null);
   };
 
   // --- Manage handlers ---
@@ -273,7 +344,10 @@ const MembersModal: React.FC<MembersModalProps> = ({
     setSelectedWorkspaces(initialWorkspaceId ? [initialWorkspaceId] : []);
     setSelectedBoards(boardId ? [boardId] : []);
     setSelectedWsMembers([]);
-    setError(''); setSuccess(false); setSearch('');
+    setError(''); 
+    setSuccess(false); 
+    setSentSummary(null);
+    setSearch('');
     onClose();
   };
 
@@ -347,13 +421,230 @@ const MembersModal: React.FC<MembersModalProps> = ({
 
             {activeTab === 'invite' && (
               <form onSubmit={handleInviteSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
-                {success ? (
-                  <div className="py-12 text-center space-y-4">
-                    <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded flex items-center justify-center mx-auto mb-6 shadow-sm">
-                      <Mail size={40} strokeWidth={2.5} />
+                {success && sentSummary ? (
+                  <div className="py-2 space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                    {/* Header banner */}
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 text-left">
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/25">
+                          <CheckCircle2 size={26} strokeWidth={2.5} />
+                        </div>
+                        <div className="flex-1 min-w-0 text-center sm:text-left">
+                          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+                              ¡Invitaciones Enviadas con Éxito!
+                            </h3>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              Enviado
+                            </span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+                            Hemos enviado los correos de invitación y configurado los niveles de acceso correspondientes.
+                          </p>
+
+                          {/* Stat chips */}
+                          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-3.5 pt-3 border-t border-emerald-500/15">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 shadow-xs">
+                              <Users size={13} className="text-[#6C5DD3]" />
+                              <strong className="text-zinc-900 dark:text-zinc-100">{sentSummary.invites.length + sentSummary.addedMembers.length}</strong> {sentSummary.invites.length + sentSummary.addedMembers.length === 1 ? 'persona' : 'personas'}
+                            </span>
+
+                            {sentSummary.workspaces.length > 0 && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 shadow-xs">
+                                <Layout size={13} className="text-[#6C5DD3]" />
+                                <strong className="text-zinc-900 dark:text-zinc-100">{sentSummary.workspaces.length}</strong> {sentSummary.workspaces.length === 1 ? 'espacio' : 'espacios'}
+                              </span>
+                            )}
+
+                            {sentSummary.publicBoards.length > 0 && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-[#13151A] text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 shadow-xs">
+                                <Globe size={13} className="text-emerald-600 dark:text-emerald-400" />
+                                <strong className="text-zinc-900 dark:text-zinc-100">{sentSummary.publicBoards.length}</strong> {sentSummary.publicBoards.length === 1 ? 'tablero público' : 'tableros públicos'}
+                              </span>
+                            )}
+
+                            {sentSummary.privateBoards.length > 0 && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 shadow-xs">
+                                <Lock size={12} className="text-amber-500" />
+                                <strong className="text-amber-900 dark:text-amber-200">{sentSummary.privateBoards.length}</strong> {sentSummary.privateBoards.length === 1 ? 'tablero privado' : 'tableros privados'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">¡Invitaciones Enviadas!</h3>
-                    <p className="text-zinc-500 dark:text-zinc-400">Hemos enviado los correos de invitación correctamente.</p>
+
+                    {/* Section 1: Destinatarios */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                          <Users size={13} className="text-[#6C5DD3]" />
+                          Personas Invitadas ({sentSummary.invites.length + sentSummary.addedMembers.length})
+                        </h4>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">Rol y estado</span>
+                      </div>
+
+                      <div className="max-h-[180px] overflow-y-auto custom-scrollbar space-y-2 border border-zinc-200/80 dark:border-white/10 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-white/[0.02]">
+                        {sentSummary.invites.map((inv, idx) => (
+                          <div key={`inv-${idx}`} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white dark:bg-[#13151A] border border-zinc-200/60 dark:border-white/5 shadow-xs">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center font-bold text-xs shrink-0">
+                                {inv.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                  {inv.email}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Invitación enviada por email
+                                </div>
+                              </div>
+                            </div>
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                              inv.role === 'ADMIN'
+                                ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                                : inv.role === 'MEMBER'
+                                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20'
+                                : 'bg-zinc-100 text-zinc-700 dark:bg-white/5 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
+                            }`}>
+                              {inv.role === 'ADMIN' ? 'Administrador' : inv.role === 'MEMBER' ? 'Miembro' : 'Invitado'}
+                            </span>
+                          </div>
+                        ))}
+
+                        {sentSummary.addedMembers.map((mem, idx) => (
+                          <div key={`mem-${idx}`} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white dark:bg-[#13151A] border border-zinc-200/60 dark:border-white/5 shadow-xs">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                {mem.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                  {mem.name}
+                                </div>
+                                <div className="text-[10px] text-zinc-400 truncate">{mem.email}</div>
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
+                              {mem.role === 'admin' ? 'Administrador' : mem.role === 'editor' ? 'Miembro' : 'Invitado'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 2: Destinos Asignados (Espacios, Tableros Públicos y Privados) */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                          <Shield size={13} className="text-[#6C5DD3]" />
+                          Destinos con acceso asignado
+                        </h4>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
+                          {sentSummary.workspaces.length + sentSummary.publicBoards.length + sentSummary.privateBoards.length} destino(s)
+                        </span>
+                      </div>
+
+                      <div className="max-h-[220px] overflow-y-auto custom-scrollbar space-y-2 border border-zinc-200/80 dark:border-white/10 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-white/[0.02]">
+                        {/* Espacios de Trabajo */}
+                        {sentSummary.workspaces.map(ws => (
+                          <div key={`ws-${ws.id}`} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white dark:bg-[#13151A] border border-zinc-200/60 dark:border-white/5 shadow-xs">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shrink-0">
+                                <Layout size={16} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                  {ws.name}
+                                </div>
+                                <div className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">Espacio de Trabajo</div>
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] border border-[#6C5DD3]/20 shrink-0">
+                              Acceso al Espacio
+                            </span>
+                          </div>
+                        ))}
+
+                        {/* Tableros Públicos / del Espacio */}
+                        {sentSummary.publicBoards.map(board => (
+                          <div key={`pb-${board.id}`} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white dark:bg-[#13151A] border border-zinc-200/60 dark:border-white/5 shadow-xs">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                <ClipboardList size={16} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                  {board.name}
+                                </div>
+                                {board.workspaceName && (
+                                  <div className="text-[10px] text-zinc-400 truncate">
+                                    Espacio: {board.workspaceName}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 shrink-0">
+                              <Globe size={11} />
+                              Tablero Público / Espacio
+                            </span>
+                          </div>
+                        ))}
+
+                        {/* Tableros Privados */}
+                        {sentSummary.privateBoards.map(board => (
+                          <div key={`prb-${board.id}`} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/25 shadow-xs">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                <Lock size={15} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                  {board.name}
+                                </div>
+                                {board.workspaceName && (
+                                  <div className="text-[10px] text-amber-700/80 dark:text-amber-400/80 truncate">
+                                    Espacio: {board.workspaceName}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100/80 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30 shrink-0">
+                              <Lock size={10} />
+                              Tablero Privado
+                            </span>
+                          </div>
+                        ))}
+
+                        {sentSummary.workspaces.length === 0 && sentSummary.publicBoards.length === 0 && sentSummary.privateBoards.length === 0 && (
+                          <div className="py-4 text-center text-xs text-zinc-400 italic">
+                            Sin destinos específicos registrados
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer Actions inside Success */}
+                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-zinc-100 dark:border-white/5">
+                      <button
+                        type="button"
+                        onClick={handleResetInviteForm}
+                        className="px-4 py-2.5 rounded-xl sm:rounded text-xs sm:text-sm font-bold text-[#6C5DD3] dark:text-[#8E82E3] hover:bg-[#6C5DD3]/10 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <RotateCcw size={15} />
+                        Invitar a más personas
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleClose}
+                        className="px-6 py-2.5 sm:py-3 rounded-xl sm:rounded font-bold text-xs sm:text-sm text-white bg-[#6C5DD3] hover:bg-[#5b4eb3] shadow-lg shadow-[#6C5DD3]/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                      >
+                        <Check size={16} strokeWidth={2.5} />
+                        Listo, cerrar
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
