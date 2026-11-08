@@ -13,6 +13,7 @@ import UserAvatar from '../components/ui/UserAvatar';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
+import ConfirmActionModal from '../components/ConfirmActionModal';
 
 const MembersPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -26,6 +27,8 @@ const MembersPage: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<WorkspaceMember | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [removeMemberCandidate, setRemoveMemberCandidate] = useState<{ targetUserId: string; name: string } | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const fetchWorkspace = useCallback(async () => {
     if (!workspaceId) return;
@@ -75,14 +78,23 @@ const MembersPage: React.FC = () => {
     }
   };
 
-  const handleRemoveMember = async (targetUserId: string, name: string) => {
-    if (!workspaceId || !window.confirm(`¿Estás seguro de que deseas eliminar a ${name} del espacio de trabajo?`)) return;
+  const handleRemoveMember = (targetUserId: string, name: string) => {
+    if (!workspaceId) return;
+    setRemoveMemberCandidate({ targetUserId, name });
+  };
+
+  const handleConfirmRemoveMember = async () => {
+    if (!workspaceId || !removeMemberCandidate) return;
+    setIsRemoving(true);
     try {
-      await apiClient.delete(`/api/workspaces/${workspaceId}/members/${targetUserId}`);
+      await apiClient.delete(`/api/workspaces/${workspaceId}/members/${removeMemberCandidate.targetUserId}`);
       toast.success('Miembro eliminado');
       fetchWorkspace();
+      setRemoveMemberCandidate(null);
     } catch (err: any) {
       toast.error('Error', { description: err.response?.data?.message || 'No se pudo eliminar al miembro' });
+    } finally {
+      setIsRemoving(false);
     }
   };
 
@@ -351,6 +363,20 @@ const MembersPage: React.FC = () => {
         workspaceId={workspaceId!}
         currentUserRole={currentUserRole}
         onUpdate={fetchWorkspace}
+      />
+
+      <ConfirmActionModal
+        isOpen={!!removeMemberCandidate}
+        title="Eliminar miembro del espacio"
+        description={`¿Estás seguro de que deseas eliminar a "${removeMemberCandidate?.name}" del espacio de trabajo?`}
+        confirmLabel="Sí, eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        isLoading={isRemoving}
+        onClose={() => {
+          if (!isRemoving) setRemoveMemberCandidate(null);
+        }}
+        onConfirm={handleConfirmRemoveMember}
       />
     </motion.div>
   );

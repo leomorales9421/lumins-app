@@ -4,6 +4,7 @@ import { X, Search, UserPlus, Trash2, Shield, User, Building2, Crown, Lock } fro
 import apiClient from '../lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
+import ConfirmActionModal from './ConfirmActionModal';
 
 interface BoardMember {
   userId: string;
@@ -63,6 +64,8 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'manage' | 'add'>('manage');
+  const [removeMemberCandidate, setRemoveMemberCandidate] = useState<{ userId: string; name: string } | null>(null);
+  const [isRemovingMember, setIsRemovingMember] = useState(false);
 
   const fetchBoardMembers = useCallback(async () => {
     try {
@@ -117,15 +120,23 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
     }
   };
 
-  const handleRemoveMember = async (userId: string, name: string) => {
-    if (!window.confirm(`¿Eliminar a ${name} del tablero?`)) return;
+  const handleRemoveMember = (userId: string, name: string) => {
+    setRemoveMemberCandidate({ userId, name });
+  };
+
+  const handleConfirmRemoveMember = async () => {
+    if (!removeMemberCandidate) return;
+    setIsRemovingMember(true);
     try {
-      await apiClient.delete(`/api/boards/${boardId}/members/${userId}`);
+      await apiClient.delete(`/api/boards/${boardId}/members/${removeMemberCandidate.userId}`);
       toast.success('Miembro eliminado del tablero');
       fetchBoardMembers();
       onUpdate();
+      setRemoveMemberCandidate(null);
     } catch (err: any) {
       toast.error('Error', { description: err.response?.data?.message || 'No se pudo eliminar al miembro' });
+    } finally {
+      setIsRemovingMember(false);
     }
   };
 
@@ -393,6 +404,20 @@ const ManageBoardMembersModal: React.FC<ManageBoardMembersModalProps> = ({
           </motion.div>
         </div>
       )}
+
+      <ConfirmActionModal
+        isOpen={!!removeMemberCandidate}
+        title="Eliminar miembro del tablero"
+        description={`¿Estás seguro de que deseas eliminar a "${removeMemberCandidate?.name}" del tablero?`}
+        confirmLabel="Sí, eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        isLoading={isRemovingMember}
+        onClose={() => {
+          if (!isRemovingMember) setRemoveMemberCandidate(null);
+        }}
+        onConfirm={handleConfirmRemoveMember}
+      />
     </AnimatePresence>
   );
 };

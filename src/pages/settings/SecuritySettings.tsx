@@ -4,6 +4,7 @@ import apiClient from '../../lib/api-client';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import ConfirmActionModal from '../../components/ConfirmActionModal';
 
 interface Session {
   id: string;
@@ -49,6 +50,7 @@ const SecuritySettings: React.FC = () => {
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
+  const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
   const fetchSessions = async () => {
@@ -109,14 +111,17 @@ const SecuritySettings: React.FC = () => {
     }
   };
 
-  const handleRevokeOtherSessions = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres cerrar todas las demás sesiones?')) return;
-    
+  const handleRevokeOtherSessions = () => {
+    setIsRevokeConfirmOpen(true);
+  };
+
+  const confirmRevokeOtherSessions = async () => {
     setRevokingOthers(true);
     setSessionError('');
     try {
       await apiClient.delete('/api/auth/sessions/others');
       setSessions(prev => prev.filter(s => s.isCurrent));
+      setIsRevokeConfirmOpen(false);
     } catch (err) {
       setSessionError('No se pudieron cerrar las otras sesiones.');
     } finally {
@@ -302,6 +307,20 @@ const SecuritySettings: React.FC = () => {
           )}
         </div>
       </section>
+
+      <ConfirmActionModal
+        isOpen={isRevokeConfirmOpen}
+        title="Cerrar otras sesiones"
+        description="¿Estás seguro de que deseas cerrar todas las demás sesiones activas? Se desconectarán todos tus otros dispositivos."
+        confirmLabel="Sí, cerrar sesiones"
+        cancelLabel="Cancelar"
+        variant="danger"
+        isLoading={revokingOthers}
+        onClose={() => {
+          if (!revokingOthers) setIsRevokeConfirmOpen(false);
+        }}
+        onConfirm={confirmRevokeOtherSessions}
+      />
     </div>
   );
 };

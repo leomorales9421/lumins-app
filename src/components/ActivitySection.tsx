@@ -11,6 +11,7 @@ import RichTextEditor from './RichTextEditor';
 import type { RichTextEditorRef } from './RichTextEditor';
 import { fixEncoding } from '../lib/encoding';
 import { sanitizeHtmlForRender } from '../lib/sanitize';
+import ConfirmActionModal from './ConfirmActionModal';
 
 interface ActivitySectionProps {
   activities: ActivityItem[];
@@ -109,6 +110,7 @@ const ActivityFeedItem: React.FC<{
 }> = ({ item, onUpdate, onDelete, cardId, canModerate }) => {
   const { user: currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   const isSystem = item.type === 'SYSTEM_EVENT';
   const isComment = item.type === 'COMMENT';
@@ -134,10 +136,13 @@ const ActivityFeedItem: React.FC<{
   };
 
   const handleDelete = () => {
-    if (window.confirm('¿Eliminar este comentario?')) {
-      const targetId = item.comment?.id || item.commentId || item.id;
-      onDelete?.(targetId);
-    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    const targetId = item.comment?.id || item.commentId || item.id;
+    onDelete?.(targetId);
+    setIsDeleteModalOpen(false);
   };
 
   return (
@@ -203,6 +208,17 @@ const ActivityFeedItem: React.FC<{
           )}
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isDeleteModalOpen}
+        title="Eliminar comentario"
+        description="¿Estás seguro de que deseas eliminar este comentario? Esta acción no se puede deshacer."
+        confirmLabel="Sí, eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

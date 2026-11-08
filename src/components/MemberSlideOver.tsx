@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { WorkspaceMember, WorkspaceRole } from '../types/workspace';
 import apiClient from '../lib/api-client';
 import UserAvatar from './ui/UserAvatar';
+import ConfirmActionModal from './ConfirmActionModal';
 
 interface MemberSlideOverProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
   const [isLoadingBoards, setIsLoadingBoards] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -133,11 +135,17 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
     }
   };
 
-  const handleRemoveMember = async () => {
-    if (!member || !window.confirm('¿Estás seguro de que deseas eliminar a este miembro del espacio de trabajo?')) return;
+  const handleRemoveMember = () => {
+    if (!member) return;
+    setIsConfirmRemoveOpen(true);
+  };
+
+  const handleConfirmRemoveMember = async () => {
+    if (!member) return;
     setIsRemoving(true);
     try {
       await apiClient.delete(`/api/workspaces/${workspaceId}/members/${member.userId}`);
+      setIsConfirmRemoveOpen(false);
       onClose();
       onUpdate();
     } catch (err) {
@@ -368,6 +376,20 @@ const MemberSlideOver: React.FC<MemberSlideOverProps> = ({
           </motion.div>
         </>
       )}
+
+      <ConfirmActionModal
+        isOpen={isConfirmRemoveOpen}
+        title="Eliminar miembro del espacio"
+        description={`¿Estás seguro de que deseas eliminar a "${member?.user?.name || 'este miembro'}" del espacio de trabajo? Perderá el acceso a todos los tableros vinculados.`}
+        confirmLabel="Sí, eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        isLoading={isRemoving}
+        onClose={() => {
+          if (!isRemoving) setIsConfirmRemoveOpen(false);
+        }}
+        onConfirm={handleConfirmRemoveMember}
+      />
     </AnimatePresence>
   );
 };

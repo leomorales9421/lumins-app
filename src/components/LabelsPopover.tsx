@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Edit2, X, ChevronLeft, Check, Plus } from 'lucide-react';
+import ConfirmActionModal from './ConfirmActionModal';
 
 interface Label {
   id: string;
@@ -46,6 +47,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
   const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   // Form state
   const [labelName, setLabelName] = useState('');
@@ -79,10 +81,14 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
 
   const handleDelete = () => {
     if (!editingLabel) return;
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta? Se quitará de todas las tarjetas.')) {
-      onDeleteLabel(editingLabel.id);
-      setCurrentView('list');
-    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!editingLabel) return;
+    onDeleteLabel(editingLabel.id);
+    setIsDeleteModalOpen(false);
+    setCurrentView('list');
   };
 
   if (currentView === 'create' || currentView === 'edit') {
@@ -168,13 +174,24 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               <button 
                 type="button"
                 onClick={handleDelete}
-                className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-4 rounded font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all border border-rose-100 dark:border-rose-500/20 active:scale-[0.98] text-sm"
+                className="bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 px-4 rounded font-bold hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all border border-rose-100 dark:border-rose-500/20 active:scale-[0.98] text-sm cursor-pointer"
               >
                 Eliminar
               </button>
             )}
           </div>
         </form>
+
+        <ConfirmActionModal
+          isOpen={isDeleteModalOpen}
+          title="Eliminar etiqueta"
+          description={`¿Estás seguro de que deseas eliminar la etiqueta "${labelName || editingLabel?.name}"? Se quitará de todas las tarjetas.`}
+          confirmLabel="Sí, eliminar"
+          cancelLabel="Cancelar"
+          variant="danger"
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
+        />
       </div>
     );
   }

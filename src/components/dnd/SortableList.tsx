@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MoreHorizontal, Plus, Pencil, Trash2, X, Archive, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, X, Archive, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../types/board';
 import { SortableCard } from './SortableCard';
@@ -16,13 +16,24 @@ interface SortableListProps {
   onCardClick: (cardId: string) => void;
   onAddCard?: (listId: string, title: string) => void;
   onUpdateList?: (listId: string, name: string) => void;
-  onArchiveList?: (listId: string) => void;
-  onDeleteList?: (listId: string) => void;
+  onArchiveList?: (listId: string, listName: string) => void;
+  onDeleteList?: (listId: string, listName: string) => void;
   onArchiveCard?: (cardId: string) => void;
+  onArchiveAllCards?: (listId: string, listName: string, count: number, onlyCompleted?: boolean) => void;
   canEdit?: boolean;
 }
 
-export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, onAddCard, onUpdateList, onArchiveList, onDeleteList, onArchiveCard, canEdit = true }) => {
+export const SortableList: React.FC<SortableListProps> = ({ 
+  list, 
+  onCardClick, 
+  onAddCard, 
+  onUpdateList, 
+  onArchiveList, 
+  onDeleteList, 
+  onArchiveCard,
+  onArchiveAllCards,
+  canEdit = true 
+}) => {
   const [isAddingCard, setIsAddingCard] = React.useState(false);
   const [newCardTitle, setNewCardTitle] = React.useState('');
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
@@ -31,6 +42,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
 
   const menuRef = React.useRef<HTMLDivElement>(null);
   const cards = (list.cards || []).filter(Boolean);
+  const completedCards = cards.filter(c => c.isDone);
 
   const {
     attributes,
@@ -194,7 +206,7 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
                   >
                     <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between">
                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Opciones de lista</span>
@@ -203,51 +215,103 @@ export const SortableList: React.FC<SortableListProps> = ({ list, onCardClick, o
                       </button>
                     </div>
                     
-                    <div className="p-1.5">
+                    <div className="p-1.5 space-y-0.5">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setIsEditingTitle(true);
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] rounded-lg transition-all flex items-center gap-3"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] rounded-lg transition-all flex items-center gap-3"
                       >
-                        <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center shrink-0">
                           <Pencil size={14} strokeWidth={2.5} />
                         </div>
-                        Editar nombre
+                        <span>Editar nombre</span>
                       </button>
+
+                      {/* Bulk Archive Actions */}
+                      {cards.length > 0 && (
+                        <>
+                          <div className="my-1.5 border-t border-zinc-100 dark:border-white/5" />
+                          <div className="px-3 pt-1 pb-0.5">
+                            <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                              Tarjetas en lista
+                            </span>
+                          </div>
+
+                          {completedCards.length > 0 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onArchiveAllCards?.(list.id, list.name || list.title || 'Lista', completedCards.length, true);
+                                setIsMenuOpen(false);
+                              }}
+                              className="w-full text-left px-3 py-2 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all flex items-center justify-between group"
+                              title="Archivar solo las tarjetas marcadas como completadas"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-7 h-7 rounded bg-emerald-100/70 dark:bg-emerald-500/15 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 size={14} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <span className="truncate">Archivar completadas</span>
+                              </div>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shrink-0">
+                                {completedCards.length}
+                              </span>
+                            </button>
+                          )}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onArchiveAllCards?.(list.id, list.name || list.title || 'Lista', cards.length, false);
+                              setIsMenuOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-2 text-[13px] font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all flex items-center justify-between group"
+                            title="Archivar todas las tarjetas de esta lista"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-7 h-7 rounded bg-amber-100/70 dark:bg-amber-500/15 flex items-center justify-center shrink-0">
+                                <Archive size={14} strokeWidth={2.5} className="text-amber-600 dark:text-amber-400" />
+                              </div>
+                              <span className="truncate">Archivar todas</span>
+                            </div>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0">
+                              {cards.length}
+                            </span>
+                          </button>
+                        </>
+                      )}
+
+                      <div className="my-1.5 border-t border-zinc-100 dark:border-white/5" />
                       
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onArchiveList && window.confirm('¿Archivar esta lista? (Podrá ser restaurada después)')) {
-                            onArchiveList(list.id);
-                          }
+                          onArchiveList?.(list.id, list.name || list.title || 'esta lista');
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-all flex items-center gap-3"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-all flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded bg-orange-100/50 dark:bg-orange-500/5 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded bg-orange-100/50 dark:bg-orange-500/5 flex items-center justify-center shrink-0">
                           <Archive size={14} strokeWidth={2.5} />
                         </div>
-                        Archivar lista
+                        <span>Archivar lista</span>
                       </button>
                       
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onDeleteList && window.confirm('¿Eliminar esta lista?')) {
-                            onDeleteList(list.id);
-                          }
+                          onDeleteList?.(list.id, list.name || list.title || 'esta lista');
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-3"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded bg-red-100/50 dark:bg-red-500/5 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded bg-red-100/50 dark:bg-red-500/5 flex items-center justify-center shrink-0">
                           <Trash2 size={14} strokeWidth={2.5} />
                         </div>
-                        Eliminar lista
+                        <span>Eliminar lista</span>
                       </button>
                     </div>
 

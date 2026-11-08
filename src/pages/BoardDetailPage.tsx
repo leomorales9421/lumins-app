@@ -113,6 +113,17 @@ const BoardDetailPage: React.FC = () => {
   const [isVisibilityDropdownOpen, setIsVisibilityDropdownOpen] = useState(false);
   const [archiveCardCandidate, setArchiveCardCandidate] = useState<{ id: string; title: string } | null>(null);
   const [isArchivingCard, setIsArchivingCard] = useState(false);
+  const [archiveCardsCandidate, setArchiveCardsCandidate] = useState<{
+    listId: string;
+    listName: string;
+    count: number;
+    onlyCompleted: boolean;
+  } | null>(null);
+  const [isArchivingCards, setIsArchivingCards] = useState(false);
+  const [archiveListCandidate, setArchiveListCandidate] = useState<{ id: string; name: string } | null>(null);
+  const [isArchivingList, setIsArchivingList] = useState(false);
+  const [deleteListCandidate, setDeleteListCandidate] = useState<{ id: string; name: string } | null>(null);
+  const [isDeletingList, setIsDeletingList] = useState(false);
 
   const { canManageBoard, canEditContent, isReadOnly } = useBoardPermissions(board?.id, userRole);
   const canEdit = canEditContent;
@@ -608,23 +619,47 @@ const BoardDetailPage: React.FC = () => {
     }
   };
 
-  const handleDeleteList = async (listId: string) => {
+  const requestDeleteList = (listId: string, listName?: string) => {
+    const name = listName || listsRef.current.find(l => l.id === listId)?.name || 'esta lista';
+    setDeleteListCandidate({ id: listId, name });
+  };
+
+  const handleConfirmDeleteList = async () => {
+    if (!deleteListCandidate) return;
+    setIsDeletingList(true);
     try {
-      await apiClient.delete(`/api/lists/${listId}`);
+      await apiClient.delete(`/api/lists/${deleteListCandidate.id}`);
       fetchBoard();
-    } catch (err) {
+      toast.success('Lista eliminada exitosamente');
+      setDeleteListCandidate(null);
+    } catch (err: any) {
       console.error('Error deleting list:', err);
+      toast.error('Error al eliminar lista', { description: err.response?.data?.message || 'No se pudo eliminar la lista' });
+    } finally {
+      setIsDeletingList(false);
     }
   };
 
-  const handleArchiveList = async (listId: string) => {
+  const requestArchiveList = (listId: string, listName?: string) => {
+    const name = listName || listsRef.current.find(l => l.id === listId)?.name || 'esta lista';
+    setArchiveListCandidate({ id: listId, name });
+  };
+
+  const handleConfirmArchiveList = async () => {
+    if (!archiveListCandidate) return;
+    setIsArchivingList(true);
     try {
-      await apiClient.patch(`/api/lists/${listId}/archive`);
+      await apiClient.patch(`/api/lists/${archiveListCandidate.id}/archive`);
       fetchBoard();
-      toast.success('Lista archivada exitosamente');
-    } catch (err) {
+      toast.success('Lista archivada exitosamente', {
+        description: `La lista "${archiveListCandidate.name}" se puede restaurar desde "Elementos Archivados".`
+      });
+      setArchiveListCandidate(null);
+    } catch (err: any) {
       console.error('Error archiving list:', err);
-      toast.error('Error', { description: 'No se pudo archivar la lista' });
+      toast.error('Error al archivar lista', { description: err.response?.data?.message || 'No se pudo archivar la lista' });
+    } finally {
+      setIsArchivingList(false);
     }
   };
 
@@ -650,6 +685,43 @@ const BoardDetailPage: React.FC = () => {
       toast.error('Error', { description: 'No se pudo archivar la tarjeta' });
     } finally {
       setIsArchivingCard(false);
+    }
+  };
+
+  const requestArchiveAllCardsFromList = (
+    listId: string,
+    listName: string,
+    count: number,
+    onlyCompleted: boolean = false
+  ) => {
+    if (count <= 0) return;
+    setArchiveCardsCandidate({ listId, listName, count, onlyCompleted });
+  };
+
+  const handleConfirmArchiveCards = async () => {
+    if (!archiveCardsCandidate) return;
+
+    setIsArchivingCards(true);
+    try {
+      const { listId, count, onlyCompleted } = archiveCardsCandidate;
+      await apiClient.post(`/api/lists/${listId}/archive-cards`, { onlyCompleted });
+      await fetchBoard();
+      toast.success(
+        onlyCompleted
+          ? `${count} tarjeta(s) completada(s) archivada(s)`
+          : `${count} tarjeta(s) archivada(s) exitosamente`,
+        {
+          description: 'Puedes consultarlas o restaurarlas en cualquier momento desde Elementos Archivados.'
+        }
+      );
+      setArchiveCardsCandidate(null);
+    } catch (err: any) {
+      console.error('Error archiving cards:', err);
+      toast.error('Error al archivar tarjetas', {
+        description: err.response?.data?.message || 'No se pudieron archivar las tarjetas'
+      });
+    } finally {
+      setIsArchivingCards(false);
     }
   };
 
@@ -1350,9 +1422,10 @@ const BoardDetailPage: React.FC = () => {
                   onCardClick={handleOpenCard}
                   onAddCard={handleAddCard}
                   onUpdateList={handleUpdateList}
-                  onArchiveList={handleArchiveList}
-                  onDeleteList={handleDeleteList}
+                  onArchiveList={requestArchiveList}
+                  onDeleteList={requestDeleteList}
                   onArchiveCard={requestArchiveCardFromBoard}
+                  onArchiveAllCards={requestArchiveAllCardsFromList}
                   canEdit={canEditContent}
                 />
               ))}
@@ -1467,6 +1540,57 @@ const BoardDetailPage: React.FC = () => {
           if (!isArchivingCard) setArchiveCardCandidate(null);
         }}
         onConfirm={handleArchiveCardFromBoard}
+      />
+
+      <ConfirmActionModal
+        isOpen={!!archiveCardsCandidate}
+        title={archiveCardsCandidate?.onlyCompleted ? 'Archivar tarjetas completadas' : 'Archivar todas las tarjetas'}
+        description={
+          archiveCardsCandidate?.onlyCompleted
+            ? `Se archivarán ${archiveCardsCandidate.count} tarjeta(s) completada(s) de la lista "${archiveCardsCandidate.listName}". Podrás consultarlas o restaurarlas en cualquier momento desde "Elementos Archivados".`
+            : `Se archivarán las ${archiveCardsCandidate?.count} tarjeta(s) de la lista "${archiveCardsCandidate?.listName}". Podrás consultarlas o restaurarlas en cualquier momento desde "Elementos Archivados".`
+        }
+        confirmLabel={
+          archiveCardsCandidate?.onlyCompleted
+            ? `Archivar completadas (${archiveCardsCandidate.count})`
+            : `Archivar todas (${archiveCardsCandidate?.count})`
+        }
+        cancelLabel="Cancelar"
+        isLoading={isArchivingCards}
+        onClose={() => {
+          if (!isArchivingCards) setArchiveCardsCandidate(null);
+        }}
+        onConfirm={handleConfirmArchiveCards}
+      />
+
+      {/* Confirm Archivar Lista */}
+      <ConfirmActionModal
+        isOpen={!!archiveListCandidate}
+        title="Archivar lista"
+        description={`La lista "${archiveListCandidate?.name}" y todas sus tarjetas pasarán a archivadas. Podrás restaurarla en cualquier momento desde "Elementos Archivados".`}
+        confirmLabel="Sí, archivar lista"
+        cancelLabel="Cancelar"
+        variant="warning"
+        isLoading={isArchivingList}
+        onClose={() => {
+          if (!isArchivingList) setArchiveListCandidate(null);
+        }}
+        onConfirm={handleConfirmArchiveList}
+      />
+
+      {/* Confirm Eliminar Lista */}
+      <ConfirmActionModal
+        isOpen={!!deleteListCandidate}
+        title="Eliminar lista"
+        description={`¿Estás seguro de que deseas eliminar permanentemente la lista "${deleteListCandidate?.name}"? Esta acción no se puede deshacer.`}
+        confirmLabel="Sí, eliminar lista"
+        cancelLabel="Cancelar"
+        variant="danger"
+        isLoading={isDeletingList}
+        onClose={() => {
+          if (!isDeletingList) setDeleteListCandidate(null);
+        }}
+        onConfirm={handleConfirmDeleteList}
       />
 
       {isArchivedModalOpen && board && (
