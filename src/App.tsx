@@ -34,6 +34,7 @@ const IntegrationsSettings = lazy(() => import('./pages/settings/IntegrationsSet
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const InsightsBoardDetailPage = lazy(() => import('./pages/InsightsBoardDetailPage'));
+const WorkspacesDirectoryPage = lazy(() => import('./pages/WorkspacesDirectoryPage'));
 
 const PageLoader = () => (
   <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
@@ -113,6 +114,8 @@ function App() {
                   
                   <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                     <Route path="/app" element={<BoardsPage />} />
+                    <Route path="/workspaces" element={<WorkspacesDirectoryPage />} />
+                    <Route path="/w/:workspaceId/workspaces" element={<WorkspacesDirectoryPage />} />
                     <Route path="/w/:workspaceId/dashboard" element={<BoardsPage />} />
                     <Route path="/w/:workspaceId/members" element={<MembersPage />} />
                     <Route path="/w/:workspaceId/activity" element={<WorkspaceActivityPage />} />
