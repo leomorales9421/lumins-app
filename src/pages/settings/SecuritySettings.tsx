@@ -131,23 +131,23 @@ const SecuritySettings: React.FC = () => {
 
   const isFormValid = formData.currentPassword && formData.newPassword && formData.confirmPassword && (formData.newPassword === formData.confirmPassword);
 
-  const inputClasses = "w-full p-3 rounded border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all";
-  const labelClasses = "text-sm font-bold text-zinc-700 dark:text-zinc-300";
+  const inputClasses = "w-full px-3.5 py-2.5 sm:p-3 rounded-xl border border-zinc-200/90 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A] text-base sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent focus:bg-white dark:focus:bg-[#13151A] outline-none transition-all";
+  const labelClasses = "text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5";
 
   return (
-    <div className="space-y-6 sm:space-y-10">
-      <div className="mb-4 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Seguridad</h2>
+    <div className="space-y-4 sm:space-y-8">
+      <div className="hidden lg:block mb-6">
+        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Seguridad</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Protege tu cuenta y gestiona tus accesos.</p>
       </div>
 
       {/* Change Password Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
-            <Key size={20} />
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <Key size={18} />
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Cambiar Contraseña</h3>
+          <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Cambiar Contraseña</h3>
         </div>
 
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 sm:space-y-5">
@@ -209,14 +209,14 @@ const SecuritySettings: React.FC = () => {
       </section>
 
       {/* Active Sessions Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
-              <Monitor size={20} />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
+              <Monitor size={18} />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Sesiones Activas</h3>
+              <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Sesiones Activas</h3>
               <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Dispositivos con acceso a tu cuenta.</p>
             </div>
           </div>

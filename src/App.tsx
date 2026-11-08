@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PermissionProvider } from './contexts/PermissionContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './components/NotificationProvider';
+import { ProductUpdatesProvider } from './contexts/ProductUpdatesContext';
+import { ProductUpdatesModal } from './components/updates/ProductUpdatesModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -98,7 +100,9 @@ function App() {
           <SocketProvider>
             <GlobalInvitationDetector />
             <NotificationProvider>
-              <Suspense fallback={<PageLoader />}>
+              <ProductUpdatesProvider>
+                <ProductUpdatesModal />
+                <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
@@ -138,6 +142,7 @@ function App() {
                 </Routes>
               </Suspense>
               <GlobalToaster />
+              </ProductUpdatesProvider>
             </NotificationProvider>
           </SocketProvider>
         </PermissionProvider>

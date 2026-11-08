@@ -306,3 +306,17 @@
     will-change: transform;
   }
 }
+
+/* Calendar Print Media Export Styles */
+@media print {
+  body.lumins-calendar-printing header,
+  body.lumins-calendar-printing nav,
+  body.lumins-calendar-printing aside,
+  body.lumins-calendar-printing .no-print {
+    display: none !important;
+  }
+  body.lumins-calendar-printing {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

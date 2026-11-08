@@ -163,7 +163,7 @@ const ActivityFeedItem: React.FC<{
             <span className="text-[11px] text-zinc-500 dark:text-zinc-400">{relativeDate}</span>
           </div>
                     {isSystem ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-300">
+            <p className="text-sm text-zinc-500 dark:text-zinc-300 break-words [overflow-wrap:anywhere]">
               {fixEncoding(item.action) || 'ha realizado una acción'}
             </p>
           ) : isEditing ? (

@@ -151,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Footer Navigation */}
           <div className={`mt-auto pb-6 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-6 w-full`}>
             <SidebarItem 
-              to="/settings" 
+              to="/settings/profile" 
               icon={<Settings size={18} />} 
               label="Configuración" 
               isCollapsed={isCollapsed} 

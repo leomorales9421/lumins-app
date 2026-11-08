@@ -142,11 +142,11 @@ const WorkspaceActivityPage: React.FC = () => {
 
   const getEventText = (event: CardEvent) => {
     const userName = <span className="font-bold text-zinc-900 dark:text-zinc-100">{event.user.name}</span>;
-    const cardTitle = <span className="font-bold text-zinc-900 dark:text-zinc-100">{event.card.title}</span>;
+    const cardTitle = <span className="font-bold text-zinc-900 dark:text-zinc-100 break-words [overflow-wrap:anywhere]">{event.card.title}</span>;
 
     switch (event.type) {
       case 'MOVE':
-        return <>{userName} movió la tarjeta {cardTitle} de <span className="font-medium">{event.fromList?.name}</span> a <span className="font-medium">{event.toList?.name}</span></>;
+        return <>{userName} movió la tarjeta {cardTitle} de <span className="font-medium break-words [overflow-wrap:anywhere]">{event.fromList?.name}</span> a <span className="font-medium break-words [overflow-wrap:anywhere]">{event.toList?.name}</span></>;
       case 'COMMENT':
         return <>{userName} comentó en {cardTitle}</>;
       case 'ATTACHMENT':
@@ -344,7 +344,7 @@ const WorkspaceActivityPage: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Main Feed Column */}
-          <div className="flex-1 lg:w-[70%] w-full">
+          <div className="flex-1 min-w-0 lg:w-[70%] w-full">
             {isLoading && activity.length === 0 ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map(i => (
@@ -395,8 +395,8 @@ const WorkspaceActivityPage: React.FC = () => {
                             />
                           </div>
                           
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-snug">
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-snug break-words [overflow-wrap:anywhere]">
                               {getEventText(event)}
                             </p>
                             
@@ -420,7 +420,7 @@ const WorkspaceActivityPage: React.FC = () => {
                             </div>
 
                             {event.type === 'COMMENT' && event.comment && (
-                               <div className="mt-3 p-3 bg-zinc-50 dark:bg-white/5 rounded border border-zinc-200 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400 italic line-clamp-2 relative overflow-hidden group-hover:bg-white dark:group-hover:bg-[#252a33] transition-colors">
+                               <div className="mt-3 p-3 bg-zinc-50 dark:bg-white/5 rounded border border-zinc-200 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400 italic line-clamp-2 break-words [overflow-wrap:anywhere] relative overflow-hidden group-hover:bg-white dark:group-hover:bg-[#252a33] transition-colors">
                                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6C5DD3]/40" />
                                   "{event.comment.body.replace(/<[^>]*>/g, '')}"
                                </div>
@@ -493,7 +493,7 @@ const WorkspaceActivityPage: React.FC = () => {
           </div>
 
           {/* Desktop Filters Sidebar */}
-          <aside className="hidden lg:block lg:w-[30%] sticky top-24 z-10">
+          <aside className="hidden lg:block lg:w-[30%] shrink-0 sticky top-24 z-10">
             <FiltersContent />
           </aside>
         </div>

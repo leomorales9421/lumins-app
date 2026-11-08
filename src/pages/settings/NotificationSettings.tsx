@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Mail, Smartphone, Info, Loader2 } from 'lucide-react';
+import { Mail, Smartphone, Info, Loader2, Check } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 import { useAuth } from '../../contexts/AuthContext';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -24,19 +24,37 @@ const NotificationToggle: React.FC<{
   checked: boolean;
   onChange: () => void;
 }> = ({ label, description, checked, onChange }) => (
-  <div className="flex items-center justify-between py-4 border-b border-zinc-100 dark:border-white/5 last:border-0">
-    <div className="pr-4">
-      <p className="font-bold text-zinc-900 dark:text-zinc-100">{label}</p>
-      {description && <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>}
+  <div
+    onClick={onChange}
+    className="flex items-center justify-between py-3.5 sm:py-4 border-b border-zinc-100 dark:border-white/5 last:border-0 cursor-pointer select-none group"
+  >
+    <div className="pr-4 min-w-0">
+      <p className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">{label}</p>
+      {description && <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>}
     </div>
     <button
-      onClick={onChange}
+      onClick={e => {
+        e.stopPropagation();
+        onChange();
+      }}
       type="button"
-      className={`relative inline-flex h-6 w-11 items-center rounded transition-colors focus:outline-none ${checked ? 'bg-[#6C5DD3]' : 'bg-zinc-200 dark:bg-zinc-800'}`}
+      role="switch"
+      aria-checked={checked}
+      style={{ borderRadius: '9999px' }}
+      className={`relative inline-flex h-7 w-12 shrink-0 items-center p-0.5 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5DD3]/40 ${
+        checked
+          ? 'bg-[#6C5DD3]'
+          : 'bg-zinc-200 dark:bg-zinc-700'
+      }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-      />
+        style={{ borderRadius: '9999px' }}
+        className={` flex h-6 w-6 transform items-center justify-center bg-white shadow-md transition-transform duration-200 ${
+          checked ? 'translate-x-5 text-[#6C5DD3]' : 'translate-x-0 text-transparent'
+        }`}
+      >
+        <Check size={12} strokeWidth={3.5} />
+      </span>
     </button>
   </div>
 );
@@ -53,11 +71,23 @@ const ToggleSkeleton = () => (
 
 const NotificationSettings: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+  const [prefs, setPrefs] = useState<NotificationPrefs>(() => {
+    if (user?.notificationPrefs) {
+      try {
+        const parsed = typeof user.notificationPrefs === 'string'
+          ? JSON.parse(user.notificationPrefs)
+          : user.notificationPrefs;
+        return { ...DEFAULT_PREFS, ...parsed };
+      } catch {
+        return DEFAULT_PREFS;
+      }
+    }
+    return DEFAULT_PREFS;
+  });
   const [saving, setSaving] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  // Load preferences from user object
+  // Load preferences from user object only if user changes
   useEffect(() => {
     if (user?.notificationPrefs) {
       try {
@@ -91,35 +121,35 @@ const NotificationSettings: React.FC = () => {
     savePrefs(newPrefs, key);
   };
 
-  const isLoading = authLoading;
+  const isLoading = !user && authLoading;
 
   return (
-    <div className="space-y-6 sm:space-y-10">
-      <div className="mb-4 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Notificaciones</h2>
+    <div className="space-y-4 sm:space-y-8">
+      <div className="hidden lg:block mb-6">
+        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Notificaciones</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Elige qué avisos quieres recibir y dónde.</p>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded p-4 flex gap-3 text-blue-700 dark:text-blue-400">
-        <Info size={20} className="flex-shrink-0 mt-0.5" />
-        <p className="text-sm font-medium leading-tight">
+      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-3.5 sm:p-4 flex gap-3 text-blue-700 dark:text-blue-400">
+        <Info size={18} className="flex-shrink-0 mt-0.5" />
+        <p className="text-xs sm:text-sm font-medium leading-snug">
           Las notificaciones push están actualmente sincronizadas con las preferencias de tu navegador.
         </p>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-xl border border-rose-100 dark:border-rose-500/20">
           {error}
         </div>
       )}
 
       {/* Email Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0">
-            <Mail size={20} />
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-3 mb-3 sm:mb-6">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0">
+            <Mail size={18} />
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Correo Electrónico</h3>
+          <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Correo Electrónico</h3>
         </div>
 
         <div className="space-y-1">
@@ -145,12 +175,12 @@ const NotificationSettings: React.FC = () => {
       </section>
 
       {/* In-App Notifications */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 sm:mb-8">
-          <div className="w-10 h-10 rounded bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center flex-shrink-0">
-            <Smartphone size={20} />
+      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-3 mb-3 sm:mb-6">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center flex-shrink-0">
+            <Smartphone size={18} />
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en App</h3>
+          <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Notificaciones en App</h3>
         </div>
 
         <div className="space-y-1">

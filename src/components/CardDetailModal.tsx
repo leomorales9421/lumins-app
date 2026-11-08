@@ -1221,22 +1221,40 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 </div>
                 <span className="text-xs font-semibold">Responsables</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0 max-w-[62%] justify-end">
                 {assignedMemberIds.length > 0 ? (
-                  <div className="flex items-center -space-x-1.5">
-                    {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(member => (
-                      <div key={member.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#1C1F26] shadow-xs">
-                        <UserAvatar name={member.name} avatarUrl={member.avatarUrl} size="sm" />
+                  (() => {
+                    const assignedMembers = boardMembers.filter(m => assignedMemberIds.includes(m.id));
+                    const count = assignedMembers.length;
+                    return (
+                      <div className="flex items-center min-w-0">
+                        {/* Stacked Avatars */}
+                        <div className="flex items-center -space-x-1.5 shrink-0">
+                          {assignedMembers.slice(0, 3).map(member => (
+                            <div key={member.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#1C1F26] shadow-xs shrink-0 overflow-hidden">
+                              <UserAvatar name={member.name} avatarUrl={member.avatarUrl} size="xs" />
+                            </div>
+                          ))}
+                          {count > 3 && (
+                            <div className="w-6 h-6 rounded-full bg-[#6C5DD3]/15 text-[#6C5DD3] dark:text-[#A599F9] border-2 border-white dark:border-[#1C1F26] flex items-center justify-center text-[10px] font-black shrink-0">
+                              +{count - 3}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Label: 1 person -> First name; Multiple -> "X miembros" */}
+                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-2 truncate">
+                          {count === 1
+                            ? assignedMembers[0]?.name.split(' ')[0]
+                            : `${count} asignados`}
+                        </span>
                       </div>
-                    ))}
-                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-2.5">
-                      {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(m => m.name.split(' ')[0]).join(', ')}
-                    </span>
-                  </div>
+                    );
+                  })()
                 ) : (
                   <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Asignar</span>
                 )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+                <ChevronRight size={15} className="text-zinc-400 opacity-60 shrink-0" />
               </div>
             </div>
 

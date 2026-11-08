@@ -3,31 +3,50 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, Layout, Shield, Search, ChevronRight, ExternalLink, Globe, Database, HardDrive, CheckCircle,
   XCircle, Copy, Check, RefreshCw, AlertTriangle, Layers3, Building2, BadgeInfo, Clock3, UserRound,
-  UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3, Zap, AlertOctagon, Sparkles
+  UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3, Zap, AlertOctagon, Sparkles,
+  Filter, CheckSquare, MessageSquare, ShieldAlert, UserCheck
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '../components/ui/Skeleton';
 
 interface Stats {
   users: number;
+  activeUsers: number;
   workspaces: number;
   boards: number;
   cards: number;
+  cardsDone: number;
+  cardsOpen: number;
+  attachments: number;
+  storageBytes: number;
+  comments: number;
+  growth: Array<{
+    day: string;
+    date: string;
+    users: number;
+    boards: number;
+    cards: number;
+  }>;
 }
 
 interface Workspace {
   id: string;
   name: string;
+  description?: string | null;
   owner: {
+    id: string;
     name: string;
     email: string;
   };
+  totalCards?: number;
   _count: {
     members: number;
     boards: number;
   };
+  boardsPreview?: Array<{ id: string; name: string; cardsCount: number }>;
+  membersPreview?: Array<{ role: string; name: string; email: string }>;
   createdAt: string;
 }
 
@@ -37,11 +56,86 @@ interface UserSummary {
   email: string;
   role: string;
   globalRole: string;
+  avatarUrl?: string | null;
+  phone?: string | null;
+  country?: string | null;
   boardsOwned: number;
+  workspacesOwned: number;
   workspacesJoined: number;
+  boardMemberships: number;
+  attachmentsCount?: number;
+  assignedCardsCount?: number;
   workspaceRoles: Record<string, number>;
   boardRoles: Record<string, number>;
   createdAt: string;
+  updatedAt: string;
+}
+
+interface UserDetails {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    globalRole: string;
+    avatarUrl?: string | null;
+    phone?: string | null;
+    country?: string | null;
+    theme?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  boards: Array<{
+    id: string;
+    name: string;
+    workspaceName: string;
+    workspaceId: string;
+    role: string;
+    membersCount: number;
+    cardsCount: number;
+    updatedAt: string;
+  }>;
+  workspaces: Array<{
+    id: string;
+    name: string;
+    role: string;
+    membersCount: number;
+    boardsCount: number;
+  }>;
+  guests: Array<{
+    id: string;
+    name: string;
+    email: string;
+    boardName: string;
+    role: string;
+    status: string;
+  }>;
+  storageBytes: number;
+  attachmentsCount: number;
+  assignedCardsCount: number;
+  completedAssignedCards: number;
+  recentActivity: Array<{
+    id: string;
+    action: string;
+    resource: string;
+    createdAt: string;
+    metadata?: any;
+  }>;
+}
+
+interface SystemActivityItem {
+  id: string;
+  action: string;
+  actionLabel: string;
+  type: 'user' | 'board' | 'workspace' | 'card' | 'system';
+  resource: string;
+  resourceId?: string | null;
+  user: string;
+  userEmail?: string | null;
+  target: string;
+  ipAddress?: string | null;
+  createdAt: string;
+  metadata?: any;
 }
 
 interface DriveStatus {
@@ -82,44 +176,32 @@ interface TelemetrySummary {
   healthyBoardsCount: number;
 }
 
-type Tab = 'dashboard' | 'users' | 'workspaces' | 'activity' | 'settings' | 'telemetry';
+type Tab = 'dashboard' | 'users' | 'workspaces' | 'activity' | 'telemetry' | 'settings';
 
-// Mock global activities since endpoint might not exist yet
-const generateMockActivities = () => {
-  const acts = [];
-  const types = ['workspace', 'user', 'system', 'board'];
-  const actions = ['creó un nuevo', 'invitó a', 'eliminó', 'actualizó'];
-  for(let i=0; i<120; i++) {
-    acts.push({
-      id: i,
-      user: `Usuario ${Math.floor(Math.random() * 50)}`,
-      action: actions[i % actions.length],
-      target: `Elemento ${i}`,
-      time: `hace ${i+1} horas`,
-      type: types[i % types.length]
-    });
-  }
-  return acts;
+const formatBytes = (bytes?: number): string => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 };
-const globalActivities = generateMockActivities();
 
-const getMockUserDetails = (user: UserSummary) => {
-  return {
-    boards: Array.from({ length: user.boardsOwned || 5 }).map((_, i) => ({
-      id: `b${i}`,
-      name: `Tablero ${i + 1}`,
-      workspaceName: `Espacio de prueba ${i % 3 + 1}`,
-      role: i === 0 ? 'ADMIN' : 'MEMBER',
-      membersCount: Math.floor(Math.random() * 10) + 1
-    })),
-    guests: Array.from({ length: 4 }).map((_, i) => ({
-      id: `g${i}`,
-      name: `Invitado ${i + 1}`,
-      email: `invitado${i+1}@externo.com`,
-      boardName: `Tablero ${i % 2 + 1}`,
-      role: 'VIEWER'
-    }))
-  };
+const formatRelativeTime = (dateStr: string): string => {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffSec < 60) return 'hace un momento';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `hace ${diffDays} d`;
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+  } catch {
+    return dateStr;
+  }
 };
 
 const Pagination = ({ 
@@ -138,9 +220,9 @@ const Pagination = ({
           className="bg-slate-100 dark:bg-white/5 border border-cu-border dark:border-white/10 rounded-lg px-2 py-1 outline-none text-cu-text dark:text-zinc-100 focus:border-cyan-500"
         >
           <option value={10}>10</option>
-          <option value={15}>15</option>
+          <option value={20}>20</option>
           <option value={50}>50</option>
-          <option value={500}>500</option>
+          <option value={100}>100</option>
         </select>
         <span>registros por página</span>
       </div>
@@ -167,23 +249,24 @@ const Pagination = ({
   );
 };
 
-const SimpleChart = () => {
-  const data = [
-    { day: 'Lun', users: 12, boards: 5 },
-    { day: 'Mar', users: 19, boards: 8 },
-    { day: 'Mie', users: 15, boards: 12 },
-    { day: 'Jue', users: 22, boards: 15 },
-    { day: 'Vie', users: 28, boards: 20 },
-    { day: 'Sab', users: 35, boards: 25 },
-    { day: 'Dom', users: 40, boards: 30 }
+const PlatformGrowthChart: React.FC<{ growth?: Stats['growth'] }> = ({ growth }) => {
+  const data = growth && growth.length > 0 ? growth : [
+    { day: 'Lun', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Mar', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Mié', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Jue', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Vie', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Sáb', date: '', users: 0, boards: 0, cards: 0 },
+    { day: 'Dom', date: '', users: 0, boards: 0, cards: 0 }
   ];
   
-  const maxVal = Math.max(...data.map(d => Math.max(d.users, d.boards)));
+  const rawMax = Math.max(1, ...data.map(d => Math.max(d.users, d.boards, d.cards)));
+  const maxVal = Math.max(rawMax, 4);
 
   return (
     <div className="h-64 flex items-end justify-between gap-2 mt-6 pt-4 border-t border-cu-border dark:border-dark-border relative">
       <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
-        {[4,3,2,1,0].map(i => (
+        {[4, 3, 2, 1, 0].map(i => (
           <div key={i} className="border-t border-cu-border dark:border-white/5 w-full flex items-center">
             <span className="text-[10px] text-cu-muted dark:text-zinc-600 -mt-2.5 bg-cu-surface dark:bg-dark-surface pr-2">
               {Math.round((maxVal * i) / 4)}
@@ -195,23 +278,32 @@ const SimpleChart = () => {
       {data.map((d, i) => (
         <div key={i} className="flex flex-col items-center gap-2 flex-1 z-10">
           <div className="flex gap-1 items-end h-48 w-full justify-center">
+            {/* Users Bar */}
             <div 
-              className="w-1/3 max-w-[20px] bg-cyan-400 rounded-t-sm transition-all duration-500 hover:brightness-110" 
-              style={{ height: `${(d.users / maxVal) * 100}%` }}
-              title={`Usuarios: ${d.users}`}
+              className="w-1/4 max-w-[16px] bg-cyan-400 rounded-t-sm transition-all duration-500 hover:brightness-110 min-h-[3px]" 
+              style={{ height: `${Math.max(3, (d.users / maxVal) * 100)}%` }}
+              title={`Nuevos Usuarios: ${d.users} (${d.date || d.day})`}
             />
+            {/* Boards Bar */}
             <div 
-              className="w-1/3 max-w-[20px] bg-emerald-400 rounded-t-sm transition-all duration-500 hover:brightness-110" 
-              style={{ height: `${(d.boards / maxVal) * 100}%` }}
-              title={`Tableros: ${d.boards}`}
+              className="w-1/4 max-w-[16px] bg-emerald-400 rounded-t-sm transition-all duration-500 hover:brightness-110 min-h-[3px]" 
+              style={{ height: `${Math.max(3, (d.boards / maxVal) * 100)}%` }}
+              title={`Nuevos Tableros: ${d.boards} (${d.date || d.day})`}
+            />
+            {/* Cards Bar */}
+            <div 
+              className="w-1/4 max-w-[16px] bg-purple-500 rounded-t-sm transition-all duration-500 hover:brightness-110 min-h-[3px]" 
+              style={{ height: `${Math.max(3, (d.cards / maxVal) * 100)}%` }}
+              title={`Nuevas Tarjetas: ${d.cards} (${d.date || d.day})`}
             />
           </div>
           <span className="text-xs font-bold text-cu-muted dark:text-zinc-500">{d.day}</span>
         </div>
       ))}
-      <div className="absolute top-0 right-0 flex gap-4 text-xs font-bold text-cu-muted dark:text-zinc-400">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-cyan-400"></div> Usuarios</div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-emerald-400"></div> Tableros</div>
+      <div className="absolute top-0 right-0 flex flex-wrap gap-4 text-xs font-bold text-cu-muted dark:text-zinc-400">
+        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-cyan-400"></div> Usuarios</div>
+        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-emerald-400"></div> Tableros</div>
+        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-purple-500"></div> Tarjetas</div>
       </div>
     </div>
   );
@@ -229,15 +321,26 @@ const SystemAdminPage: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // User detail state
   const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [roleChangeLoading, setRoleChangeLoading] = useState(false);
+
+  // System Activity state
+  const [activities, setActivities] = useState<SystemActivityItem[]>([]);
+  const [activityTotal, setActivityTotal] = useState(0);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityCategory, setActivityCategory] = useState<string>('all');
+  const [actPage, setActPage] = useState(1);
+  const [actPerPage, setActPerPage] = useState(15);
 
   // Pagination states
   const [userPage, setUserPage] = useState(1);
   const [userPerPage, setUserPerPage] = useState(10);
   const [wsPage, setWsPage] = useState(1);
   const [wsPerPage, setWsPerPage] = useState(10);
-  const [actPage, setActPage] = useState(1);
-  const [actPerPage, setActPerPage] = useState(10);
 
   // Telemetry state
   const [telemetryData, setTelemetryData] = useState<{
@@ -257,6 +360,7 @@ const SystemAdminPage: React.FC = () => {
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Primary initial fetch
   useEffect(() => {
     if (user?.globalRole !== 'SYSTEM_ADMIN') {
       navigate('/app');
@@ -307,8 +411,82 @@ const SystemAdminPage: React.FC = () => {
     setUserPage(1);
     setWsPage(1);
     setActPage(1);
-    if (activeTab !== 'users') setSelectedUser(null);
+    if (activeTab !== 'users') {
+      setSelectedUser(null);
+      setUserDetails(null);
+    }
   }, [searchTerm, activeTab]);
+
+  // Load Real User Details
+  const handleSelectUser = useCallback(async (summaryUser: UserSummary) => {
+    setSelectedUser(summaryUser);
+    setUserDetailsLoading(true);
+    try {
+      const res = await apiClient.get<{ data: UserDetails }>(`/api/system/users/${summaryUser.id}/details`);
+      setUserDetails(res.data);
+    } catch (err) {
+      console.error('Failed to load user details', err);
+    } finally {
+      setUserDetailsLoading(false);
+    }
+  }, []);
+
+  // Toggle user global role
+  const handleToggleGlobalRole = useCallback(async () => {
+    if (!selectedUser || !userDetails) return;
+    const newRole = selectedUser.globalRole === 'SYSTEM_ADMIN' ? 'USER' : 'SYSTEM_ADMIN';
+    const confirmMsg = newRole === 'SYSTEM_ADMIN'
+      ? `¿Estás seguro de promover a ${selectedUser.name} a SUPER ADMIN? Tendrá acceso total e irrestricto a la plataforma.`
+      : `¿Estás seguro de quitar los permisos de Super Admin a ${selectedUser.name}?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setRoleChangeLoading(true);
+    try {
+      const res = await apiClient.patch<{ data: { user: { id: string; globalRole: string } } }>(
+        `/api/system/users/${selectedUser.id}/role`,
+        { globalRole: newRole }
+      );
+      const updatedGlobalRole = res.data.user.globalRole;
+      setSelectedUser(prev => prev ? { ...prev, globalRole: updatedGlobalRole } : null);
+      setUserDetails(prev => prev ? { ...prev, user: { ...prev.user, globalRole: updatedGlobalRole } } : null);
+      setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, globalRole: updatedGlobalRole } : u));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Error al actualizar rol del usuario');
+    } finally {
+      setRoleChangeLoading(false);
+    }
+  }, [selectedUser, userDetails]);
+
+  // Fetch Real System Activity
+  const fetchActivity = useCallback(async () => {
+    setActivityLoading(true);
+    try {
+      const res = await apiClient.get<{ data: { total: number; activities: SystemActivityItem[] } }>(
+        '/api/system/activity',
+        {
+          params: {
+            page: actPage,
+            limit: actPerPage,
+            category: activityCategory,
+            search: searchTerm
+          }
+        }
+      );
+      setActivities(res.data.activities || []);
+      setActivityTotal(res.data.total || 0);
+    } catch (err) {
+      console.error('Failed to fetch system activity', err);
+    } finally {
+      setActivityLoading(false);
+    }
+  }, [actPage, actPerPage, activityCategory, searchTerm]);
+
+  useEffect(() => {
+    if (activeTab === 'activity') {
+      fetchActivity();
+    }
+  }, [activeTab, fetchActivity]);
 
   const handleGetAuthUrl = useCallback(async () => {
     setDriveAuthUrlLoading(true);
@@ -344,7 +522,7 @@ const SystemAdminPage: React.FC = () => {
     }
   }, [pendingToken]);
 
-  // Derived state for Users
+  // Filtered Users
   const filteredUsers = useMemo(() => {
     return users.filter(item =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -357,7 +535,7 @@ const SystemAdminPage: React.FC = () => {
     return filteredUsers.slice(start, start + userPerPage);
   }, [filteredUsers, userPage, userPerPage]);
 
-  // Derived state for Workspaces
+  // Filtered Workspaces
   const filteredWorkspaces = useMemo(() => {
     return workspaces.filter(ws => 
       ws.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -370,20 +548,6 @@ const SystemAdminPage: React.FC = () => {
     const start = (wsPage - 1) * wsPerPage;
     return filteredWorkspaces.slice(start, start + wsPerPage);
   }, [filteredWorkspaces, wsPage, wsPerPage]);
-
-  // Derived state for Activities
-  const filteredActivities = useMemo(() => {
-    return globalActivities.filter(a => 
-      a.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.target.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
-
-  const paginatedActivities = useMemo(() => {
-    const start = (actPage - 1) * actPerPage;
-    return filteredActivities.slice(start, start + actPerPage);
-  }, [filteredActivities, actPage, actPerPage]);
 
   const handleEnterWorkspace = (wsId: string) => {
     navigate(`/w/${wsId}/dashboard`);
@@ -492,7 +656,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
 
   return (
     <div className="flex-1 bg-cu-bg dark:bg-dark-bg min-h-screen text-cu-text dark:text-zinc-100 p-6 sm:p-10 font-sans">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1440px] mx-auto">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
@@ -503,7 +667,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
             </div>
             <h1 className="text-4xl font-black tracking-tight">Centro de Control Global</h1>
             <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-              Gestión avanzada de plataforma, usuarios, espacios de trabajo y configuraciones del sistema.
+              Gestión avanzada de plataforma, usuarios, espacios de trabajo, telemetría y auditoría integral del sistema.
             </p>
           </div>
         </div>
@@ -513,7 +677,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
           {tabsMenu.map(t => (
             <button
               key={t.id}
-              onClick={() => { setActiveTab(t.id as Tab); setSearchTerm(''); setSelectedUser(null); }}
+              onClick={() => { setActiveTab(t.id as Tab); setSearchTerm(''); setSelectedUser(null); setUserDetails(null); }}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
                 activeTab === t.id 
                   ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400' 
@@ -536,13 +700,39 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
           {/* DASHBOARD TAB */}
           {activeTab === 'dashboard' && (
             <>
+              {/* Primary KPIs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard title="Usuarios Totales" value={stats?.users || 0} icon={<Users size={20} />} color="text-blue-400" />
-                <StatCard title="Espacios" value={stats?.workspaces || 0} icon={<Globe size={20} />} color="text-purple-400" />
-                <StatCard title="Tableros" value={stats?.boards || 0} icon={<Layout size={20} />} color="text-emerald-400" />
-                <StatCard title="Tarjetas" value={stats?.cards || 0} icon={<Database size={20} />} color="text-orange-400" />
+                <StatCard 
+                  title="Usuarios Totales" 
+                  value={stats?.users || 0} 
+                  subtitle={`${stats?.activeUsers || 0} activos en 30 días`} 
+                  icon={<Users size={20} />} 
+                  color="text-blue-500" 
+                />
+                <StatCard 
+                  title="Espacios de Trabajo" 
+                  value={stats?.workspaces || 0} 
+                  subtitle="Entornos activos" 
+                  icon={<Globe size={20} />} 
+                  color="text-purple-500" 
+                />
+                <StatCard 
+                  title="Tableros Totales" 
+                  value={stats?.boards || 0} 
+                  subtitle="Proyectos y flujos" 
+                  icon={<Layout size={20} />} 
+                  color="text-emerald-500" 
+                />
+                <StatCard 
+                  title="Tarjetas Totales" 
+                  value={stats?.cards || 0} 
+                  subtitle={`${stats?.cardsDone || 0} finalizadas`} 
+                  icon={<Database size={20} />} 
+                  color="text-orange-500" 
+                />
               </div>
 
+              {/* Chart & Quick Summary */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div className="lg:col-span-2 bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
                   <div className="flex items-center justify-between gap-4">
@@ -551,22 +741,27 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                         <Activity size={20} className="text-cyan-400" />
                         Crecimiento de la plataforma
                       </h2>
-                      <p className="text-sm text-cu-muted dark:text-zinc-500 mt-2">Usuarios y tableros creados en los últimos 7 días.</p>
+                      <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">
+                        Usuarios, tableros y tarjetas creados en los últimos 7 días (datos reales).
+                      </p>
                     </div>
                   </div>
-                  <SimpleChart />
+                  <PlatformGrowthChart growth={stats?.growth} />
                 </div>
 
                 <div className="space-y-6">
                   <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
                     <h2 className="text-lg font-bold flex items-center gap-3 mb-4">
                       <CircleGauge size={18} className="text-emerald-400" />
-                      Resumen rápido
+                      Métricas de Operación
                     </h2>
                     <div className="space-y-3 text-sm">
-                      <SummaryLine label="Usuarios Activos" value={String(stats?.users || 0)} icon={<UserRound size={14} />} />
-                      <SummaryLine label="Espacios Activos" value={String(stats?.workspaces || 0)} icon={<Building2 size={14} />} />
-                      <SummaryLine label="Total Tableros" value={String(stats?.boards || 0)} icon={<Layers3 size={14} />} />
+                      <SummaryLine label="Usuarios Activos (30d)" value={String(stats?.activeUsers || 0)} icon={<UserRound size={14} />} />
+                      <SummaryLine label="Tarjetas Pendientes" value={String(stats?.cardsOpen || 0)} icon={<CheckSquare size={14} />} />
+                      <SummaryLine label="Tarjetas Finalizadas" value={String(stats?.cardsDone || 0)} icon={<CheckCircle size={14} />} />
+                      <SummaryLine label="Archivos y Adjuntos" value={String(stats?.attachments || 0)} icon={<HardDrive size={14} />} />
+                      <SummaryLine label="Almacenamiento Total" value={formatBytes(stats?.storageBytes)} icon={<Database size={14} />} />
+                      <SummaryLine label="Comentarios Registrados" value={String(stats?.comments || 0)} icon={<MessageSquare size={14} />} />
                       <SummaryLine label="Google Drive" value={driveStatus?.connected ? 'Conectado' : 'Pendiente'} icon={<BadgeInfo size={14} />} />
                     </div>
                   </div>
@@ -586,7 +781,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                         <UsersRound size={20} className="text-cyan-400" />
                         Gestión de Usuarios
                       </h2>
-                      <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">Directorio completo de cuentas registradas.</p>
+                      <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">Directorio completo de cuentas registradas en la base de datos.</p>
                     </div>
                     <div className="relative w-full max-w-md">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cu-muted dark:text-zinc-500" size={18} />
@@ -604,29 +799,42 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                     <div className="grid grid-cols-12 gap-3 px-4 py-3 bg-slate-100 dark:bg-white/5 text-[11px] uppercase tracking-[0.25em] text-cu-muted dark:text-zinc-500 font-black">
                       <div className="col-span-4">Usuario</div>
                       <div className="col-span-2">Rol global</div>
-                      <div className="col-span-2">Tableros</div>
+                      <div className="col-span-2">Tableros Propios</div>
                       <div className="col-span-2">Espacios</div>
-                      <div className="col-span-2">Registro</div>
+                      <div className="col-span-2 text-right">Registro</div>
                     </div>
                     <div className="divide-y divide-white/5 min-h-[300px]">
                       {paginatedUsers.length > 0 ? paginatedUsers.map((item) => (
-                        <div key={item.id} onClick={() => setSelectedUser(item)} className="cursor-pointer grid grid-cols-12 gap-3 px-4 py-4 items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                          <div className="col-span-4 min-w-0">
-                            <div className="font-bold text-cu-text dark:text-zinc-100 truncate">{item.name}</div>
-                            <div className="text-xs text-cu-muted dark:text-zinc-500 truncate">{item.email}</div>
+                        <div 
+                          key={item.id} 
+                          onClick={() => handleSelectUser(item)} 
+                          className="cursor-pointer grid grid-cols-12 gap-3 px-4 py-4 items-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group"
+                        >
+                          <div className="col-span-4 min-w-0 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+                              {item.name ? item.name.charAt(0).toUpperCase() : '?'}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-cu-text dark:text-zinc-100 truncate group-hover:text-cyan-500 transition-colors">
+                                {item.name}
+                              </div>
+                              <div className="text-xs text-cu-muted dark:text-zinc-500 truncate">{item.email}</div>
+                            </div>
                           </div>
                           <div className="col-span-2">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${item.globalRole === 'SYSTEM_ADMIN' ? 'bg-red-500/10 text-red-500' : 'bg-cyan-500/10 text-cyan-500'}`}>
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                              item.globalRole === 'SYSTEM_ADMIN' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-cyan-500/10 text-cyan-500'
+                            }`}>
                               {item.globalRole}
                             </span>
                           </div>
                           <div className="col-span-2 text-sm text-slate-700 dark:text-zinc-300 font-bold">
-                            {item.boardsOwned}
+                            {item.boardsOwned} tableros
                           </div>
                           <div className="col-span-2 text-sm text-slate-700 dark:text-zinc-300 font-bold">
-                            {item.workspacesJoined}
+                            {item.workspacesJoined} espacios
                           </div>
-                          <div className="col-span-2 text-xs text-cu-muted dark:text-zinc-500">
+                          <div className="col-span-2 text-xs text-cu-muted dark:text-zinc-500 text-right">
                             {new Date(item.createdAt).toLocaleDateString('es-ES')}
                           </div>
                         </div>
@@ -649,82 +857,225 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
               ) : (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                   <button 
-                    onClick={() => setSelectedUser(null)}
+                    onClick={() => { setSelectedUser(null); setUserDetails(null); }}
                     className="flex items-center gap-2 text-sm font-bold text-cu-muted dark:text-zinc-500 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors mb-6"
                   >
                     <ChevronRight size={16} className="rotate-180" />
                     Volver al directorio
                   </button>
 
+                  {/* User Profile Header */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-cyan-500/20">
-                        {selectedUser.name.charAt(0).toUpperCase()}
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/20">
+                        {selectedUser.name ? selectedUser.name.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div>
-                        <h2 className="text-2xl font-black text-cu-text dark:text-zinc-100 flex items-center gap-2">
+                        <h2 className="text-2xl font-black text-cu-text dark:text-zinc-100 flex items-center gap-3">
                           {selectedUser.name}
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest ${selectedUser.globalRole === 'SYSTEM_ADMIN' ? 'bg-red-500/10 text-red-500' : 'bg-cyan-500/10 text-cyan-500'}`}>
+                          <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-widest font-black ${
+                            selectedUser.globalRole === 'SYSTEM_ADMIN' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-cyan-500/10 text-cyan-500'
+                          }`}>
                             {selectedUser.globalRole}
                           </span>
                         </h2>
-                        <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">{selectedUser.email} • ID: {selectedUser.id}</p>
+                        <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">
+                          {selectedUser.email} • ID: <span className="font-mono text-xs">{selectedUser.id}</span>
+                        </p>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleToggleGlobalRole}
+                        disabled={roleChangeLoading || selectedUser.id === user?.id}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                          selectedUser.globalRole === 'SYSTEM_ADMIN'
+                            ? 'bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20'
+                            : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-500 border-cyan-500/20'
+                        } disabled:opacity-50`}
+                      >
+                        <ShieldAlert size={14} />
+                        {roleChangeLoading 
+                          ? 'Guardando...' 
+                          : selectedUser.globalRole === 'SYSTEM_ADMIN' 
+                            ? 'Degradar a Usuario Normal' 
+                            : 'Promover a Super Admin'}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <StatCard title="Tableros Totales" value={selectedUser.boardsOwned} icon={<Layout size={18} />} color="text-cyan-400" />
-                    <StatCard title="Espacios Totales" value={selectedUser.workspacesJoined} icon={<Building2 size={18} />} color="text-purple-400" />
-                    <StatCard title="Invitados" value={getMockUserDetails(selectedUser).guests.length} icon={<Users size={18} />} color="text-amber-400" />
-                    <StatCard title="Almacenamiento" value={0} icon={<HardDrive size={18} />} color="text-emerald-400" />
-                  </div>
+                  {userDetailsLoading ? (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {[1,2,3,4].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+                      </div>
+                      <Skeleton className="h-64 rounded-2xl" />
+                    </div>
+                  ) : userDetails ? (
+                    <>
+                      {/* Real User KPI Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <StatCard 
+                          title="Tableros Totales" 
+                          value={userDetails.boards.length} 
+                          subtitle={`${userDetails.boards.filter(b => b.role === 'PROPIETARIO').length} como propietario`}
+                          icon={<Layout size={18} />} 
+                          color="text-cyan-400" 
+                        />
+                        <StatCard 
+                          title="Espacios de Trabajo" 
+                          value={userDetails.workspaces.length} 
+                          subtitle="Espacios vinculados"
+                          icon={<Building2 size={18} />} 
+                          color="text-purple-400" 
+                        />
+                        <StatCard 
+                          title="Colaboradores" 
+                          value={userDetails.guests.length} 
+                          subtitle="En tableros propios"
+                          icon={<Users size={18} />} 
+                          color="text-amber-400" 
+                        />
+                        <StatCard 
+                          title="Almacenamiento" 
+                          value={0}
+                          customValue={formatBytes(userDetails.storageBytes)}
+                          subtitle={`${userDetails.attachmentsCount} adjuntos subidos`}
+                          icon={<HardDrive size={18} />} 
+                          color="text-emerald-400" 
+                        />
+                      </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
-                      <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
-                        <Layers3 size={16} className="text-cyan-500" />
-                        Tableros (Propiedad / Acceso)
-                      </h3>
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                        {getMockUserDetails(selectedUser).boards.map(b => (
-                          <div key={b.id} className="flex justify-between items-center p-3 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl">
-                            <div>
-                              <div className="font-bold text-sm">{b.name}</div>
-                              <div className="text-[10px] text-cu-muted dark:text-zinc-500 uppercase">{b.workspaceName}</div>
-                            </div>
-                            <div className="text-right">
-                              <div className={`text-[10px] font-black uppercase ${b.role === 'ADMIN' ? 'text-cyan-500' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                {b.role}
+                      {/* Boards & Collaborators Lists */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        {/* Real Boards List */}
+                        <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
+                          <h3 className="font-bold flex items-center justify-between mb-4 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Layers3 size={16} className="text-cyan-500" />
+                              Tableros (Propiedad / Acceso Real)
+                            </span>
+                            <span className="text-xs text-cu-muted dark:text-zinc-500">
+                              {userDetails.boards.length} tableros
+                            </span>
+                          </h3>
+                          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-2">
+                            {userDetails.boards.length > 0 ? (
+                              userDetails.boards.map(b => (
+                                <div key={b.id} className="flex justify-between items-center p-3 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl hover:border-cyan-500/30 transition-all">
+                                  <div className="min-w-0 pr-3">
+                                    <div className="font-bold text-sm truncate">{b.name}</div>
+                                    <div className="text-[10px] text-cu-muted dark:text-zinc-500 uppercase truncate">
+                                      {b.workspaceName} • {b.cardsCount} tarjetas
+                                    </div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <div className={`text-[10px] font-black uppercase ${
+                                      b.role === 'PROPIETARIO' || b.role === 'ADMIN' ? 'text-cyan-500' : 'text-slate-500 dark:text-zinc-400'
+                                    }`}>
+                                      {b.role}
+                                    </div>
+                                    <div className="text-[10px] text-cu-muted dark:text-zinc-500">{b.membersCount} miembros</div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-xs text-cu-muted dark:text-zinc-500 py-6 text-center">
+                                Este usuario no pertenece a ningún tablero todavía.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Real Guests & Collaborators List */}
+                        <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
+                          <h3 className="font-bold flex items-center justify-between mb-4 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Users size={16} className="text-amber-500" />
+                              Colaboradores & Invitados Reales
+                            </span>
+                            <span className="text-xs text-cu-muted dark:text-zinc-500">
+                              {userDetails.guests.length} personas
+                            </span>
+                          </h3>
+                          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-2">
+                            {userDetails.guests.length > 0 ? (
+                              userDetails.guests.map(g => (
+                                <div key={g.id} className="flex justify-between items-center p-3 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl hover:border-amber-500/30 transition-all">
+                                  <div className="min-w-0 pr-3">
+                                    <div className="font-bold text-sm truncate">{g.name}</div>
+                                    <div className="text-[10px] text-cu-muted dark:text-zinc-500 truncate">{g.email}</div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <div className="text-[10px] font-black text-amber-500 uppercase">{g.role}</div>
+                                    <div className="text-[10px] text-cu-muted dark:text-zinc-500 truncate max-w-[140px]">{g.boardName}</div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-xs text-cu-muted dark:text-zinc-500 py-6 text-center">
+                                No hay colaboradores externos o miembros invitados registrados por este usuario.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Workspaces & Recent User Activity */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Workspaces Joined */}
+                        <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
+                          <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
+                            <Building2 size={16} className="text-purple-500" />
+                            Espacios de Trabajo Vinculados
+                          </h3>
+                          <div className="space-y-2">
+                            {userDetails.workspaces.map(w => (
+                              <div key={w.id} className="flex justify-between items-center p-3 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl">
+                                <div>
+                                  <div className="font-bold text-sm">{w.name}</div>
+                                  <div className="text-[10px] text-cu-muted dark:text-zinc-500">
+                                    {w.boardsCount} tableros • {w.membersCount} miembros
+                                  </div>
+                                </div>
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-500 uppercase">
+                                  {w.role}
+                                </span>
                               </div>
-                              <div className="text-[10px] text-cu-muted dark:text-zinc-500">{b.membersCount} miembros</div>
-                            </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
-                      <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
-                        <Users size={16} className="text-amber-500" />
-                        Invitados (Externos / Miembros)
-                      </h3>
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                        {getMockUserDetails(selectedUser).guests.map(g => (
-                          <div key={g.id} className="flex justify-between items-center p-3 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl">
-                            <div>
-                              <div className="font-bold text-sm">{g.name}</div>
-                              <div className="text-[10px] text-cu-muted dark:text-zinc-500">{g.email}</div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-[10px] font-black text-amber-500 uppercase">{g.role}</div>
-                              <div className="text-[10px] text-cu-muted dark:text-zinc-500">{g.boardName}</div>
-                            </div>
+                        {/* Recent User Audit Logs */}
+                        <div className="bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-dark-border rounded-2xl p-5">
+                          <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
+                            <Activity size={16} className="text-cyan-500" />
+                            Última Actividad Registrada
+                          </h3>
+                          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                            {userDetails.recentActivity.length > 0 ? (
+                              userDetails.recentActivity.map(act => (
+                                <div key={act.id} className="flex justify-between items-center p-2.5 bg-white dark:bg-black/20 border border-cu-border dark:border-white/10 rounded-xl text-xs">
+                                  <div>
+                                    <span className="font-semibold text-slate-700 dark:text-zinc-200">{act.action}</span>
+                                    <span className="text-cu-muted dark:text-zinc-500 ml-2">[{act.resource}]</span>
+                                  </div>
+                                  <span className="text-[10px] text-cu-muted dark:text-zinc-500 font-mono">
+                                    {formatRelativeTime(act.createdAt)}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-xs text-cu-muted dark:text-zinc-500 py-6 text-center">
+                                Sin eventos de auditoría registrados recientemente.
+                              </p>
+                            )}
                           </div>
-                        ))}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -739,7 +1090,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                     <Building2 size={20} className="text-purple-400" />
                     Directorio de Espacios
                   </h2>
-                  <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">Gestión global de espacios de trabajo.</p>
+                  <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">Gestión global de espacios de trabajo y sus proyectos.</p>
                 </div>
                 <div className="relative w-full md:w-96">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cu-muted dark:text-zinc-500" size={18} />
@@ -794,6 +1145,12 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                               <span className="text-sm font-black">{ws._count.boards}</span>
                               <span className="text-[10px] text-cu-muted dark:text-zinc-500 uppercase">Tableros</span>
                             </div>
+                            {ws.totalCards !== undefined && (
+                              <div className="flex flex-col">
+                                <span className="text-sm font-black">{ws.totalCards}</span>
+                                <span className="text-[10px] text-cu-muted dark:text-zinc-500 uppercase">Tarjetas</span>
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-xs text-cu-muted dark:text-zinc-500">
@@ -832,64 +1189,115 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
             </div>
           )}
 
-          {/* ACTIVITY TAB */}
+          {/* ACTIVITY TAB (REAL AUDIT TRAIL) */}
           {activeTab === 'activity' && (
             <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
                   <h2 className="text-xl font-bold flex items-center gap-3">
                     <Activity size={20} className="text-orange-400" />
-                    Actividad Global
+                    Actividad Global en Tiempo Real
                   </h2>
-                  <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">Registro de acciones de todos los usuarios en la plataforma.</p>
+                  <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">
+                    Auditoría de acciones reales registradas en la base de datos ({activityTotal} eventos).
+                  </p>
                 </div>
-                <div className="relative w-full max-w-md">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cu-muted dark:text-zinc-500" size={18} />
-                  <input
-                    type="text"
-                    placeholder="Buscar actividad, usuario o elemento..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-white/5 border border-cu-border dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm focus:bg-slate-200 dark:bg-white/10 focus:border-orange-500/50 outline-none transition-all"
-                  />
+                
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                  {/* Category Filter */}
+                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-cu-border dark:border-white/10 overflow-x-auto text-xs font-bold">
+                    {[
+                      { id: 'all', label: 'Todos' },
+                      { id: 'auth', label: 'Sesiones & Auth' },
+                      { id: 'board', label: 'Tableros' },
+                      { id: 'card', label: 'Tarjetas' },
+                      { id: 'workspace', label: 'Espacios' },
+                      { id: 'telemetry', label: 'Telemetría' }
+                    ].map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => { setActivityCategory(cat.id); setActPage(1); }}
+                        className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+                          activityCategory === cat.id 
+                            ? 'bg-white dark:bg-white/10 text-cu-text dark:text-zinc-100 shadow-sm' 
+                            : 'text-cu-muted dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cu-muted dark:text-zinc-500" size={16} />
+                    <input
+                      type="text"
+                      placeholder="Buscar por usuario o acción..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-slate-100 dark:bg-white/5 border border-cu-border dark:border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs focus:bg-slate-200 dark:bg-white/10 focus:border-orange-500/50 outline-none transition-all"
+                    />
+                  </div>
+
+                  <button
+                    onClick={fetchActivity}
+                    disabled={activityLoading}
+                    className="p-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl text-cu-muted dark:text-zinc-400 border border-cu-border dark:border-white/10 transition-all shrink-0"
+                    title="Refrescar actividad"
+                  >
+                    <RefreshCw size={16} className={activityLoading ? 'animate-spin' : ''} />
+                  </button>
                 </div>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-cu-border dark:border-dark-border">
-                <div className="divide-y divide-white/5">
-                  {paginatedActivities.length > 0 ? paginatedActivities.map((act) => (
-                    <div key={act.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-xl ${
-                          act.type === 'workspace' ? 'bg-purple-500/20 text-purple-500' :
-                          act.type === 'user' ? 'bg-blue-500/20 text-blue-500' :
-                          act.type === 'board' ? 'bg-emerald-500/20 text-emerald-500' :
-                          'bg-amber-500/20 text-amber-500'
-                        }`}>
-                          {act.type === 'workspace' && <Building2 size={16} />}
-                          {act.type === 'user' && <Users size={16} />}
-                          {act.type === 'board' && <Layout size={16} />}
-                          {act.type === 'system' && <Settings size={16} />}
-                        </div>
-                        <div className="text-sm">
-                          <span className="font-bold text-cu-text dark:text-zinc-100">{act.user}</span>
-                          <span className="text-slate-500 dark:text-zinc-400 mx-1">{act.action}</span>
-                          <span className="font-semibold text-cu-text dark:text-zinc-200">{act.target}</span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-cu-muted dark:text-zinc-500">
-                        {act.time}
-                      </div>
+                <div className="divide-y divide-white/5 min-h-[300px]">
+                  {activityLoading ? (
+                    <div className="p-8 space-y-4">
+                      {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-12 rounded-xl" />)}
                     </div>
-                  )) : (
+                  ) : activities.length > 0 ? (
+                    activities.map((act) => (
+                      <div key={act.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <div className="flex items-center gap-4 min-w-0 pr-4">
+                          <div className={`p-2 rounded-xl shrink-0 ${
+                            act.type === 'workspace' ? 'bg-purple-500/20 text-purple-500' :
+                            act.type === 'user' ? 'bg-blue-500/20 text-blue-500' :
+                            act.type === 'board' ? 'bg-emerald-500/20 text-emerald-500' :
+                            act.type === 'card' ? 'bg-orange-500/20 text-orange-500' :
+                            'bg-amber-500/20 text-amber-500'
+                          }`}>
+                            {act.type === 'workspace' && <Building2 size={16} />}
+                            {act.type === 'user' && <Users size={16} />}
+                            {act.type === 'board' && <Layout size={16} />}
+                            {act.type === 'card' && <CheckSquare size={16} />}
+                            {act.type === 'system' && <Settings size={16} />}
+                          </div>
+                          <div className="text-sm min-w-0">
+                            <span className="font-bold text-cu-text dark:text-zinc-100">{act.user}</span>
+                            <span className="text-slate-500 dark:text-zinc-400 mx-1.5">{act.actionLabel}</span>
+                            <span className="font-semibold text-cu-text dark:text-zinc-200 truncate">{act.target}</span>
+                            {act.ipAddress && (
+                              <span className="ml-2 text-[10px] text-cu-muted dark:text-zinc-500 font-mono hidden sm:inline">
+                                ({act.ipAddress})
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-cu-muted dark:text-zinc-500 whitespace-nowrap shrink-0">
+                          {formatRelativeTime(act.createdAt)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
                     <div className="px-4 py-16 flex flex-col items-center justify-center text-center text-sm text-cu-muted dark:text-zinc-500">
                       <Activity size={32} className="opacity-20 mb-3" />
-                      <p>No se encontraron registros de actividad.</p>
+                      <p>No se encontraron registros de actividad con los filtros seleccionados.</p>
                     </div>
                   )}
                 </div>
                 <Pagination 
-                  total={filteredActivities.length} 
+                  total={activityTotal} 
                   page={actPage} 
                   perPage={actPerPage} 
                   onPageChange={setActPage} 
@@ -905,14 +1313,14 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
               <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
                 <h2 className="text-xl font-bold flex items-center gap-3 mb-2">
                   <Settings size={20} className="text-slate-400" />
-                  Configuraciones Globales
+                  Configuraciones Globales del Sistema
                 </h2>
                 <p className="text-sm text-cu-muted dark:text-zinc-500 mb-6">
-                  Administra las integraciones de la plataforma y otras configuraciones técnicas a nivel de sistema.
+                  Administra las integraciones de la plataforma y el almacenamiento técnico a nivel de servidor.
                 </p>
 
                 {/* Google Drive Config Section */}
-                <div className="border border-cu-border dark:border-dark-border rounded-2xl overflow-hidden">
+                <div className="border border-cu-border dark:border-dark-border rounded-2xl overflow-hidden mb-6">
                   <div className="p-5 bg-slate-50 dark:bg-white/[0.02] border-b border-cu-border dark:border-dark-border">
                     <h3 className="font-bold flex items-center gap-2">
                       <HardDrive size={18} className="text-emerald-400" />
@@ -1022,6 +1430,28 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                         <p className="text-sm font-bold text-red-700 dark:text-red-400">Error al cargar estado de Google Drive.</p>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* System Storage & Database Summary */}
+                <div className="border border-cu-border dark:border-dark-border rounded-2xl overflow-hidden p-6 bg-slate-50 dark:bg-white/[0.02]">
+                  <h3 className="font-bold flex items-center gap-2 text-sm mb-4">
+                    <Database size={16} className="text-cyan-500" />
+                    Resumen de Base de Datos y Almacenamiento
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div className="p-3 bg-white dark:bg-black/20 rounded-xl border border-cu-border dark:border-white/10">
+                      <span className="text-cu-muted dark:text-zinc-500 block mb-1">Almacenamiento Total</span>
+                      <span className="font-black text-sm">{formatBytes(stats?.storageBytes)}</span>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-black/20 rounded-xl border border-cu-border dark:border-white/10">
+                      <span className="text-cu-muted dark:text-zinc-500 block mb-1">Archivos Adjuntos</span>
+                      <span className="font-black text-sm">{stats?.attachments || 0} archivos</span>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-black/20 rounded-xl border border-cu-border dark:border-white/10">
+                      <span className="text-cu-muted dark:text-zinc-500 block mb-1">Comentarios Guardados</span>
+                      <span className="font-black text-sm">{stats?.comments || 0} registros</span>
+                    </div>
                   </div>
                 </div>
 
@@ -1242,11 +1672,9 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                                 <span className={`font-semibold ${b.avgPayloadKb > 500 ? 'text-amber-500' : 'text-cu-text dark:text-zinc-300'}`}>
                                   {b.avgPayloadKb} KB
                                 </span>
-                                {b.maxPayloadKb > b.avgPayloadKb && (
-                                  <span className="text-[10px] text-cu-muted dark:text-zinc-500">
-                                    máx {b.maxPayloadKb} KB
-                                  </span>
-                                )}
+                                <span className="text-[10px] text-cu-muted dark:text-zinc-500">
+                                  máx {b.maxPayloadKb} KB
+                                </span>
                               </div>
                             </td>
                             <td className="py-3.5 px-4 text-slate-700 dark:text-zinc-300">
@@ -1285,15 +1713,31 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
   );
 };
 
-const StatCard: React.FC<{ title: string; value: number; icon: React.ReactNode; color: string }> = ({ title, value, icon, color }) => (
-  <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 flex flex-col justify-between h-32 hover:border-cu-border dark:border-white/10 transition-all group">
+const StatCard: React.FC<{ 
+  title: string; 
+  value: number; 
+  customValue?: string;
+  subtitle?: string; 
+  icon: React.ReactNode; 
+  color: string 
+}> = ({ title, value, customValue, subtitle, icon, color }) => (
+  <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 flex flex-col justify-between h-36 hover:border-cyan-500/30 transition-all group">
     <div className="flex justify-between items-start">
       <div className={`p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
         {icon}
       </div>
       <span className="text-[11px] font-black text-cu-muted dark:text-zinc-500 uppercase tracking-widest">{title}</span>
     </div>
-    <div className="text-3xl font-black tracking-tighter">{value.toLocaleString()}</div>
+    <div>
+      <div className="text-3xl font-black tracking-tighter">
+        {customValue !== undefined ? customValue : value.toLocaleString()}
+      </div>
+      {subtitle && (
+        <div className="text-xs text-cu-muted dark:text-zinc-500 mt-1 font-medium truncate">
+          {subtitle}
+        </div>
+      )}
+    </div>
   </div>
 );
 

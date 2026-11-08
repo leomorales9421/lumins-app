@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import apiClient from '../lib/api-client';
+import { applyThemeToDom, isValidTheme } from '../lib/theme';
 
 interface User {
   id: string;
@@ -94,7 +95,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async () => {
     try {
       const response = await apiClient.get<{ data: { user: User } }>('/api/auth/me');
-      setUser(response.data.user);
+      const fetchedUser = response.data.user;
+      setUser(fetchedUser);
+
+      // Sync theme on initial session load only if localStorage has no explicit preference yet
+      const localTheme = localStorage.getItem('theme');
+      if (!isValidTheme(localTheme) && isValidTheme(fetchedUser?.theme)) {
+        applyThemeToDom(fetchedUser.theme, true);
+      }
     } catch (error) {
       console.error('Failed to refresh user:', error);
       throw error;

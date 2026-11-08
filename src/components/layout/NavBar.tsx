@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Search, Bell, MessageSquare, Menu, Shield, Settings } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
 import UserAvatar from '../ui/UserAvatar';
+import { useProductUpdates } from '../../contexts/ProductUpdatesContext';
 
 interface NavBarProps {
   user: any;
@@ -19,6 +20,7 @@ const NavBar: React.FC<NavBarProps> = ({
   canCreateBoard = false
 }) => {
   const navigate = useNavigate();
+  const { openUpdates, hasUnread } = useProductUpdates();
 
   return (
     <nav className="h-16 bg-white dark:bg-[#1C1F26] border-b border-zinc-200 dark:border-white/10 flex items-center px-4 z-50 sticky top-0 w-full">
@@ -81,6 +83,23 @@ const NavBar: React.FC<NavBarProps> = ({
             onCreateWorkspace={onCreateWorkspace}
             canCreateBoard={canCreateBoard}
           />
+
+          {/* Campana de Novedades y Mejoras */}
+          <button
+            type="button"
+            onClick={openUpdates}
+            className="relative p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all flex items-center justify-center cursor-pointer"
+            title="Novedades y mejoras del sistema"
+            aria-label="Novedades y mejoras"
+          >
+            <Bell size={18} />
+            {hasUnread && (
+              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 pointer-events-none">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6C5DD3] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#6C5DD3] ring-2 ring-white dark:ring-[#1C1F26]" />
+              </span>
+            )}
+          </button>
 
           <div className="h-6 w-px bg-zinc-200 dark:bg-white/10 mx-1 sm:mx-2" />
 
