@@ -550,6 +550,7 @@ const SystemAdminPage: React.FC = () => {
   }, [filteredWorkspaces, wsPage, wsPerPage]);
 
   const handleEnterWorkspace = (wsId: string) => {
+    localStorage.setItem('lastActiveWorkspaceId', wsId);
     navigate(`/w/${wsId}/dashboard`);
   };
 
@@ -1159,10 +1160,11 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                         <td className="px-6 py-4 text-right">
                           <button 
                             onClick={() => handleEnterWorkspace(ws.id)}
-                            className="opacity-0 group-hover:opacity-100 px-3 py-1.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-lg text-xs font-bold hover:bg-purple-500 hover:text-white transition-all inline-flex items-center gap-2"
+                            className="px-3.5 py-1.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/25 rounded-xl text-xs font-bold hover:bg-purple-600 hover:text-white transition-all inline-flex items-center gap-1.5 shadow-xs"
+                            title="Ingresar e impersonar espacio"
                           >
-                            Ingresar
-                            <ChevronRight size={14} />
+                            <span>Ingresar</span>
+                            <ExternalLink size={13} />
                           </button>
                         </td>
                       </tr>

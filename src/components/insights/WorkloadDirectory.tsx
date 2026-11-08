@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../lib/api-client';
 import { Users, ArrowUpDown } from 'lucide-react';
 import UserProfileModal from './UserProfileModal';
+import { UserAvatar } from '../ui/UserAvatar';
 
 export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { selectedBoardId?: string; workspaceId?: string }) {
   const [workload, setWorkload] = useState<any[]>([]);
@@ -75,13 +76,7 @@ export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { se
                     onClick={() => setSelectedUser(row.user.id)}
                   >
                     <td className="p-4 flex items-center gap-3">
-                      {row.user.avatarUrl ? (
-                         <img src={row.user.avatarUrl} alt={row.user.name} className="w-8 h-8 rounded-full" />
-                      ) : (
-                         <div className="w-8 h-8 rounded-full bg-[#6C5DD3] text-white flex items-center justify-center font-bold text-xs">
-                           {row.user.name.charAt(0).toUpperCase()}
-                         </div>
-                      )}
+                      <UserAvatar user={row.user} size="sm" />
                       <div>
                         <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{row.user.name}</p>
                         <p className="text-xs text-zinc-500">{row.user.email}</p>
@@ -123,13 +118,7 @@ export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { se
                 className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm active:scale-[0.98] touch-manipulation transition-transform"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  {row.user.avatarUrl ? (
-                     <img src={row.user.avatarUrl} alt={row.user.name} className="w-10 h-10 rounded-full" />
-                  ) : (
-                     <div className="w-10 h-10 rounded-full bg-[#6C5DD3] text-white flex items-center justify-center font-bold text-sm">
-                       {row.user.name.charAt(0).toUpperCase()}
-                     </div>
-                  )}
+                  <UserAvatar user={row.user} size="md" />
                   <div>
                     <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[15px]">{row.user.name}</p>
                     <p className="text-xs text-zinc-500">{row.user.email}</p>
