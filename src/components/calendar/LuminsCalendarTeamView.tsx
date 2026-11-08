@@ -598,13 +598,13 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
         )}
 
         {/* Scrollable Workload Matrix (Desktop or Mobile Grid Mode) */}
-        <div className={`${mobileMode === 'cards' ? 'hidden md:flex' : 'flex'} flex-1 min-h-0 overflow-auto custom-scrollbar`}>
-          <div className="min-w-[620px] md:min-w-[780px] flex flex-col">
+        <div className={`${mobileMode === 'cards' ? 'hidden md:flex' : 'flex'} flex-col flex-1 min-h-0 overflow-auto custom-scrollbar w-full`}>
+          <div className="w-full min-w-[780px] flex flex-col flex-1">
             {/* Sticky Day Headers */}
             <div
-              className="sticky top-0 z-20 grid border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#15181F]"
+              className="sticky top-0 z-20 grid w-full border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#15181F]"
               style={{
-                gridTemplateColumns: `minmax(110px, 220px) repeat(${colsCount}, minmax(85px, 1fr))`,
+                gridTemplateColumns: `minmax(180px, 240px) repeat(${colsCount}, minmax(100px, 1fr))`,
               }}
             >
               <div className="px-2.5 sm:px-3.5 py-2.5 border-r border-zinc-200/80 dark:border-white/10 flex items-center text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -677,13 +677,13 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                 return (
                   <div
                     key={row.id}
-                    className={`grid ${
+                    className={`grid w-full ${
                       row.isUnassigned
                         ? 'bg-amber-500/[0.02] dark:bg-amber-500/[0.03]'
                         : 'bg-white dark:bg-[#181B22]'
                     }`}
                     style={{
-                      gridTemplateColumns: `minmax(110px, 220px) repeat(${colsCount}, minmax(85px, 1fr))`,
+                      gridTemplateColumns: `minmax(180px, 240px) repeat(${colsCount}, minmax(100px, 1fr))`,
                     }}
                   >
                     {/* Left Member Cell */}
