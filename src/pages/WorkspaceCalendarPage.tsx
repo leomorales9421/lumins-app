@@ -37,6 +37,7 @@ import {
   addDays,
   differenceInCalendarDays,
   startOfDay,
+  isSameMonth,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -515,6 +516,41 @@ const WorkspaceCalendarPage: React.FC = () => {
     setOnlyMyTasks(false);
     setSearchQuery('');
   };
+
+  const handleSetStatusFilter = useCallback(
+    (newStatus: string) => {
+      setStatusFilter(newStatus);
+      if (newStatus === 'overdue') {
+        const today = startOfDay(new Date());
+        const overdueEventsList = events.filter(ev => isEventOverdue(ev, today));
+        if (overdueEventsList.length > 0) {
+          const targetDate = getEventDateRange(overdueEventsList[0]).end;
+          if (!isSameMonth(targetDate, currentDate)) {
+            setCurrentDate(targetDate);
+            toast.info(
+              `Navegando a ${format(targetDate, 'MMMM yyyy', { locale: es })} donde está la tarea vencida.`,
+              { icon: '📅' }
+            );
+          }
+        }
+      } else if (newStatus === 'due_soon') {
+        const today = startOfDay(new Date());
+        const dueSoonEvents = events.filter(ev => {
+          if (isCardCompleted(ev)) return false;
+          const { end } = getEventDateRange(ev);
+          const diff = differenceInCalendarDays(end, today);
+          return diff >= 0 && diff <= 2;
+        });
+        if (dueSoonEvents.length > 0) {
+          const targetDate = getEventDateRange(dueSoonEvents[0]).end;
+          if (!isSameMonth(targetDate, currentDate)) {
+            setCurrentDate(targetDate);
+          }
+        }
+      }
+    },
+    [events, currentDate]
+  );
 
   // Period navigation
   const handlePrev = useCallback(() => {
@@ -1495,7 +1531,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                onClick={() => setStatusFilter(statusFilter === 'done' ? 'all' : 'done')}
+                onClick={() => handleSetStatusFilter(statusFilter === 'done' ? 'all' : 'done')}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
                   statusFilter === 'done'
                     ? 'bg-emerald-500 text-white border-emerald-500'
@@ -1512,7 +1548,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               {metrics.dueSoon > 0 && (
                 <button
                   type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'due_soon' ? 'all' : 'due_soon')}
+                  onClick={() => handleSetStatusFilter(statusFilter === 'due_soon' ? 'all' : 'due_soon')}
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
                     statusFilter === 'due_soon'
                       ? 'bg-indigo-600 text-white border-indigo-600'
@@ -1528,10 +1564,10 @@ const WorkspaceCalendarPage: React.FC = () => {
               {metrics.overdue > 0 && (
                 <button
                   type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
+                  onClick={() => handleSetStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
                     statusFilter === 'overdue'
-                      ? 'bg-rose-500 text-white border-rose-500'
+                      ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/30'
                       : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20'
                   }`}
                   title="Filtrar tareas vencidas"
@@ -1544,7 +1580,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               {metrics.blocked > 0 && (
                 <button
                   type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'blocked' ? 'all' : 'blocked')}
+                  onClick={() => handleSetStatusFilter(statusFilter === 'blocked' ? 'all' : 'blocked')}
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
                     statusFilter === 'blocked'
                       ? 'bg-amber-500 text-white border-amber-500'
@@ -1560,6 +1596,84 @@ const WorkspaceCalendarPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* BANNER INFORMATIVO CUANDO EL FILTRO DE VENCIDAS ESTÁ ACTIVO */}
+      {statusFilter === 'overdue' && (
+        <div className="mx-3 sm:mx-6 mb-2.5 px-3.5 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shrink-0 shadow-xs animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-rose-500/30">
+              <AlertCircle size={16} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-300">
+                  Filtro de Vencidas Activo
+                </span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                  {filteredEvents.length} {filteredEvents.length === 1 ? 'tarea' : 'tareas'}
+                </span>
+              </div>
+              <p className="text-xs text-rose-900/90 dark:text-rose-200/90 truncate mt-0.5">
+                {filteredEvents.length === 1 ? (
+                  <>
+                    <strong className="font-semibold text-rose-950 dark:text-white">
+                      {filteredEvents[0].title}
+                    </strong>{' '}
+                    · Venció el{' '}
+                    {format(getEventDateRange(filteredEvents[0]).end, "d 'de' MMMM yyyy", { locale: es })}
+                    {!isSameMonth(getEventDateRange(filteredEvents[0]).end, currentDate) && (
+                      <span className="ml-1 text-rose-600 dark:text-rose-400 font-bold">
+                        (en {format(getEventDateRange(filteredEvents[0]).end, 'MMMM yyyy', { locale: es })})
+                      </span>
+                    )}
+                  </>
+                ) : filteredEvents.length > 1 ? (
+                  `${filteredEvents.length} tareas tienen fecha límite anterior a hoy.`
+                ) : (
+                  'No hay tareas vencidas que coincidan con los filtros seleccionados.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 w-full sm:w-auto shrink-0 justify-end">
+            {filteredEvents.length === 1 && (
+              <button
+                type="button"
+                onClick={() => handleSelectEvent(filteredEvents[0])}
+                className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-xs"
+              >
+                Abrir tarjeta
+              </button>
+            )}
+            {filteredEvents.length > 0 && !isSameMonth(getEventDateRange(filteredEvents[0]).end, currentDate) && (
+              <button
+                type="button"
+                onClick={() => setCurrentDate(getEventDateRange(filteredEvents[0]).end)}
+                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-50 dark:hover:bg-white/5 transition-all"
+              >
+                Ir a {format(getEventDateRange(filteredEvents[0]).end, 'MMMM', { locale: es })}
+              </button>
+            )}
+            {activeView !== 'agenda' && (
+              <button
+                type="button"
+                onClick={() => setActiveView('agenda')}
+                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
+              >
+                Ver en Agenda
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setStatusFilter('all')}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
+            >
+              Quitar filtro
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3. MAIN CALENDAR WORKSPACE + UNSCHEDULED BACKLOG DRAWER */}
       <div id="lumins-calendar-export-target" className="flex-1 min-h-0 flex gap-2.5 overflow-hidden">
@@ -1805,7 +1919,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                   </label>
                   <select
                     value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
+                    onChange={e => handleSetStatusFilter(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
                   >
                     <option value="all">Cualquier estado</option>
