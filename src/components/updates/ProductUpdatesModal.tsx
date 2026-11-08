@@ -90,15 +90,15 @@ export const ProductUpdatesModal: React.FC = () => {
               <X size={18} />
             </button>
 
-            {/* Badges superiores con margen derecho para no chocar con el botón cerrar */}
-            <div className="flex items-center gap-2 mb-2.5 sm:mb-3 pr-12 sm:pr-14">
+            {/* Badges superiores con espacio limpio para el botón cerrar */}
+            <div className="flex flex-wrap items-center gap-2 mb-2.5 sm:mb-3 pr-14 sm:pr-16">
               <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white">
                 <Sparkles size={11} /> {currentRelease.badge}
               </span>
-              <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] sm:text-[11px] font-bold text-white/90">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] sm:text-[11px] font-bold text-white/95">
                 {currentRelease.version}
               </span>
-              <span className="text-[11px] sm:text-xs text-white/80 font-medium ml-auto hidden sm:inline">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] sm:text-[11px] font-medium text-white/85">
                 {currentRelease.releaseDate}
               </span>
             </div>
