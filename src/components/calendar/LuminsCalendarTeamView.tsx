@@ -68,6 +68,7 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
       label: 'Libre',
       dotColor: '#94A3B8',
       badgeClass: 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-400',
+      textClass: 'text-zinc-400 dark:text-zinc-500',
       cellBg: '',
       status: 'free' as const,
     };
@@ -77,6 +78,7 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
       label: `${activeCount} · Sobrecarga`,
       dotColor: '#EF4444',
       badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
+      textClass: 'text-rose-600 dark:text-rose-400',
       cellBg: 'bg-rose-500/[0.04] dark:bg-rose-500/[0.07]',
       status: 'overload' as const,
     };
@@ -86,6 +88,7 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
       label: `${activeCount} · Alta`,
       dotColor: '#F59E0B',
       badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+      textClass: 'text-amber-600 dark:text-amber-400',
       cellBg: 'bg-amber-500/[0.03] dark:bg-amber-500/[0.05]',
       status: 'high' as const,
     };
@@ -94,6 +97,7 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
     label: `${activeCount} · OK`,
     dotColor: '#10B981',
     badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+    textClass: 'text-emerald-600 dark:text-emerald-400',
     cellBg: '',
     status: 'healthy' as const,
   };
@@ -731,11 +735,11 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
 
                       {!row.isUnassigned && (
                         <div className="flex items-center justify-between gap-1 pt-1 border-t border-zinc-100 dark:border-white/[0.05]">
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase">
+                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
                             Pico diario:
                           </span>
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${peakStatus.badgeClass}`}
+                            className={`text-[9.5px] font-bold ${peakStatus.textClass}`}
                           >
                             {peakDailyLoad === 0 ? 'Sin carga' : `${peakDailyLoad}/día`}
                           </span>
