@@ -190,6 +190,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
       };
 
       toast.success('Tarjeta creada en el calendario');
+      window.dispatchEvent(new CustomEvent('lumins:card-created', { detail: { card: createdCard, newEvent } }));
       onCreated(newEvent);
       onClose();
     } catch (err: any) {

@@ -413,6 +413,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { title: editTitle });
       if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
     } catch (err) {
       console.error('Error updating title:', err);
       if (card && previousTitle) {
@@ -434,6 +435,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
 
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { description: descriptionToSave });
+      if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
     } catch (err) {
       console.error('Error updating description:', err);
       if (card) setEditDescription(card.description || '');
@@ -540,6 +543,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         await apiClient.post(`/api/cards/${cardId}/assignees`, { userId });
       }
       if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId, userId } }));
     } catch (err) {
       console.error('Error toggling member:', err);
       setAssignedMemberIds(prev => isAssigned ? [...prev, userId] : prev.filter(id => id !== userId));
@@ -678,6 +682,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         });
       }
       if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
     } catch (err) {
       console.error('Error updating dates:', err);
     } finally {
@@ -765,6 +770,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     try {
       await apiClient.patch(`/api/cards/${cardId}`, properties);
       if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
     } catch (err) {
       console.error('Error updating properties:', err);
       // Rollback on error
@@ -783,6 +789,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     try {
       await apiClient.patch(`/api/cards/${cardId}`, { isDone: newDoneState });
       if (onUpdate) onUpdate();
+      window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
     } catch (err) {
       console.error('Error toggling done state:', err);
       // Rollback

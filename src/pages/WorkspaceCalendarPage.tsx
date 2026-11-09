@@ -272,15 +272,23 @@ const WorkspaceCalendarPage: React.FC = () => {
           };
         }>(`/api/workspaces/${workspaceId}/calendar-events`);
 
-        const newEvents = response.data.events || [];
-        const newUnscheduled = response.data.unscheduledEvents || [];
-        const newBoards = response.data.boards || [];
-        const newMembers = response.data.members || [];
+        const raw = response as any;
+        const payloadData = raw?.data || raw;
+        const newEvents = payloadData?.events || [];
+        const newUnscheduled = payloadData?.unscheduledEvents || [];
+        const newBoards = payloadData?.boards || [];
+        const newMembers = payloadData?.members || [];
 
         setEvents(newEvents);
         eventsRef.current = newEvents;
         setUnscheduledEvents(newUnscheduled);
-        if (newBoards.length > 0) setBoardsList(newBoards);
+        if (newBoards.length > 0) {
+          const currentKey = boardsList.map(b => b.id).sort().join(',');
+          const newKey = newBoards.map((b: any) => b.id).sort().join(',');
+          if (currentKey !== newKey) {
+            setBoardsList(newBoards);
+          }
+        }
         if (newMembers.length > 0) setWorkspaceMembers(newMembers);
 
         calendarEventsCache.set(workspaceId, {
@@ -295,7 +303,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [workspaceId]
+    [workspaceId, boardsList]
   );
 
   useEffect(() => {
@@ -304,12 +312,20 @@ const WorkspaceCalendarPage: React.FC = () => {
     fetchEvents(hasData);
   }, [workspaceId]);
 
-  // Real-Time Socket.IO subscriptions for visible boards (Requirement 0.6)
-  useEffect(() => {
-    if (!socket || boardsList.length === 0) return;
+  // Real-Time Socket.IO subscriptions for workspace & visible boards
+  const boardsListKey = useMemo(() => boardsList.map(b => b.id).sort().join(','), [boardsList]);
 
-    const boardIds = boardsList.map(b => b.id);
-    boardIds.forEach(bId => socket.emit('join_board', bId));
+  useEffect(() => {
+    if (!socket || !workspaceId) return;
+
+    const joinAllRooms = () => {
+      socket.emit('join_workspace', workspaceId);
+      boardsList.forEach(bId => socket.emit('join_board', bId.id));
+    };
+
+    joinAllRooms();
+
+    socket.on('connect', joinAllRooms);
 
     const handleRealtimeChange = () => {
       fetchEvents(true);
@@ -320,16 +336,35 @@ const WorkspaceCalendarPage: React.FC = () => {
     socket.on('card:moved', handleRealtimeChange);
     socket.on('card:deleted', handleRealtimeChange);
     socket.on('board:updated', handleRealtimeChange);
+    socket.on('calendar:refresh', handleRealtimeChange);
 
     return () => {
-      boardIds.forEach(bId => socket.emit('leave_board', bId));
+      socket.emit('leave_workspace', workspaceId);
+      boardsList.forEach(bId => socket.emit('leave_board', bId.id));
+      socket.off('connect', joinAllRooms);
       socket.off('card:updated', handleRealtimeChange);
       socket.off('card:created', handleRealtimeChange);
       socket.off('card:moved', handleRealtimeChange);
       socket.off('card:deleted', handleRealtimeChange);
       socket.off('board:updated', handleRealtimeChange);
+      socket.off('calendar:refresh', handleRealtimeChange);
     };
-  }, [socket, boardsList, fetchEvents]);
+  }, [socket, workspaceId, boardsListKey, fetchEvents]);
+
+  // Local window event listeners for instantaneous in-app reactivity
+  useEffect(() => {
+    const handleLocalRefresh = () => {
+      fetchEvents(true);
+    };
+
+    window.addEventListener('lumins:card-updated', handleLocalRefresh);
+    window.addEventListener('lumins:card-created', handleLocalRefresh);
+
+    return () => {
+      window.removeEventListener('lumins:card-updated', handleLocalRefresh);
+      window.removeEventListener('lumins:card-created', handleLocalRefresh);
+    };
+  }, [fetchEvents]);
 
   // Derive unique boards, members, and labels for filter selectors
   const uniqueBoards = useMemo<CalendarBoardInfo[]>(() => {
@@ -1993,7 +2028,10 @@ const WorkspaceCalendarPage: React.FC = () => {
             cardId={selectedCard.cardId}
             boardId={selectedCard.boardId}
             isOpen={!!selectedCard}
-            onClose={() => setSelectedCard(null)}
+            onClose={() => {
+              setSelectedCard(null);
+              fetchEvents(true);
+            }}
             onUpdate={() => fetchEvents(true)}
           />
         )}
