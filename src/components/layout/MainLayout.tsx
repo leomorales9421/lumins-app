@@ -41,7 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
   const location = useLocation();
-  const isBoardView = location.pathname.startsWith('/boards/');
+  const isBoardView = location.pathname.startsWith('/boards/') || location.pathname.startsWith('/b/');
   const [boardBackground, setBoardBackground] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoadingBg, setIsLoadingBg] = useState(false);
@@ -109,7 +109,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
           description: 'Has sido eliminado de este tablero.' 
         });
         // Check if we are currently on that board
-        if (location.pathname.includes(`/boards/${resourceId}`)) {
+        if (location.pathname.includes(`/boards/${resourceId}`) || location.pathname.includes(`/b/${resourceId}`)) {
           navigate('/app', { replace: true });
         }
       } else {

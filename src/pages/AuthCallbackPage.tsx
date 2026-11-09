@@ -51,7 +51,11 @@ const AuthCallbackPage: React.FC = () => {
             return;
           }
 
-          navigate(postLoginRedirect, { replace: true });
+          const target = postLoginRedirect.startsWith('/b/')
+            ? postLoginRedirect.replace(/^\/b\//, '/boards/')
+            : postLoginRedirect;
+
+          navigate(target, { replace: true });
           return;
         }
         

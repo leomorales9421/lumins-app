@@ -19,10 +19,22 @@ const LoginPage: React.FC = () => {
 
   const resolveRedirectTarget = () => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('redirect') || '/app';
+    const redirectParam = params.get('redirect');
+    const storedRedirect = localStorage.getItem('lumins_post_login_redirect');
+    const target = redirectParam || storedRedirect || '/app';
+    if (target.startsWith('/b/')) {
+      return target.replace(/^\/b\//, '/boards/');
+    }
+    return target;
   };
 
   const redirectToTarget = (target: string) => {
+    try {
+      localStorage.removeItem('lumins_post_login_redirect');
+    } catch (e) {
+      // ignore
+    }
+
     if (target.startsWith('http://') || target.startsWith('https://')) {
       window.location.href = target;
       return;

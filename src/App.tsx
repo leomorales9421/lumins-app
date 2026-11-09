@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PermissionProvider } from './contexts/PermissionContext';
 import { SocketProvider } from './contexts/SocketContext';
@@ -74,6 +74,13 @@ const WorkspaceRedirect: React.FC<{ to: string }> = ({ to }) => {
   return null;
 };
 
+const BoardShortLinkRedirect: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const search = searchParams.toString();
+  return <Navigate to={`/boards/${id}${search ? `?${search}` : ''}`} replace />;
+};
+
 const GlobalInvitationDetector: React.FC = () => {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
@@ -124,6 +131,7 @@ function App() {
                     <Route path="/w/:workspaceId/insights/boards/:boardId" element={<InsightsBoardDetailPage />} />
                     <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
                     <Route path="/boards/:id" element={<BoardDetailPage />} />
+                    <Route path="/b/:id" element={<BoardDetailPage />} />
                     
                     <Route path="/settings" element={<SettingsPage />}>
                       <Route index element={<Navigate to="profile" replace />} />
@@ -139,6 +147,8 @@ function App() {
                   <Route path="/activity" element={<ProtectedRoute><WorkspaceRedirect to="activity" /></ProtectedRoute>} />
                   <Route path="/insights" element={<ProtectedRoute><WorkspaceRedirect to="insights" /></ProtectedRoute>} />
                   <Route path="/members" element={<ProtectedRoute><WorkspaceRedirect to="members" /></ProtectedRoute>} />
+
+                  <Route path="/b/:id" element={<BoardShortLinkRedirect />} />
 
                   <Route path="/" element={<Navigate to="/app" replace />} />
                   <Route path="*" element={<Navigate to="/app" replace />} />

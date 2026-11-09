@@ -87,7 +87,9 @@ const BoardDetailPage: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(!cachedData);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(
+    () => searchParams.get('cardId') || searchParams.get('card') || null
+  );
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
   const [activeList, setActiveList] = useState<List | null>(null);
   const [isAddingList, setIsAddingList] = useState(false);
