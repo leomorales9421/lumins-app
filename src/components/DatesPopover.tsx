@@ -75,7 +75,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-[340px] sm:w-[350px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full ${className || 'w-[340px] sm:w-[350px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button 
@@ -239,6 +239,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
                 value={dueTime}
                 onChange={setDueTime}
                 disabled={!hasDueDate}
+                direction="up"
                 className="shrink-0"
               />
             </div>
