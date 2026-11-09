@@ -142,8 +142,13 @@ const IntegrationsSettings: React.FC = () => {
       const payload = res?.data || res;
       if (payload?.success) {
         const syncData = payload.data || payload;
+        const total = syncData.syncedCount ?? 0;
+        const updated = (syncData.insertedCount ?? 0) + (syncData.updatedCount ?? 0);
+        const description = updated > 0
+          ? `${updated} eventos actualizados en tu calendario "${syncData.calendarName || 'Lumins'}" (${total} verificadas).`
+          : `Al día (${total} tarjetas verificadas, sin cambios pendientes).`;
         toast.success(`Sincronización completada`, {
-          description: `${syncData.syncedCount ?? 0} tarjetas actualizadas en tu calendario "${syncData.calendarName || 'Lumins'}".`,
+          description,
         });
         fetchGcalStatus();
       }

@@ -162,8 +162,13 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
       const payload = res?.data || res;
       if (payload?.success) {
         const syncData = payload.data || payload;
+        const total = syncData.syncedCount ?? 0;
+        const updated = (syncData.insertedCount ?? 0) + (syncData.updatedCount ?? 0);
+        const description = updated > 0
+          ? `${updated} eventos actualizados en Google Calendar (${total} verificadas).`
+          : `Al día (${total} tarjetas verificadas, sin cambios pendientes).`;
         toast.success(`Google Calendar sincronizado`, {
-          description: `${syncData.syncedCount ?? 0} tarjetas actualizadas.`,
+          description,
         });
         fetchGcalStatus();
         onSyncCompleted?.();
