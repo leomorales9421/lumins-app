@@ -87,13 +87,16 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
 
     setLoading(true);
     try {
-      const res = await apiClient.post<{ data: { ticket: { ticketCode: string } } }>('/api/support/tickets', {
+      const res = await apiClient.post<{
+        success: boolean;
+        data: { ticket: { ticketCode: string } };
+      }>('/api/support/tickets', {
         category,
         subject: subject.trim(),
         message: message.trim(),
       });
 
-      const ticket = res.data?.data?.ticket || res.data?.ticket;
+      const ticket = res.data?.ticket;
       setSubmittedTicket({ ticketCode: ticket?.ticketCode || '#TK-OK' });
       toast.success('¡Solicitud de soporte enviada exitosamente!');
     } catch (err: any) {
@@ -280,3 +283,4 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
 };
 
 export default SupportModal;
+

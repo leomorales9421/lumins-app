@@ -113,6 +113,7 @@ export const SupportTicketsAdmin: React.FC = () => {
     setLoading(true);
     try {
       const res = await apiClient.get<{
+        success: boolean;
         data: {
           tickets: SupportTicket[];
           counts: SupportCounts;
@@ -128,13 +129,13 @@ export const SupportTicketsAdmin: React.FC = () => {
         },
       });
 
-      if (res.data?.data) {
-        setTickets(res.data.data.tickets || []);
-        if (res.data.data.counts) {
-          setCounts(res.data.data.counts);
+      if (res.data) {
+        setTickets(res.data.tickets || []);
+        if (res.data.counts) {
+          setCounts(res.data.counts);
         }
-        if (res.data.data.pagination) {
-          setTotalPages(res.data.data.pagination.totalPages || 1);
+        if (res.data.pagination) {
+          setTotalPages(res.data.pagination.totalPages || 1);
         }
       }
     } catch (err: any) {
@@ -152,11 +153,14 @@ export const SupportTicketsAdmin: React.FC = () => {
   const handleUpdateStatus = async (ticketId: string, newStatus: string) => {
     setUpdatingId(ticketId);
     try {
-      const res = await apiClient.patch<{ data: { ticket: SupportTicket } }>(
+      const res = await apiClient.patch<{
+        success: boolean;
+        data: { ticket: SupportTicket };
+      }>(
         `/api/support/tickets/${ticketId}/status`,
         { status: newStatus }
       );
-      const updated = res.data?.data?.ticket;
+      const updated = res.data?.ticket;
       if (updated) {
         setTickets(prev => prev.map(t => (t.id === ticketId ? updated : t)));
         if (selectedTicket?.id === ticketId) {
@@ -176,14 +180,17 @@ export const SupportTicketsAdmin: React.FC = () => {
     if (!selectedTicket) return;
     setSavingNotes(true);
     try {
-      const res = await apiClient.patch<{ data: { ticket: SupportTicket } }>(
+      const res = await apiClient.patch<{
+        success: boolean;
+        data: { ticket: SupportTicket };
+      }>(
         `/api/support/tickets/${selectedTicket.id}/status`,
         { 
           status: selectedTicket.status,
           adminNotes: adminNotes.trim(),
         }
       );
-      const updated = res.data?.data?.ticket;
+      const updated = res.data?.ticket;
       if (updated) {
         setSelectedTicket(updated);
         setTickets(prev => prev.map(t => (t.id === updated.id ? updated : t)));
@@ -619,3 +626,4 @@ export const SupportTicketsAdmin: React.FC = () => {
 };
 
 export default SupportTicketsAdmin;
+
