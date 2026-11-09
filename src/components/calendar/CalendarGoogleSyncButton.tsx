@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
+import { GoogleCalendarIcon } from '../ui/GoogleCalendarIcon';
 
 interface GoogleCalendarStatus {
   connected: boolean;
@@ -20,18 +21,6 @@ interface GoogleCalendarStatus {
   lastSyncAt?: string | null;
 }
 
-const GoogleCalendarIcon = ({ size = 16, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
-    <rect x="3" y="4" width="18" height="18" rx="3" fill="#ffffff" />
-    <path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" fill="#4285F4" opacity="0.1" />
-    <path d="M16 2v4M8 2v4M3 10h18" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <rect x="7" y="13" width="3" height="3" rx="0.5" fill="#EA4335" />
-    <rect x="11" y="13" width="3" height="3" rx="0.5" fill="#FBBC04" />
-    <rect x="15" y="13" width="3" height="3" rx="0.5" fill="#34A853" />
-    <rect x="7" y="17" width="3" height="3" rx="0.5" fill="#4285F4" />
-    <rect x="11" y="17" width="3" height="3" rx="0.5" fill="#1A73E8" />
-  </svg>
-);
 
 interface CalendarGoogleSyncButtonProps {
   workspaceId: string;

@@ -10,6 +10,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import { GoogleCalendarIcon } from '../../components/ui/GoogleCalendarIcon';
 import { toast } from 'sonner';
 import { apiClient } from '../../lib/api-client';
 
@@ -19,18 +20,6 @@ const TrelloIcon = ({ size = 24, className = '' }) => (
   </svg>
 );
 
-const GoogleCalendarIcon = ({ size = 28, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
-    <rect x="3" y="4" width="18" height="18" rx="3" fill="#ffffff" />
-    <path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" fill="#4285F4" opacity="0.1" />
-    <path d="M16 2v4M8 2v4M3 10h18" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <rect x="7" y="13" width="3" height="3" rx="0.5" fill="#EA4335" />
-    <rect x="11" y="13" width="3" height="3" rx="0.5" fill="#FBBC04" />
-    <rect x="15" y="13" width="3" height="3" rx="0.5" fill="#34A853" />
-    <rect x="7" y="17" width="3" height="3" rx="0.5" fill="#4285F4" />
-    <rect x="11" y="17" width="3" height="3" rx="0.5" fill="#1A73E8" />
-  </svg>
-);
 
 interface GoogleCalendarStatus {
   connected: boolean;
@@ -187,8 +176,8 @@ const IntegrationsSettings: React.FC = () => {
       {/* GOOGLE CALENDAR INTEGRATION */}
       <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 flex items-center justify-center text-blue-600 shadow-lg shadow-blue-500/10 flex-shrink-0">
-            <GoogleCalendarIcon size={34} />
+          <div className="w-16 h-16 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200/90 dark:border-white/10 flex items-center justify-center shadow-sm flex-shrink-0 p-2.5">
+            <GoogleCalendarIcon size={38} />
           </div>
 
           <div className="flex-1">
