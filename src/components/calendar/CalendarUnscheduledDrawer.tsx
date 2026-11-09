@@ -49,6 +49,25 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
     format(new Date(), 'yyyy-MM-dd')
   );
 
+  // Limpiar draggingCardId de forma segura ante cualquier finalización de arrastre o cambio en la lista
+  React.useEffect(() => {
+    const handleGlobalDragEnd = () => {
+      setDraggingCardId(null);
+    };
+    window.addEventListener('dragend', handleGlobalDragEnd);
+    window.addEventListener('drop', handleGlobalDragEnd);
+    return () => {
+      window.removeEventListener('dragend', handleGlobalDragEnd);
+      window.removeEventListener('drop', handleGlobalDragEnd);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (draggingCardId && !unscheduledEvents.some(ev => ev.id === draggingCardId)) {
+      setDraggingCardId(null);
+    }
+  }, [unscheduledEvents, draggingCardId]);
+
   const filteredCards = useMemo(() => {
     const q = search.trim().toLowerCase();
     return unscheduledEvents.filter(ev => {

@@ -838,7 +838,7 @@ const WorkspaceCalendarPage: React.FC = () => {
       const isTeamViewDrop = targetMemberId !== undefined;
 
       // Calculate target assignees if dropped in Team View
-      let nextAssignees = card.extendedProps.assignees || [];
+      let nextAssignees = [...(card.extendedProps.assignees || [])];
       if (isTeamViewDrop) {
         if (targetMemberId) {
           const targetMember = 
@@ -846,14 +846,14 @@ const WorkspaceCalendarPage: React.FC = () => {
             workspaceMembers.find(m => m.id === targetMemberId) ||
             events.flatMap(e => e.extendedProps?.assignees || []).find(a => a?.id === targetMemberId);
 
-          nextAssignees = [
-            {
+          if (!nextAssignees.some(a => a.id === targetMemberId)) {
+            nextAssignees.push({
               id: targetMemberId,
               name: targetMember?.name || 'Miembro',
               email: targetMember?.email || '',
               avatarUrl: targetMember?.avatarUrl || null,
-            },
-          ];
+            });
+          }
         } else {
           // Explicitly dropped into "Sin asignar"
           nextAssignees = [];
@@ -880,26 +880,13 @@ const WorkspaceCalendarPage: React.FC = () => {
       setUnscheduledEvents(prev => prev.filter(i => i.id !== cardId));
 
       try {
-        // 1. Update dates
+        // 1. Update dates and assignees atomically in ONE single call
         await apiClient.patch(`/api/cards/${card.id}/dates`, {
           startDate: null,
           dueDate: dueISO,
+          ...(isTeamViewDrop && targetMemberId ? { addAssigneeId: targetMemberId } : {}),
+          ...(isTeamViewDrop && targetMemberId === null ? { clearAssignees: true } : {}),
         });
-
-        // 2. If dropped in Team View, update assignees to match target row
-        if (isTeamViewDrop) {
-          const currentAssigneeIds = (card.extendedProps.assignees || []).map(a => a.id);
-          // Remove previous assignees that are not targetMemberId
-          for (const prevId of currentAssigneeIds) {
-            if (prevId !== targetMemberId) {
-              await apiClient.delete(`/api/cards/${card.id}/assignees/${prevId}`).catch(() => {});
-            }
-          }
-          // Assign target member if not already assigned
-          if (targetMemberId && !currentAssigneeIds.includes(targetMemberId)) {
-            await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: targetMemberId }).catch(() => {});
-          }
-        }
 
         // Sincronización silenciosa con el servidor para consolidar el estado sin recargar la página
         fetchEvents(true);
@@ -925,11 +912,13 @@ const WorkspaceCalendarPage: React.FC = () => {
                 });
                 // Restore assignees if changed
                 if (isTeamViewDrop) {
-                  if (targetMemberId) {
+                  if (targetMemberId && !(card.extendedProps.assignees || []).some(a => a.id === targetMemberId)) {
                     await apiClient.delete(`/api/cards/${card.id}/assignees/${targetMemberId}`).catch(() => {});
                   }
-                  for (const prevA of card.extendedProps.assignees || []) {
-                    await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: prevA.id }).catch(() => {});
+                  if (targetMemberId === null) {
+                    for (const prevA of card.extendedProps.assignees || []) {
+                      await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: prevA.id }).catch(() => {});
+                    }
                   }
                 }
                 toast.success('Programación deshecha');
@@ -945,7 +934,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         showError('Error', 'No se pudo programar la tarjeta');
       }
     },
-    [unscheduledEvents, events, uniqueMembers, showError, fetchEvents]
+    [unscheduledEvents, events, uniqueMembers, workspaceMembers, showError, fetchEvents]
   );
 
   // Team View 2D Drag: Reassign + Reschedule (Requirement 3.1)
