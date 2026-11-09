@@ -70,7 +70,11 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
   const upcomingMonday = nextMonday(today);
 
   return (
-    <aside className="w-full sm:w-80 lg:w-84 shrink-0 h-full bg-white dark:bg-[#181B22] rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-sm flex flex-col overflow-hidden animate-in slide-in-from-right-4 duration-200">
+    <aside 
+      id="calendar-unscheduled-drawer" 
+      data-export-ignore="true"
+      className="w-full sm:w-80 lg:w-84 shrink-0 h-full bg-white dark:bg-[#181B22] rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-sm flex flex-col overflow-hidden animate-in slide-in-from-right-4 duration-200"
+    >
       {/* Header */}
       <div className="px-3.5 py-2.5 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/80 dark:bg-[#15181F] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 min-w-0">

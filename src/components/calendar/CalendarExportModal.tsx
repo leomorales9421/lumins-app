@@ -50,6 +50,59 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
   const periodSlug = sanitizeFileName(currentDateText || 'calendario');
   const workspaceSlug = sanitizeFileName(workspaceName);
 
+  const TRANSPARENT_PIXEL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+  // Convierte dataURL en Uint8Array de forma nativa sin usar fetch() para evitar bloqueos de CSP
+  const base64ToUint8Array = (dataUri: string): Uint8Array => {
+    const base64 = dataUri.split(',')[1];
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  };
+
+  // Captura ultra-robusta a prueba de CORS en avatares y fuentes externas
+  const captureCalendarNode = async (targetEl: HTMLElement, quality = 0.95, pixelRatio = 1.6): Promise<string> => {
+    const { toPng } = await import('html-to-image');
+
+    const commonFilter = (node: HTMLElement) => {
+      if (node instanceof HTMLElement) {
+        if (node.classList?.contains('fixed')) return false;
+        if (node.id === 'calendar-unscheduled-drawer' || node.closest?.('#calendar-unscheduled-drawer')) return false;
+        if (node.getAttribute?.('data-export-ignore') === 'true') return false;
+        if (node.tagName === 'SCRIPT' || node.tagName === 'NOSCRIPT') return false;
+      }
+      return true;
+    };
+
+    const options = {
+      quality,
+      pixelRatio: Math.min(window.devicePixelRatio || 1, pixelRatio),
+      backgroundColor: '#ffffff',
+      skipFonts: true, // Crucial: evita errores CORS al intentar descargar fuentes remotas
+      cacheBust: false,
+      imagePlaceholder: TRANSPARENT_PIXEL, // Reemplaza avatares de Google u orígenes externos bloqueados por CORS
+      onImageErrorHandler: () => TRANSPARENT_PIXEL,
+      filter: commonFilter,
+    };
+
+    try {
+      return await toPng(targetEl, options);
+    } catch (firstErr) {
+      console.warn('Primer intento de captura falló, aplicando modo ultra-compatibilidad:', firstErr);
+      // Fallback seguro a escala 1x
+      return await toPng(targetEl, {
+        ...options,
+        pixelRatio: 1,
+        quality: 0.85,
+      });
+    }
+  };
+
   // 1. Export PDF Profesional con pdf-lib (A4 Landscape, Membrete Corporativo y Grid Nítido)
   const handleExportPDF = async () => {
     try {
@@ -61,23 +114,10 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
 
       toast.info('Generando documento PDF de alta resolución...');
 
-      const [{ toPng }, { PDFDocument, rgb, StandardFonts }] = await Promise.all([
-        import('html-to-image'),
+      const [{ PDFDocument, rgb, StandardFonts }, dataUrl] = await Promise.all([
         import('pdf-lib'),
+        captureCalendarNode(targetEl, 0.95, 1.6),
       ]);
-
-      // Capturar nodo del calendario a 2x DPR
-      const dataUrl = await toPng(targetEl, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        filter: (node) => {
-          if (node instanceof HTMLElement && node.classList.contains('fixed')) {
-            return false;
-          }
-          return true;
-        },
-      });
 
       // Crear documento PDF A4 apaisado (841.89 x 595.28 puntos)
       const pdfDoc = await PDFDocument.create();
@@ -134,8 +174,8 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
         color: rgb(108 / 255, 93 / 255, 211 / 255),
       });
 
-      // Insertar imagen capturada
-      const pngImageBytes = await fetch(dataUrl).then((r) => r.arrayBuffer());
+      // Insertar imagen capturada de forma segura sin pasar por fetch
+      const pngImageBytes = base64ToUint8Array(dataUrl);
       const pngImage = await pdfDoc.embedPng(pngImageBytes);
       const pngDims = pngImage.scale(1);
 
@@ -194,18 +234,17 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
 
       toast.info('Capturando imagen en alta resolución...');
 
-      const { toPng } = await import('html-to-image');
+      const dataUrl = await captureCalendarNode(targetEl, 0.98, 1.8);
 
-      const dataUrl = await toPng(targetEl, {
-        quality: 0.98,
-        pixelRatio: 2.5,
-        backgroundColor: '#ffffff',
-      });
+      const bytes = base64ToUint8Array(dataUrl);
+      const blob = new Blob([bytes as unknown as BlobPart], { type: 'image/png' });
+      const blobUrl = URL.createObjectURL(blob);
 
       const link = document.createElement('a');
       link.download = `Calendario_${workspaceSlug}_${periodSlug}.png`;
-      link.href = dataUrl;
+      link.href = blobUrl;
       link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
 
       toast.success('Imagen PNG descargada');
       onClose();
