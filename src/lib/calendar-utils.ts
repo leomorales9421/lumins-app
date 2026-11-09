@@ -178,6 +178,62 @@ export function parseCalendarDate(raw: string | Date | null | undefined): Date |
 }
 
 /**
+ * Formatea una fecha o cadena en formato 12 horas con AM / PM (ej. "12:00 PM", "9:30 AM")
+ */
+export function formatTime12h(date: Date | string | null | undefined): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+  let hours = d.getHours();
+  const minutes = d.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const strMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  return `${hours}:${strMinutes} ${ampm}`;
+}
+
+/**
+ * Parsea una cadena de hora (12h o 24h, ej. "2:30 PM", "14:30", "9 am")
+ * y retorna { hours: number (0-23), minutes: number (0-59) } o null si es inválida
+ */
+export function parseTime12h(timeStr: string | null | undefined): { hours: number; minutes: number } | null {
+  if (!timeStr) return null;
+  const cleaned = timeStr.trim().toUpperCase();
+  
+  // Soporta "12:30 PM", "2:15PM", "9:00 AM", "9 AM", "14:30", "14"
+  const match = cleaned.match(/^(\d{1,2})(?::(\d{1,2}))?\s*(AM|PM)?$/i);
+  if (!match) return null;
+
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const modifier = match[3] ? match[3].toUpperCase() : null;
+
+  if (isNaN(hours) || isNaN(minutes) || minutes < 0 || minutes > 59) return null;
+
+  if (modifier === 'PM') {
+    if (hours < 12) hours += 12;
+  } else if (modifier === 'AM') {
+    if (hours === 12) hours = 0;
+  } else {
+    if (hours > 23) return null;
+  }
+
+  return { hours, minutes };
+}
+
+/**
+ * Normaliza cualquier entrada de hora a un string estándar "h:mm A" (ej: "12:00 PM")
+ */
+export function normalizeTime12h(timeStr: string | null | undefined, fallback = '12:00 PM'): string {
+  const parsed = parseTime12h(timeStr);
+  if (!parsed) return fallback;
+  const dummy = new Date();
+  dummy.setHours(parsed.hours, parsed.minutes, 0, 0);
+  return formatTime12h(dummy);
+}
+
+/**
  * Serializes a calendar day at 12:00 local time so that any timezone parsing it
  * preserves the exact calendar date (YYYY-MM-DD) without shifting.
  */

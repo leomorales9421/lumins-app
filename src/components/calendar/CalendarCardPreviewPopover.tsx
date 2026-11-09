@@ -21,6 +21,7 @@ import {
   getEventDateRange,
   isCardCompleted,
   isEventOverdue,
+  formatTime12h,
 } from '../../lib/calendar-utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -53,9 +54,10 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
   const { start, end, isMultiDay, durationDays } = getEventDateRange(event);
   const priorityInfo = PRIORITY_COLORS[props.priority || 'P2'] || PRIORITY_COLORS.P2;
 
+  const timeSuffix = props.dueDate ? ` · ${formatTime12h(props.dueDate)}` : '';
   const dateText = isMultiDay
-    ? `${format(start, 'd MMM', { locale: es })} – ${format(end, 'd MMM yyyy', { locale: es })} (${durationDays} días)`
-    : format(end, "EEEE d 'de' MMMM", { locale: es });
+    ? `${format(start, 'd MMM', { locale: es })} – ${format(end, 'd MMM yyyy', { locale: es })} (${durationDays} días)${timeSuffix}`
+    : `${format(end, "EEEE d 'de' MMMM", { locale: es })}${timeSuffix}`;
 
   const hasChecklist = (props.checklistTotal || 0) > 0;
   const checklistPct = hasChecklist

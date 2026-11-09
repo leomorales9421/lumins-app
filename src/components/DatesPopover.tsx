@@ -5,6 +5,8 @@ import type { DateRange } from 'react-day-picker';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
+import TimeSelector12h from './TimeSelector12h';
+import { formatTime12h, parseTime12h } from '../lib/calendar-utils';
 
 interface DatesPopoverProps {
   onClose: () => void;
@@ -31,6 +33,17 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
 
   const [hasStartDate, setHasStartDate] = useState(!!initialStartDate);
   const [hasDueDate, setHasDueDate] = useState(initialDueDate ? true : !initialStartDate);
+  const [dueTime, setDueTime] = useState<string>(() => {
+    if (initialDueDate) {
+      try {
+        const d = parseISO(initialDueDate);
+        if (!isNaN(d.getTime())) {
+          return formatTime12h(d) || '12:00 PM';
+        }
+      } catch {}
+    }
+    return '12:00 PM';
+  });
 
   const handleRangeSelect = (newRange: DateRange | undefined) => {
     setRange(newRange);
@@ -42,15 +55,27 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   const handleSave = () => {
+    const rawTargetDue = hasDueDate
+      ? (range?.to || (hasStartDate ? range?.to || range?.from : range?.from))
+      : null;
+
+    let finalDueDateISO: string | null = null;
+    if (hasDueDate && rawTargetDue) {
+      const targetDate = new Date(rawTargetDue);
+      const timeParsed = parseTime12h(dueTime) || { hours: 12, minutes: 0 };
+      targetDate.setHours(timeParsed.hours, timeParsed.minutes, 0, 0);
+      finalDueDateISO = targetDate.toISOString();
+    }
+
     onSaveDates({
       startDate: hasStartDate && range?.from ? range.from.toISOString() : null,
-      dueDate: hasDueDate && (range?.to || range?.from) ? (range.to || range.from)!.toISOString() : null,
+      dueDate: finalDueDateISO,
     });
     onClose();
   };
 
   return (
-    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-[320px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full overflow-hidden ${className || 'w-[340px] sm:w-[350px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <button 
@@ -183,7 +208,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
               disabled={!hasStartDate}
               placeholder="D/M/AAAA"
               value={range?.from ? format(range.from, 'd/M/yyyy') : ''}
-              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3]'}`}
             />
           </div>
         </div>
@@ -193,7 +218,7 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
           <div className="flex items-center gap-3">
             <div 
               onClick={() => setHasDueDate(!hasDueDate)}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
                 hasDueDate 
                   ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
@@ -201,20 +226,20 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             >
               {hasDueDate && <Check size={12} strokeWidth={4} />}
             </div>
-            <div className="flex-1 flex gap-2">
+            <div className="flex-1 flex items-center gap-2 min-w-0">
               <input 
                 type="text"
                 readOnly
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
                 value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
-                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-zinc-900 dark:text-zinc-100 flex-1 min-w-0 outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3]'}`}
               />
-              <input 
-                type="text"
+              <TimeSelector12h
+                value={dueTime}
+                onChange={setDueTime}
                 disabled={!hasDueDate}
-                defaultValue="12:00"
-                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-20 text-center outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]'}`}
+                className="shrink-0"
               />
             </div>
           </div>

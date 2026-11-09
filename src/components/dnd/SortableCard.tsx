@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { MessageSquare, Paperclip, CheckSquare, Eye, AlignLeft, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatTime12h } from '../../lib/calendar-utils';
 import type { Card } from '../../types/board';
 import UserAvatar from '../ui/UserAvatar';
 
@@ -100,7 +101,11 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
                     ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                     : 'text-zinc-500 dark:text-zinc-400'
                 }`}
-                title={isOverdue ? 'Vencido' : 'Fecha de vencimiento'}
+                title={
+                  isOverdue
+                    ? `Vencido (${format(parseISO(card.dueDate), 'd MMM', { locale: es })} · ${formatTime12h(parseISO(card.dueDate))})`
+                    : `Vence el ${format(parseISO(card.dueDate), 'd MMM', { locale: es })} · ${formatTime12h(parseISO(card.dueDate))}`
+                }
               >
                 <Clock size={11} strokeWidth={2.5} />
                 {format(parseISO(card.dueDate), 'd MMM', { locale: es })}

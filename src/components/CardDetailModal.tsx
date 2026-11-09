@@ -30,6 +30,7 @@ import LabelsPopover from './LabelsPopover';
 import MembersPopover from './MembersPopover';
 import ChecklistBlock from './ChecklistBlock';
 import DatesPopover from './DatesPopover';
+import { formatTime12h } from '../lib/calendar-utils';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Checklist, ChecklistItem } from '../types/board';
@@ -1315,9 +1316,16 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 {(card?.startDate || card?.dueDate) ? (
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
-                    {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
+                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 flex-wrap">
+                    {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} – `}
+                    {card.dueDate ? (
+                      <>
+                        {format(parseISO(card.dueDate), 'd MMM', { locale: es })}
+                        <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                          · {formatTime12h(parseISO(card.dueDate))}
+                        </span>
+                      </>
+                    ) : 'Sin vencimiento'}
                     {card.dueDate && new Date(card.dueDate) < new Date() && !card.isDone && (
                       <span className="bg-red-500/15 text-red-600 border border-red-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">Vencido</span>
                     )}
@@ -1571,9 +1579,16 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                         className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 px-3 py-1.5 rounded font-semibold text-[12px] cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-all border border-zinc-200 dark:border-white/10"
                       >
                         <Clock size={14} />
-                        <span>
-                          {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} - `}
-                          {card.dueDate ? format(parseISO(card.dueDate), 'd MMM', { locale: es }) : 'Sin vencimiento'}
+                        <span className="flex items-center gap-1 flex-wrap">
+                          {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} – `}
+                          {card.dueDate ? (
+                            <>
+                              {format(parseISO(card.dueDate), 'd MMM', { locale: es })}
+                              <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                                · {formatTime12h(parseISO(card.dueDate))}
+                              </span>
+                            </>
+                          ) : 'Sin vencimiento'}
                           {card.dueDate && new Date(card.dueDate) < new Date() && !card.isDone && !card.isDueDateDone && (
                             <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
                           )}
