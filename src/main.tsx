@@ -31,6 +31,19 @@ if (typeof window !== 'undefined') {
       handleChunkReload();
     }
   });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event?.reason;
+    const msg = (typeof reason === 'string' ? reason : reason?.message) || '';
+    if (
+      msg.includes('Failed to fetch dynamically imported module') ||
+      msg.includes('Loading chunk') ||
+      msg.includes('ChunkLoadError')
+    ) {
+      console.warn('[Lumins] Módulo dinámico desactualizado tras despliegue, recargando...', msg);
+      handleChunkReload();
+    }
+  });
 }
 
 // Initialize theme from localStorage consistently
