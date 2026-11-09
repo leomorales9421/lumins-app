@@ -9,9 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  BarChart2
+  BarChart2,
+  HelpCircle
 } from 'lucide-react';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
+import SupportModal from '../support/SupportModal';
 
 interface SidebarProps {
   onCreateWorkspace: () => void;
@@ -54,6 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const effectiveWorkspaceId = urlWorkspaceId === 'global' ? null : urlWorkspaceId;
   const workspaceId = effectiveWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   const sidebarClasses = `
     transition-all duration-300 transform flex flex-col w-64
@@ -149,7 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Footer Navigation */}
-          <div className={`mt-auto pb-6 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-6 w-full`}>
+          <div className={`mt-auto pb-6 ${isCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 border-t ${isFloating ? 'border-white/10' : 'border-zinc-100 dark:border-white/5'} pt-4 w-full`}>
             <SidebarItem 
               to="/settings/profile" 
               icon={<Settings size={18} />} 
@@ -157,6 +160,28 @@ const Sidebar: React.FC<SidebarProps> = ({
               isCollapsed={isCollapsed} 
               isFloating={isFloating} 
             />
+
+            <button
+              type="button"
+              onClick={() => setShowSupportModal(true)}
+              title={isCollapsed ? "Soporte y Ayuda" : undefined}
+              className={`
+                flex items-center transition-colors rounded p-2.5 w-full text-[13px] font-bold cursor-pointer
+                ${isFloating 
+                  ? 'text-white/80 hover:text-white hover:bg-white/10' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] dark:hover:text-[#A599F9]'}
+                ${isCollapsed ? 'justify-center' : 'gap-3'}
+              `}
+            >
+              <span className={`${isCollapsed ? 'scale-110' : ''} transition-transform flex-shrink-0`}>
+                <HelpCircle size={18} />
+              </span>
+              {!isCollapsed && (
+                <span className="whitespace-nowrap overflow-hidden opacity-100 transition-all">
+                  Soporte y Ayuda
+                </span>
+              )}
+            </button>
             
             <button
               onClick={logout}
@@ -181,6 +206,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       </aside>
+
+      <SupportModal 
+        isOpen={showSupportModal} 
+        onClose={() => setShowSupportModal(false)} 
+      />
     </>
   );
 };

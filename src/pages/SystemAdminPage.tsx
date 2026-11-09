@@ -4,12 +4,13 @@ import {
   Users, Layout, Shield, Search, ChevronRight, ExternalLink, Globe, Database, HardDrive, CheckCircle,
   XCircle, Copy, Check, RefreshCw, AlertTriangle, Layers3, Building2, BadgeInfo, Clock3, UserRound,
   UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3, Zap, AlertOctagon, Sparkles,
-  Filter, CheckSquare, MessageSquare, ShieldAlert, UserCheck
+  Filter, CheckSquare, MessageSquare, ShieldAlert, UserCheck, HelpCircle
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '../components/ui/Skeleton';
+import SupportTicketsAdmin from '../components/admin/SupportTicketsAdmin';
 
 interface Stats {
   users: number;
@@ -176,7 +177,7 @@ interface TelemetrySummary {
   healthyBoardsCount: number;
 }
 
-type Tab = 'dashboard' | 'users' | 'workspaces' | 'activity' | 'telemetry' | 'settings';
+type Tab = 'dashboard' | 'users' | 'workspaces' | 'support' | 'activity' | 'telemetry' | 'settings';
 
 const formatBytes = (bytes?: number): string => {
   if (!bytes || bytes === 0) return '0 B';
@@ -369,6 +370,10 @@ const SystemAdminPage: React.FC = () => {
 
     const token = searchParams.get('token');
     const connected = searchParams.get('drive');
+    const tabParam = searchParams.get('tab') as Tab;
+    if (tabParam && ['dashboard', 'users', 'workspaces', 'support', 'activity', 'telemetry', 'settings'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
     if (token && connected === 'connected') {
       setPendingToken(token);
       setActiveTab('settings');
@@ -638,6 +643,7 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
     { id: 'dashboard', label: 'Resumen', icon: <BarChart3 size={18} /> },
     { id: 'users', label: 'Usuarios', icon: <Users size={18} /> },
     { id: 'workspaces', label: 'Espacios', icon: <Building2 size={18} /> },
+    { id: 'support', label: 'Soporte', icon: <HelpCircle size={18} /> },
     { id: 'activity', label: 'Actividad', icon: <Activity size={18} /> },
     { id: 'telemetry', label: 'Vigilante de Rendimiento', icon: <CircleGauge size={18} /> },
     { id: 'settings', label: 'Configuraciones', icon: <Settings size={18} /> },
@@ -1307,6 +1313,11 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                 />
               </div>
             </div>
+          )}
+
+          {/* SUPPORT TICKETS TAB */}
+          {activeTab === 'support' && (
+            <SupportTicketsAdmin />
           )}
 
           {/* SETTINGS TAB */}

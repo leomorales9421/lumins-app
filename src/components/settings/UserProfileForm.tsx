@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, CheckCircle2, Mail, Phone, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Camera, Save, Loader2, Globe, CheckCircle2, Mail, Phone, ChevronDown, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import { Skeleton } from '../ui/Skeleton';
@@ -7,30 +7,82 @@ import { compressImage } from '../../lib/image-utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
-const LATAM_COUNTRIES = [
-  { name: 'Argentina', code: 'AR', prefix: '+54' },
-  { name: 'Bolivia', code: 'BO', prefix: '+591' },
-  { name: 'Brasil', code: 'BR', prefix: '+55' },
-  { name: 'Chile', code: 'CL', prefix: '+56' },
-  { name: 'Colombia', code: 'CO', prefix: '+57' },
-  { name: 'Costa Rica', code: 'CR', prefix: '+506' },
-  { name: 'Cuba', code: 'CU', prefix: '+53' },
-  { name: 'Ecuador', code: 'EC', prefix: '+593' },
-  { name: 'El Salvador', code: 'SV', prefix: '+503' },
-  { name: 'Guatemala', code: 'GT', prefix: '+502' },
-  { name: 'Honduras', code: 'HN', prefix: '+504' },
-  { name: 'México', code: 'MX', prefix: '+52' },
-  { name: 'Nicaragua', code: 'NI', prefix: '+505' },
-  { name: 'Panamá', code: 'PA', prefix: '+507' },
-  { name: 'Paraguay', code: 'PY', prefix: '+595' },
-  { name: 'Perú', code: 'PE', prefix: '+51' },
-  { name: 'Puerto Rico', code: 'PR', prefix: '+1' },
-  { name: 'República Dominicana', code: 'DO', prefix: '+1' },
-  { name: 'Uruguay', code: 'UY', prefix: '+598' },
-  { name: 'Venezuela', code: 'VE', prefix: '+58' },
+export interface CountryOption {
+  name: string;
+  code: string;
+  prefix: string;
+  defaultTimezone: string;
+}
+
+export const LATAM_COUNTRIES: CountryOption[] = [
+  { name: 'Argentina', code: 'AR', prefix: '+54', defaultTimezone: 'America/Argentina/Buenos_Aires' },
+  { name: 'Bolivia', code: 'BO', prefix: '+591', defaultTimezone: 'America/La_Paz' },
+  { name: 'Brasil', code: 'BR', prefix: '+55', defaultTimezone: 'America/Sao_Paulo' },
+  { name: 'Chile', code: 'CL', prefix: '+56', defaultTimezone: 'America/Santiago' },
+  { name: 'Colombia', code: 'CO', prefix: '+57', defaultTimezone: 'America/Bogota' },
+  { name: 'Costa Rica', code: 'CR', prefix: '+506', defaultTimezone: 'America/Costa_Rica' },
+  { name: 'Cuba', code: 'CU', prefix: '+53', defaultTimezone: 'America/Havana' },
+  { name: 'Ecuador', code: 'EC', prefix: '+593', defaultTimezone: 'America/Guayaquil' },
+  { name: 'El Salvador', code: 'SV', prefix: '+503', defaultTimezone: 'America/El_Salvador' },
+  { name: 'España', code: 'ES', prefix: '+34', defaultTimezone: 'Europe/Madrid' },
+  { name: 'Estados Unidos', code: 'US', prefix: '+1', defaultTimezone: 'America/New_York' },
+  { name: 'Guatemala', code: 'GT', prefix: '+502', defaultTimezone: 'America/Guatemala' },
+  { name: 'Honduras', code: 'HN', prefix: '+504', defaultTimezone: 'America/Tegucigalpa' },
+  { name: 'México', code: 'MX', prefix: '+52', defaultTimezone: 'America/Mexico_City' },
+  { name: 'Nicaragua', code: 'NI', prefix: '+505', defaultTimezone: 'America/Managua' },
+  { name: 'Panamá', code: 'PA', prefix: '+507', defaultTimezone: 'America/Panama' },
+  { name: 'Paraguay', code: 'PY', prefix: '+595', defaultTimezone: 'America/Asuncion' },
+  { name: 'Perú', code: 'PE', prefix: '+51', defaultTimezone: 'America/Lima' },
+  { name: 'Puerto Rico', code: 'PR', prefix: '+1', defaultTimezone: 'America/Puerto_Rico' },
+  { name: 'República Dominicana', code: 'DO', prefix: '+1', defaultTimezone: 'America/Santo_Domingo' },
+  { name: 'Uruguay', code: 'UY', prefix: '+598', defaultTimezone: 'America/Montevideo' },
+  { name: 'Venezuela', code: 'VE', prefix: '+58', defaultTimezone: 'America/Caracas' },
 ];
 
-const getCachedGeo = (): { country: string; prefix: string } | null => {
+export const AVAILABLE_TIMEZONES = [
+  { value: 'America/Caracas', label: 'Venezuela (Caracas, GMT-4)' },
+  { value: 'UTC', label: 'UTC (Tiempo Universal Coordinado, GMT+0)' },
+  { value: 'America/Bogota', label: 'Colombia (Bogotá, GMT-5)' },
+  { value: 'America/Lima', label: 'Perú (Lima, GMT-5)' },
+  { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (Buenos Aires, GMT-3)' },
+  { value: 'America/Santiago', label: 'Chile (Santiago, GMT-4 / GMT-3)' },
+  { value: 'America/Mexico_City', label: 'México (Ciudad de México, GMT-6)' },
+  { value: 'America/Sao_Paulo', label: 'Brasil (São Paulo, GMT-3)' },
+  { value: 'America/La_Paz', label: 'Bolivia (La Paz, GMT-4)' },
+  { value: 'America/Guayaquil', label: 'Ecuador (Guayaquil / Quito, GMT-5)' },
+  { value: 'America/Asuncion', label: 'Paraguay (Asunción, GMT-4)' },
+  { value: 'America/Montevideo', label: 'Uruguay (Montevideo, GMT-3)' },
+  { value: 'America/Panama', label: 'Panamá (GMT-5)' },
+  { value: 'America/Costa_Rica', label: 'Costa Rica (San José, GMT-6)' },
+  { value: 'America/Guatemala', label: 'Guatemala (GMT-6)' },
+  { value: 'America/El_Salvador', label: 'El Salvador (GMT-6)' },
+  { value: 'America/Tegucigalpa', label: 'Honduras (Tegucigalpa, GMT-6)' },
+  { value: 'America/Managua', label: 'Nicaragua (Managua, GMT-6)' },
+  { value: 'America/Havana', label: 'Cuba (La Habana, GMT-5)' },
+  { value: 'America/Santo_Domingo', label: 'Rep. Dominicana (Santo Domingo, GMT-4)' },
+  { value: 'America/Puerto_Rico', label: 'Puerto Rico (San Juan, GMT-4)' },
+  { value: 'America/New_York', label: 'EE.UU. Este (Nueva York / Miami, GMT-5)' },
+  { value: 'America/Chicago', label: 'EE.UU. Centro (Chicago / Texas, GMT-6)' },
+  { value: 'America/Denver', label: 'EE.UU. Montaña (Denver, GMT-7)' },
+  { value: 'America/Los_Angeles', label: 'EE.UU. Pacífico (Los Ángeles, GMT-8)' },
+  { value: 'Europe/Madrid', label: 'España (Madrid / Barcelona, GMT+1 / GMT+2)' },
+  { value: 'Europe/London', label: 'Reino Unido (Londres, GMT+0 / GMT+1)' },
+];
+
+const resolveDefaultTimezone = (countryName?: string, currentTz?: string): string => {
+  if (currentTz) return currentTz;
+  if (countryName) {
+    const matched = LATAM_COUNTRIES.find(c => c.name.toLowerCase() === countryName.toLowerCase());
+    if (matched) return matched.defaultTimezone;
+  }
+  try {
+    const sysTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (sysTz) return sysTz;
+  } catch {}
+  return 'America/Caracas';
+};
+
+const getCachedGeo = (): { country: string; prefix: string; timezone?: string } | null => {
   try {
     const raw = localStorage.getItem('lumins_detected_geo');
     return raw ? JSON.parse(raw) : null;
@@ -52,6 +104,11 @@ const UserProfileForm: React.FC = () => {
     const cachedGeo = getCachedGeo();
     const initialCountry = user?.country || cachedGeo?.country || '';
     const initialPhone = user?.phone || (cachedGeo?.prefix ? cachedGeo.prefix : '') || '';
+    const initialTimezone =
+      user?.timezone ||
+      user?.preferences?.timezone ||
+      cachedGeo?.timezone ||
+      resolveDefaultTimezone(initialCountry);
 
     return {
       firstName: nameParts[0] || '',
@@ -59,9 +116,17 @@ const UserProfileForm: React.FC = () => {
       email: user?.email || '',
       phone: initialPhone,
       country: initialCountry,
+      timezone: initialTimezone,
       avatarUrl: user?.avatarUrl || '',
     };
   });
+
+  const allTimezones = useMemo(() => {
+    if (formData.timezone && !AVAILABLE_TIMEZONES.some(t => t.value === formData.timezone)) {
+      return [{ value: formData.timezone, label: `${formData.timezone} (Detectada)` }, ...AVAILABLE_TIMEZONES];
+    }
+    return AVAILABLE_TIMEZONES;
+  }, [formData.timezone]);
 
   // Solo sincronizar si cambia el id de usuario (evitar re-renders y parpadeos innecesarios)
   const lastUserIdRef = React.useRef(user?.id);
@@ -69,6 +134,12 @@ const UserProfileForm: React.FC = () => {
     if (user && user.id !== lastUserIdRef.current) {
       lastUserIdRef.current = user.id;
       const nameParts = (user.name || '').trim().split(' ');
+      const userCountry = user.country || '';
+      const userTimezone =
+        user.timezone ||
+        user.preferences?.timezone ||
+        resolveDefaultTimezone(userCountry);
+
       setFormData(prev => ({
         ...prev,
         firstName: nameParts[0] || '',
@@ -76,6 +147,7 @@ const UserProfileForm: React.FC = () => {
         email: user.email || '',
         phone: user.phone || prev.phone,
         country: user.country || prev.country,
+        timezone: userTimezone || prev.timezone,
         avatarUrl: user.avatarUrl || '',
       }));
     }
@@ -93,13 +165,18 @@ const UserProfileForm: React.FC = () => {
             try {
               localStorage.setItem(
                 'lumins_detected_geo',
-                JSON.stringify({ country: detectedCountry.name, prefix: detectedCountry.prefix })
+                JSON.stringify({
+                  country: detectedCountry.name,
+                  prefix: detectedCountry.prefix,
+                  timezone: detectedCountry.defaultTimezone,
+                })
               );
             } catch {}
             setFormData(prev => ({
               ...prev,
               country: prev.country || detectedCountry.name,
               phone: prev.phone || detectedCountry.prefix,
+              timezone: prev.timezone || detectedCountry.defaultTimezone,
             }));
           }
         })
@@ -109,14 +186,19 @@ const UserProfileForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'country') {
       const country = LATAM_COUNTRIES.find(c => c.name === value);
-      if (country && (!formData.phone || formData.phone.startsWith('+'))) {
-        setFormData(prev => ({ ...prev, country: value, phone: country.prefix }));
-      }
+      setFormData(prev => ({
+        ...prev,
+        country: value,
+        phone: country && (!prev.phone || prev.phone.startsWith('+')) ? country.prefix : prev.phone,
+        timezone: country ? country.defaultTimezone : prev.timezone,
+      }));
+      return;
     }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,8 +252,18 @@ const UserProfileForm: React.FC = () => {
         name: fullName,
         phone: formData.phone,
         country: formData.country,
+        timezone: formData.timezone,
+        preferences: {
+          ...(user?.preferences || {}),
+          timezone: formData.timezone,
+        },
         ...(currentAvatar ? { avatarUrl: currentAvatar } : {}),
       });
+
+      try {
+        localStorage.setItem('lumins_user_timezone', formData.timezone);
+      } catch {}
+
       if (setUser) {
         setUser(response.data.user);
       }
@@ -216,8 +308,12 @@ const UserProfileForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Country / Phone / Email Skeleton */}
+        {/* Country / Timezone / Phone / Email Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-24 rounded" />
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
           <div className="space-y-2">
             <Skeleton className="h-3 w-24 rounded" />
             <Skeleton className="h-11 w-full rounded-xl" />
@@ -226,7 +322,7 @@ const UserProfileForm: React.FC = () => {
             <Skeleton className="h-3 w-20 rounded" />
             <Skeleton className="h-11 w-full rounded-xl" />
           </div>
-          <div className="sm:col-span-2 space-y-2">
+          <div className="space-y-2">
             <Skeleton className="h-3 w-48 rounded" />
             <Skeleton className="h-11 w-full rounded-xl" />
           </div>
@@ -360,6 +456,32 @@ const UserProfileForm: React.FC = () => {
           </div>
 
           <div>
+            <label className={labelClasses}>Zona Horaria</label>
+            <div className="relative">
+              <select
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleChange}
+                className={`${inputWithIconClasses} appearance-none cursor-pointer pr-10`}
+              >
+                {allTimezones.map(tz => (
+                  <option key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+              <Clock
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
+              />
+              <ChevronDown
+                size={16}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
+              />
+            </div>
+          </div>
+
+          <div>
             <label className={labelClasses}>Teléfono</label>
             <div className="relative">
               <input
@@ -377,7 +499,7 @@ const UserProfileForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="sm:col-span-2">
+          <div>
             <label className={labelClasses}>Correo Electrónico (ID de cuenta)</label>
             <div className="relative">
               <input

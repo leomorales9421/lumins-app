@@ -12,6 +12,7 @@ interface User {
   phone?: string;
   avatarUrl?: string;
   country?: string;
+  timezone?: string;
   theme?: string;
   language?: string;
   notificationPrefs?: Record<string, boolean> | string;
