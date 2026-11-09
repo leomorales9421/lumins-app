@@ -89,6 +89,7 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
   onRangeSelectStart,
   onRangeSelectEnter,
 }) => {
+  const [isExternalOver, setIsExternalOver] = useState(false);
   const dayKey = getDayKey(day);
   const { isOver, setNodeRef } = useDroppable({
     id: `day:${dayKey}`,
@@ -107,12 +108,25 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
         }
       }}
       onMouseEnter={() => onRangeSelectEnter(day)}
+      onDragEnter={e => {
+        if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
+          e.preventDefault();
+          setIsExternalOver(true);
+        }
+      }}
       onDragOver={e => {
         if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
           e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (!isExternalOver) setIsExternalOver(true);
         }
       }}
+      onDragLeave={e => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+        setIsExternalOver(false);
+      }}
       onDrop={e => {
+        setIsExternalOver(false);
         const cardId = e.dataTransfer.getData('application/lumins-calendar-card');
         if (cardId && onDropUnscheduledCard) {
           e.preventDefault();
@@ -128,7 +142,9 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
           ? 'bg-zinc-50/75 dark:bg-white/[0.015]'
           : 'bg-white dark:bg-[#181B22]'
       } ${!isCurrentMonth ? 'opacity-45 bg-zinc-50/50 dark:bg-[#13151A]/60' : ''} ${
-        isOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/10 dark:bg-[#6C5DD3]/20 z-10' : ''
+        isOver || isExternalOver
+          ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10'
+          : ''
       }`}
     >
       {/* Top row: Day number & Quick Create + button */}

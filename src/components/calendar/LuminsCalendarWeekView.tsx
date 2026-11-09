@@ -251,6 +251,7 @@ const DroppableWeekColumn: React.FC<DroppableWeekColumnProps> = ({
   onDropUnscheduledCard,
   onOpenQuickMenu,
 }) => {
+  const [isExternalOver, setIsExternalOver] = useState(false);
   const dayKey = getDayKey(day);
   const { isOver, setNodeRef } = useDroppable({
     id: `week-day:${dayKey}`,
@@ -263,25 +264,38 @@ const DroppableWeekColumn: React.FC<DroppableWeekColumnProps> = ({
   return (
     <div
       ref={setNodeRef}
+      onDragEnter={e => {
+        if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
+          e.preventDefault();
+          setIsExternalOver(true);
+        }
+      }}
       onDragOver={e => {
         if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
           e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (!isExternalOver) setIsExternalOver(true);
         }
       }}
+      onDragLeave={e => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+        setIsExternalOver(false);
+      }}
       onDrop={e => {
+        setIsExternalOver(false);
         const cardId = e.dataTransfer.getData('application/lumins-calendar-card');
         if (cardId && onDropUnscheduledCard) {
           e.preventDefault();
           onDropUnscheduledCard(cardId, day);
         }
       }}
-      className={`flex flex-col min-h-0 h-full border-r border-zinc-200/70 dark:border-white/[0.06] last:border-r-0 transition-colors ${
+      className={`flex flex-col min-h-0 h-full border-r border-zinc-200/70 dark:border-white/[0.06] last:border-r-0 transition-all ${
         today
           ? 'bg-[#6C5DD3]/[0.04] dark:bg-[#6C5DD3]/[0.08]'
           : weekend
           ? 'bg-zinc-50/60 dark:bg-white/[0.015]'
           : 'bg-white dark:bg-[#181B22]'
-      } ${isOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/10' : ''}`}
+      } ${isOver || isExternalOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10' : ''}`}
     >
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 space-y-2">
         {singleDayEvents.length === 0 ? (

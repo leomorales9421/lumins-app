@@ -835,26 +835,112 @@ const WorkspaceCalendarPage: React.FC = () => {
       const card = unscheduledEvents.find(c => c.id === cardId);
       if (!card) return;
       const dueISO = toSafeCalendarISO(targetDate);
-      await applyCardDatesUpdate(
-        card,
-        null,
-        dueISO,
-        `Programada para el ${format(targetDate, "d 'de' MMM", { locale: es })}`
-      );
+      const isTeamViewDrop = targetMemberId !== undefined;
 
-      if (targetMemberId) {
-        const member = uniqueMembers.find(m => m.id === targetMemberId);
-        if (member && !card.extendedProps.assignees?.some(a => a.id === targetMemberId)) {
-          try {
-            await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: targetMemberId });
-            fetchEvents(true);
-          } catch {
-            // ignore
-          }
+      // Calculate target assignees if dropped in Team View
+      let nextAssignees = card.extendedProps.assignees || [];
+      if (isTeamViewDrop) {
+        if (targetMemberId) {
+          const targetMember = uniqueMembers.find(m => m.id === targetMemberId);
+          nextAssignees = targetMember
+            ? [
+                {
+                  id: targetMember.id,
+                  name: targetMember.name,
+                  email: targetMember.email,
+                  avatarUrl: targetMember.avatarUrl,
+                },
+              ]
+            : [];
+        } else {
+          // Explicitly dropped into "Sin asignar"
+          nextAssignees = [];
         }
       }
+
+      // Optimistic update
+      const previousEvents = events;
+      const previousUnscheduled = unscheduledEvents;
+
+      const scheduledCard: CalendarCardEvent = {
+        ...card,
+        start: dueISO,
+        end: dueISO,
+        extendedProps: {
+          ...card.extendedProps,
+          startDate: null,
+          dueDate: dueISO,
+          assignees: nextAssignees,
+        },
+      };
+
+      setEvents(prev => [...prev.filter(i => i.id !== cardId), scheduledCard]);
+      setUnscheduledEvents(prev => prev.filter(i => i.id !== cardId));
+
+      try {
+        // 1. Update dates
+        await apiClient.patch(`/api/cards/${card.id}/dates`, {
+          startDate: null,
+          dueDate: dueISO,
+        });
+
+        // 2. If dropped in Team View, update assignees to match target row
+        if (isTeamViewDrop) {
+          const currentAssigneeIds = (card.extendedProps.assignees || []).map(a => a.id);
+          // Remove previous assignees that are not targetMemberId
+          for (const prevId of currentAssigneeIds) {
+            if (prevId !== targetMemberId) {
+              await apiClient.delete(`/api/cards/${card.id}/assignees/${prevId}`).catch(() => {});
+            }
+          }
+          // Assign target member if not already assigned
+          if (targetMemberId && !currentAssigneeIds.includes(targetMemberId)) {
+            await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: targetMemberId }).catch(() => {});
+          }
+        }
+
+        const memberName = targetMemberId
+          ? uniqueMembers.find(m => m.id === targetMemberId)?.name
+          : null;
+        const msg = memberName
+          ? `Programada para el ${format(targetDate, "d 'de' MMM", { locale: es })} (${memberName})`
+          : `Programada para el ${format(targetDate, "d 'de' MMM", { locale: es })}`;
+
+        toast.success(msg, {
+          action: {
+            label: 'Deshacer',
+            onClick: async () => {
+              setEvents(previousEvents);
+              setUnscheduledEvents(previousUnscheduled);
+              try {
+                // Restore dates
+                await apiClient.patch(`/api/cards/${card.id}/dates`, {
+                  startDate: null,
+                  dueDate: null,
+                });
+                // Restore assignees if changed
+                if (isTeamViewDrop) {
+                  if (targetMemberId) {
+                    await apiClient.delete(`/api/cards/${card.id}/assignees/${targetMemberId}`).catch(() => {});
+                  }
+                  for (const prevA of card.extendedProps.assignees || []) {
+                    await apiClient.post(`/api/cards/${card.id}/assignees`, { userId: prevA.id }).catch(() => {});
+                  }
+                }
+                toast.success('Programación deshecha');
+              } catch {
+                fetchEvents(true);
+              }
+            },
+          },
+        });
+      } catch {
+        setEvents(previousEvents);
+        setUnscheduledEvents(previousUnscheduled);
+        showError('Error', 'No se pudo programar la tarjeta');
+      }
     },
-    [unscheduledEvents, applyCardDatesUpdate, uniqueMembers, fetchEvents]
+    [unscheduledEvents, events, uniqueMembers, showError, fetchEvents]
   );
 
   // Team View 2D Drag: Reassign + Reschedule (Requirement 3.1)

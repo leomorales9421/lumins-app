@@ -214,6 +214,7 @@ const DroppableTeamCell: React.FC<DroppableTeamCellProps> = ({
   onDropUnscheduledCard,
   onOpenQuickMenu,
 }) => {
+  const [isExternalOver, setIsExternalOver] = useState(false);
   const dayKey = getDayKey(day);
   const { isOver, setNodeRef } = useDroppable({
     id: `team-cell:${memberId}:${dayKey}`,
@@ -230,12 +231,25 @@ const DroppableTeamCell: React.FC<DroppableTeamCellProps> = ({
   return (
     <div
       ref={setNodeRef}
+      onDragEnter={e => {
+        if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
+          e.preventDefault();
+          setIsExternalOver(true);
+        }
+      }}
       onDragOver={e => {
         if (e.dataTransfer.types.includes('application/lumins-calendar-card')) {
           e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (!isExternalOver) setIsExternalOver(true);
         }
       }}
+      onDragLeave={e => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+        setIsExternalOver(false);
+      }}
       onDrop={e => {
+        setIsExternalOver(false);
         const cardId = e.dataTransfer.getData('application/lumins-calendar-card');
         if (cardId && onDropUnscheduledCard) {
           e.preventDefault();
@@ -246,10 +260,10 @@ const DroppableTeamCell: React.FC<DroppableTeamCellProps> = ({
           );
         }
       }}
-      className={`p-1.5 border-r border-zinc-200/60 dark:border-white/[0.05] last:border-r-0 flex flex-col gap-1.5 min-h-[84px] transition-colors ${
+      className={`p-1.5 border-r border-zinc-200/60 dark:border-white/[0.05] last:border-r-0 flex flex-col gap-1.5 min-h-[84px] transition-all ${
         load.cellBg
       } ${today ? 'bg-[#6C5DD3]/[0.03]' : ''} ${
-        isOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/10' : ''
+        isOver || isExternalOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10 shadow-inner' : ''
       }`}
     >
       {/* Cell capacity indicator */}

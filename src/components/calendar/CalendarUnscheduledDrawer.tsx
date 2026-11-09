@@ -44,6 +44,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
   const [boardFilter, setBoardFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [activeScheduleCardId, setActiveScheduleCardId] = useState<string | null>(null);
+  const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
   const [customDateStr, setCustomDateStr] = useState<string>(() =>
     format(new Date(), 'yyyy-MM-dd')
   );
@@ -186,7 +187,12 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                 onDragStart={e => {
                   if (!canEdit) return;
                   e.dataTransfer.setData('application/lumins-calendar-card', ev.id);
+                  e.dataTransfer.setData('text/plain', ev.id);
                   e.dataTransfer.effectAllowed = 'move';
+                  setDraggingCardId(ev.id);
+                }}
+                onDragEnd={() => {
+                  setDraggingCardId(null);
                 }}
                 onContextMenu={e => {
                   e.preventDefault();
@@ -198,6 +204,10 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                 }}
                 className={`group p-2.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#1E222B] hover:border-[#6C5DD3]/50 shadow-2xs transition-all space-y-1.5 ${
                   canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                } ${
+                  draggingCardId === ev.id
+                    ? 'opacity-40 scale-95 border-dashed border-[#6C5DD3] dark:border-[#6C5DD3]'
+                    : ''
                 }`}
               >
                 {/* Top: Board › List + Context menu */}
