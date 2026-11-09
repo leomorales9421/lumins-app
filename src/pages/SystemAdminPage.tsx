@@ -4,7 +4,7 @@ import {
   Users, Layout, Shield, Search, ChevronRight, ExternalLink, Globe, Database, HardDrive, CheckCircle,
   XCircle, Copy, Check, RefreshCw, AlertTriangle, Layers3, Building2, BadgeInfo, Clock3, UserRound,
   UsersRound, CircleGauge, FileText, Activity, Settings, BarChart3, Zap, AlertOctagon, Sparkles,
-  Filter, CheckSquare, MessageSquare, ShieldAlert, UserCheck, HelpCircle
+  Filter, CheckSquare, MessageSquare, ShieldAlert, UserCheck, HelpCircle, MousePointerClick, Flame, Bug, Compass
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
@@ -175,6 +175,43 @@ interface TelemetrySummary {
   criticalBoardsCount: number;
   warningBoardsCount: number;
   healthyBoardsCount: number;
+}
+
+interface ClarityInsightsData {
+  configured: boolean;
+  cached: boolean;
+  lastUpdated: string;
+  canRefresh: boolean;
+  nextAllowedRefreshMinutes: number;
+  timeframeDays: number;
+  traffic: {
+    totalSessions: number;
+    distinctUsers: number;
+    botSessions: number;
+    pagesPerSession: number;
+  };
+  frustration: {
+    deadClicks: { count: number; percentage: number };
+    rageClicks: { count: number; percentage: number };
+    excessiveScroll: { count: number; percentage: number };
+    quickBacks: { count: number; percentage: number };
+  };
+  errors: {
+    scriptErrors: { count: number; percentage: number };
+    errorClicks: { count: number; percentage: number };
+  };
+  engagement: {
+    averageScrollDepth: number;
+    totalTimeSeconds: number;
+    activeTimeSeconds: number;
+  };
+  devices: Array<{ name: string; sessionsCount: number }>;
+  browsers: Array<{ name: string; sessionsCount: number }>;
+  operatingSystems: Array<{ name: string; sessionsCount: number }>;
+  countries: Array<{ name: string; sessionsCount: number }>;
+  popularPages: Array<{ url: string; visitsCount: number }>;
+  healthStatus: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+  healthScore: number;
 }
 
 type Tab = 'dashboard' | 'users' | 'workspaces' | 'support' | 'activity' | 'telemetry' | 'settings';
@@ -352,6 +389,11 @@ const SystemAdminPage: React.FC = () => {
   const [telemetryLoading, setTelemetryLoading] = useState(false);
   const [telemetryCopied, setTelemetryCopied] = useState(false);
   const [telemetrySearch, setTelemetrySearch] = useState('');
+
+  // Clarity state
+  const [clarityData, setClarityData] = useState<ClarityInsightsData | null>(null);
+  const [clarityLoading, setClarityLoading] = useState(false);
+  const [clarityRefreshing, setClarityRefreshing] = useState(false);
 
   // Drive state
   const [driveStatus, setDriveStatus] = useState<DriveStatus | null>(null);
@@ -575,11 +617,28 @@ const SystemAdminPage: React.FC = () => {
     }
   }, []);
 
+  const fetchClarity = useCallback(async (refresh = false) => {
+    if (refresh) setClarityRefreshing(true);
+    else setClarityLoading(true);
+    try {
+      const res = await apiClient.get<any>(`/api/system/clarity/insights${refresh ? '?refresh=true' : ''}`);
+      if (res?.data) {
+        setClarityData(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch clarity insights', err);
+    } finally {
+      setClarityLoading(false);
+      setClarityRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'telemetry') {
       fetchTelemetry();
+      fetchClarity();
     }
-  }, [activeTab, fetchTelemetry]);
+  }, [activeTab, fetchTelemetry, fetchClarity]);
 
   const handleExportTelemetryForAI = useCallback(() => {
     if (!telemetryData) return;
@@ -1580,6 +1639,194 @@ Analiza los datos anteriores. Identifica cuellos de botella específicos (por ej
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* MICROSOFT CLARITY UX & FRUSTRATION METRICS */}
+              <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        <Activity size={12} />
+                        Microsoft Clarity
+                      </span>
+                      {clarityData?.configured && (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          clarityData.healthStatus === 'HEALTHY'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            : clarityData.healthStatus === 'WARNING'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                        }`}>
+                          {clarityData.healthStatus === 'HEALTHY' ? <CheckCircle size={11} /> : <AlertTriangle size={11} />}
+                          Salud UX: {clarityData.healthScore}/100 · {clarityData.healthStatus === 'HEALTHY' ? 'Óptima' : clarityData.healthStatus === 'WARNING' ? 'Fricción Moderada' : 'Atención Requerida'}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-black text-cu-text dark:text-zinc-100">
+                      Experiencia de Usuario & Fricción en Vivo (Últimas 24h)
+                    </h3>
+                    <p className="text-xs text-cu-muted dark:text-zinc-400 mt-1">
+                      Métricas reales de interacción y comportamiento analizadas por la Data Export API de Microsoft Clarity.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      onClick={() => fetchClarity(true)}
+                      disabled={clarityLoading || clarityRefreshing || !clarityData?.canRefresh}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                        clarityData?.canRefresh
+                          ? 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-zinc-200 border-cu-border dark:border-white/10'
+                          : 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-white/[0.02] text-cu-muted border-transparent'
+                      }`}
+                      title={clarityData?.canRefresh ? 'Actualizar métricas de Clarity' : `En caché para proteger el límite de 10 peticiones/día de Clarity (Próximo en ${clarityData?.nextAllowedRefreshMinutes || 15} min)`}
+                    >
+                      <RefreshCw size={13} className={clarityRefreshing ? 'animate-spin' : ''} />
+                      {clarityRefreshing ? 'Actualizando...' : 'Sincronizar'}
+                    </button>
+                    <a
+                      href="https://clarity.microsoft.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-[#6C5DD3]/10 hover:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-[#A599F9] border border-[#6C5DD3]/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <span>Abrir Clarity</span>
+                      <ExternalLink size={13} />
+                    </a>
+                  </div>
+                </div>
+
+                {clarityLoading && !clarityData ? (
+                  <div className="py-10 text-center text-cu-muted">
+                    <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-cyan-500" />
+                    <p className="text-xs font-medium">Cargando métricas de Microsoft Clarity...</p>
+                  </div>
+                ) : !clarityData?.configured ? (
+                  <div className="p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-amber-800 dark:text-amber-300 text-xs">
+                    <p className="font-bold mb-1">Clarity API Token no configurado</p>
+                    <p className="opacity-90">Añade <code>CLARITY_API_TOKEN</code> en el archivo <code>.env</code> para activar la telemetría de UX en tiempo real.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* 4 Frustration & Reliability Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      {/* Rage Clicks */}
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-cu-muted dark:text-zinc-400">
+                            Clics de Rabia (Rage)
+                          </span>
+                          <Flame size={16} className={clarityData.frustration.rageClicks.count > 10 ? 'text-rose-500' : 'text-amber-500'} />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                            {clarityData.frustration.rageClicks.count}
+                          </span>
+                          <span className="text-xs font-bold text-cu-muted dark:text-zinc-400">
+                            ({clarityData.frustration.rageClicks.percentage}% sesiones)
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-cu-muted dark:text-zinc-500 mt-1">
+                          Clics rápidos cuando un elemento no responde
+                        </p>
+                      </div>
+
+                      {/* Dead Clicks */}
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-cu-muted dark:text-zinc-400">
+                            Clics Muertos (Dead)
+                          </span>
+                          <MousePointerClick size={16} className="text-blue-400" />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                            {clarityData.frustration.deadClicks.count}
+                          </span>
+                          <span className="text-xs font-bold text-cu-muted dark:text-zinc-400">
+                            ({clarityData.frustration.deadClicks.percentage}% sesiones)
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-cu-muted dark:text-zinc-500 mt-1">
+                          Clics en textos o zonas estáticas sin acción
+                        </p>
+                      </div>
+
+                      {/* Quick Backs */}
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-cu-muted dark:text-zinc-400">
+                            Abandonos Rápidos
+                          </span>
+                          <Compass size={16} className="text-purple-400" />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                            {clarityData.frustration.quickBacks.count}
+                          </span>
+                          <span className="text-xs font-bold text-cu-muted dark:text-zinc-400">
+                            ({clarityData.frustration.quickBacks.percentage}% sesiones)
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-cu-muted dark:text-zinc-500 mt-1">
+                          Páginas de donde el usuario retrocede de inmediato
+                        </p>
+                      </div>
+
+                      {/* Script Errors */}
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-cu-border dark:border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-cu-muted dark:text-zinc-400">
+                            Errores JS en Clientes
+                          </span>
+                          <Bug size={16} className={clarityData.errors.scriptErrors.count > 0 ? 'text-rose-500' : 'text-emerald-500'} />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-cu-text dark:text-zinc-100">
+                            {clarityData.errors.scriptErrors.count}
+                          </span>
+                          <span className="text-xs font-bold text-cu-muted dark:text-zinc-400">
+                            ({clarityData.errors.scriptErrors.percentage}% sesiones)
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-cu-muted dark:text-zinc-500 mt-1">
+                          Fallos no controlados capturados en navegadores
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Metadata Strip: Traffic, Devices & Browsers */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-cu-border dark:border-dark-border text-xs">
+                      <div className="flex flex-wrap items-center gap-4 text-cu-muted dark:text-zinc-400">
+                        <div>
+                          <strong className="text-cu-text dark:text-zinc-200 font-extrabold">{clarityData.traffic.totalSessions}</strong> sesiones analizadas
+                        </div>
+                        <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                        <div>
+                          <strong className="text-cu-text dark:text-zinc-200 font-extrabold">{clarityData.traffic.distinctUsers}</strong> usuarios únicos
+                        </div>
+                        <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                        <div>
+                          <strong className="text-cu-text dark:text-zinc-200 font-extrabold">{clarityData.traffic.pagesPerSession}</strong> págs / sesión
+                        </div>
+                        <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                        <div>
+                          Scroll prom: <strong className="text-cu-text dark:text-zinc-200 font-extrabold">{clarityData.engagement.averageScrollDepth}%</strong>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[11px] text-cu-muted dark:text-zinc-500">
+                        <span>Actualizado {formatRelativeTime(clarityData.lastUpdated)}</span>
+                        {clarityData.cached && (
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-semibold text-zinc-500">
+                            Caché anti-cuota activo
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Table of Monitored Boards */}

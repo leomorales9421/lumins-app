@@ -90,12 +90,13 @@ export const useBoardTelemetry = ({
   useEffect(() => {
     if (isLoading || !board || reportSentRef.current) return;
 
-    // Small delay to ensure render layout is fully settled
+    // Capture the exact load time when loading finishes (not after timeout)
+    const loadTimeMs = Math.max(10, Math.round(performance.now() - startTimeRef.current));
+
+    // Small delay to ensure render layout is fully settled before sending payload
     const timer = setTimeout(async () => {
       if (reportSentRef.current) return;
       reportSentRef.current = true;
-
-      const loadTimeMs = Math.round(performance.now() - startTimeRef.current);
 
       // Estimate JSON payload size
       let payloadSizeBytes = 0;
