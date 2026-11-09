@@ -28,9 +28,11 @@ export const compressImage = async (
     const compressedBlob = await imageCompression(file, compressionOptions);
     
     // El blob retornado no siempre tiene el nombre original, lo reconstruimos como File
-    const fileName = file.name.split('.')[0] + '.webp';
+    const ext = compressionOptions.fileType?.includes('jpeg') || compressionOptions.fileType?.includes('jpg') ? '.jpg' : '.webp';
+    const baseName = file.name.replace(/\.[^/.]+$/, '') || 'captura';
+    const fileName = `${baseName}${ext}`;
     return new File([compressedBlob], fileName, {
-      type: 'image/webp',
+      type: compressionOptions.fileType || 'image/webp',
       lastModified: Date.now(),
     });
   } catch (error) {
@@ -47,5 +49,18 @@ export const compressAttachment = async (file: File): Promise<File> => {
     maxSizeMB: 1, // 1MB para adjuntos
     maxWidthOrHeight: 1920, // Full HD max
     fileType: 'image/webp',
+  });
+};
+
+/**
+ * Comprime y minimiza una imagen para tickets de soporte (capturas de pantalla y fotos).
+ * Garantiza texto legible en capturas mientras reduce el peso drásticamente para correo y DB.
+ */
+export const compressSupportAttachment = async (file: File): Promise<File> => {
+  return compressImage(file, {
+    maxSizeMB: 0.8, // 800 KB max
+    maxWidthOrHeight: 1600,
+    fileType: 'image/jpeg',
+    useWebWorker: true,
   });
 };

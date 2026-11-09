@@ -14,7 +14,8 @@ import {
   FileText, 
   Check, 
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Paperclip
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
@@ -28,6 +29,10 @@ export interface SupportTicket {
   category: 'problema' | 'duda' | 'sugerencia' | 'queja';
   subject: string;
   message: string;
+  attachmentUrl?: string | null;
+  attachmentName?: string | null;
+  attachmentSize?: number | null;
+  attachmentType?: string | null;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   priority: string;
   adminNotes?: string | null;
@@ -402,8 +407,13 @@ export const SupportTicketsAdmin: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-3 max-w-xs">
-                        <div className="font-extrabold text-zinc-900 dark:text-zinc-100 truncate">
-                          {ticket.subject}
+                        <div className="font-extrabold text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-1.5">
+                          <span className="truncate">{ticket.subject}</span>
+                          {ticket.attachmentUrl && (
+                            <span title={ticket.attachmentName || 'Contiene archivo adjunto'} className="shrink-0 text-[#6C5DD3] bg-[#6C5DD3]/10 p-0.5 rounded">
+                              <Paperclip size={12} />
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
                           {ticket.message}
@@ -545,6 +555,48 @@ export const SupportTicketsAdmin: React.FC = () => {
                   {selectedTicket.message}
                 </div>
               </div>
+
+              {/* Archivo adjunto */}
+              {selectedTicket.attachmentUrl && (
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 block">
+                    Archivo Adjunto
+                  </label>
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {selectedTicket.attachmentType?.startsWith('image/') ? (
+                        <img 
+                          src={selectedTicket.attachmentUrl} 
+                          alt={selectedTicket.attachmentName || 'Captura'} 
+                          className="w-12 h-12 rounded-xl object-cover border border-zinc-200 dark:border-white/10 shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(selectedTicket.attachmentUrl!, '_blank')}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shrink-0">
+                          <Paperclip size={18} />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">
+                          {selectedTicket.attachmentName || 'archivo_adjunto'}
+                        </p>
+                        <p className="text-[10px] text-zinc-400">
+                          {selectedTicket.attachmentSize ? `${(selectedTicket.attachmentSize / 1024).toFixed(1)} KB` : 'Adjunto'}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={selectedTicket.attachmentUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                    >
+                      <ExternalLink size={13} />
+                      <span>Abrir</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Status Switcher */}
               <div className="space-y-1.5">
