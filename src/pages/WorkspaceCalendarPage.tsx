@@ -841,17 +841,19 @@ const WorkspaceCalendarPage: React.FC = () => {
       let nextAssignees = card.extendedProps.assignees || [];
       if (isTeamViewDrop) {
         if (targetMemberId) {
-          const targetMember = uniqueMembers.find(m => m.id === targetMemberId);
-          nextAssignees = targetMember
-            ? [
-                {
-                  id: targetMember.id,
-                  name: targetMember.name,
-                  email: targetMember.email,
-                  avatarUrl: targetMember.avatarUrl,
-                },
-              ]
-            : [];
+          const targetMember = 
+            uniqueMembers.find(m => m.id === targetMemberId) ||
+            workspaceMembers.find(m => m.id === targetMemberId) ||
+            events.flatMap(e => e.extendedProps?.assignees || []).find(a => a?.id === targetMemberId);
+
+          nextAssignees = [
+            {
+              id: targetMemberId,
+              name: targetMember?.name || 'Miembro',
+              email: targetMember?.email || '',
+              avatarUrl: targetMember?.avatarUrl || null,
+            },
+          ];
         } else {
           // Explicitly dropped into "Sin asignar"
           nextAssignees = [];
@@ -899,8 +901,11 @@ const WorkspaceCalendarPage: React.FC = () => {
           }
         }
 
+        // Sincronización silenciosa con el servidor para consolidar el estado sin recargar la página
+        fetchEvents(true);
+
         const memberName = targetMemberId
-          ? uniqueMembers.find(m => m.id === targetMemberId)?.name
+          ? (uniqueMembers.find(m => m.id === targetMemberId)?.name || 'Miembro')
           : null;
         const msg = memberName
           ? `Programada para el ${format(targetDate, "d 'de' MMM", { locale: es })} (${memberName})`
