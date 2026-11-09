@@ -237,15 +237,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
               />
             </div>
 
-            {/* User sender indicator */}
-            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-              <span className="truncate">
-                Remitente: <strong className="text-zinc-700 dark:text-zinc-200 font-bold">{user?.name}</strong> ({user?.email})
-              </span>
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
-                Notificación directa
-              </span>
-            </div>
+
 
             {/* Footer Buttons */}
             <div className="pt-2 border-t border-zinc-100 dark:border-white/5 flex items-center justify-end gap-3">
