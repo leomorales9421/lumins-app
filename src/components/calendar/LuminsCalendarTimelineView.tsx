@@ -105,7 +105,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
     return eachDayOfInterval({ start, end });
   }, [currentDate, scale]);
 
-  const dayColWidth = scale === 'week' ? 68 : scale === 'month' ? 38 : 22;
+  const dayColWidth = scale === 'week' ? 76 : scale === 'month' ? 44 : 26;
   const rangeStart = startOfDay(timelineDays[0]);
   const rangeEnd = startOfDay(timelineDays[timelineDays.length - 1]);
 
@@ -360,7 +360,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
         >
           {/* Sticky Timeline Dates Header */}
           <div className="sticky top-0 z-20 flex border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#15181F]">
-            <div className="w-[110px] sm:w-[160px] md:w-[240px] shrink-0 px-2 sm:px-3.5 py-2.5 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-30 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+            <div className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3.5 py-2.5 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-30 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
               <span className="truncate">
                 {groupBy === 'board'
                   ? 'Tablero / Tarea'
@@ -418,7 +418,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                     <button
                       type="button"
                       onClick={() => toggleGroup(group.id)}
-                      className="w-[110px] sm:w-[160px] md:w-[240px] shrink-0 px-2 sm:px-3 py-2 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between gap-1.5 text-left hover:bg-zinc-100/80 dark:hover:bg-white/[0.04] transition-colors"
+                      className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3 py-2 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between gap-1.5 text-left hover:bg-zinc-100/80 dark:hover:bg-white/[0.04] transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {isCollapsed ? (
@@ -516,7 +516,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                               e.preventDefault();
                               onOpenQuickMenu?.(ev, { x: e.clientX, y: e.clientY });
                             }}
-                            className="w-[110px] sm:w-[160px] md:w-[240px] shrink-0 h-full px-2 sm:px-3 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-white dark:bg-[#181B22] flex items-center justify-between gap-1.5 cursor-pointer hover:text-[#6C5DD3]"
+                            className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 h-full px-2 sm:px-3 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-white dark:bg-[#181B22] flex items-center justify-between gap-1.5 cursor-pointer hover:text-[#6C5DD3]"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
                               {done ? (
@@ -609,33 +609,71 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                                 />
                               )}
 
-                              <div className="flex items-center gap-1.5 min-w-0 pointer-events-none">
-                                <span
-                                  className={`truncate ${
-                                    done
-                                      ? 'line-through text-zinc-500'
-                                      : 'text-zinc-900 dark:text-zinc-100'
-                                  }`}
-                                >
-                                  {ev.title}
-                                </span>
-                                <span className="text-[9px] font-extrabold text-zinc-500 dark:text-zinc-400 shrink-0">
-                                  ({spanDays}d)
-                                </span>
-                              </div>
+                              {barWidth >= 80 ? (
+                                <>
+                                  <div className="flex items-center gap-1.5 min-w-0 pointer-events-none">
+                                    <span
+                                      className={`truncate ${
+                                        done
+                                          ? 'line-through text-zinc-500'
+                                          : 'text-zinc-900 dark:text-zinc-100'
+                                      }`}
+                                    >
+                                      {ev.title}
+                                    </span>
+                                    <span className="text-[9px] font-extrabold text-zinc-500 dark:text-zinc-400 shrink-0">
+                                      ({spanDays}d)
+                                    </span>
+                                  </div>
 
-                              {props.assignees && props.assignees.length > 0 && barWidth >= 90 && (
-                                <div className="flex items-center -space-x-1 shrink-0 pointer-events-none">
-                                  {props.assignees.slice(0, 2).map(m => (
-                                    <img
-                                      key={m.id}
-                                      src={getAvatarUrl(m)}
-                                      alt={m.name}
-                                      style={{ borderRadius: '9999px' }}
-                                      className="w-4 h-4 object-cover ring-1 ring-white dark:ring-[#181B22]"
-                                    />
-                                  ))}
-                                </div>
+                                  {props.assignees && props.assignees.length > 0 && barWidth >= 110 && (
+                                    <div className="flex items-center -space-x-1 shrink-0 pointer-events-none">
+                                      {props.assignees.slice(0, 2).map(m => (
+                                        <img
+                                          key={m.id}
+                                          src={getAvatarUrl(m)}
+                                          alt={m.name}
+                                          style={{ borderRadius: '9999px' }}
+                                          className="w-4 h-4 object-cover ring-1 ring-white dark:ring-[#181B22]"
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {/* Compact indicator inside narrow bar without squeezed text */}
+                                  <div className="w-full flex items-center justify-center pointer-events-none">
+                                    {done ? (
+                                      <CheckCircle2 size={11} className="text-emerald-500 shrink-0" />
+                                    ) : spanDays > 1 ? (
+                                      <span className="text-[9px] font-black text-zinc-600 dark:text-zinc-300">
+                                        {spanDays}d
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className="w-1.5 h-1.5 rounded-full"
+                                        style={{ backgroundColor: color }}
+                                      />
+                                    )}
+                                  </div>
+
+                                  {/* Floating label to the right of narrow bar */}
+                                  <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none whitespace-nowrap z-20">
+                                    <span
+                                      className={`text-[11px] font-bold ${
+                                        done
+                                          ? 'line-through text-zinc-400'
+                                          : 'text-zinc-700 dark:text-zinc-200'
+                                      }`}
+                                    >
+                                      {ev.title}
+                                    </span>
+                                    <span className="text-[10px] font-semibold text-zinc-400">
+                                      ({spanDays === 1 ? '1 día' : `${spanDays} días`})
+                                    </span>
+                                  </div>
+                                </>
                               )}
 
                               {/* Right Resize Handle */}
