@@ -270,17 +270,6 @@ const DroppableTeamCell: React.FC<DroppableTeamCellProps> = ({
         isOver || isExternalOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10 shadow-inner' : ''
       }`}
     >
-      {/* Cell capacity indicator */}
-      {cellEvents.length > 0 && (
-        <div className="flex items-center justify-between px-0.5">
-          <span
-            className={`px-1.5 py-0.2 rounded text-[9px] font-extrabold ${load.badgeClass}`}
-          >
-            {load.label}
-          </span>
-        </div>
-      )}
-
       {/* Cards */}
       <div className="space-y-1 flex-1">
         {cellEvents.map(ev => (
@@ -549,7 +538,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                       </div>
                     </div>
 
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${peakStatus.badgeClass}`}>
+                    <span className={`text-[10px] font-extrabold ${peakStatus.textClass}`}>
                       {peakDailyLoad === 0 ? 'Libre' : `${peakDailyLoad}/día · ${peakStatus.label.split('·')[1] || 'OK'}`}
                     </span>
                   </div>
