@@ -15,6 +15,7 @@ import {
   Trash2,
   Sparkles,
   Layers,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
@@ -300,6 +301,18 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                   <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
                     {gcalStatus.accountEmail}
                   </div>
+                  {gcalStatus.lastSyncAt && (
+                    <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500">
+                      <Clock size={10} className="shrink-0" />
+                      <span className="truncate">
+                        Última sinc.:{' '}
+                        {new Date(gcalStatus.lastSyncAt).toLocaleString('es-ES', {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between pt-1 border-t border-zinc-200/50 dark:border-white/5">
                     <button
                       type="button"

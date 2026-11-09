@@ -241,7 +241,7 @@ const WorkspaceCalendarPage: React.FC = () => {
     const statusParam = searchParams.get('googleCalendar');
     if (statusParam === 'connected') {
       toast.success('¡Google Calendar vinculado exitosamente!', {
-        description: 'Tus tareas con fecha se sincronizan automáticamente.',
+        description: 'Sincronización inicial en curso en segundo plano para tus tareas.',
       });
       searchParams.delete('googleCalendar');
       setSearchParams(searchParams, { replace: true });
