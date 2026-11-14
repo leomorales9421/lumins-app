@@ -7,18 +7,17 @@ export function isValidTheme(value: unknown): value is ThemeType {
 }
 
 /**
- * Resolves the active theme preference without causing unexpected flips.
- * Local storage is kept in sync with the active DOM theme; if localStorage
- * is empty (e.g. fresh login), it falls back to the user's saved DB theme,
- * or 'light' by default.
+ * Resolves the active theme preference.
+ * The user's account theme (saved in DB) takes priority over browser local storage.
+ * If user has no theme set, falls back to browser localStorage or 'light'.
  */
 export function resolveCurrentTheme(userTheme?: string | null): ThemeType {
+  if (isValidTheme(userTheme)) {
+    return userTheme;
+  }
   const local = localStorage.getItem('theme');
   if (isValidTheme(local)) {
     return local;
-  }
-  if (isValidTheme(userTheme)) {
-    return userTheme;
   }
   return 'light';
 }

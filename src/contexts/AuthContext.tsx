@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import apiClient from '../lib/api-client';
-import { applyThemeToDom, isValidTheme } from '../lib/theme';
+import { applyThemeToDom, isValidTheme, resolveCurrentTheme } from '../lib/theme';
 
 interface User {
   id: string;
@@ -99,11 +99,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const fetchedUser = response.data.user;
       setUser(fetchedUser);
 
-      // Sync theme on initial session load only if localStorage has no explicit preference yet
-      const localTheme = localStorage.getItem('theme');
-      if (!isValidTheme(localTheme) && isValidTheme(fetchedUser?.theme)) {
-        applyThemeToDom(fetchedUser.theme, true);
-      }
+      // Sync theme directly with the logged-in user's account preference
+      const effectiveTheme = resolveCurrentTheme(fetchedUser?.theme);
+      applyThemeToDom(effectiveTheme, true);
     } catch (error) {
       console.error('Failed to refresh user:', error);
       throw error;
@@ -163,6 +161,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       apiClient.clearTokens();
       setUser(null);
       try {
+        localStorage.removeItem('theme');
+        applyThemeToDom('light', false);
         Object.keys(sessionStorage).forEach((key) => {
           if (key.includes('onboarding')) sessionStorage.removeItem(key);
         });
