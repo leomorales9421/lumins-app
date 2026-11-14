@@ -50,6 +50,9 @@ import { useBoardPermissions } from '../hooks/useBoardPermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { compressAttachment } from '../lib/image-utils';
 import ConfirmActionModal from './ConfirmActionModal';
+import GoogleMeetScheduleModal, { type CardMeetingData } from './GoogleMeetScheduleModal';
+import GoogleDrivePickerModal from './GoogleDrivePickerModal';
+import { GoogleMeetIcon } from './ui/GoogleIcons';
 
 
 interface Member {
@@ -88,6 +91,7 @@ interface CardData {
   isDone?: boolean;
   isDueDateDone?: boolean;
   status?: string;
+  meetingData?: CardMeetingData | null;
 }
 
 // ActivityItem interface is now imported from ../types/activity
@@ -161,6 +165,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+  const [isMeetModalOpen, setIsMeetModalOpen] = useState(false);
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
   const currentCardIdRef = React.useRef<string | null>(null);
   const initialDataRef = React.useRef(initialData);
 
@@ -239,7 +245,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         riskLevel: cardData.riskLevel,
         module: cardData.module,
         createdAt: cardData.createdAt,
-        isDone: cardData.isDone
+        isDone: cardData.isDone,
+        meetingData: cardData.meetingData || null,
       };
       
       setCard(mappedCard);
@@ -1142,6 +1149,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     onClose={() => setActivePopover(null)}
                     onUploadFile={handleFileUpload}
                     onAttachLink={handleAttachLink}
+                    onOpenGoogleDrive={() => setIsDriveModalOpen(true)}
                     isUploading={isUploading}
                   />
                 }
@@ -1424,6 +1432,29 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 <ChevronRight size={15} className="text-zinc-400 opacity-60" />
               </div>
             </div>
+
+            {/* Row 6: Google Meet */}
+            <div
+              onClick={() => !isReadOnly && setIsMeetModalOpen(true)}
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <GoogleMeetIcon size={15} />
+                </div>
+                <span className="text-xs font-semibold">Google Meet</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {card?.meetingData?.meetUrl ? (
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    Reunión activa ({format(parseISO(card.meetingData.scheduledStart), 'd MMM · HH:mm', { locale: es })})
+                  </span>
+                ) : (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Agendar Meet</span>
+                )}
+                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
+              </div>
+            </div>
           </div>
 
           {/* NATIVE MOBILE ACTION SHEET (md:hidden) */}
@@ -1519,6 +1550,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       onClose={() => setActivePopover(null)}
                       onUploadFile={handleFileUpload}
                       onAttachLink={handleAttachLink}
+                      onOpenGoogleDrive={() => setIsDriveModalOpen(true)}
                       isUploading={isUploading}
                     />
                   )}
@@ -1762,6 +1794,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                           onClose={() => setActivePopover(null)}
                           onUploadFile={handleFileUpload}
                           onAttachLink={handleAttachLink}
+                          onOpenGoogleDrive={() => setIsDriveModalOpen(true)}
                           isUploading={isUploading}
                         />
                       )}
@@ -1884,7 +1917,127 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 >
                   <CheckSquare size={15} /> Checklist
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMeetModalOpen(true)}
+                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full sm:rounded border font-semibold sm:font-bold text-xs sm:text-sm transition-all shadow-sm active:scale-95 whitespace-nowrap ${
+                    card?.meetingData?.meetUrl
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                      : 'bg-zinc-100 dark:bg-white/5 border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-emerald-600'
+                  }`}
+                >
+                  <GoogleMeetIcon size={15} />
+                  <span>{card?.meetingData?.meetUrl ? 'Editar Meet' : 'Google Meet'}</span>
+                </button>
               </div>
+              )}
+
+              {/* Scheduled Google Meet Banner (Visible to all board members) */}
+              {card?.meetingData?.meetUrl && (
+                <div className="p-4 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] dark:bg-emerald-500/[0.08] space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#13151A] border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs">
+                        <GoogleMeetIcon size={22} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                            Videollamada de Google Meet
+                          </h4>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                            {card.meetingData.durationMinutes || 45} min
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 mt-0.5">
+                          {format(parseISO(card.meetingData.scheduledStart), "EEEE d 'de' MMMM · h:mm a", { locale: es })}
+                        </p>
+                        {card.meetingData.agendaNote && (
+                          <p className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
+                            {card.meetingData.agendaNote}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(card.meetingData!.meetUrl);
+                          toast.success('Enlace de Google Meet copiado al portapapeles');
+                        }}
+                        className="px-3 py-2 rounded-lg text-xs font-bold bg-white/80 dark:bg-[#13151A] text-zinc-700 dark:text-zinc-200 border border-zinc-200/80 dark:border-white/10 hover:bg-white transition-colors inline-flex items-center gap-1.5"
+                      >
+                        <Copy size={12} />
+                        <span>Copiar link</span>
+                      </button>
+                      <a
+                        href={card.meetingData.meetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-lg text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 transition-all inline-flex items-center gap-1.5"
+                      >
+                        <span>Unirse a Meet</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Invited Assignees & External Guests summary */}
+                  {((card.meetingData.invitedAssignees?.length || 0) > 0 ||
+                    (card.meetingData.externalGuests?.length || 0) > 0 ||
+                    !isReadOnly) && (
+                    <div className="pt-2.5 border-t border-emerald-500/15 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(card.meetingData.invitedAssignees?.length || 0) > 0 && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-zinc-500 dark:text-zinc-400">
+                              Equipo invitado:
+                            </span>
+                            <div className="flex items-center -space-x-1.5">
+                              {card.meetingData.invitedAssignees.map(member => (
+                                <div
+                                  key={member.id}
+                                  title={`${member.name} (${member.email})`}
+                                  className="w-5 h-5 rounded-full ring-2 ring-white dark:ring-[#1C1F26] overflow-hidden"
+                                >
+                                  <UserAvatar
+                                    name={member.name}
+                                    avatarUrl={member.avatarUrl || undefined}
+                                    size="xs"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {(card.meetingData.externalGuests?.length || 0) > 0 && (
+                          <span
+                            title={card.meetingData.externalGuests.join(', ')}
+                            className="px-2 py-0.5 rounded-full bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] font-bold"
+                          >
+                            +{card.meetingData.externalGuests.length} invitado
+                            {card.meetingData.externalGuests.length === 1 ? '' : 's'} externo
+                            {card.meetingData.externalGuests.length === 1 ? '' : 's'} (
+                            {card.meetingData.externalGuests.join(', ')})
+                          </span>
+                        )}
+                      </div>
+
+                      {!isReadOnly && (
+                        <button
+                          type="button"
+                          onClick={() => setIsMeetModalOpen(true)}
+                          className="font-bold text-emerald-700 dark:text-emerald-300 hover:underline ml-auto"
+                        >
+                          Gestionar invitados / horario
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               <div className="space-y-4">
@@ -2067,6 +2220,39 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         }}
         onConfirm={confirmArchiveCard}
       />
+      {cardId && (
+        <>
+          <GoogleMeetScheduleModal
+            isOpen={isMeetModalOpen}
+            onClose={() => setIsMeetModalOpen(false)}
+            cardId={cardId}
+            cardTitle={card?.title || displayTitle}
+            defaultDate={card?.dueDate || card?.startDate || null}
+            assignees={boardMembers.filter(m => assignedMemberIds.includes(m.id))}
+            existingMeeting={card?.meetingData || null}
+            onScheduled={(newMeetingData) => {
+              setCard(prev => (prev ? { ...prev, meetingData: newMeetingData } : null));
+              fetchCardDetails(true);
+              if (onUpdate) onUpdate();
+              window.dispatchEvent(
+                new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } })
+              );
+            }}
+          />
+          <GoogleDrivePickerModal
+            isOpen={isDriveModalOpen}
+            onClose={() => setIsDriveModalOpen(false)}
+            cardId={cardId}
+            onAttached={() => {
+              fetchCardDetails(true);
+              if (onUpdate) onUpdate();
+              window.dispatchEvent(
+                new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } })
+              );
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };

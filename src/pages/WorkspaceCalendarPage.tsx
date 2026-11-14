@@ -45,6 +45,8 @@ import { toast } from 'sonner';
 import apiClient from '../lib/api-client';
 import CardDetailModal from '../components/CardDetailModal';
 import ConfirmActionModal from '../components/ConfirmActionModal';
+import GoogleMeetScheduleModal from '../components/GoogleMeetScheduleModal';
+import { GoogleMeetIcon } from '../components/ui/GoogleIcons';
 import { useNotificationHelpers } from '../components/NotificationProvider';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { useAuth } from '../contexts/AuthContext';
@@ -179,6 +181,7 @@ const WorkspaceCalendarPage: React.FC = () => {
   const [isArchivingCard, setIsArchivingCard] = useState<boolean>(false);
   const [showIcalModal, setShowIcalModal] = useState<boolean>(false);
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
+  const [meetModalEvent, setMeetModalEvent] = useState<CalendarCardEvent | null>(null);
 
   // Apply a Saved View (Requirement 4.2)
   const handleApplySavedView = useCallback((view: CalendarSavedView) => {
@@ -467,6 +470,7 @@ const WorkspaceCalendarPage: React.FC = () => {
       if (statusFilter === 'overdue' && !overdue) return false;
       if (statusFilter === 'due_soon' && !isDueSoon) return false;
       if (statusFilter === 'blocked' && !props.blocked) return false;
+      if (statusFilter === 'has_meet' && !props.meetingData?.meetUrl) return false;
 
       if (q) {
         const inTitle = ev.title.toLowerCase().includes(q);
@@ -498,10 +502,19 @@ const WorkspaceCalendarPage: React.FC = () => {
     let overdue = 0;
     let dueSoon = 0;
     let blocked = 0;
+    const meetCardIds = new Set<string>();
 
     for (const ev of events) {
       if (hiddenBoardIds.includes(ev.extendedProps.boardId)) continue;
       if (boardFilter !== 'all' && ev.extendedProps.boardId !== boardFilter) continue;
+
+      if (ev.extendedProps.meetingData?.meetUrl) {
+        meetCardIds.add(ev.extendedProps.cardId || ev.id);
+      }
+
+      // Skip overlay Meet events when counting deliverable task metrics so cards aren't double-counted
+      if (ev.extendedProps.isMeetEvent) continue;
+
       total += 1;
       const done = isCardCompleted(ev);
       if (done) {
@@ -516,7 +529,7 @@ const WorkspaceCalendarPage: React.FC = () => {
     }
 
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { total, completed, pct, overdue, dueSoon, blocked };
+    return { total, completed, pct, overdue, dueSoon, blocked, meets: meetCardIds.size };
   }, [events, hiddenBoardIds, boardFilter]);
 
   const activeFiltersCount = useMemo(() => {
@@ -784,6 +797,45 @@ const WorkspaceCalendarPage: React.FC = () => {
   // Optimistic Reschedule (Requirement 0.7 & 2.7)
   const handleRescheduleEvent = useCallback(
     async (event: CalendarCardEvent, targetDay: Date) => {
+      // If dragging a dedicated Google Meet calendar chip, reschedule the Meet (preserving hour/minute)
+      // instead of changing the card's delivery dueDate
+      if (event.extendedProps.isMeetEvent && event.extendedProps.meetingData) {
+        const realCardId = event.extendedProps.cardId || event.id.replace(/^meet:/, '');
+        const mData = event.extendedProps.meetingData;
+        const prevStart = new Date(mData.scheduledStart || targetDay);
+        const nextMeetStart = new Date(
+          targetDay.getFullYear(),
+          targetDay.getMonth(),
+          targetDay.getDate(),
+          isNaN(prevStart.getTime()) ? 10 : prevStart.getHours(),
+          isNaN(prevStart.getTime()) ? 0 : prevStart.getMinutes(),
+          0,
+          0
+        );
+
+        try {
+          await apiClient.post(`/api/integrations/google-meet/cards/${realCardId}/schedule`, {
+            scheduledStart: nextMeetStart.toISOString(),
+            durationMinutes: mData.durationMinutes || 45,
+            inviteAssignees: mData.inviteAssignees !== false,
+            invitedAssigneeIds: mData.invitedAssigneeIds,
+            externalGuests: mData.externalGuests || [],
+            hideInternalDetails: mData.hideInternalDetails,
+            agendaNote: mData.agendaNote || '',
+          });
+          toast.success(
+            `Videollamada reprogramada al ${format(targetDay, "d 'de' MMM", { locale: es })}`
+          );
+          fetchEvents(true);
+        } catch (err: any) {
+          showError(
+            'Error al reprogramar Meet',
+            err?.response?.data?.message || 'No se pudo mover la videollamada'
+          );
+        }
+        return;
+      }
+
       const { durationDays, isMultiDay } = getEventDateRange(event);
       const hadStartDate = Boolean(event.extendedProps.startDate);
 
@@ -807,7 +859,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         `Reprogramada al ${format(targetDay, "d 'de' MMM", { locale: es })}`
       );
     },
-    [applyCardDatesUpdate]
+    [applyCardDatesUpdate, fetchEvents, showError]
   );
 
   // Resize Event Dates (Requirement 2.3)
@@ -1141,11 +1193,16 @@ const WorkspaceCalendarPage: React.FC = () => {
   // Archive Card using global ConfirmActionModal (Requirement 2.5)
   const handleConfirmArchiveCard = useCallback(async () => {
     if (!cardToArchive) return;
+    const realCardId = cardToArchive.extendedProps.cardId || cardToArchive.id.replace(/^meet:/, '');
     setIsArchivingCard(true);
     try {
-      await apiClient.patch(`/api/cards/${cardToArchive.id}`, { status: 'closed' });
-      setEvents(prev => prev.filter(i => i.id !== cardToArchive.id));
-      setUnscheduledEvents(prev => prev.filter(i => i.id !== cardToArchive.id));
+      await apiClient.patch(`/api/cards/${realCardId}`, { status: 'closed' });
+      setEvents(prev =>
+        prev.filter(
+          i => i.id !== realCardId && i.extendedProps.cardId !== realCardId
+        )
+      );
+      setUnscheduledEvents(prev => prev.filter(i => i.id !== realCardId));
       toast.success(`Tarjeta "${cardToArchive.title}" archivada`);
       setCardToArchive(null);
     } catch {
@@ -1157,7 +1214,7 @@ const WorkspaceCalendarPage: React.FC = () => {
 
   const handleSelectEvent = useCallback((ev: CalendarCardEvent) => {
     setSelectedCard({
-      cardId: ev.id,
+      cardId: ev.extendedProps.cardId || ev.id.replace(/^meet:/, ''),
       boardId: ev.extendedProps.boardId,
     });
   }, []);
@@ -1692,6 +1749,22 @@ const WorkspaceCalendarPage: React.FC = () => {
                 </button>
               )}
 
+              {metrics.meets > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleSetStatusFilter(statusFilter === 'has_meet' ? 'all' : 'has_meet')}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                    statusFilter === 'has_meet'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                  }`}
+                  title="Filtrar reuniones de Google Meet"
+                >
+                  <GoogleMeetIcon size={11} />
+                  <span>{metrics.meets} Meet</span>
+                </button>
+              )}
+
               {metrics.blocked > 0 && (
                 <button
                   type="button"
@@ -1928,6 +2001,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             applyCardDatesUpdate(ev, null, null, 'Fecha eliminada (enviada a Sin fecha)')
           }
           onRequestArchive={ev => setCardToArchive(ev)}
+          onScheduleMeet={ev => setMeetModalEvent(ev)}
         />
       )}
 
@@ -2136,6 +2210,22 @@ const WorkspaceCalendarPage: React.FC = () => {
         events={filteredEvents}
         exportTargetId="lumins-calendar-export-target"
       />
+
+      {/* 11. GOOGLE MEET SCHEDULE MODAL FROM CALENDAR */}
+      {meetModalEvent && (
+        <GoogleMeetScheduleModal
+          isOpen={Boolean(meetModalEvent)}
+          onClose={() => setMeetModalEvent(null)}
+          cardId={meetModalEvent.extendedProps.cardId || meetModalEvent.id.replace(/^meet:/, '')}
+          cardTitle={meetModalEvent.title}
+          cardStartDate={meetModalEvent.extendedProps.startDate}
+          cardDueDate={meetModalEvent.extendedProps.dueDate}
+          assignees={meetModalEvent.extendedProps.assignees || []}
+          existingMeeting={meetModalEvent.extendedProps.meetingData}
+          onScheduled={() => fetchEvents(true)}
+          onRemoved={() => fetchEvents(true)}
+        />
+      )}
     </div>
   );
 };

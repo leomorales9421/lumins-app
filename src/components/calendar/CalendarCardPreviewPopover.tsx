@@ -23,6 +23,7 @@ import {
   isEventOverdue,
   formatTime12h,
 } from '../../lib/calendar-utils';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -135,6 +136,36 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
             {priorityInfo.label}
           </span>
         </div>
+
+        {/* Google Meet Quick Join Banner */}
+        {props.meetingData?.meetUrl && (
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-white dark:bg-[#13151A] border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <GoogleMeetIcon size={15} />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">
+                  Google Meet ({props.meetingData.durationMinutes || 45}m)
+                </span>
+                <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 truncate block">
+                  {formatTime12h(props.meetingData.scheduledStart)}
+                  {(props.meetingData.externalGuests?.length || 0) > 0 &&
+                    ` · +${props.meetingData.externalGuests.length} ext.`}
+                </span>
+              </div>
+            </div>
+            <a
+              href={props.meetingData.meetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold shrink-0 transition-colors"
+            >
+              Unirse
+            </a>
+          </div>
+        )}
 
         {/* Labels */}
         {props.labels && props.labels.length > 0 && (

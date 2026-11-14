@@ -20,8 +20,11 @@ import {
   PRIORITY_COLORS,
   parseCalendarDate,
   toSafeCalendarISO,
+  parseTime12h,
 } from '../../lib/calendar-utils';
 import { getAvatarUrl } from './CalendarCardPreviewPopover';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
+import TimeSelector12h from '../TimeSelector12h';
 
 interface QuickCreatePopoverProps {
   workspaceId: string;
@@ -76,6 +79,12 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
     return format(initialStartDate, 'yyyy-MM-dd') !== format(initialDueDate, 'yyyy-MM-dd');
   });
   const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([]);
+  const [includeMeet, setIncludeMeet] = useState<boolean>(false);
+  const [meetTime12h, setMeetTime12h] = useState<string>('10:00 AM');
+  const [meetDuration, setMeetDuration] = useState<number>(45);
+  const [inviteAssigneesToMeet, setInviteAssigneesToMeet] = useState<boolean>(true);
+  const [externalMeetGuests, setExternalMeetGuests] = useState<string[]>([]);
+  const [guestEmailInput, setGuestEmailInput] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -149,6 +158,40 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
       }
 
       const createdCard = res.data?.card;
+      let scheduledMeetingData: any = null;
+
+      if (includeMeet && createdCard?.id) {
+        const finalGuests = [...externalMeetGuests];
+        if (guestEmailInput.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmailInput.trim())) {
+          finalGuests.push(guestEmailInput.trim().toLowerCase());
+        }
+
+        try {
+          const [y, m, d] = dueDateStr.split('-').map(Number);
+          const parsedTime = parseTime12h(meetTime12h) || { hours: 10, minutes: 0 };
+          const meetStart = new Date(y, m - 1, d, parsedTime.hours, parsedTime.minutes, 0, 0);
+
+          const meetRes: any = await apiClient.post(
+            `/api/integrations/google-meet/cards/${createdCard.id}/schedule`,
+            {
+              scheduledStart: meetStart.toISOString(),
+              durationMinutes: meetDuration,
+              inviteAssignees: inviteAssigneesToMeet,
+              invitedAssigneeIds: inviteAssigneesToMeet ? selectedAssigneeIds : [],
+              externalGuests: finalGuests,
+              hideInternalDetails: finalGuests.length > 0,
+            }
+          );
+          const meetPayload = meetRes?.data || meetRes;
+          scheduledMeetingData =
+            meetPayload?.meetingData || meetPayload?.data?.meetingData || null;
+        } catch (meetErr: any) {
+          toast.info(
+            'Tarjeta creada. Vincula Google Meet en Configuración > Integraciones para generar la videollamada.'
+          );
+        }
+      }
+
       const chosenList = availableLists.find(l => l.id === listId);
       const assignedUsers = members
         .filter(m => selectedAssigneeIds.includes(m.id))
@@ -186,6 +229,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
           assignees: assignedUsers,
           startDate: finalStart ? toSafeCalendarISO(finalStart) : null,
           dueDate: toSafeCalendarISO(finalDue),
+          meetingData: scheduledMeetingData,
         },
       };
 
@@ -411,6 +455,136 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Google Meet Optional Toggle */}
+            <div className="p-3 rounded-xl bg-emerald-500/[0.06] dark:bg-emerald-500/[0.08] border border-emerald-500/20 space-y-2.5">
+              <label className="flex items-center justify-between gap-2 cursor-pointer select-none">
+                <span className="flex items-center gap-2 text-xs font-extrabold text-zinc-900 dark:text-zinc-100">
+                  <GoogleMeetIcon size={15} />
+                  <span>Agendar videollamada de Google Meet</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={includeMeet}
+                  onChange={e => setIncludeMeet(e.target.checked)}
+                  className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                />
+              </label>
+
+              {includeMeet && (
+                <div className="space-y-2.5 pt-2 border-t border-emerald-500/15">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="block text-[10px] font-bold text-zinc-400 mb-0.5">
+                        Hora de inicio
+                      </span>
+                      <TimeSelector12h
+                        value={meetTime12h}
+                        onChange={setMeetTime12h}
+                        direction="up"
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] font-bold text-zinc-400 mb-0.5">
+                        Duración
+                      </span>
+                      <select
+                        value={meetDuration}
+                        onChange={e => setMeetDuration(Number(e.target.value))}
+                        className="w-full h-9 px-2 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200"
+                      >
+                        <option value={15}>15 min</option>
+                        <option value={30}>30 min</option>
+                        <option value={45}>45 min</option>
+                        <option value={60}>1 hora</option>
+                        <option value={90}>1.5 horas</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={inviteAssigneesToMeet}
+                      onChange={e => setInviteAssigneesToMeet(e.target.checked)}
+                      className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      Confirmar invitación a los asignados ({selectedAssigneeIds.length})
+                    </span>
+                  </label>
+
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold text-zinc-400">
+                      Correos adicionales (Invitados externos)
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="email"
+                        value={guestEmailInput}
+                        onChange={e => setGuestEmailInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const email = guestEmailInput.trim().toLowerCase();
+                            if (!email) return;
+                            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                              toast.error('Formato de correo inválido');
+                              return;
+                            }
+                            if (!externalMeetGuests.includes(email)) {
+                              setExternalMeetGuests(prev => [...prev, email]);
+                            }
+                            setGuestEmailInput('');
+                          }
+                        }}
+                        placeholder="invitado@externo.com + Enter"
+                        className="flex-1 h-8 px-2.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-medium text-zinc-900 dark:text-zinc-100"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const email = guestEmailInput.trim().toLowerCase();
+                          if (!email) return;
+                          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            toast.error('Formato de correo inválido');
+                            return;
+                          }
+                          if (!externalMeetGuests.includes(email)) {
+                            setExternalMeetGuests(prev => [...prev, email]);
+                          }
+                          setGuestEmailInput('');
+                        }}
+                        className="px-2.5 h-8 rounded-lg bg-emerald-600 text-white text-[11px] font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                    {externalMeetGuests.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {externalMeetGuests.map(email => (
+                          <span
+                            key={email}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold"
+                          >
+                            {email}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExternalMeetGuests(prev => prev.filter(e => e !== email))
+                              }
+                            >
+                              <X size={10} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-white/10">

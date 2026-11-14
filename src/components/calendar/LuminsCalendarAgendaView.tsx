@@ -33,12 +33,14 @@ import {
   type CalendarCardEvent,
   type CalendarColorBy,
   PRIORITY_COLORS,
+  formatTime12h,
   getDayKey,
   getEventAccentColor,
   getEventDateRange,
   isCardCompleted,
   isEventOverdue,
 } from '../../lib/calendar-utils';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 import { getAvatarUrl } from './CalendarCardPreviewPopover';
 
 interface LuminsCalendarAgendaViewProps {
@@ -222,6 +224,21 @@ const LuminsCalendarAgendaView: React.FC<LuminsCalendarAgendaViewProps> = ({
 
             {/* Metadata tags */}
             <div className="flex items-center gap-2 flex-wrap pt-0.5">
+              {props.meetingData?.meetUrl && (
+                <a
+                  href={props.meetingData.meetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold transition-colors"
+                >
+                  <GoogleMeetIcon size={11} />
+                  <span>
+                    Meet {formatTime12h(props.meetingData.scheduledStart)} · Unirse
+                  </span>
+                </a>
+              )}
+
               <span
                 className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${priorityInfo.badgeClass}`}
               >

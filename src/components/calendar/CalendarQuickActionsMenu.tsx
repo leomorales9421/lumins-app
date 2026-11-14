@@ -18,6 +18,7 @@ import {
   PRIORITY_COLORS,
   isCardCompleted,
 } from '../../lib/calendar-utils';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 import { getAvatarUrl } from './CalendarCardPreviewPopover';
 
 interface CalendarQuickActionsMenuProps {
@@ -33,6 +34,7 @@ interface CalendarQuickActionsMenuProps {
   onQuickMoveDate: (event: CalendarCardEvent, targetDate: Date) => void;
   onRemoveDate: (event: CalendarCardEvent) => void;
   onRequestArchive: (event: CalendarCardEvent) => void;
+  onScheduleMeet?: (event: CalendarCardEvent) => void;
 }
 
 const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
@@ -48,6 +50,7 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
   onQuickMoveDate,
   onRemoveDate,
   onRequestArchive,
+  onScheduleMeet,
 }) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const props = event.extendedProps;
@@ -126,6 +129,33 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
           <ExternalLink size={13} className="text-zinc-400" />
           Ir al tablero
         </button>
+
+        {props.meetingData?.meetUrl && (
+          <a
+            href={props.meetingData.meetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onClose()}
+            className="w-full px-3 py-1.5 flex items-center gap-2 text-left font-extrabold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+          >
+            <GoogleMeetIcon size={13} />
+            Unirse a Google Meet
+          </a>
+        )}
+
+        {canEdit && onScheduleMeet && (
+          <button
+            type="button"
+            onClick={() => {
+              onScheduleMeet(event);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 flex items-center gap-2 text-left font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/[0.05]"
+          >
+            <GoogleMeetIcon size={13} />
+            {props.meetingData?.meetUrl ? 'Editar Google Meet' : 'Agendar Google Meet'}
+          </button>
+        )}
       </div>
 
       {canEdit && (

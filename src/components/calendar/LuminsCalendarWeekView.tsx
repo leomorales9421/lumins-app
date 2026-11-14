@@ -39,6 +39,7 @@ import {
   type CalendarColorBy,
   PRIORITY_COLORS,
   buildWeekDays,
+  formatTime12h,
   getDayKey,
   getEventAccentColor,
   getEventDateRange,
@@ -46,6 +47,7 @@ import {
   isEventOverdue,
   segmentEventsForWeek,
 } from '../../lib/calendar-utils';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 import { getAvatarUrl } from './CalendarCardPreviewPopover';
 
 interface LuminsCalendarWeekViewProps {
@@ -148,13 +150,33 @@ const DraggableWeekCard: React.FC<DraggableWeekCardProps> = ({
       {/* Title (2 lines) */}
       <p
         className={`text-xs font-bold leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] ${
-          done
+          !props.isMeetEvent && done
             ? 'line-through text-zinc-400 dark:text-zinc-500'
             : 'text-zinc-900 dark:text-zinc-100'
         }`}
       >
         {event.title}
       </p>
+
+      {/* Google Meet Badge in Week Card */}
+      {props.meetingData?.meetUrl && (
+        <a
+          href={props.meetingData.meetUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          onPointerDown={e => e.stopPropagation()}
+          className="flex items-center justify-between gap-1.5 px-2 py-1 rounded-md bg-emerald-500/12 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-[10px] font-extrabold transition-colors"
+        >
+          <span className="inline-flex items-center gap-1 truncate">
+            <GoogleMeetIcon size={11} />
+            <span>{formatTime12h(props.meetingData.scheduledStart) || 'Meet'}</span>
+          </span>
+          <span className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-300 shrink-0">
+            Unirse ↗
+          </span>
+        </a>
+      )}
 
       {/* Labels */}
       {props.labels && props.labels.length > 0 && (

@@ -60,6 +60,8 @@ export interface CalendarCardEvent {
   end?: string | null;
   backgroundColor: string;
   extendedProps: {
+    cardId?: string;
+    isMeetEvent?: boolean;
     boardId: string;
     boardName: string;
     boardBackground?: string | null;
@@ -80,6 +82,7 @@ export interface CalendarCardEvent {
     assignees: CalendarAssignee[];
     startDate: string | null;
     dueDate: string | null;
+    meetingData?: any | null;
   };
 }
 
@@ -284,6 +287,7 @@ export function getEventDateRange(event: CalendarCardEvent): {
 }
 
 export function isEventOverdue(event: CalendarCardEvent, todayDate: Date = startOfDay(new Date())): boolean {
+  if (event.extendedProps?.isMeetEvent) return false;
   if (isCardCompleted(event)) return false;
   const { end } = getEventDateRange(event);
   return isBefore(end, startOfDay(todayDate));
@@ -295,6 +299,7 @@ export function getEventAccentColor(
   todayDate: Date = startOfDay(new Date())
 ): string {
   const props = event.extendedProps;
+  if (props?.isMeetEvent) return '#10B981';
   const boardColor =
     props.boardAccentColor ||
     resolveBoardAccentColor(props.boardId, props.boardBackground) ||

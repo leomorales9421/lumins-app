@@ -1,0 +1,729 @@
+import React, { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
+import {
+  X,
+  Users,
+  Mail,
+  Plus,
+  Check,
+  Shield,
+  Calendar as CalendarIcon,
+  Clock,
+  Loader2,
+  Trash2,
+  Sparkles,
+  ExternalLink,
+  Copy,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../lib/api-client';
+import { GoogleMeetIcon } from './ui/GoogleIcons';
+import TimeSelector12h from './TimeSelector12h';
+import { formatTime12h, parseTime12h } from '../lib/calendar-utils';
+import UserAvatar from './ui/UserAvatar';
+
+export interface CardMeetingAssignee {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+}
+
+export interface CardMeetingData {
+  meetUrl: string;
+  googleEventId?: string | null;
+  calendarId?: string | null;
+  scheduledStart: string;
+  scheduledEnd: string;
+  durationMinutes: number;
+  inviteAssignees: boolean;
+  invitedAssigneeIds: string[];
+  invitedAssignees: CardMeetingAssignee[];
+  externalGuests: string[];
+  hideInternalDetails: boolean;
+  agendaNote?: string | null;
+  organizerUserId: string;
+  organizerName?: string;
+  organizerEmail?: string;
+  updatedAt: string;
+}
+
+interface GoogleMeetScheduleModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  cardId: string;
+  cardTitle: string;
+  defaultDate?: string | null;
+  assignees: Array<{
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  }>;
+  existingMeeting?: CardMeetingData | null;
+  onScheduled: (meetingData: CardMeetingData | null) => void;
+}
+
+const DURATION_OPTIONS = [
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 hora' },
+  { value: 90, label: '1.5 horas' },
+  { value: 120, label: '2 horas' },
+];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
+  isOpen,
+  onClose,
+  cardId,
+  cardTitle,
+  defaultDate,
+  assignees,
+  existingMeeting,
+  onScheduled,
+}) => {
+  const navigate = useNavigate();
+
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [isMeetConnected, setIsMeetConnected] = useState(false);
+  const [canQuickLink, setCanQuickLink] = useState(false);
+  const [connectedEmail, setConnectedEmail] = useState<string | undefined>();
+  const [isActivatingQuickLink, setIsActivatingQuickLink] = useState(false);
+
+  const [dateStr, setDateStr] = useState<string>(() => {
+    const source = existingMeeting?.scheduledStart || defaultDate;
+    if (source) {
+      try {
+        const d = parseISO(source);
+        if (!isNaN(d.getTime())) return format(d, 'yyyy-MM-dd');
+      } catch {}
+    }
+    return format(new Date(), 'yyyy-MM-dd');
+  });
+
+  const [startTime12h, setStartTime12h] = useState<string>(() => {
+    const source = existingMeeting?.scheduledStart || defaultDate;
+    if (source) {
+      try {
+        const d = parseISO(source);
+        if (!isNaN(d.getTime())) return formatTime12h(d) || '10:00 AM';
+      } catch {}
+    }
+    return '10:00 AM';
+  });
+
+  const [durationMinutes, setDurationMinutes] = useState<number>(
+    existingMeeting?.durationMinutes || 45
+  );
+
+  const [inviteAssignees, setInviteAssignees] = useState<boolean>(
+    existingMeeting ? existingMeeting.inviteAssignees : true
+  );
+
+  const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>(() => {
+    if (existingMeeting?.invitedAssigneeIds) {
+      return existingMeeting.invitedAssigneeIds;
+    }
+    return assignees.map(a => a.id);
+  });
+
+  const [externalGuests, setExternalGuests] = useState<string[]>(
+    existingMeeting?.externalGuests || []
+  );
+  const [guestEmailInput, setGuestEmailInput] = useState('');
+
+  const [hideInternalDetails, setHideInternalDetails] = useState<boolean>(
+    existingMeeting
+      ? existingMeeting.hideInternalDetails
+      : (existingMeeting?.externalGuests?.length || 0) > 0
+  );
+
+  const [agendaNote, setAgendaNote] = useState<string>(existingMeeting?.agendaNote || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    checkMeetIntegration();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (existingMeeting) {
+      try {
+        const d = parseISO(existingMeeting.scheduledStart);
+        if (!isNaN(d.getTime())) {
+          setDateStr(format(d, 'yyyy-MM-dd'));
+          setStartTime12h(formatTime12h(d) || '10:00 AM');
+        }
+      } catch {}
+      setDurationMinutes(existingMeeting.durationMinutes || 45);
+      setInviteAssignees(existingMeeting.inviteAssignees);
+      setSelectedAssigneeIds(existingMeeting.invitedAssigneeIds || []);
+      setExternalGuests(existingMeeting.externalGuests || []);
+      setHideInternalDetails(existingMeeting.hideInternalDetails);
+      setAgendaNote(existingMeeting.agendaNote || '');
+    } else {
+      setSelectedAssigneeIds(assignees.map(a => a.id));
+    }
+  }, [existingMeeting, assignees]);
+
+  const checkMeetIntegration = async () => {
+    try {
+      setIsCheckingStatus(true);
+      const res: any = await apiClient.get('/api/integrations/google-meet/status');
+      const payload = res?.status !== undefined ? res : res?.data;
+      if (payload?.status) {
+        setIsMeetConnected(Boolean(payload.status.connected));
+        setCanQuickLink(Boolean(payload.status.canQuickLinkFromCalendar));
+        setConnectedEmail(payload.status.accountEmail);
+      }
+    } catch {
+      setIsMeetConnected(false);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  const handleQuickActivate = async () => {
+    try {
+      setIsActivatingQuickLink(true);
+      const res: any = await apiClient.post('/api/integrations/google-meet/quick-link');
+      const payload = res?.success !== undefined ? res : res?.data;
+      if (payload?.success) {
+        setIsMeetConnected(true);
+        setConnectedEmail(payload.accountEmail);
+        toast.success('¡Google Meet activado!');
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'No se pudo activar Google Meet');
+    } finally {
+      setIsActivatingQuickLink(false);
+    }
+  };
+
+  const toggleAssignee = (userId: string) => {
+    setSelectedAssigneeIds(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const handleAddExternalGuest = () => {
+    const raw = guestEmailInput.trim().toLowerCase();
+    if (!raw) return;
+
+    const parts = raw
+      .split(/[,;\s]+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const validNew: string[] = [];
+    for (const email of parts) {
+      if (!EMAIL_REGEX.test(email)) {
+        toast.error(`El correo "${email}" no tiene un formato válido`);
+        return;
+      }
+      if (!externalGuests.includes(email) && !validNew.includes(email)) {
+        validNew.push(email);
+      }
+    }
+
+    if (validNew.length > 0) {
+      const next = [...externalGuests, ...validNew];
+      setExternalGuests(next);
+      if (externalGuests.length === 0) {
+        setHideInternalDetails(true);
+      }
+    }
+    setGuestEmailInput('');
+  };
+
+  const handleGuestKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddExternalGuest();
+    }
+  };
+
+  const handleRemoveExternalGuest = (email: string) => {
+    setExternalGuests(prev => prev.filter(item => item !== email));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Auto-add any pending typed email before submitting
+    let finalExternalGuests = [...externalGuests];
+    if (guestEmailInput.trim()) {
+      const candidate = guestEmailInput.trim().toLowerCase();
+      if (!EMAIL_REGEX.test(candidate)) {
+        toast.error(`El correo "${candidate}" no es válido`);
+        return;
+      }
+      if (!finalExternalGuests.includes(candidate)) {
+        finalExternalGuests.push(candidate);
+      }
+      setGuestEmailInput('');
+    }
+
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y || !m || !d) {
+      toast.error('Selecciona una fecha válida para la reunión');
+      return;
+    }
+
+    const parsedTime = parseTime12h(startTime12h) || { hours: 10, minutes: 0 };
+    const startDateObj = new Date(y, m - 1, d, parsedTime.hours, parsedTime.minutes, 0, 0);
+
+    setIsSubmitting(true);
+    try {
+      const res: any = await apiClient.post(
+        `/api/integrations/google-meet/cards/${cardId}/schedule`,
+        {
+          scheduledStart: startDateObj.toISOString(),
+          durationMinutes,
+          inviteAssignees,
+          invitedAssigneeIds: inviteAssignees ? selectedAssigneeIds : [],
+          externalGuests: finalExternalGuests,
+          hideInternalDetails,
+          agendaNote,
+        }
+      );
+
+      const payload = res?.data || res;
+      const meetingData = payload?.meetingData || payload?.data?.meetingData;
+      const totalInvited =
+        (inviteAssignees ? selectedAssigneeIds.length : 0) + finalExternalGuests.length;
+
+      toast.success(
+        existingMeeting ? 'Reunión de Google Meet actualizada' : '¡Google Meet agendado!',
+        {
+          description:
+            totalInvited > 0
+              ? `Se enviaron invitaciones de calendario a ${totalInvited} participante${
+                  totalInvited === 1 ? '' : 's'
+                }.`
+              : 'El enlace de la videollamada ha sido añadido a la tarjeta.',
+        }
+      );
+
+      onScheduled(meetingData);
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.message || 'Error al agendar la reunión de Google Meet');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRemoveMeet = async () => {
+    setIsRemoving(true);
+    try {
+      await apiClient.delete(`/api/integrations/google-meet/cards/${cardId}`);
+      toast.success('Reunión de Google Meet desvinculada de la tarjeta');
+      onScheduled(null);
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.message || 'No se pudo eliminar la reunión');
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between bg-zinc-50/60 dark:bg-black/20">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs">
+              <GoogleMeetIcon size={20} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                {existingMeeting ? 'Configurar Google Meet' : 'Agendar Google Meet'}
+              </h3>
+              <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 truncate">
+                {cardTitle}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {isCheckingStatus ? (
+          <div className="p-10 flex flex-col items-center justify-center gap-3">
+            <Loader2 size={24} className="animate-spin text-emerald-500" />
+            <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+              Verificando conexión con Google Meet...
+            </p>
+          </div>
+        ) : !isMeetConnected ? (
+          <div className="p-6 space-y-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
+              <GoogleMeetIcon size={28} />
+            </div>
+            <div className="space-y-1.5 max-w-sm mx-auto">
+              <h4 className="text-base font-black text-zinc-900 dark:text-zinc-100">
+                Vincula tu cuenta de Google Meet
+              </h4>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Para generar enlaces de videollamada e invitar a asignados o correos externos automáticamente, activa Google Meet en tus integraciones.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+              {canQuickLink && (
+                <button
+                  type="button"
+                  onClick={handleQuickActivate}
+                  disabled={isActivatingQuickLink}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all disabled:opacity-50"
+                >
+                  {isActivatingQuickLink ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                  <span>Activar ahora con mi cuenta de Calendar</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  navigate('/settings/integrations');
+                }}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 transition-all"
+              >
+                <span>Ir a Configuración &gt; Integraciones</span>
+                <ExternalLink size={13} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+            {existingMeeting?.meetUrl && (
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+                    Sala activa
+                  </span>
+                  <a
+                    href={existingMeeting.meetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline truncate block"
+                  >
+                    {existingMeeting.meetUrl}
+                  </a>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(existingMeeting.meetUrl);
+                      toast.success('Enlace de Google Meet copiado');
+                    }}
+                    className="p-2 rounded-lg bg-white/80 dark:bg-black/30 text-zinc-700 dark:text-zinc-200 hover:bg-white transition-colors"
+                    title="Copiar enlace"
+                  >
+                    <Copy size={13} />
+                  </button>
+                  <a
+                    href={existingMeeting.meetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1"
+                  >
+                    <span>Unirse</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* 1. Date, Time & Duration */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
+                  <CalendarIcon size={11} /> Fecha
+                </label>
+                <input
+                  type="date"
+                  value={dateStr}
+                  onChange={e => setDateStr(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-800 dark:text-zinc-200 outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
+                  <Clock size={11} /> Hora de inicio
+                </label>
+                <TimeSelector12h
+                  value={startTime12h}
+                  onChange={setStartTime12h}
+                  direction="down"
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
+                  <Clock size={11} /> Duración
+                </label>
+                <select
+                  value={durationMinutes}
+                  onChange={e => setDurationMinutes(Number(e.target.value))}
+                  className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-800 dark:text-zinc-200 outline-none focus:border-emerald-500"
+                >
+                  {DURATION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Confirmation of Card Assignees */}
+            <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A]/60 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <label
+                  onClick={() => setInviteAssignees(!inviteAssignees)}
+                  className="flex items-center gap-2.5 cursor-pointer select-none"
+                >
+                  <div
+                    className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
+                      inviteAssignees
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-black/20'
+                    }`}
+                  >
+                    {inviteAssignees && <Check size={11} strokeWidth={3} />}
+                  </div>
+                  <div>
+                    <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                      <Users size={13} className="text-emerald-500" />
+                      Invitar a los asignados de la tarjeta
+                    </span>
+                    <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">
+                      Confirma quiénes del equipo asignado recibirán invitación a esta reunión
+                    </span>
+                  </div>
+                </label>
+
+                {assignees.length > 0 && inviteAssignees && (
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    {selectedAssigneeIds.length}/{assignees.length} seleccionados
+                  </span>
+                )}
+              </div>
+
+              {assignees.length === 0 ? (
+                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 italic pl-6">
+                  Esta tarjeta aún no tiene miembros asignados. Puedes agregar invitados por correo abajo.
+                </p>
+              ) : (
+                inviteAssignees && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {assignees.map(member => {
+                      const isSelected = selectedAssigneeIds.includes(member.id);
+                      return (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onClick={() => toggleAssignee(member.id)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? 'bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 shadow-2xs'
+                              : 'bg-white dark:bg-[#1C1F26] border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 opacity-65'
+                          }`}
+                        >
+                          <UserAvatar
+                            name={member.name}
+                            avatarUrl={member.avatarUrl}
+                            size="xs"
+                          />
+                          <span className="truncate max-w-[130px]">{member.name}</span>
+                          {isSelected && <Check size={11} className="text-emerald-500 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* 3. External / Additional Email Guests */}
+            <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A]/60 space-y-2.5">
+              <div>
+                <label className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  <Mail size={13} className="text-[#6C5DD3]" />
+                  Correos adicionales (Invitados externos o clientes)
+                </label>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Agrega correos de personas externas que no están en el tablero para enviarles la invitación de Google Meet.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="email"
+                  value={guestEmailInput}
+                  onChange={e => setGuestEmailInput(e.target.value)}
+                  onKeyDown={handleGuestKeyDown}
+                  placeholder="ejemplo@cliente.com (presiona Enter)"
+                  className="flex-1 px-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1C1F26] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#6C5DD3]"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddExternalGuest}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] hover:bg-[#6C5DD3] hover:text-white transition-colors inline-flex items-center gap-1 shrink-0"
+                >
+                  <Plus size={13} />
+                  <span>Agregar</span>
+                </button>
+              </div>
+
+              {externalGuests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {externalGuests.map(email => (
+                    <span
+                      key={email}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] border border-[#6C5DD3]/25"
+                    >
+                      <Mail size={11} />
+                      <span>{email}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExternalGuest(email)}
+                        className="hover:text-rose-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Privacy option when external guests are present */}
+              <div className="pt-2 border-t border-zinc-200/60 dark:border-white/5 flex items-start gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setHideInternalDetails(!hideInternalDetails)}
+                  className={`mt-0.5 w-4 h-4 rounded flex items-center justify-center border shrink-0 transition-colors ${
+                    hideInternalDetails
+                      ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white'
+                      : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-black/20'
+                  }`}
+                >
+                  {hideInternalDetails && <Check size={10} strokeWidth={3} />}
+                </button>
+                <div
+                  onClick={() => setHideInternalDetails(!hideInternalDetails)}
+                  className="cursor-pointer select-none"
+                >
+                  <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200 flex items-center gap-1">
+                    <Shield size={11} className="text-[#6C5DD3]" />
+                    Ocultar detalles internos del tablero en la invitación de correo
+                  </span>
+                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 block">
+                    Evita exponer nombres de listas, prioridades o enlaces internos a invitados externos.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Optional Agenda Note */}
+            <div>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1 block">
+                Nota o agenda para la videollamada (Opcional)
+              </label>
+              <textarea
+                rows={2}
+                value={agendaNote}
+                onChange={e => setAgendaNote(e.target.value)}
+                placeholder="Puntos a tratar en la sesión de Google Meet..."
+                className="w-full px-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500 resize-none"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between gap-2 pt-3 border-t border-zinc-100 dark:border-white/10">
+              <div>
+                {existingMeeting ? (
+                  <button
+                    type="button"
+                    onClick={handleRemoveMeet}
+                    disabled={isRemoving || isSubmitting}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                  >
+                    {isRemoving ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={13} />
+                    )}
+                    <span>Quitar Meet</span>
+                  </button>
+                ) : connectedEmail ? (
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                    Organizador: {connectedEmail}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSubmitting || isRemoving}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isRemoving}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <GoogleMeetIcon size={15} />
+                      <span>{existingMeeting ? 'Actualizar reunión' : 'Crear y enviar invitaciones'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GoogleMeetScheduleModal;

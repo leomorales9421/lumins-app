@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { X, Link, Upload, Info } from 'lucide-react';
+import { GoogleDriveIcon } from './ui/GoogleIcons';
 
 interface AttachmentPopoverProps {
   onClose: () => void;
   onUploadFile: (file: File) => void;
   onAttachLink: (url: string, name: string) => void;
+  onOpenGoogleDrive?: () => void;
   isUploading?: boolean;
   className?: string;
 }
@@ -13,6 +15,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
   onClose, 
   onUploadFile, 
   onAttachLink,
+  onOpenGoogleDrive,
   isUploading = false,
   className
 }) => {
@@ -44,7 +47,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between p-2 mb-4">
+      <div className="flex items-center justify-between p-2 mb-3">
         <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
           Adjuntar
         </h3>
@@ -62,17 +65,17 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
         <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 mb-1">
           Archivo de ordenador
         </p>
-        <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 mb-3">
+        <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 mb-2.5">
           Archivos hasta 25 MB • Videos máx. 20 MB
         </p>
         
         <button 
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[#6C5DD3] dark:text-[#8E82E3] font-bold py-5 rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[#6C5DD3] dark:text-[#8E82E3] font-bold py-4 rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-1.5 group disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="w-10 h-10 bg-[#6C5DD3]/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Upload size={20} strokeWidth={2.5} />
+          <div className="w-9 h-9 bg-[#6C5DD3]/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Upload size={18} strokeWidth={2.5} />
           </div>
           <span>Seleccionar archivo</span>
           <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500">Imágenes, documentos, audios y videos</span>
@@ -86,23 +89,52 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
         />
 
-        {/* Tip banner for heavy files */}
-        <div className="mt-3 p-2.5 rounded-lg bg-[#6C5DD3]/5 border border-[#6C5DD3]/15 flex items-start gap-2 text-zinc-600 dark:text-zinc-300">
-          <Info size={14} className="text-[#6C5DD3] shrink-0 mt-0.5" />
-          <p className="text-[11px] leading-relaxed">
-            ¿Tu video o archivo supera el límite? Súbelo a <strong>Google Drive</strong> o <strong>Dropbox</strong> y pega el enlace abajo.
-          </p>
-        </div>
+        {/* Google Drive Complement Button */}
+        {onOpenGoogleDrive ? (
+          <button
+            type="button"
+            disabled={isUploading}
+            onClick={() => {
+              onClose();
+              onOpenGoogleDrive();
+            }}
+            className="mt-2.5 w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-[#13151A] hover:bg-[#6C5DD3]/10 dark:hover:bg-[#6C5DD3]/15 border border-zinc-200/80 dark:border-white/10 hover:border-[#6C5DD3]/40 transition-all group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0 text-left">
+              <div className="w-7 h-7 rounded-md bg-white dark:bg-[#1C1F26] border border-zinc-200/60 dark:border-white/10 flex items-center justify-center shrink-0">
+                <GoogleDriveIcon size={15} />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 block group-hover:text-[#6C5DD3] dark:group-hover:text-[#8E82E3] transition-colors">
+                  Google Drive
+                </span>
+                <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 block truncate">
+                  Elegir de tu unidad o subir archivos pesados
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-extrabold text-[#6C5DD3] dark:text-[#8E82E3] uppercase tracking-wider shrink-0">
+              Abrir
+            </span>
+          </button>
+        ) : (
+          <div className="mt-3 p-2.5 rounded-lg bg-[#6C5DD3]/5 border border-[#6C5DD3]/15 flex items-start gap-2 text-zinc-600 dark:text-zinc-300">
+            <Info size={14} className="text-[#6C5DD3] shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-relaxed">
+              ¿Tu video o archivo supera el límite? Súbelo a <strong>Google Drive</strong> o <strong>Dropbox</strong> y pega el enlace abajo.
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="px-6 py-3 flex items-center gap-4">
+      <div className="px-6 py-2.5 flex items-center gap-4">
         <div className="h-px flex-1 bg-zinc-100 dark:bg-white/5" />
         <span className="text-[10px] font-black text-zinc-300 dark:text-zinc-700 uppercase tracking-[0.3em]">o</span>
         <div className="h-px flex-1 bg-zinc-100 dark:border-white/5" />
       </div>
 
       {/* Section 2: External Link */}
-      <div className="px-2 space-y-4">
+      <div className="px-2 space-y-3">
         <div className="space-y-1.5">
           <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1 block">
             Enlace *
@@ -136,7 +168,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 mt-6 px-2 pb-1">
+      <div className="flex items-center justify-end gap-3 mt-5 px-2 pb-1">
         <button 
           onClick={onClose}
           disabled={isUploading}

@@ -21,7 +21,10 @@ const RegisterPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<FlowStep>('EMAIL');
 
   // Form Fields
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('email')?.trim() || '';
+  });
   const [otpCode, setOtpCode] = useState('');
   const [registrationToken, setRegistrationToken] = useState('');
   

@@ -31,7 +31,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
   );
 
   // Form Fields
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('email')?.trim() || '';
+  });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [existingUserName, setExistingUserName] = useState('');

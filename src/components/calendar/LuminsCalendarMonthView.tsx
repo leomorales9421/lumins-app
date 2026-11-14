@@ -40,6 +40,7 @@ import {
   type CalendarColorBy,
   type WeekEventSegment,
   buildMonthWeeks,
+  formatTime12h,
   getDayKey,
   getEventAccentColor,
   getEventDateRange,
@@ -48,6 +49,7 @@ import {
   segmentEventsForWeek,
   PRIORITY_COLORS,
 } from '../../lib/calendar-utils';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 import CalendarCardPreviewPopover, { getAvatarUrl } from './CalendarCardPreviewPopover';
 
 interface LuminsCalendarMonthViewProps {
@@ -238,6 +240,11 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
 
   const isDone = isCardCompleted(event);
   const isOverdue = isEventOverdue(event);
+  const isMeetEvent = Boolean(props.isMeetEvent);
+  const hasMeet = Boolean(props.meetingData?.meetUrl);
+  const meetTimeLabel = props.meetingData?.scheduledStart
+    ? formatTime12h(props.meetingData.scheduledStart)
+    : '';
   const accentColor = getEventAccentColor(event, colorBy);
   const isP0 = props.priority === 'P0';
   const hasChecklist = (props.checklistTotal || 0) > 0;
@@ -267,7 +274,9 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
       } ${isDragging ? 'opacity-35 scale-[0.98]' : 'hover:brightness-95 dark:hover:brightness-110'} ${
         isStart ? 'rounded-l-md ml-1' : 'rounded-l-none ml-0 border-l-0'
       } ${isEnd ? 'rounded-r-md mr-1' : 'rounded-r-none mr-0 border-r-0'} ${
-        isDone
+        isMeetEvent
+          ? 'bg-emerald-500/14 dark:bg-emerald-500/22 text-emerald-950 dark:text-emerald-100 border border-emerald-500/45 shadow-2xs'
+          : isDone
           ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-zinc-400 dark:text-zinc-400 border border-emerald-500/30'
           : isOverdue
           ? 'bg-rose-500/12 dark:bg-rose-500/20 text-rose-900 dark:text-rose-200 border border-rose-500/40'
@@ -279,9 +288,18 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
         gridColumn: `${startCol + 1} / span ${span}`,
         gridRow: laneIndex + 1,
         ...(isStart
-          ? { borderLeftWidth: '3.5px', borderLeftColor: isDone ? '#10B981' : isOverdue ? '#EF4444' : accentColor }
+          ? {
+              borderLeftWidth: '3.5px',
+              borderLeftColor: isMeetEvent
+                ? '#10B981'
+                : isDone
+                ? '#10B981'
+                : isOverdue
+                ? '#EF4444'
+                : accentColor,
+            }
           : {}),
-        ...(isMultiDay && !isDone && !isOverdue
+        ...(isMultiDay && !isDone && !isOverdue && !isMeetEvent
           ? {
               backgroundColor: `${accentColor}1A`,
               borderColor: `${accentColor}4D`,
@@ -290,7 +308,7 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
       }}
     >
       {/* Left Resize Handle (Requirement 2.3) */}
-      {canEdit && isStart && onStartEdgeResize && (
+      {canEdit && !isMeetEvent && isStart && onStartEdgeResize && (
         <div
           onPointerDown={e => onStartEdgeResize(e, event, 'start')}
           title="Arrastrar para cambiar fecha de inicio"
@@ -302,7 +320,9 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
         {!isStart && (
           <ChevronLeft size={10} className="shrink-0 opacity-60" />
         )}
-        {isDone ? (
+        {isMeetEvent ? (
+          <GoogleMeetIcon size={12} className="shrink-0" />
+        ) : isDone ? (
           <CheckCircle2 size={11} className="text-emerald-500 shrink-0" />
         ) : props.blocked ? (
           <Lock size={11} className="text-amber-500 shrink-0" />
@@ -317,13 +337,28 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
           />
         )}
 
-        <span className={`truncate leading-none ${isDone ? 'line-through opacity-75' : ''}`}>
+        {isMeetEvent && meetTimeLabel && (
+          <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 shrink-0">
+            {meetTimeLabel}
+          </span>
+        )}
+
+        <span className={`truncate leading-none ${!isMeetEvent && isDone ? 'line-through opacity-75' : ''}`}>
           {event.title}
         </span>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        {hasChecklist && span > 1 && (
+        {!isMeetEvent && hasMeet && (
+          <span
+            title={`Google Meet: ${meetTimeLabel}`}
+            className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[9px] font-extrabold shrink-0"
+          >
+            <GoogleMeetIcon size={10} />
+          </span>
+        )}
+
+        {!isMeetEvent && hasChecklist && span > 1 && (
           <span className="hidden lg:inline-flex items-center gap-0.5 text-[9px] font-extrabold text-zinc-500 dark:text-zinc-400 bg-black/5 dark:bg-white/10 px-1 rounded">
             <CheckSquare size={9} />
             {props.checklistCompleted}/{props.checklistTotal}
@@ -345,7 +380,7 @@ const DraggableSegmentBar: React.FC<DraggableSegmentBarProps> = ({
       </div>
 
       {/* Right Resize Handle (Requirement 2.3) */}
-      {canEdit && isEnd && onStartEdgeResize && (
+      {canEdit && !isMeetEvent && isEnd && onStartEdgeResize && (
         <div
           onPointerDown={e => onStartEdgeResize(e, event, 'end')}
           title="Arrastrar para cambiar fecha de entrega"
