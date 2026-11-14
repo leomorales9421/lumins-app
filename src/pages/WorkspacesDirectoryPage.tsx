@@ -15,11 +15,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Settings
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
 import DeleteWorkspaceModal from '../components/DeleteWorkspaceModal';
+import EditWorkspaceModal, { type WorkspaceEditableData } from '../components/EditWorkspaceModal';
 import { toast } from 'sonner';
 
 interface WorkspaceItem {
@@ -69,6 +71,8 @@ const WorkspacesDirectoryPage: React.FC = () => {
 
   // Delete modal state
   const [workspaceToDelete, setWorkspaceToDelete] = useState<{ id: string; name: string } | null>(null);
+  // Edit modal state
+  const [workspaceToEdit, setWorkspaceToEdit] = useState<WorkspaceEditableData | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -367,6 +371,19 @@ const WorkspacesDirectoryPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {(isOwner || role.label === 'Admin' || (user as any)?.globalRole === 'SYSTEM_ADMIN') && (
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            setWorkspaceToEdit(ws);
+                          }}
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-[#6C5DD3] hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                          title="Propiedades del espacio"
+                        >
+                          <Settings size={13} />
+                        </button>
+                      )}
+
                       {isOwner && (
                         <button
                           onClick={e => {
@@ -454,6 +471,21 @@ const WorkspacesDirectoryPage: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Edit Workspace Modal */}
+      {workspaceToEdit && (
+        <EditWorkspaceModal
+          isOpen={!!workspaceToEdit}
+          onClose={() => setWorkspaceToEdit(null)}
+          workspace={workspaceToEdit}
+          onWorkspaceUpdated={(updated) => {
+            setWorkspaces(prev => prev.map(w => w.id === updated.id ? { ...w, ...updated } : w));
+          }}
+          onRequestDelete={(id, name) => {
+            setWorkspaceToDelete({ id, name });
+          }}
+        />
+      )}
 
       {/* Delete Workspace Modal */}
       {workspaceToDelete && (

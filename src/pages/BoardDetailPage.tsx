@@ -849,7 +849,9 @@ const BoardDetailPage: React.FC = () => {
             
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
-                <span className="font-black text-xs sm:text-sm">{board.name.charAt(0).toUpperCase()}</span>
+                <span className="font-black text-xs sm:text-sm">
+                  {Array.from(board.name.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s]+/u, '') || board.name)[0]?.toUpperCase() || 'L'}
+                </span>
               </div>
               
               <div className="flex flex-col min-w-0 flex-1">

@@ -140,8 +140,8 @@ const BoardsPage: React.FC = () => {
             </div>
           ) : workspaces.length === 0 ? (
             <WorkspaceEmptyState onCreateClick={() => {
-              // Trigger global workspace creation
-              window.dispatchEvent(new CustomEvent('open-create-workspace'));
+              // Trigger onboarding flow for new users
+              window.dispatchEvent(new CustomEvent('open-onboarding'));
             }} />
           ) : (
             <>

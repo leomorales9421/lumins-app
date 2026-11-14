@@ -7,6 +7,8 @@ import Sidebar from './Sidebar';
 import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
 import TrelloImportModal from '../TrelloImportModal';
+import OnboardingStepperModal from '../onboarding/OnboardingStepperModal';
+import ThemePreferenceModal from '../ThemePreferenceModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
 import { motion } from 'framer-motion';
 
@@ -36,6 +38,9 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateBoardModal, setShowCreateBoardModal] = useState(false);
   const [showTrelloImportModal, setShowTrelloImportModal] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [isPostOnboardingTheme, setIsPostOnboardingTheme] = useState(false);
 
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -166,18 +171,37 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     const openBoard = () => setShowCreateBoardModal(true);
     const openWorkspace = () => setShowCreateWorkspaceModal(true);
     const openTrello = () => setShowTrelloImportModal(true);
+    const openOnboarding = () => setShowOnboardingModal(true);
+    const openTheme = (e: any) => {
+      setIsPostOnboardingTheme(!!e?.detail?.isPostOnboarding);
+      setShowThemeModal(true);
+    };
     
     window.addEventListener('open-create-board', openBoard);
     window.addEventListener('open-create-workspace', openWorkspace);
     window.addEventListener('open-trello-import', openTrello);
+    window.addEventListener('open-onboarding', openOnboarding);
+    window.addEventListener('open-theme-picker', openTheme);
     
     return () => {
       window.removeEventListener('open-create-board', openBoard);
       window.removeEventListener('open-create-workspace', openWorkspace);
       window.removeEventListener('open-trello-import', openTrello);
+      window.removeEventListener('open-onboarding', openOnboarding);
+      window.removeEventListener('open-theme-picker', openTheme);
     };
 
   }, []);
+
+  // Check if new user has 0 workspaces and should see onboarding
+  useEffect(() => {
+    if (!isLoadingWorkspaces && workspaces.length === 0 && user?.id) {
+      const sessionDismissed = sessionStorage.getItem(`lumins_onboarding_dismissed_${user.id}`);
+      if (!sessionDismissed) {
+        setShowOnboardingModal(true);
+      }
+    }
+  }, [isLoadingWorkspaces, workspaces.length, user]);
 
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
   
@@ -337,6 +361,18 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
       <TrelloImportModal
         isOpen={showTrelloImportModal}
         onClose={() => setShowTrelloImportModal(false)}
+      />
+
+      <OnboardingStepperModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+        onCompleted={handleWorkspaceCreated}
+      />
+
+      <ThemePreferenceModal
+        isOpen={showThemeModal}
+        onClose={() => setShowThemeModal(false)}
+        isPostOnboarding={isPostOnboardingTheme}
       />
 
     </div>
