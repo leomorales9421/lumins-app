@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Monitor, Palette, Check, Loader2, Sparkles } from 'lucide-react';
@@ -20,29 +20,50 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
 }) => {
   const { user, setUser } = useAuth();
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>(() => resolveCurrentTheme(user?.theme));
+  const initialThemeRef = useRef<ThemeType>(resolveCurrentTheme(user?.theme));
+  const isSavedRef = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       const current = resolveCurrentTheme(user?.theme);
+      initialThemeRef.current = current;
       setSelectedTheme(current);
+      isSavedRef.current = false;
     }
   }, [isOpen, user?.theme]);
 
+  // Clean-up on unmount / close if user didn't save
+  useEffect(() => {
+    return () => {
+      if (!isSavedRef.current && isOpen) {
+        applyThemeToDom(initialThemeRef.current, true);
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  // Real-time preview as the user selects a theme
+  // Real-time preview as the user selects a theme (does not persist until saved)
   const handleSelectTheme = (newTheme: ThemeType) => {
     setSelectedTheme(newTheme);
-    applyThemeToDom(newTheme, true);
+    applyThemeToDom(newTheme, false);
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(15);
     }
   };
 
+  // Revert back to original theme if cancelled
+  const handleCancel = () => {
+    applyThemeToDom(initialThemeRef.current, true);
+    setSelectedTheme(initialThemeRef.current);
+    onClose();
+  };
+
   // Final persist to database
   const handleSave = async () => {
     setIsSaving(true);
+    isSavedRef.current = true;
     try {
       applyThemeToDom(selectedTheme, true);
       const res = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', {
@@ -113,7 +134,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={handleCancel}
           className="fixed inset-0 bg-black/40 backdrop-blur-sm"
         />
 
@@ -201,11 +222,11 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCancel}
               disabled={isSaving}
               className="flex-1 py-3 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors text-center"
             >
-              Mantener actual
+              Mantener actual ({initialThemeRef.current === 'dark' ? 'Oscuro' : initialThemeRef.current === 'light' ? 'Claro' : 'Automático'})
             </button>
             <button
               type="button"

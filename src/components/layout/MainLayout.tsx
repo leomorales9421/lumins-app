@@ -41,6 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [isPostOnboardingTheme, setIsPostOnboardingTheme] = useState(false);
+  const hasAutoOpenedOnboardingRef = useRef(false);
 
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -193,11 +194,11 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   }, []);
 
-  // Check if new user has 0 workspaces and should see onboarding
+  // Check if user has 0 workspaces and automatically show onboarding
   useEffect(() => {
     if (!isLoadingWorkspaces && workspaces.length === 0 && user?.id) {
-      const sessionDismissed = sessionStorage.getItem(`lumins_onboarding_dismissed_${user.id}`);
-      if (!sessionDismissed) {
+      if (!hasAutoOpenedOnboardingRef.current) {
+        hasAutoOpenedOnboardingRef.current = true;
         setShowOnboardingModal(true);
       }
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Building2, 
@@ -7,6 +8,8 @@ import {
   Sparkles, 
   ArrowRight, 
   ArrowLeft, 
+  ArrowDown, 
+  ArrowUp, 
   X, 
   Plus, 
   Check, 
@@ -95,23 +98,46 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
   const [selectedPriority, setSelectedPriority] = useState<'P0' | 'P1' | 'P2' | 'P3'>('P1');
   const [trelloImportTested, setTrelloImportTested] = useState(false);
   const [googleCalendarSyncTested, setGoogleCalendarSyncTested] = useState(false);
-  const [cardDropped, setCardDropped] = useState(false);
+  const [droppedCol, setDroppedCol] = useState<number | null>(null);
+  const cardDropped = droppedCol !== null;
   const [isMarkedDone, setIsMarkedDone] = useState(false);
-  const [isOverDropZone, setIsOverDropZone] = useState(false);
+
+  // Pointer-based Drag & Drop state (Genuine Lumins DragOverlay pattern)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragSource, setDragSource] = useState<'inbox' | 'col' | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPointerPos, setDragPointerPos] = useState({ x: 0, y: 0 });
+  const [dragCardSize, setDragCardSize] = useState({ width: 280, height: 90 });
+  const [hoveredDropCol, setHoveredDropCol] = useState<number | null>(null);
 
   // Submit states
   const [isCreating, setIsCreating] = useState(false);
   const [creationStepMsg, setCreationStepMsg] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Pre-fill workspace name with user's name if empty
+  // Reset and initialize stepper state whenever it opens
   useEffect(() => {
-    if (user?.name && !workspaceName) {
-      setWorkspaceName(`Espacio de ${user.name.split(' ')[0]}`);
+    if (isOpen) {
+      setCurrentStep(0);
+      setWorkspaceName(user?.name ? `Espacio de ${user.name.split(' ')[0]}` : '');
+      setWorkspaceType('🏢 Empresa / Pyme');
+      setBoardName('Tareas Semanales');
+      setSelectedBg(BOARD_BACKGROUND_CHOICES[0]);
+      setCardTitle('');
+      setCreatedCards(['Planificar objetivos del equipo']);
+      setSelectedPriority('P1');
+      setTrelloImportTested(false);
+      setGoogleCalendarSyncTested(false);
+      setDroppedCol(null);
+      setIsDragging(false);
+      setDragSource(null);
+      setHoveredDropCol(null);
+      setIsMarkedDone(false);
+      setIsCreating(false);
+      setCreationStepMsg('');
+      setError(null);
     }
-  }, [user, workspaceName]);
-
-  if (!isOpen) return null;
+  }, [isOpen, user]);
 
   const totalSteps = 6;
 
@@ -130,6 +156,10 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
     }
     if (currentStep === 1 && !boardName.trim()) {
       setError('Por favor indica un nombre para tu tablero.');
+      return;
+    }
+    if (currentStep === 4 && !isMarkedDone) {
+      setError('Por favor marca la tarjeta como lista haciendo clic en el recuadro.');
       return;
     }
     if (currentStep < totalSteps - 1) {
@@ -255,8 +285,101 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
   const mainCardTitle = createdCards[0] || (cardTitle.trim() || 'Planificar objetivos del equipo');
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#2A2568] text-white font-sans overflow-hidden select-none h-[100dvh] w-screen">
+  // Genuine Lumins pointer drag handler (zero lag, no stuck transforms)
+  const handleStartDrag = (e: React.PointerEvent, source: 'inbox' | 'col') => {
+    // Only primary button (left mouse) or touch
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+    // Do not initiate drag if user interacted with the checkbox or a button
+    const targetEl = e.target as HTMLElement;
+    if (targetEl.closest('button, [data-checkbox-btn]')) {
+      return;
+    }
+
+    const cardEl = e.currentTarget as HTMLElement;
+    const rect = cardEl.getBoundingClientRect();
+
+    setIsDragging(true);
+    setDragSource(source);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+    setDragPointerPos({ x: e.clientX, y: e.clientY });
+    setDragCardSize({ width: rect.width, height: rect.height });
+    setHoveredDropCol(source === 'col' ? droppedCol : 0);
+
+    const onPointerMove = (moveEv: PointerEvent) => {
+      moveEv.preventDefault();
+      setDragPointerPos({ x: moveEv.clientX, y: moveEv.clientY });
+
+      const colElements = Array.from(document.querySelectorAll('[data-column-id]'));
+      let targetCol: number | null = null;
+      for (let i = 0; i < colElements.length; i++) {
+        const colRect = colElements[i].getBoundingClientRect();
+        if (
+          moveEv.clientX >= colRect.left - 20 &&
+          moveEv.clientX <= colRect.right + 20 &&
+          moveEv.clientY >= colRect.top - 80 &&
+          moveEv.clientY <= colRect.bottom + 80
+        ) {
+          targetCol = i;
+          break;
+        }
+      }
+      setHoveredDropCol(targetCol);
+    };
+
+    const onPointerUp = (upEv: PointerEvent) => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+
+      const colElements = Array.from(document.querySelectorAll('[data-column-id]'));
+      let finalCol: number | null = null;
+      for (let i = 0; i < colElements.length; i++) {
+        const colRect = colElements[i].getBoundingClientRect();
+        if (
+          upEv.clientX >= colRect.left - 30 &&
+          upEv.clientX <= colRect.right + 30 &&
+          upEv.clientY >= colRect.top - 90 &&
+          upEv.clientY <= colRect.bottom + 90
+        ) {
+          finalCol = i;
+          break;
+        }
+      }
+
+      if (finalCol !== null) {
+        setDroppedCol(finalCol);
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+      } else if (source === 'inbox' && upEv.clientX > rect.right + 15) {
+        // Dragged into the general board area
+        setDroppedCol(0);
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+      }
+
+      setIsDragging(false);
+      setDragSource(null);
+      setHoveredDropCol(null);
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="onboarding-stepper-root"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 0.985 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-[9999] flex flex-col bg-[#2A2568] text-white font-sans overflow-hidden select-none h-[100dvh] w-screen"
+        >
       
       {/* Lumins Brand Gradient Overlay (Deep Saturated Indigo/Violet) */}
       <div 
@@ -777,12 +900,13 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                       <span className="flex items-center gap-1.5 flex-wrap">
                         <span>Arrastra la tarjeta o</span>
                         <b className="text-amber-300">haz clic / toca para moverla</b>
-                        <span>a "Lista de tareas"</span>
+                        <span>a cualquiera de las 3 columnas</span>
                       </span>
                     ) : !isMarkedDone ? (
-                      <span className="text-amber-300 font-bold flex items-center gap-1.5 animate-pulse">
+                      <span className="text-amber-300 font-bold flex items-center gap-1.5 animate-pulse flex-wrap">
                         <Sparkles size={14} className="text-amber-300 shrink-0" />
                         <span>¡Bien! Ahora toca el recuadro para marcarla como <b>Lista</b>.</span>
+                        <ArrowDown size={14} className="text-amber-300 shrink-0 animate-bounce" />
                       </span>
                     ) : (
                       <span className="text-emerald-300 font-bold flex items-center gap-1.5">
@@ -815,22 +939,18 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                     <div className="space-y-2">
                       {/* Interactive Card */}
                       {!cardDropped ? (
-                        <motion.div
-                          drag
-                          dragConstraints={{ left: 0, right: 300, top: -100, bottom: 200 }}
-                          dragElastic={0.2}
-                          onDragEnd={(_e, info) => {
-                            if (info.offset.x > 60 || info.offset.y > 60 || info.offset.y < -40) {
-                              setCardDropped(true);
+                        <div
+                          onPointerDown={(e) => handleStartDrag(e, 'inbox')}
+                          onClick={() => {
+                            if (!isDragging) {
+                              setDroppedCol(0);
                               if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
                             }
                           }}
-                          onClick={() => {
-                            setCardDropped(true);
-                            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
-                          }}
-                          className="bg-white text-zinc-900 border border-zinc-200 border-l-4 border-l-[#F97316] rounded-xl p-3 shadow-xl cursor-grab active:cursor-grabbing hover:scale-[1.02] active:scale-95 transition-all group touch-none"
-                          title="Toca o arrastra esta tarjeta hacia el tablero"
+                          className={`bg-white text-zinc-900 border border-zinc-200 border-l-4 border-l-[#F97316] rounded-xl p-3 shadow-xl cursor-grab active:cursor-grabbing hover:scale-[1.02] active:scale-95 group touch-none select-none transition-all ${
+                            isDragging && dragSource === 'inbox' ? 'opacity-30 border-dashed' : 'opacity-100'
+                          }`}
+                          title="Toca o arrastra esta tarjeta hacia cualquiera de las 3 columnas del tablero"
                         >
                           <div className="font-bold text-xs sm:text-sm text-zinc-900 mb-2 leading-snug">
                             {mainCardTitle}
@@ -847,7 +967,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                               <span>Mover</span> →
                             </span>
                           </div>
-                        </motion.div>
+                        </div>
                       ) : (
                         <div className="border border-dashed border-white/10 rounded-xl p-3 text-center text-xs text-white/50 bg-white/[0.02]">
                           ✨ Bandeja organizada
@@ -914,190 +1034,206 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
                     {/* Columns Row (Real Lumins White Column Cards - Responsive horizontal swipe on mobile) */}
                     <div className="flex sm:grid sm:grid-cols-3 gap-3 overflow-x-auto snap-x snap-mandatory pb-2 custom-scrollbar">
-                      
-                      {/* Column 1: Lista de tareas */}
-                      <div className="w-[82vw] sm:w-auto shrink-0 snap-center bg-white/95 text-zinc-900 rounded-xl border border-zinc-200/90 shadow-md p-3 sm:p-3.5 flex flex-col justify-between min-h-[190px] sm:min-h-[220px]">
-                        <div>
-                          {/* Column Header */}
-                          <div className="flex items-center justify-between mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-xs text-zinc-900">Lista de tareas</span>
-                              <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-bold border border-zinc-200">
-                                {cardDropped ? '1' : '0'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-zinc-400">
-                              <Plus size={13} />
-                              <MoreHorizontal size={13} />
-                            </div>
-                          </div>
-                          
-                          {/* Card or Drop Target */}
-                          {cardDropped ? (
-                            <motion.div
-                              initial={{ scale: 0.9, opacity: 0, y: -8 }}
-                              animate={{ scale: 1, opacity: 1, y: 0 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                              className={`bg-white border rounded-xl p-3 shadow-sm transition-all relative border-l-4 border-l-[#F97316] ${
-                                isMarkedDone
-                                  ? 'border-emerald-400 ring-2 ring-emerald-400/20 shadow-md'
-                                  : 'border-zinc-200'
-                              }`}
-                            >
-                              {/* Sparkle burst on complete */}
-                              {isMarkedDone && (
-                                <motion.div 
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: [0, 1.3, 1] }}
-                                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg"
-                                >
-                                  <Sparkles size={13} />
-                                </motion.div>
-                              )}
-
-                              <div className="flex items-start gap-2.5">
-                                {/* Large touch-friendly Checkbox */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setIsMarkedDone(!isMarkedDone);
-                                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
-                                  }}
-                                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 mt-0.5 ${
-                                    isMarkedDone
-                                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                                      : 'border-zinc-300 hover:border-emerald-500 bg-zinc-50 ring-4 ring-emerald-400/40 animate-pulse'
-                                  }`}
-                                  title="Haz clic para marcar como lista"
-                                >
-                                  {isMarkedDone && <Check size={13} strokeWidth={3} className="text-white" />}
-                                </button>
-
-                                <div className="min-w-0 flex-1">
-                                  <div className={`font-bold text-xs sm:text-sm leading-snug transition-all ${
-                                    isMarkedDone ? 'line-through text-zinc-400' : 'text-zinc-900'
-                                  }`}>
-                                    {mainCardTitle}
-                                  </div>
-
-                                  <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-2.5 pt-1.5 border-t border-zinc-100">
-                                    <span className="flex items-center gap-1 font-semibold text-zinc-600">
-                                      <Clock size={11} className="text-zinc-400" /> 18 nov
-                                    </span>
-                                    {isMarkedDone ? (
-                                      <span className="text-emerald-600 font-extrabold flex items-center gap-0.5">
-                                        <Check size={11} strokeWidth={3} /> Lista
-                                      </span>
-                                    ) : (
-                                      <span className="text-amber-500 font-bold animate-pulse">
-                                        👆 Marca como lista
-                                      </span>
-                                    )}
-                                  </div>
+                      {[
+                        { id: 0, title: 'Lista de tareas' },
+                        { id: 1, title: 'En proceso' },
+                        { id: 2, title: 'Hecho' },
+                      ].map((col) => {
+                        const isTargetColumn = droppedCol === col.id;
+                        const isHoveredDuringDrag = isDragging && hoveredDropCol === col.id;
+                        return (
+                          <div
+                            key={col.id}
+                            data-column-id={col.id}
+                            onClick={() => {
+                              if (!isDragging && droppedCol !== col.id) {
+                                setDroppedCol(col.id);
+                                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                              }
+                            }}
+                            className={`w-[82vw] sm:w-auto shrink-0 snap-center bg-white text-zinc-900 rounded-xl border shadow-md p-3 sm:p-3.5 flex flex-col justify-between min-h-[190px] sm:min-h-[220px] transition-all select-none ${
+                              isHoveredDuringDrag
+                                ? 'border-[#6C5DD3] ring-2 ring-[#6C5DD3]/40 bg-purple-50/40'
+                                : 'border-zinc-200/90'
+                            } ${!isTargetColumn ? 'hover:border-[#6C5DD3]/40 cursor-pointer' : ''}`}
+                          >
+                            <div>
+                              {/* Column Header */}
+                              <div className="flex items-center justify-between mb-2.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-black text-xs text-zinc-900">{col.title}</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-bold border border-zinc-200">
+                                    {isTargetColumn ? '1' : '0'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 text-zinc-400">
+                                  <Plus size={13} />
+                                  <MoreHorizontal size={13} />
                                 </div>
                               </div>
-                            </motion.div>
-                          ) : (
-                            <div
-                              onDragOver={(e) => {
-                                e.preventDefault();
-                                setIsOverDropZone(true);
-                              }}
-                              onDragLeave={() => setIsOverDropZone(false)}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                setIsOverDropZone(false);
-                                setCardDropped(true);
-                                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
-                              }}
-                              onClick={() => {
-                                setCardDropped(true);
-                                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
-                              }}
-                              className={`border-2 border-dashed rounded-xl p-4 text-center transition-all cursor-pointer min-h-[90px] flex flex-col items-center justify-center ${
-                                isOverDropZone
-                                  ? 'border-[#6C5DD3] bg-[#6C5DD3]/15 scale-102'
-                                  : 'border-zinc-300 bg-zinc-50/70 hover:border-[#6C5DD3] hover:bg-[#6C5DD3]/5'
-                              }`}
-                            >
-                              <span className="text-xs font-bold text-zinc-700">Soltar tarjeta aquí</span>
-                              <span className="text-[10px] text-zinc-400 mt-0.5">o clic para mover</span>
-                            </div>
-                          )}
-                        </div>
+                              
+                              {/* Content: Dropped Card OR Drop Target */}
+                              {isTargetColumn ? (
+                                <div
+                                  onPointerDown={(e) => handleStartDrag(e, 'col')}
+                                  className={`bg-white border rounded-xl p-3 shadow-sm relative border-l-4 border-l-[#F97316] select-none cursor-grab active:cursor-grabbing hover:shadow-md transition-all touch-none ${
+                                    isDragging && dragSource === 'col'
+                                      ? 'opacity-30 border-dashed border-[#6C5DD3]'
+                                      : isMarkedDone
+                                      ? 'border-emerald-400 ring-2 ring-emerald-400/20 shadow-md'
+                                      : 'border-zinc-200'
+                                  }`}
+                                  title="Arrastra para mover a otra columna o haz clic en el check para marcarla como lista"
+                                >
+                                  {/* Sparkle burst on complete */}
+                                  {isMarkedDone && (
+                                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg animate-bounce">
+                                      <Sparkles size={13} />
+                                    </div>
+                                  )}
 
-                        <div className="text-[11px] text-zinc-500 font-semibold pt-2 flex items-center gap-1 hover:text-zinc-800 cursor-pointer">
-                          <Plus size={12} /> Añadir tarjeta
-                        </div>
-                      </div>
+                                  <div className="flex items-start gap-2.5 relative">
+                                    {/* Touch-friendly Checkbox with indicator arrow badge */}
+                                    <div className="relative shrink-0 mt-0.5" data-checkbox-btn>
+                                      {!isMarkedDone && (
+                                        <div className="absolute -top-7 -left-1 z-20 flex items-center gap-0.5 bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 px-2 py-0.5 rounded-full text-[9px] font-black shadow-md whitespace-nowrap pointer-events-none animate-bounce">
+                                          <span>Toca aquí</span>
+                                          <ArrowDown size={10} strokeWidth={3} className="text-zinc-950" />
+                                        </div>
+                                      )}
 
-                      {/* Column 2: En proceso */}
-                      <div className="w-[82vw] sm:w-auto shrink-0 snap-center bg-white/95 text-zinc-900 rounded-xl border border-zinc-200/90 shadow-md p-3 sm:p-3.5 flex flex-col justify-between min-h-[190px] sm:min-h-[220px]">
-                        <div>
-                          <div className="flex items-center justify-between mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-xs text-zinc-900">En proceso</span>
-                              <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-bold border border-zinc-200">
-                                0
-                              </span>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setIsMarkedDone(!isMarkedDone);
+                                          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+                                        }}
+                                        className={`w-4 h-4 rounded-[4px] border-[1.5px] flex items-center justify-center transition-all ${
+                                          isMarkedDone
+                                            ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                                            : 'border-amber-400 bg-white ring-2 ring-amber-300/70 hover:scale-110 active:scale-95'
+                                        }`}
+                                        title="Haz clic para marcar como lista"
+                                      >
+                                        {isMarkedDone && <Check size={11} strokeWidth={3.5} className="text-white" />}
+                                      </button>
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                      <div className={`font-bold text-xs sm:text-sm leading-snug transition-all ${
+                                        isMarkedDone ? 'line-through text-zinc-400' : 'text-zinc-900'
+                                      }`}>
+                                        {mainCardTitle}
+                                      </div>
+
+                                      <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-2.5 pt-1.5 border-t border-zinc-100">
+                                        <span className="flex items-center gap-1 font-semibold text-zinc-600">
+                                          <Clock size={11} className="text-zinc-400" /> 18 nov
+                                        </span>
+                                        {isMarkedDone ? (
+                                          <span className="text-emerald-600 font-extrabold flex items-center gap-0.5">
+                                            <Check size={11} strokeWidth={3} /> Lista
+                                          </span>
+                                        ) : (
+                                          <span className="text-amber-500 font-bold flex items-center gap-1">
+                                            <ArrowLeft size={11} strokeWidth={3} className="text-amber-500 animate-pulse" /> Marca como lista
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  onClick={() => {
+                                    if (!isDragging) {
+                                      setDroppedCol(col.id);
+                                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                                    }
+                                  }}
+                                  className={`border-2 border-dashed rounded-xl p-4 text-center transition-all cursor-pointer min-h-[90px] flex flex-col items-center justify-center ${
+                                    isHoveredDuringDrag
+                                      ? 'border-[#6C5DD3] bg-[#6C5DD3]/20 scale-[1.02] text-[#6C5DD3]'
+                                      : 'border-zinc-300 bg-zinc-50/70 hover:border-[#6C5DD3] hover:bg-[#6C5DD3]/10 text-zinc-700'
+                                  }`}
+                                  title={`Mover tarjeta a ${col.title}`}
+                                >
+                                  <span className="text-xs font-bold">Mover aquí</span>
+                                  <span className="text-[10px] text-zinc-400 mt-0.5">arrastra o haz clic</span>
+                                </div>
+                              )}
                             </div>
-                            <div className="flex items-center gap-1 text-zinc-400">
-                              <Plus size={13} />
-                              <MoreHorizontal size={13} />
+
+                            <div className="text-[11px] text-zinc-500 font-semibold pt-2 flex items-center gap-1 hover:text-zinc-800 cursor-pointer">
+                              <Plus size={12} /> Añadir tarjeta
                             </div>
                           </div>
-                          
-                          <div className="h-20 border border-dashed border-zinc-200 bg-zinc-50/50 rounded-xl flex items-center justify-center text-[10px] text-zinc-400 font-medium">
-                            Sin tarjetas
-                          </div>
-                        </div>
-
-                        <div className="text-[11px] text-zinc-500 font-semibold pt-2 flex items-center gap-1">
-                          <Plus size={12} /> Añadir tarjeta
-                        </div>
-                      </div>
-
-                      {/* Column 3: Hecho */}
-                      <div className="w-[82vw] sm:w-auto shrink-0 snap-center bg-white/95 text-zinc-900 rounded-xl border border-zinc-200/90 shadow-md p-3 sm:p-3.5 flex flex-col justify-between min-h-[190px] sm:min-h-[220px]">
-                        <div>
-                          <div className="flex items-center justify-between mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-xs text-zinc-900">Hecho</span>
-                              <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-bold border border-zinc-200">
-                                0
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-zinc-400">
-                              <Plus size={13} />
-                              <MoreHorizontal size={13} />
-                            </div>
-                          </div>
-
-                          <div className="h-20 border border-dashed border-zinc-200 bg-zinc-50/50 rounded-xl flex items-center justify-center text-[10px] text-zinc-400 font-medium">
-                            Sin tarjetas
-                          </div>
-                        </div>
-
-                        <div className="text-[11px] text-zinc-500 font-semibold pt-2 flex items-center gap-1">
-                          <Plus size={12} /> Añadir tarjeta
-                        </div>
-                      </div>
-
+                        );
+                      })}
                     </div>
                   </div>
 
                 </div>
 
-                <button
-                  onClick={handleNext}
-                  className={`w-full sm:w-auto px-10 py-3.5 sm:py-3 rounded-xl font-extrabold text-sm transition-all shadow-xl active:scale-95 ${
-                    isMarkedDone
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)]'
-                      : 'bg-white text-[#2A2568] hover:bg-white/90'
-                  }`}
-                >
-                  Continuar
-                </button>
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    onClick={handleNext}
+                    disabled={!isMarkedDone}
+                    className={`w-full sm:w-auto px-10 py-3.5 sm:py-3 rounded-xl font-extrabold text-sm transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${
+                      isMarkedDone
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)] cursor-pointer hover:scale-105'
+                        : 'bg-white/15 text-white/40 cursor-not-allowed border border-white/10 shadow-none'
+                    }`}
+                  >
+                    <span>{isMarkedDone ? 'Continuar' : 'Marca la tarea como lista para continuar'}</span>
+                    {isMarkedDone && <ArrowRight size={16} />}
+                  </button>
+                  {!isMarkedDone && cardDropped && (
+                    <span className="text-amber-300 text-xs font-semibold flex items-center gap-1 animate-pulse">
+                      <ArrowUp size={13} /> Haz clic en el recuadro de la tarea para marcarla como lista
+                    </span>
+                  )}
+                </div>
+
+                {/* Floating Drag Overlay following cursor/touch with zero delay */}
+                {isDragging && (
+                  <div
+                    className="fixed pointer-events-none z-[99999] transition-none"
+                    style={{
+                      left: `${dragPointerPos.x - dragOffset.x}px`,
+                      top: `${dragPointerPos.y - dragOffset.y}px`,
+                      width: `${dragCardSize.width}px`,
+                      transform: 'scale(1.05) rotate(2deg)',
+                      filter: 'drop-shadow(0 20px 25px rgba(0, 0, 0, 0.45))',
+                      willChange: 'left, top, transform',
+                    }}
+                  >
+                    <div className={`bg-white border rounded-xl p-3 shadow-2xl border-l-4 border-l-[#F97316] ${
+                      isMarkedDone ? 'border-emerald-400 ring-2 ring-emerald-400/20' : 'border-zinc-200'
+                    }`}>
+                      <div className="flex items-start gap-2.5">
+                        <div className={`w-4 h-4 rounded-[4px] border-[1.5px] flex items-center justify-center shrink-0 mt-0.5 ${
+                          isMarkedDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-amber-400 bg-white ring-2 ring-amber-300/70'
+                        }`}>
+                          {isMarkedDone && <Check size={11} strokeWidth={3.5} className="text-white" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={`font-bold text-xs sm:text-sm leading-snug truncate ${
+                            isMarkedDone ? 'line-through text-zinc-400' : 'text-zinc-900'
+                          }`}>
+                            {mainCardTitle}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-zinc-500 mt-2 pt-1 border-t border-zinc-100">
+                            <span className="flex items-center gap-1 font-semibold text-zinc-600">
+                              <Clock size={11} className="text-zinc-400" /> 18 nov
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -1178,7 +1314,10 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
         </div>
       </main>
-    </div>
+    </motion.div>
+    )}
+  </AnimatePresence>,
+  document.body
   );
 };
 

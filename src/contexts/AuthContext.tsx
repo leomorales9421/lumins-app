@@ -162,6 +162,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       apiClient.clearTokens();
       setUser(null);
+      try {
+        Object.keys(sessionStorage).forEach((key) => {
+          if (key.includes('onboarding')) sessionStorage.removeItem(key);
+        });
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes('onboarding')) localStorage.removeItem(key);
+        });
+      } catch {}
       window.location.href = '/login';
     }
   };
