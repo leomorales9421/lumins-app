@@ -19,6 +19,32 @@ interface User {
   preferences?: Record<string, any>;
 }
 
+export interface GeoInfo {
+  code: string;
+  name: string;
+  dialCode: string;
+  flag: string;
+}
+
+export interface InitiateAuthResult {
+  exists: boolean;
+  requiresOtp?: boolean;
+  authMethods?: string[];
+  geo: GeoInfo;
+  message?: string;
+  user?: {
+    name: string;
+  };
+}
+
+export interface VerifyOtpResult {
+  verified: boolean;
+  isNewUser: boolean;
+  registrationToken?: string;
+  accessToken?: string;
+  user?: User;
+}
+
 interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -32,6 +58,16 @@ interface AuthContextType {
     acceptsTerms: boolean,
     acceptsPrivacy: boolean
   ) => Promise<void>;
+  initiateAuth: (email: string) => Promise<InitiateAuthResult>;
+  verifyOtp: (email: string, code: string) => Promise<VerifyOtpResult>;
+  completeProfile: (params: {
+    registrationToken: string;
+    name: string;
+    country?: string;
+    phone?: string;
+    password?: string;
+  }) => Promise<void>;
+  setSessionFromToken: (accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -152,6 +188,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const setSessionFromToken = async (accessToken: string) => {
+    apiClient.setTokens(accessToken);
+    await refreshUser();
+  };
+
+  const initiateAuth = async (email: string): Promise<InitiateAuthResult> => {
+    try {
+      const result = await apiClient.post<InitiateAuthResult>('/api/auth/initiate', { email });
+      return result;
+    } catch (error) {
+      console.error('Initiate auth failed:', error);
+      throw error;
+    }
+  };
+
+  const verifyOtp = async (email: string, code: string): Promise<VerifyOtpResult> => {
+    try {
+      const result = await apiClient.post<VerifyOtpResult>('/api/auth/verify-otp', { email, code });
+      if (result.accessToken) {
+        apiClient.setTokens(result.accessToken);
+        await refreshUser();
+      }
+      return result;
+    } catch (error) {
+      console.error('Verify OTP failed:', error);
+      throw error;
+    }
+  };
+
+  const completeProfile = async (params: {
+    registrationToken: string;
+    name: string;
+    country?: string;
+    phone?: string;
+    password?: string;
+  }) => {
+    try {
+      const response = await apiClient.post<{
+        data: {
+          user: User;
+          accessToken: string;
+        };
+      }>('/api/auth/complete-profile', {
+        name: params.name,
+        country: params.country,
+        phone: params.phone,
+        password: params.password,
+      }, {
+        headers: {
+          Authorization: `Bearer ${params.registrationToken}`
+        }
+      });
+
+      const { accessToken } = response.data;
+      apiClient.setTokens(accessToken);
+      await refreshUser();
+    } catch (error) {
+      console.error('Complete profile failed:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await apiClient.post('/api/auth/logout');
@@ -169,7 +267,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         Object.keys(localStorage).forEach((key) => {
           if (key.includes('onboarding')) localStorage.removeItem(key);
         });
-      } catch {}
+      } catch { }
       window.location.href = '/login';
     }
   };
@@ -181,6 +279,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     login,
     register,
+    initiateAuth,
+    verifyOtp,
+    completeProfile,
+    setSessionFromToken,
     logout,
     refreshUser,
   };

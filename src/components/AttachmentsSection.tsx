@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paperclip, FileText, Archive, ExternalLink, Trash2, Link } from 'lucide-react';
+import { Paperclip, FileText, Archive, ExternalLink, Trash2, Link, Video, Music } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Attachment {
@@ -24,6 +24,14 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
     const isImageMime = attachment.mime?.startsWith('image/');
     const isImageUrl = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(attachment.url);
     const isImage = isImageMime || (attachment.mime === 'link' && isImageUrl);
+
+    const isVideoMime = attachment.mime?.startsWith('video/');
+    const isVideoUrl = /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(attachment.url) || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(attachment.name);
+    const isVideo = isVideoMime || isVideoUrl;
+
+    const isAudioMime = attachment.mime?.startsWith('audio/');
+    const isAudioUrl = /\.(mp3|wav|ogg|m4a)$/i.test(attachment.url) || /\.(mp3|wav|ogg|m4a)$/i.test(attachment.name);
+    const isAudio = isAudioMime || isAudioUrl;
     
     return (
       <div className="w-16 h-12 bg-zinc-900 rounded overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
@@ -33,6 +41,14 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ attachments, on
             alt={attachment.name} 
             className="object-cover w-full h-full hover:scale-110 transition-transform duration-500" 
           />
+        ) : isVideo ? (
+          <div className="text-indigo-400">
+            <Video size={22} />
+          </div>
+        ) : isAudio ? (
+          <div className="text-violet-400">
+            <Music size={22} />
+          </div>
         ) : (
           <div className="text-white/80">
             {attachment.mime === 'link' ? (

@@ -801,14 +801,30 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const handleFileUpload = async (file: File) => {
     if (!file || !cardId) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Archivo demasiado grande', {
-        description: 'El archivo es demasiado grande (máx 10MB)'
+    // Validación inteligente de peso y tipo
+    const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name);
+    const MAX_VIDEO_MB = 20;
+    const MAX_GENERAL_MB = 25;
+
+    if (isVideo && file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error(`Video demasiado pesado (${fileSizeMB} MB)`, {
+        description: `Los videos para subida directa tienen un límite de ${MAX_VIDEO_MB} MB. Para videos más pesados, te recomendamos subirlo a tu Google Drive, YouTube o Dropbox y adjuntar el enlace aquí.`,
+        duration: 9000,
       });
+      setActivePopover('attachments_main');
       return;
     }
 
-
+    if (!isVideo && file.size > MAX_GENERAL_MB * 1024 * 1024) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error(`Archivo demasiado grande (${fileSizeMB} MB)`, {
+        description: `El tamaño máximo permitido para subida directa es de ${MAX_GENERAL_MB} MB. Te sugerimos subirlo a Google Drive y adjuntar el enlace compartido.`,
+        duration: 8000,
+      });
+      setActivePopover('attachments_main');
+      return;
+    }
 
     let fileToUpload = file;
     
@@ -833,10 +849,28 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       await fetchCardDetails(true);
       if (onUpdate) onUpdate();
       setActivePopover(null);
-    } catch (err) {
+      toast.success('Archivo adjuntado con éxito');
+    } catch (err: any) {
       console.error('Error uploading file:', err);
+      let errorDesc = 'Hubo un problema al procesar tu archivo. Por favor, inténtalo de nuevo.';
+      
+      if (err.response?.data?.message) {
+        errorDesc = err.response.data.message;
+      } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        errorDesc = 'La subida tardó demasiado tiempo en completarse. Comprueba la velocidad de tu conexión a internet.';
+      } else if (err.message === 'Network Error' || !err.response) {
+        errorDesc = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+      } else if (err.response?.status === 413) {
+        errorDesc = 'El archivo supera el tamaño máximo permitido por el servidor.';
+      } else if (err.response?.status === 403) {
+        errorDesc = 'No tienes permisos para adjuntar archivos en esta tarjeta.';
+      } else if (err.response?.status === 401) {
+        errorDesc = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+      }
+
       toast.error('Error al subir el archivo', {
-        description: 'Hubo un problema al procesar tu archivo. Por favor, inténtalo de nuevo.'
+        description: errorDesc,
+        duration: 7000,
       });
     } finally {
       setIsUploading(false);

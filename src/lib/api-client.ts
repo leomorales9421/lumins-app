@@ -47,7 +47,12 @@ class ApiClient {
         let token = this.getAccessToken();
         
         // Precise check for endpoints that should NOT trigger a token refresh or have a token added
-        const isLoginOrRegister = config.url?.includes('/api/auth/login') || config.url?.includes('/api/auth/register');
+        const isLoginOrRegister = 
+          config.url?.includes('/api/auth/login') || 
+          config.url?.includes('/api/auth/register') ||
+          config.url?.includes('/api/auth/initiate') ||
+          config.url?.includes('/api/auth/verify-otp') ||
+          config.url?.includes('/api/auth/complete-profile');
         const isRefreshEndpoint = config.url?.includes('/api/auth/refresh');
         
         if (token) {
@@ -103,10 +108,13 @@ class ApiClient {
           return this.client(originalRequest);
         }
 
-        // Skip token refresh only for login, register and the refresh endpoint itself
+        // Skip token refresh only for public auth endpoints and the refresh endpoint itself
         const isExemptFromRetry = 
           originalRequest?.url?.includes('/api/auth/login') || 
           originalRequest?.url?.includes('/api/auth/register') || 
+          originalRequest?.url?.includes('/api/auth/initiate') || 
+          originalRequest?.url?.includes('/api/auth/verify-otp') || 
+          originalRequest?.url?.includes('/api/auth/complete-profile') || 
           originalRequest?.url?.includes('/api/auth/refresh');
         
         // If error is 401 and we haven't retried yet, and it's not an exempt endpoint
