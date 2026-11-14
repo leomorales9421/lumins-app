@@ -44,10 +44,80 @@ export const BOARD_BACKGROUND_PRESETS: BoardBackgroundPreset[] = [
 
 export const DEFAULT_BOARD_BACKGROUND = BOARD_BACKGROUND_PRESETS[0].value;
 
-const GALLERY_CACHE_KEY = 'lumins_board_bg_gallery_v2';
-const GALLERY_CACHE_TTL_MS = 1000 * 60 * 60 * 6;
-const GALLERY_FALLBACK_IDS = ['1011', '1025', '1035', '1043', '1050', '1069', '1074', '1084', '1080', '1081', '1082', '1083'];
-const GALLERY_ENDPOINT = 'https://picsum.photos/v2/list?page=3&limit=12';
+export const UNSPLASH_CURATED_WALLPAPERS: BoardBackgroundImage[] = [
+  {
+    id: 'aurora',
+    author: 'Jonatan Pie',
+    thumbUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'mountains-lake',
+    author: 'Bailey Zindel',
+    thumbUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'deep-ocean',
+    author: 'Matt Hardy',
+    thumbUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'cyberpunk-city',
+    author: 'Aleksandar Pasaric',
+    thumbUrl: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'sunset-coast',
+    author: 'Sean Oulashin',
+    thumbUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'misty-forest',
+    author: 'Sebastian Unrau',
+    thumbUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'desert-dunes',
+    author: 'Jeremy Bishop',
+    thumbUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'starry-galaxy',
+    author: 'Vincentiu Solomon',
+    thumbUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'abstract-waves',
+    author: 'Milad Fakurian',
+    thumbUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'snowy-peaks',
+    author: 'Kaley Dykstra',
+    thumbUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'calming-lake',
+    author: 'Luca Bravo',
+    thumbUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920&q=80&auto=format',
+  },
+  {
+    id: 'golden-valley',
+    author: 'David Marcu',
+    thumbUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=70&auto=format',
+    fullUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80&auto=format',
+  },
+];
 
 export const normalizeBoardBackground = (input?: string | null): string | null => {
   if (typeof input !== 'string') return null;
@@ -99,7 +169,15 @@ export const resolveBoardBackground = (input?: string | null): ResolvedBoardBack
   const normalized = normalizeBoardBackground(input);
 
   if (!normalized) return { kind: 'none', value: null };
-  if (isRemoteImageBackground(normalized)) return { kind: 'image', value: normalized };
+  if (isRemoteImageBackground(normalized)) {
+    // If it's a legacy or failing Picsum URL, transparently map to a fast, reliable Unsplash wallpaper
+    if (normalized.includes('picsum.photos')) {
+      const hash = normalized.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const mappedWallpaper = UNSPLASH_CURATED_WALLPAPERS[hash % UNSPLASH_CURATED_WALLPAPERS.length].fullUrl;
+      return { kind: 'image', value: mappedWallpaper };
+    }
+    return { kind: 'image', value: normalized };
+  }
   if (isPresetBackground(normalized)) {
     const config = parseBackgroundConfig(normalized);
     return { kind: 'preset', value: config.base, tone: config.tone, lava: config.lava, rawValue: normalized };
@@ -109,95 +187,41 @@ export const resolveBoardBackground = (input?: string | null): ResolvedBoardBack
   return { kind: 'preset', value: DEFAULT_BOARD_BACKGROUND, tone: 'dark', lava: true, rawValue: DEFAULT_BOARD_BACKGROUND };
 };
 
-const mapPicsumImage = (img: PicsumApiImage): BoardBackgroundImage => ({
-  id: String(img.id),
-  author: img.author || 'Picsum',
-  thumbUrl: `https://picsum.photos/id/${img.id}/400/250`,
-  fullUrl: `https://picsum.photos/id/${img.id}/1920/1080`,
-});
-
-const sanitizeImageList = (images: unknown): PicsumApiImage[] => {
-  if (!Array.isArray(images)) return [];
-
-  return images.reduce<PicsumApiImage[]>((acc, item) => {
-    if (!item || typeof item !== 'object') return acc;
-
-    const candidate = item as Partial<PicsumApiImage>;
-    if (!candidate.id) return acc;
-
-    const mapped: PicsumApiImage = { id: String(candidate.id) };
-    if (typeof candidate.author === 'string') {
-      mapped.author = candidate.author;
-    }
-
-    acc.push(mapped);
-    return acc;
-  }, []);
+export const fetchBoardBackgroundGallery = async (_signal?: AbortSignal): Promise<BoardBackgroundImage[]> => {
+  return UNSPLASH_CURATED_WALLPAPERS;
 };
 
-const readGalleryCache = (): PicsumApiImage[] | null => {
-  try {
-    const raw = sessionStorage.getItem(GALLERY_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<BoardBackgroundCachePayload>;
-
-    if (typeof parsed.timestamp !== 'number') return null;
-    if (Date.now() - parsed.timestamp > GALLERY_CACHE_TTL_MS) return null;
-
-    const images = sanitizeImageList(parsed.images);
-    return images.length > 0 ? images : null;
-  } catch {
-    return null;
-  }
-};
-
-const writeGalleryCache = (images: PicsumApiImage[]) => {
-  try {
-    const payload: BoardBackgroundCachePayload = {
-      timestamp: Date.now(),
-      images,
-    };
-    sessionStorage.setItem(GALLERY_CACHE_KEY, JSON.stringify(payload));
-  } catch {
-    // Ignore cache write failures.
-  }
-};
-
-const fallbackGallery = (): BoardBackgroundImage[] => {
-  return GALLERY_FALLBACK_IDS.map((id) => mapPicsumImage({ id }));
-};
-
-export const fetchBoardBackgroundGallery = async (signal?: AbortSignal): Promise<BoardBackgroundImage[]> => {
-  const cached = readGalleryCache();
-  if (cached) return cached.map(mapPicsumImage);
-
-  try {
-    const response = await fetch(GALLERY_ENDPOINT, { signal });
-    if (!response.ok) {
-      throw new Error(`Gallery request failed with status ${response.status}`);
-    }
-
-    const payload = await response.json();
-    const images = sanitizeImageList(payload);
-
-    if (images.length === 0) {
-      throw new Error('Gallery payload is empty');
-    }
-
-    writeGalleryCache(images);
-    return images.map(mapPicsumImage);
-  } catch {
-    return fallbackGallery();
-  }
-};
-
-export const preloadImageUrl = (url: string): Promise<boolean> => {
+export const preloadImageUrl = (url: string, timeoutMs = 3000): Promise<boolean> => {
   if (!isRemoteImageBackground(url)) return Promise.resolve(false);
 
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        img.src = '';
+        resolve(false);
+      }
+    }, timeoutMs);
+
+    img.onload = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(true);
+      }
+    };
+
+    img.onerror = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(false);
+      }
+    };
+
     img.src = url;
   });
 };
