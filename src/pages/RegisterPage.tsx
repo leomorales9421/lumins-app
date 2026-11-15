@@ -4,6 +4,7 @@ import { useAuth, type GeoInfo } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import AmbientBackground from '../components/layout/AmbientBackground';
 import BrandLogo from '../components/ui/BrandLogo';
+import { LuminsSuccessIcon } from '../components/icons/LuminsIcons';
 import { OtpInput } from '../components/auth/OtpInput';
 import { CountryPhoneInput, type CountryOption, COUNTRIES_LIST } from '../components/auth/CountryPhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -468,9 +469,14 @@ const RegisterPage: React.FC = () => {
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <div className="mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3 border border-emerald-100">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50/90 border border-slate-200/90 text-slate-700 text-xs font-semibold mb-3 shadow-2xs">
+                    <LuminsSuccessIcon size={15} />
                     <span>Correo verificado</span>
+                    <span className="flex items-center gap-0.5 ml-0.5" aria-hidden="true">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FF665E]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#12A9A8]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC40]" />
+                    </span>
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     Personaliza tu cuenta
@@ -489,7 +495,7 @@ const RegisterPage: React.FC = () => {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Leonardo"
+                        placeholder="John"
                         autoComplete="given-name"
                         autoFocus
                         required
@@ -502,7 +508,7 @@ const RegisterPage: React.FC = () => {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Morales"
+                        placeholder="Doe"
                         autoComplete="family-name"
                         className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
