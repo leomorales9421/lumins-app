@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import LuminsLogoLoader from '../components/ui/LuminsLogoLoader';
@@ -105,8 +105,13 @@ export const NavigationLoaderProvider: React.FC<{ children: React.ReactNode }> =
   const routeChanging = location.pathname !== trackedPath;
   const effectiveVisible = isOverlayVisible || routeChanging;
 
+  const contextValue = useMemo(
+    () => ({ registerLoading, unregisterLoading, isOverlayVisible: effectiveVisible }),
+    [registerLoading, unregisterLoading, effectiveVisible]
+  );
+
   return (
-    <NavigationLoaderContext.Provider value={{ registerLoading, unregisterLoading, isOverlayVisible: effectiveVisible }}>
+    <NavigationLoaderContext.Provider value={contextValue}>
       {children}
     </NavigationLoaderContext.Provider>
   );
@@ -118,20 +123,22 @@ export const NavigationLoaderProvider: React.FC<{ children: React.ReactNode }> =
  */
 export function useModuleLoading(isLoading: boolean, moduleKey?: string) {
   const ctx = useContext(NavigationLoaderContext);
+  const registerLoading = ctx?.registerLoading;
+  const unregisterLoading = ctx?.unregisterLoading;
   const autoIdRef = useRef(moduleKey || `mod-${Math.random().toString(36).slice(2, 9)}`);
   const id = moduleKey || autoIdRef.current;
 
   useEffect(() => {
-    if (!ctx) return;
+    if (!registerLoading || !unregisterLoading) return;
     if (isLoading) {
-      ctx.registerLoading(id);
+      registerLoading(id);
     } else {
-      ctx.unregisterLoading(id);
+      unregisterLoading(id);
     }
     return () => {
-      ctx.unregisterLoading(id);
+      unregisterLoading(id);
     };
-  }, [ctx, id, isLoading]);
+  }, [registerLoading, unregisterLoading, id, isLoading]);
 }
 
 export function useNavigationLoader() {
