@@ -423,6 +423,71 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
             }}
           />
 
+          {/* Animated Lumins Geometric Shapes (Logo Colors: Coral, Turquesa, Amarillo) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+            {/* Top-left: 3 ascending Lumins bars gently waving */}
+            <motion.div
+              animate={{ y: [0, -10, 0], rotate: [-4, -1, -4] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-20 left-5 sm:top-24 sm:left-14 flex items-end gap-2 opacity-30 sm:opacity-45"
+            >
+              <motion.div
+                animate={{ scaleY: [1, 1.18, 1] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+                className="w-3.5 sm:w-4 h-7 sm:h-9 rounded-lg bg-[#FF665E] origin-bottom"
+              />
+              <motion.div
+                animate={{ scaleY: [1, 1.14, 1] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.35 }}
+                className="w-3.5 sm:w-4 h-11 sm:h-14 rounded-lg bg-[#12A9A8] origin-bottom"
+              />
+              <motion.div
+                animate={{ scaleY: [1, 1.12, 1] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.7 }}
+                className="w-3.5 sm:w-4 h-14 sm:h-20 rounded-lg bg-[#FFCC40] origin-bottom"
+              />
+            </motion.div>
+
+            {/* Top-right: floating rounded square + coral dot */}
+            <motion.div
+              animate={{ y: [0, 12, 0], x: [0, -6, 0], rotate: [12, 22, 12] }}
+              transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-24 right-6 sm:top-28 sm:right-20 opacity-25 sm:opacity-40"
+            >
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl border-[3px] border-[#12A9A8]/60 bg-[#12A9A8]/15" />
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, -14, 0], scale: [1, 1.12, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              className="hidden sm:block absolute top-44 right-36 w-5 h-5 rounded-md bg-[#FF665E]/35 rotate-12"
+            />
+
+            {/* Bottom-left: floating rounded rectangle + yellow square */}
+            <motion.div
+              animate={{ y: [0, -12, 0], x: [0, 8, 0], rotate: [-10, -4, -10] }}
+              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              className="absolute bottom-16 left-6 sm:bottom-20 sm:left-20 opacity-25 sm:opacity-40"
+            >
+              <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-2xl bg-[#FFCC40]/25 border-[3px] border-[#FFCC40]/60" />
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut', delay: 1.4 }}
+              className="hidden sm:block absolute bottom-40 left-36 w-4 h-10 rounded-full bg-[#12A9A8]/30 rotate-[20deg]"
+            />
+
+            {/* Bottom-right: coral rounded bar + turquoise pill */}
+            <motion.div
+              animate={{ y: [0, 10, 0], rotate: [6, 12, 6] }}
+              transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+              className="absolute bottom-16 right-6 sm:bottom-24 sm:right-16 flex items-end gap-2 opacity-25 sm:opacity-45"
+            >
+              <div className="w-3.5 sm:w-4 h-12 sm:h-16 rounded-lg bg-[#FF665E]/80" />
+              <div className="w-3.5 sm:w-4 h-8 sm:h-11 rounded-lg bg-[#12A9A8]/80" />
+              <div className="w-3.5 sm:w-4 h-5 sm:h-7 rounded-lg bg-[#FFCC40]/90" />
+            </motion.div>
+          </div>
+
           {/* 1. TOP HEADER (Native App Bar on Mobile / Trello-Style on Desktop) */}
           <header className="relative z-20 h-14 sm:h-16 px-4 sm:px-10 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md shrink-0">
             {/* Brand Logo & Name / Mobile Back */}

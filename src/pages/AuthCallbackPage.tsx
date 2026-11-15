@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
-import { Loader2 } from 'lucide-react';
+import LuminsLogoLoader from '../components/ui/LuminsLogoLoader';
 import AmbientBackground from '../components/layout/AmbientBackground';
 
 const AuthCallbackPage: React.FC = () => {
@@ -72,15 +72,17 @@ const AuthCallbackPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden bg-[#F4F6F9] dark:bg-[#09090B]">
+    <div className="min-h-[100dvh] flex items-center justify-center p-5 sm:p-6 relative font-sans overflow-hidden bg-[#FAFAFA] dark:bg-[#14171C]">
       <AmbientBackground />
-      <div className="w-full max-w-[400px] bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl shadow-2xl p-10 flex flex-col items-center justify-center relative z-10 text-center">
-        <Loader2 className="animate-spin mb-6 text-[#4338ca]" size={48} />
-        <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-2 tracking-tight">
-          Autenticando
+      <div className="w-full max-w-[380px] bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-xl border border-[#E5E7EB]/80 dark:border-white/10 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/40 px-7 py-10 sm:px-10 sm:py-12 flex flex-col items-center justify-center relative z-10 text-center">
+        <div className="mb-7">
+          <LuminsLogoLoader size="lg" />
+        </div>
+        <h2 className="text-xl font-bold text-[#111827] dark:text-[#F3F4F6] mb-2 tracking-tight">
+          Preparando espacio...
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-          Por favor espera mientras configuramos tu sesión de forma segura...
+        <p className="text-sm text-[#6B7280] dark:text-[#9CA3AF] leading-relaxed max-w-[260px]">
+          Estamos verificando tu cuenta y preparando tu entorno de trabajo.
         </p>
       </div>
     </div>

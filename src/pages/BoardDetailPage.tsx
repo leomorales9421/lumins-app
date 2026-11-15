@@ -1067,27 +1067,27 @@ const BoardDetailPage: React.FC = () => {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                      className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-2xl rounded shadow-2xl border border-zinc-200 dark:border-white/10 py-3 z-50 overflow-hidden"
                     >
-                      <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
+                      <div className="px-4 pb-2 mb-2 border-b border-zinc-200/70 dark:border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-zinc-400 dark:text-white/30 uppercase tracking-[0.2em]">Filtrar por</span>
                         {filterUserId && (
-                          <button onClick={() => setFilterUserId(null)} className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter hover:underline">Limpiar</button>
+                          <button onClick={() => setFilterUserId(null)} className="text-[9px] font-bold text-rose-500 dark:text-rose-400 uppercase tracking-tighter hover:underline">Limpiar</button>
                         )}
                       </div>
                       <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
                         <button
                           onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
-                          className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded transition-colors text-sm text-white/70"
+                          className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-colors text-sm text-zinc-700 dark:text-white/70"
                         >
-                          <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
+                          <div className="w-8 h-8 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-[10px] font-bold">All</div>
                           Todos los miembros
                         </button>
                         {board.members?.map(member => (
                           <button
                             key={member.userId}
                             onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                            className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold' : 'text-white/70 hover:text-white'}`}
+                            className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold' : 'text-zinc-700 dark:text-white/70 hover:text-zinc-900 dark:hover:text-white'}`}
                           >
                             <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-[var(--lumins-accent)]' : ''}`}>
                               <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
@@ -1121,8 +1121,6 @@ const BoardDetailPage: React.FC = () => {
                 onUpdate={fetchBoard}
                 workspaceRole={userRole}
                 onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
-                externalOpen={isSettingsDrawerOpen}
-                onExternalClose={() => setIsSettingsDrawerOpen(false)}
               />
             )}
 
@@ -1147,20 +1145,20 @@ const BoardDetailPage: React.FC = () => {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-3 w-64 bg-[#1C1F26]/95 backdrop-blur-2xl rounded-xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden"
+                      className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-2xl rounded-xl shadow-2xl border border-zinc-200 dark:border-white/10 py-3 z-50 overflow-hidden"
                     >
-                      <div className="px-4 pb-2 mb-2 border-b border-white/5 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Saltar a lista</span>
+                      <div className="px-4 pb-2 mb-2 border-b border-zinc-200/70 dark:border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-zinc-400 dark:text-white/30 uppercase tracking-[0.2em]">Saltar a lista</span>
                       </div>
                       <div className="max-h-[300px] overflow-y-auto px-2 space-y-1 custom-scrollbar">
                         {lists.map(list => (
                           <button
                             key={list.id}
                             onClick={() => scrollToList(list.id)}
-                            className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 rounded-lg transition-all text-sm text-white/70 hover:text-white group"
+                            className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all text-sm text-zinc-700 dark:text-white/70 hover:text-zinc-900 dark:hover:text-white group"
                           >
                             <span className="truncate font-bold">{list.name}</span>
-                            <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40 group-hover:text-white/60 transition-colors">
+                            <span className="text-[10px] bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-zinc-500 dark:text-white/40 group-hover:text-zinc-700 dark:group-hover:text-white/60 transition-colors">
                               {list.cards?.length || 0}
                             </span>
                           </button>
@@ -1178,13 +1176,17 @@ const BoardDetailPage: React.FC = () => {
       {/* Native Mobile Board Options Sheet (md:hidden) */}
       <AnimatePresence>
         {isMobileBoardMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-[100] flex items-end justify-center">
-            {/* Dark Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+          <motion.div
+            key="mobile-board-sheet-root"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="md:hidden fixed inset-0 z-[100] flex items-end justify-center"
+          >
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50"
               onClick={() => setIsMobileBoardMenuOpen(false)}
             />
 
@@ -1193,19 +1195,19 @@ const BoardDetailPage: React.FC = () => {
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="relative w-full bg-[#1C1F26] text-white rounded-t-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-white/10 z-10 max-h-[85vh] flex flex-col overflow-hidden"
+              transition={{ type: 'tween', duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full bg-white dark:bg-[#1C1F26] text-zinc-900 dark:text-white rounded-t-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.22)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-zinc-200/80 dark:border-white/10 z-10 max-h-[85dvh] flex flex-col overflow-hidden pb-[max(0.5rem,env(safe-area-inset-bottom))]"
             >
               {/* Pull handle */}
               <div
-                className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer"
+                className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer shrink-0"
                 onClick={() => setIsMobileBoardMenuOpen(false)}
               >
-                <div className="w-10 h-1.5 rounded-full bg-white/20" />
+                <div className="w-10 h-1.5 rounded-full bg-zinc-300 dark:bg-white/20" />
               </div>
 
               {/* Sheet Header */}
-              <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
+              <div className="px-5 py-3 border-b border-zinc-200/80 dark:border-white/10 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     style={{
@@ -1217,8 +1219,8 @@ const BoardDetailPage: React.FC = () => {
                     {board.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-sm text-white truncate">{board.name}</h3>
-                    <p className="text-[11px] text-white/50 flex items-center gap-1.5">
+                    <h3 className="font-bold text-sm text-zinc-900 dark:text-white truncate">{board.name}</h3>
+                    <p className="text-[11px] text-zinc-500 dark:text-white/50 flex items-center gap-1.5">
                       {board.visibility === 'PRIVATE' ? <Lock size={11} /> : <Building2 size={11} />}
                       <span>{board.visibility === 'PRIVATE' ? 'Tablero Privado' : 'Espacio de Trabajo'}</span>
                       <span>•</span>
@@ -1228,7 +1230,7 @@ const BoardDetailPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setIsMobileBoardMenuOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 active:scale-95"
+                  className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-zinc-500 dark:text-white/60 active:scale-95"
                 >
                   <X size={16} />
                 </button>
@@ -1238,10 +1240,10 @@ const BoardDetailPage: React.FC = () => {
               <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
                 {/* List Navigator */}
                 <div>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                  <span className="text-[10px] font-black text-zinc-400 dark:text-white/40 uppercase tracking-wider block mb-2 px-1">
                     Saltar a lista ({lists.length})
                   </span>
-                  <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar p-1 bg-white/5 rounded-xl border border-white/5">
+                  <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar p-1 bg-zinc-100/80 dark:bg-white/5 rounded-xl border border-zinc-200/70 dark:border-white/5">
                     {lists.map(list => (
                       <button
                         key={list.id}
@@ -1249,12 +1251,12 @@ const BoardDetailPage: React.FC = () => {
                           scrollToList(list.id);
                           setIsMobileBoardMenuOpen(false);
                         }}
-                        className="w-full px-3 py-2 rounded-lg flex items-center justify-between text-left hover:bg-white/10 active:bg-white/15 transition-all group"
+                        className="w-full px-3 py-2 rounded-lg flex items-center justify-between text-left hover:bg-white dark:hover:bg-white/10 active:bg-zinc-200/70 dark:active:bg-white/15 transition-all group"
                       >
-                        <span className="text-xs font-semibold text-white/80 group-hover:text-white truncate">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-white/80 group-hover:text-zinc-900 dark:group-hover:text-white truncate">
                           {list.name}
                         </span>
-                        <span className="text-[10px] font-bold bg-white/10 px-1.5 py-0.5 rounded text-white/50">
+                        <span className="text-[10px] font-bold bg-zinc-200/80 dark:bg-white/10 px-1.5 py-0.5 rounded text-zinc-600 dark:text-white/50">
                           {list.cards?.length || 0}
                         </span>
                       </button>
@@ -1263,8 +1265,8 @@ const BoardDetailPage: React.FC = () => {
                 </div>
 
                 {/* Board Actions */}
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-black text-zinc-400 dark:text-white/40 uppercase tracking-wider block mb-2 px-1">
                     Acciones del tablero
                   </span>
 
@@ -1273,18 +1275,18 @@ const BoardDetailPage: React.FC = () => {
                       setIsMobileBoardMenuOpen(false);
                       setIsArchivedModalOpen(true);
                     }}
-                    className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                    className="w-full p-3 rounded-xl bg-zinc-100/80 hover:bg-zinc-200/70 dark:bg-white/5 dark:hover:bg-white/10 active:scale-[0.99] flex items-center justify-between transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center">
                         <ArchiveRestore size={16} />
                       </div>
                       <div className="text-left">
-                        <div className="text-xs font-bold text-white">Elementos archivados</div>
-                        <div className="text-[11px] text-white/50">Ver o restaurar tarjetas y listas</div>
+                        <div className="text-xs font-bold text-zinc-900 dark:text-white">Elementos archivados</div>
+                        <div className="text-[11px] text-zinc-500 dark:text-white/50">Ver o restaurar tarjetas y listas</div>
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-white/30" />
+                    <ChevronRight size={16} className="text-zinc-400 dark:text-white/30" />
                   </button>
 
                   <button
@@ -1292,46 +1294,46 @@ const BoardDetailPage: React.FC = () => {
                       setIsMobileBoardMenuOpen(false);
                       setIsMembersModalOpen(true);
                     }}
-                    className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                    className="w-full p-3 rounded-xl bg-zinc-100/80 hover:bg-zinc-200/70 dark:bg-white/5 dark:hover:bg-white/10 active:scale-[0.99] flex items-center justify-between transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                         <Users size={16} />
                       </div>
                       <div className="text-left">
-                        <div className="text-xs font-bold text-white">Miembros del tablero</div>
-                        <div className="text-[11px] text-white/50">{board.members?.length || 0} personas colaborando</div>
+                        <div className="text-xs font-bold text-zinc-900 dark:text-white">Miembros del tablero</div>
+                        <div className="text-[11px] text-zinc-500 dark:text-white/50">{board.members?.length || 0} personas colaborando</div>
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-white/30" />
+                    <ChevronRight size={16} className="text-zinc-400 dark:text-white/30" />
                   </button>
 
                   {isAdmin && (
                     <button
                       onClick={() => {
                         setIsMobileBoardMenuOpen(false);
-                        setIsSettingsDrawerOpen(true);
+                        setTimeout(() => setIsSettingsDrawerOpen(true), 60);
                       }}
-                      className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
+                      className="w-full p-3 rounded-xl bg-zinc-100/80 hover:bg-zinc-200/70 dark:bg-white/5 dark:hover:bg-white/10 active:scale-[0.99] flex items-center justify-between transition-all"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                           <Settings size={16} />
                         </div>
                         <div className="text-left">
-                          <div className="text-xs font-bold text-white">Configuración del tablero</div>
-                          <div className="text-[11px] text-white/50">Fondo, permisos y administración</div>
+                          <div className="text-xs font-bold text-zinc-900 dark:text-white">Configuración del tablero</div>
+                          <div className="text-[11px] text-zinc-500 dark:text-white/50">Fondo, permisos y administración</div>
                         </div>
                       </div>
-                      <ChevronRight size={16} className="text-white/30" />
+                      <ChevronRight size={16} className="text-zinc-400 dark:text-white/30" />
                     </button>
                   )}
                 </div>
 
                 {/* Visibility Toggle if Admin */}
                 {isAdmin && (
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2 px-1">
+                  <div className="pt-2 border-t border-zinc-200/80 dark:border-white/5">
+                    <span className="text-[10px] font-black text-zinc-400 dark:text-white/40 uppercase tracking-wider block mb-2 px-1">
                       Visibilidad
                     </span>
                     <div className="grid grid-cols-2 gap-2">
@@ -1342,7 +1344,7 @@ const BoardDetailPage: React.FC = () => {
                         }}
                         className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${board.visibility === 'PRIVATE'
                           ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow'
-                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                          : 'bg-zinc-100/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white/60 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                           }`}
                       >
                         <Lock size={14} />
@@ -1355,7 +1357,7 @@ const BoardDetailPage: React.FC = () => {
                         }}
                         className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${board.visibility === 'WORKSPACE'
                           ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow'
-                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                          : 'bg-zinc-100/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white/60 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                           }`}
                       >
                         <Building2 size={14} />
@@ -1366,9 +1368,50 @@ const BoardDetailPage: React.FC = () => {
                 )}
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Board Settings Bottom Sheet (rendered outside hidden md:flex) */}
+      {isAdmin && (
+        <BoardOptionsMenu
+          board={board}
+          onUpdate={fetchBoard}
+          workspaceRole={userRole}
+          onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
+          mobileOnly
+          externalOpen={isSettingsDrawerOpen}
+          onExternalClose={() => setIsSettingsDrawerOpen(false)}
+        />
+      )}
+
+      {board.archived && (
+        <div className="mx-3 sm:mx-5 mt-2 px-4 py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 backdrop-blur-md flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950 dark:text-amber-100">
+          <div className="flex items-center gap-2 font-semibold">
+            <ArchiveRestore size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>
+              Este tablero está archivado. No aparece en tableros activos, estadísticas, calendario ni recordatorios.
+            </span>
+          </div>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await apiClient.patch(`/api/boards/${board.id}/unarchive`);
+                  toast.success('Tablero restaurado');
+                  setBoard((prev) => (prev ? { ...prev, archived: false, archivedAt: null } : null));
+                } catch {
+                  toast.error('No se pudo restaurar el tablero');
+                }
+              }}
+              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition-colors cursor-pointer shrink-0"
+            >
+              Restaurar tablero
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Canvas Area (Lists) */}
       <main

@@ -12,7 +12,7 @@ import {
   Pencil,
   Users,
   Link2,
-  Trash2,
+  Archive,
   X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -197,15 +197,22 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
     }
   };
 
-  const handleDeleteBoard = async () => {
+  const handleArchiveBoard = async () => {
     setIsDeleting(true);
     try {
-      await apiClient.delete(`/api/boards/${board.id}`);
-      toast.success(`Tablero "${board.name}" eliminado`);
+      const res = await apiClient.patch<{ data?: { cancelledMeetsCount?: number } }>(
+        `/api/boards/${board.id}/archive`
+      );
+      const cancelledMeets = res.data?.cancelledMeetsCount || 0;
+      toast.success(
+        cancelledMeets > 0
+          ? `Tablero "${board.name}" archivado (${cancelledMeets} Meet(s) cancelados)`
+          : `Tablero "${board.name}" archivado`
+      );
       setIsDeleteOpen(false);
       window.dispatchEvent(new CustomEvent('lumins:board-updated'));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'No se pudo eliminar el tablero');
+      toast.error(err.response?.data?.message || 'No se pudo archivar el tablero');
     } finally {
       setIsDeleting(false);
     }
@@ -422,20 +429,24 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
               <span>Copiar enlace</span>
             </button>
 
-            <div className="my-1 border-t border-slate-100 dark:border-white/10" />
+            {board.canArchive && (
+              <>
+                <div className="my-1 border-t border-slate-100 dark:border-white/10" />
 
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setMenuOpen(false);
-                setIsDeleteOpen(true);
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer text-left"
-            >
-              <Trash2 size={14} className="shrink-0" />
-              <span>Eliminar tablero</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors cursor-pointer text-left"
+                >
+                  <Archive size={14} className="shrink-0" />
+                  <span>Archivar tablero</span>
+                </button>
+              </>
+            )}
           </div>,
           document.body
         )}
@@ -529,16 +540,16 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         </div>
       )}
 
-      {/* Delete Board Confirmation */}
+      {/* Archive Board Confirmation */}
       <ConfirmActionModal
         isOpen={isDeleteOpen}
-        title="Eliminar tablero"
-        description={`¿Estás seguro de eliminar "${board.name}"? Esta acción borrará todas sus listas y tarjetas de forma permanente.`}
-        confirmLabel="Sí, eliminar"
+        title="Archivar tablero"
+        description={`¿Archivar "${board.name}"? Dejará de mostrarse en tableros activos, estadísticas y recordatorios. Además, se cancelarán los Google Meets programados y se quitarán sus eventos sincronizados de Google Calendar.`}
+        confirmLabel="Sí, archivar"
         cancelLabel="Cancelar"
-        variant="danger"
+        variant="warning"
         isLoading={isDeleting}
-        onConfirm={handleDeleteBoard}
+        onConfirm={handleArchiveBoard}
         onClose={() => setIsDeleteOpen(false)}
       />
     </>

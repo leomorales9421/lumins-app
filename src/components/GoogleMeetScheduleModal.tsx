@@ -130,8 +130,18 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   const [connectedEmail, setConnectedEmail] = useState<string | undefined>();
   const [isActivatingQuickLink, setIsActivatingQuickLink] = useState(false);
 
+  const getNextQuarterHour = (base = new Date()) => {
+    const d = new Date(base);
+    const nextQuarter = Math.floor(d.getMinutes() / 15) * 15 + 15;
+    d.setMinutes(nextQuarter, 0, 0);
+    return {
+      dateStr: format(d, 'yyyy-MM-dd'),
+      time12h: formatTime12h(d) || '12:00 PM',
+    };
+  };
+
   const [dateStr, setDateStr] = useState<string>(() => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const fallback = getNextQuarterHour();
     if (existingMeeting?.scheduledStart) {
       try {
         const d = parseISO(existingMeeting.scheduledStart);
@@ -143,22 +153,29 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
         const d = parseISO(defaultDate);
         if (!isNaN(d.getTime())) {
           const formatted = format(d, 'yyyy-MM-dd');
-          return formatted >= todayStr ? formatted : todayStr;
+          return formatted >= fallback.dateStr ? formatted : fallback.dateStr;
         }
       } catch {}
     }
-    return todayStr;
+    return fallback.dateStr;
   });
 
   const [startTime12h, setStartTime12h] = useState<string>(() => {
-    const source = existingMeeting?.scheduledStart || defaultDate;
-    if (source) {
+    if (existingMeeting?.scheduledStart) {
       try {
-        const d = parseISO(source);
-        if (!isNaN(d.getTime())) return formatTime12h(d) || '10:00 AM';
+        const d = parseISO(existingMeeting.scheduledStart);
+        if (!isNaN(d.getTime())) return formatTime12h(d) || getNextQuarterHour().time12h;
       } catch {}
     }
-    return '10:00 AM';
+    if (defaultDate) {
+      try {
+        const d = parseISO(defaultDate);
+        if (!isNaN(d.getTime()) && d.getTime() > Date.now()) {
+          return formatTime12h(d) || getNextQuarterHour().time12h;
+        }
+      } catch {}
+    }
+    return getNextQuarterHour().time12h;
   });
 
   const [durationMinutes, setDurationMinutes] = useState<number>(
@@ -192,6 +209,21 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     checkMeetIntegration();
+    if (!existingMeeting) {
+      const nextSlot = getNextQuarterHour();
+      if (defaultDate) {
+        try {
+          const d = parseISO(defaultDate);
+          if (!isNaN(d.getTime()) && d.getTime() > Date.now()) {
+            setDateStr(format(d, 'yyyy-MM-dd'));
+            setStartTime12h(formatTime12h(d) || nextSlot.time12h);
+            return;
+          }
+        } catch {}
+      }
+      setDateStr(nextSlot.dateStr);
+      setStartTime12h(nextSlot.time12h);
+    }
   }, [isOpen]);
 
   useEffect(() => {
@@ -385,15 +417,23 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+      className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="w-full sm:max-w-lg bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl border-t sm:border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[88vh] animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile Pull Handle */}
+        <div
+          className="sm:hidden w-full flex items-center justify-center pt-2.5 pb-0.5 bg-zinc-50/60 dark:bg-black/20 shrink-0 cursor-pointer"
+          onClick={onClose}
+        >
+          <div className="w-10 h-1.5 rounded-full bg-zinc-300 dark:bg-white/20" />
+        </div>
+
         {/* Header */}
-        <div className="px-5 py-4 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between bg-zinc-50/60 dark:bg-black/20">
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between bg-zinc-50/60 dark:bg-black/20 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             {backLabel && (
               <button
@@ -500,7 +540,8 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4">
             {existingMeeting?.meetUrl && (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -551,8 +592,19 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   type="date"
                   min={format(new Date(), 'yyyy-MM-dd')}
                   value={dateStr}
-                  onChange={e => setDateStr(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-800 dark:text-zinc-200 outline-none focus:border-emerald-500"
+                  onChange={e => {
+                    const nextDate = e.target.value;
+                    setDateStr(nextDate);
+                    const now = new Date();
+                    if (nextDate === format(now, 'yyyy-MM-dd')) {
+                      const parsed = parseTime12h(startTime12h);
+                      const nowMins = now.getHours() * 60 + now.getMinutes();
+                      if (!parsed || parsed.hours * 60 + parsed.minutes < nowMins) {
+                        setStartTime12h(getNextQuarterHour(now).time12h);
+                      }
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-800 dark:text-zinc-200 outline-none focus:border-[#12A9A8]"
                 />
               </div>
 
@@ -565,6 +617,11 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   onChange={setStartTime12h}
                   direction="down"
                   className="w-full"
+                  minMinutesFromMidnight={
+                    dateStr === format(new Date(), 'yyyy-MM-dd')
+                      ? new Date().getHours() * 60 + new Date().getMinutes()
+                      : undefined
+                  }
                 />
               </div>
 
@@ -758,9 +815,11 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
               />
             </div>
 
+            </div>
+
             {/* Footer */}
-            <div className="flex items-center justify-between gap-2 pt-3 border-t border-zinc-100 dark:border-white/10">
-              <div>
+            <div className="px-4 sm:px-5 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-zinc-100 dark:border-white/10 bg-white dark:bg-[#1C1F26] shrink-0 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
+              <div className="flex items-center justify-between sm:justify-start">
                 {existingMeeting ? (
                   <button
                     type="button"
@@ -776,25 +835,25 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                     <span>Quitar Meet</span>
                   </button>
                 ) : connectedEmail ? (
-                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 truncate max-w-[240px]">
                     Organizador: {connectedEmail}
                   </span>
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isSubmitting || isRemoving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+                  className="px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 bg-zinc-100 sm:bg-transparent dark:bg-white/5 sm:dark:bg-transparent transition-colors shrink-0"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isRemoving}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95 whitespace-nowrap cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

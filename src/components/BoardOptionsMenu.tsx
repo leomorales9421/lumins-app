@@ -9,7 +9,7 @@ import {
   Image as ImageIcon,
   Upload,
   RotateCcw,
-  Trash2,
+  Archive,
   Loader2,
   Sparkles,
   Pencil,
@@ -54,6 +54,7 @@ export interface BoardOptionsMenuProps {
   workspaceRole?: string;
   externalOpen?: boolean;
   onExternalClose?: () => void;
+  mobileOnly?: boolean;
 }
 
 export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
@@ -63,6 +64,7 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
   workspaceRole,
   externalOpen = false,
   onExternalClose,
+  mobileOnly = false,
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -116,6 +118,7 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
   useEffect(() => {
     if (!effectiveOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
+      if (mobileOnly) return;
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         closeMenu();
       }
@@ -129,7 +132,7 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEsc);
     };
-  }, [effectiveOpen, closeMenu]);
+  }, [effectiveOpen, closeMenu, mobileOnly]);
 
   useEffect(() => {
     if (effectiveOpen) {
@@ -364,15 +367,23 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
     }
   }, [board.id, onUpdateBoard]);
 
-  const handleDelete = async () => {
+  const handleArchive = async () => {
     setIsDeleting(true);
     try {
-      await apiClient.delete(`/api/boards/${board.id}`);
-      toast.success('Tablero eliminado');
+      const res = await apiClient.patch<{ data?: { cancelledMeetsCount?: number } }>(
+        `/api/boards/${board.id}/archive`
+      );
+      const cancelledMeets = res.data?.cancelledMeetsCount || 0;
+      toast.success(
+        cancelledMeets > 0
+          ? `Tablero archivado (${cancelledMeets} Meet(s) cancelados)`
+          : 'Tablero archivado'
+      );
+      closeMenu();
       navigate(`/w/${board.workspaceId}/dashboard`);
     } catch (err) {
-      console.error('Error deleting board', err);
-      toast.error('No se pudo eliminar el tablero');
+      console.error('Error archiving board', err);
+      toast.error('No se pudo archivar el tablero');
     } finally {
       setIsDeleting(false);
     }
@@ -381,29 +392,8 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
   const canChangeVisibility =
     board.ownerId === user?.id || workspaceRole === 'ADMIN' || workspaceRole === 'OWNER' || workspaceRole === 'admin';
 
-  return (
-    <div className="relative" ref={menuRef}>
-      <button
-        type="button"
-        onClick={() => (effectiveOpen ? closeMenu() : setIsOpen(true))}
-        title="Opciones y Configuración del Tablero"
-        className={`hidden md:flex items-center justify-center w-7 h-7 rounded-lg transition-all active:scale-95 cursor-pointer ${
-          effectiveOpen
-            ? 'bg-white/20 text-white'
-            : 'text-white/80 hover:text-white hover:bg-white/15'
-        }`}
-      >
-        <Settings2 size={15} className={effectiveOpen ? 'text-[var(--lumins-accent)]' : ''} />
-      </button>
-
-      <AnimatePresence>
-        {effectiveOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.96 }}
-            className="fixed md:absolute right-4 md:right-0 top-16 md:top-auto md:mt-2 w-[340px] sm:w-[360px] max-w-[calc(100vw-2rem)] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 p-2.5 z-[150] space-y-2.5 text-xs max-h-[82vh] overflow-y-auto custom-scrollbar"
-          >
+  const menuContent = (
+    <>
             {/* Header del Menú */}
             <div className="flex items-center justify-between px-2 pt-1 pb-1.5 border-b border-zinc-100 dark:border-white/5">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
@@ -694,17 +684,17 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold transition-colors cursor-pointer"
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 font-semibold transition-colors cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Trash2 size={13} />
-                    Eliminar este tablero
+                    <Archive size={13} />
+                    Archivar este tablero
                   </span>
                 </button>
               ) : (
-                <div className="p-2 rounded-xl bg-rose-50/70 dark:bg-rose-500/10 border border-rose-200/70 dark:border-rose-500/20 space-y-2">
-                  <p className="text-[11px] font-medium text-rose-700 dark:text-rose-300 leading-snug">
-                    Se eliminarán permanentemente todas las listas y tarjetas.
+                <div className="p-2 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-500/20 space-y-2">
+                  <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200 leading-snug">
+                    Se ocultará de tableros activos, estadísticas y recordatorios. Además, se cancelarán los Google Meets programados y se quitarán sus eventos de Google Calendar.
                   </p>
                   <div className="flex gap-1.5">
                     <button
@@ -716,17 +706,77 @@ export const BoardOptionsMenu: React.FC<BoardOptionsMenuProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={handleDelete}
+                      onClick={handleArchive}
                       disabled={isDeleting}
-                      className="flex-1 py-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] cursor-pointer disabled:opacity-60"
+                      className="flex-1 py-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] cursor-pointer disabled:opacity-60"
                     >
-                      {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+                      {isDeleting ? 'Archivando...' : 'Sí, archivar'}
                     </button>
                   </div>
                 </div>
               )}
             </div>
-          </motion.div>
+    </>
+  );
+
+  return (
+    <div className={mobileOnly ? 'md:hidden' : 'relative'} ref={menuRef}>
+      {!mobileOnly && (
+        <button
+          type="button"
+          onClick={() => (effectiveOpen ? closeMenu() : setIsOpen(true))}
+          title="Opciones y Configuración del Tablero"
+          className={`hidden md:flex items-center justify-center w-7 h-7 rounded-lg transition-all active:scale-95 cursor-pointer ${
+            effectiveOpen
+              ? 'bg-white/20 text-white'
+              : 'text-white/80 hover:text-white hover:bg-white/15'
+          }`}
+        >
+          <Settings2 size={15} className={effectiveOpen ? 'text-[var(--lumins-accent)]' : ''} />
+        </button>
+      )}
+
+      <AnimatePresence>
+        {effectiveOpen && (
+          mobileOnly ? (
+            <motion.div
+              key="mobile-board-settings-root"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-[150] flex items-end justify-center"
+            >
+              <div className="fixed inset-0 bg-black/50" onClick={closeMenu} />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'tween', duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full bg-white dark:bg-[#1C1F26] text-zinc-900 dark:text-white rounded-t-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.22)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-zinc-200/80 dark:border-white/10 max-h-[88dvh] flex flex-col overflow-hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+              >
+                <div
+                  className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer shrink-0"
+                  onClick={closeMenu}
+                >
+                  <div className="w-10 h-1.5 rounded-full bg-zinc-300 dark:bg-white/20" />
+                </div>
+                <div className="p-3 pt-1.5 space-y-2.5 text-xs overflow-y-auto custom-scrollbar">
+                  {menuContent}
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="desktop-board-settings-popover"
+              initial={{ opacity: 0, y: 6, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.96 }}
+              className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-2rem)] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 p-2.5 z-[150] space-y-2.5 text-xs max-h-[82vh] overflow-y-auto custom-scrollbar"
+            >
+              {menuContent}
+            </motion.div>
+          )
         )}
       </AnimatePresence>
     </div>

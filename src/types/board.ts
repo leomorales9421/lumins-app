@@ -28,6 +28,12 @@ export interface Card {
     checklists: number;
     attachments: number;
   };
+  meeting?: {
+    meetUrl: string;
+    scheduledStart: string;
+    scheduledEnd: string;
+    durationMinutes?: number;
+  } | null;
 }
 
 export interface List {
@@ -59,6 +65,9 @@ export interface Board {
   createdAt?: string;
   updatedAt?: string;
   starred?: boolean;
+  canArchive?: boolean;
+  archived?: boolean;
+  archivedAt?: string | null;
   ownerId?: string;
   owner?: {
     id: string;

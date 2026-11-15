@@ -19,7 +19,8 @@ import {
   Edit2,
   Plus,
   Copy,
-  ChevronRight
+  ChevronRight,
+  SlidersHorizontal
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import RichTextEditor, { type RichTextEditorRef } from './RichTextEditor';
@@ -167,7 +168,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
   const [isMeetModalOpen, setIsMeetModalOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [showMobileProperties, setShowMobileProperties] = useState(false);
   const currentCardIdRef = React.useRef<string | null>(null);
+
+  useEffect(() => {
+    setShowMobileProperties(false);
+  }, [isOpen, cardId]);
   const initialDataRef = React.useRef(initialData);
 
   useEffect(() => {
@@ -1323,203 +1329,223 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             </div>
           )}
 
-          {/* NATIVE MOBILE & TABLET PROPERTY SHEET (md:hidden) */}
-          <div className="md:hidden bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 rounded-2xl overflow-hidden divide-y divide-zinc-200/60 dark:divide-white/5 mb-6 shadow-xs">
-            {/* Row 1: Responsables */}
-            <div
-              onClick={() => setActivePopover(activePopover === 'mobile_members' ? null : 'mobile_members')}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
+          {/* NATIVE MOBILE & TABLET COLLAPSIBLE PROPERTIES (md:hidden) */}
+          <div className="md:hidden mb-5">
+            <button
+              type="button"
+              onClick={() => setShowMobileProperties(prev => !prev)}
+              className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:scale-[0.99] transition-all cursor-pointer"
             >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center">
-                  <Users size={15} />
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center shrink-0">
+                  <SlidersHorizontal size={13} />
                 </div>
-                <span className="text-xs font-semibold">Responsables</span>
-              </div>
-              <div className="flex items-center gap-2 min-w-0 max-w-[62%] justify-end">
-                {assignedMemberIds.length > 0 ? (
-                  (() => {
-                    const assignedMembers = boardMembers.filter(m => assignedMemberIds.includes(m.id));
-                    const count = assignedMembers.length;
-                    return (
-                      <div className="flex items-center min-w-0">
-                        {/* Stacked Avatars */}
-                        <div className="flex items-center -space-x-1.5 shrink-0">
-                          {assignedMembers.slice(0, 3).map(member => (
-                            <div key={member.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#1C1F26] shadow-xs shrink-0 overflow-hidden">
+                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200 shrink-0">
+                  Opciones
+                </span>
+
+                {/* Compact summary pills when collapsed */}
+                {!showMobileProperties && (
+                  <div className="flex items-center gap-1.5 min-w-0 overflow-hidden ml-1">
+                    {card?.priority && (
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                        card.priority === 'P0' ? 'bg-[#FF665E]/[0.12] text-[#D94841] dark:text-[#FF857E]' :
+                        card.priority === 'P1' ? 'bg-[#FFCC40]/[0.22] text-amber-900 dark:text-[#FFCC40]' :
+                        card.priority === 'P2' ? 'bg-[#12A9A8]/[0.12] text-[#0E8786] dark:text-[#4ED4D2]' :
+                        'bg-slate-100 dark:bg-white/[0.08] text-slate-600 dark:text-zinc-300'
+                      }`}>
+                        {card.priority}
+                      </span>
+                    )}
+                    {assignedMemberIds.length > 0 && (
+                      <div className="flex items-center -space-x-1 shrink-0">
+                        {boardMembers
+                          .filter(m => assignedMemberIds.includes(m.id))
+                          .slice(0, 2)
+                          .map(member => (
+                            <div key={member.id} className="w-5 h-5 rounded-full border border-white dark:border-[#1C1F26] overflow-hidden">
                               <UserAvatar name={member.name} avatarUrl={member.avatarUrl} size="xs" />
                             </div>
                           ))}
-                          {count > 3 && (
-                            <div className="w-6 h-6 rounded-full bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] border-2 border-white dark:border-[#1C1F26] flex items-center justify-center text-[10px] font-black shrink-0">
-                              +{count - 3}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Label: 1 person -> First name; Multiple -> "X miembros" */}
-                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-2 truncate">
-                          {count === 1
-                            ? assignedMembers[0]?.name.split(' ')[0]
-                            : `${count} asignados`}
-                        </span>
+                        {assignedMemberIds.length > 2 && (
+                          <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 pl-1.5">
+                            +{assignedMemberIds.length - 2}
+                          </span>
+                        )}
                       </div>
-                    );
-                  })()
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Asignar</span>
-                )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60 shrink-0" />
-              </div>
-            </div>
-
-            {/* Row 2: Prioridad & Riesgo */}
-            <div
-              onClick={() => setActivePopover(activePopover === 'mobile_properties' ? null : 'mobile_properties')}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                  <Zap size={15} />
-                </div>
-                <span className="text-xs font-semibold">Propiedades</span>
-              </div>
-              <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                {card?.priority ? (
-                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                    card.priority === 'P0' ? 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E]' :
-                    card.priority === 'P1' ? 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40]' :
-                    card.priority === 'P2' ? 'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2]' :
-                    'bg-slate-100 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300'
-                  }`}>
-                    {card.priority === 'P0' ? '⚡ P0' : card.priority === 'P1' ? '⚡ P1' : card.priority === 'P2' ? '⚡ P2 - Media' : 'P3'}
-                  </span>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Prioridad</span>
-                )}
-                {card?.riskLevel && (
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                    card.riskLevel === 'high' ? 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E]' :
-                    card.riskLevel === 'med' ? 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40]' :
-                    'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2]'
-                  }`}>
-                    Riesgo {card.riskLevel === 'high' ? 'Alto' : card.riskLevel === 'med' ? 'Medio' : 'Bajo'}
-                  </span>
-                )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
-              </div>
-            </div>
-
-            {/* Row 3: Fechas */}
-            <div
-              onClick={() => setActivePopover(activePopover === 'mobile_dates' ? null : 'mobile_dates')}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                  <Clock size={15} />
-                </div>
-                <span className="text-xs font-semibold">Fechas</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {(card?.startDate || card?.dueDate) ? (
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 flex-wrap">
-                    {card.startDate && `${format(parseISO(card.startDate), 'd MMM', { locale: es })} – `}
-                    {card.dueDate ? (
-                      <>
-                        {format(parseISO(card.dueDate), 'd MMM', { locale: es })}
-                        <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-                          · {formatTime12h(parseISO(card.dueDate))}
-                        </span>
-                      </>
-                    ) : 'Sin vencimiento'}
-                    {card.dueDate && new Date(card.dueDate) < new Date() && !card.isDone && (
-                      <span className="bg-red-500/15 text-red-600 border border-red-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">Vencido</span>
                     )}
-                  </span>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Asignar fechas</span>
-                )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
-              </div>
-            </div>
-
-            {/* Row 4: Etiquetas */}
-            <div
-              onClick={() => setActivePopover(activePopover === 'mobile_labels' ? null : 'mobile_labels')}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                  <Tag size={15} />
-                </div>
-                <span className="text-xs font-semibold">Etiquetas</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedLabelIds.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 justify-end max-w-[200px]">
-                    {boardLabels.filter(l => selectedLabelIds.includes(l.id)).map(label => (
-                      <span 
-                        key={label.id} 
-                        style={{ backgroundColor: label.color }}
-                        className="px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-xs"
-                      >
-                        {label.name}
+                    {card?.dueDate && (
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0 ${
+                        new Date(card.dueDate) < new Date() && !card.isDone
+                          ? 'bg-red-500/15 text-red-600 dark:text-red-400'
+                          : 'bg-zinc-200/70 dark:bg-white/10 text-zinc-600 dark:text-zinc-300'
+                      }`}>
+                        {format(parseISO(card.dueDate), 'd MMM', { locale: es })}
                       </span>
-                    ))}
+                    )}
+                    {selectedLabelIds.length > 0 && (
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        {boardLabels
+                          .filter(l => selectedLabelIds.includes(l.id))
+                          .slice(0, 3)
+                          .map(label => (
+                            <span
+                              key={label.id}
+                              style={{ backgroundColor: label.color }}
+                              className="w-2 h-2 rounded-full"
+                            />
+                          ))}
+                      </div>
+                    )}
+                    {card?.meetingData?.meetUrl && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0">
+                        Meet
+                      </span>
+                    )}
+                    {!card?.priority && assignedMemberIds.length === 0 && !card?.dueDate && selectedLabelIds.length === 0 && !card?.meetingData?.meetUrl && (
+                      <span className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">
+                        Responsables, fechas, Meet...
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Añadir etiquetas</span>
                 )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
               </div>
-            </div>
 
-            {/* Row 5: Checklist */}
-            <div
-              onClick={() => handleAddChecklist()}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center">
-                  <CheckSquare size={15} />
-                </div>
-                <span className="text-xs font-semibold">Checklist</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {checklists.length > 0 ? (
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    {checklists.reduce((acc, cl) => acc + (cl.items?.filter(i => i.done || (i as any).isCompleted)?.length || 0), 0)} / {checklists.reduce((acc, cl) => acc + (cl.items?.length || 0), 0)} completados
-                  </span>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Crear checklist</span>
-                )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
-              </div>
-            </div>
+              <ChevronDown
+                size={16}
+                className={`text-zinc-400 shrink-0 transition-transform duration-200 ${showMobileProperties ? 'rotate-180' : ''}`}
+              />
+            </button>
 
-            {/* Row 6: Google Meet */}
-            <div
-              onClick={() => !isReadOnly && setIsMeetModalOpen(true)}
-              className="flex items-center justify-between p-3.5 hover:bg-zinc-100/70 dark:hover:bg-white/5 active:bg-zinc-200/60 dark:active:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <GoogleMeetIcon size={15} />
-                </div>
-                <span className="text-xs font-semibold">Google Meet</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {card?.meetingData?.meetUrl ? (
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    Reunión activa ({format(parseISO(card.meetingData.scheduledStart), 'd MMM · HH:mm', { locale: es })})
-                  </span>
-                ) : (
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">+ Agendar Meet</span>
-                )}
-                <ChevronRight size={15} className="text-zinc-400 opacity-60" />
-              </div>
-            </div>
+            <AnimatePresence initial={false}>
+              {showMobileProperties && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    {/* Tile 1: Responsables */}
+                    <button
+                      type="button"
+                      onClick={() => setActivePopover(activePopover === 'mobile_members' ? null : 'mobile_members')}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center shrink-0">
+                        <Users size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Responsables</p>
+                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
+                          {assignedMemberIds.length > 0
+                            ? `${assignedMemberIds.length} ${assignedMemberIds.length === 1 ? 'asignado' : 'asignados'}`
+                            : '+ Asignar'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Tile 2: Propiedades */}
+                    <button
+                      type="button"
+                      onClick={() => setActivePopover(activePopover === 'mobile_properties' ? null : 'mobile_properties')}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <Zap size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Propiedades</p>
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {card?.priority || card?.riskLevel
+                            ? `${card?.priority || ''}${card?.priority && card?.riskLevel ? ' · ' : ''}${card?.riskLevel === 'high' ? 'Riesgo Alto' : card?.riskLevel === 'med' ? 'Riesgo Medio' : card?.riskLevel === 'low' ? 'Riesgo Bajo' : ''}`
+                            : '+ Prioridad'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Tile 3: Fechas */}
+                    <button
+                      type="button"
+                      onClick={() => setActivePopover(activePopover === 'mobile_dates' ? null : 'mobile_dates')}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <Clock size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Fechas</p>
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {card?.dueDate
+                            ? `${format(parseISO(card.dueDate), 'd MMM', { locale: es })} · ${formatTime12h(parseISO(card.dueDate))}`
+                            : card?.startDate
+                              ? format(parseISO(card.startDate), 'd MMM', { locale: es })
+                              : '+ Asignar'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Tile 4: Etiquetas */}
+                    <button
+                      type="button"
+                      onClick={() => setActivePopover(activePopover === 'mobile_labels' ? null : 'mobile_labels')}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <Tag size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Etiquetas</p>
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {selectedLabelIds.length > 0
+                            ? `${selectedLabelIds.length} ${selectedLabelIds.length === 1 ? 'etiqueta' : 'etiquetas'}`
+                            : '+ Añadir'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Tile 5: Checklist */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddChecklist()}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center shrink-0">
+                        <CheckSquare size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Checklist</p>
+                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {checklists.length > 0
+                            ? `${checklists.reduce((acc, cl) => acc + (cl.items?.filter(i => i.done || (i as any).isCompleted)?.length || 0), 0)}/${checklists.reduce((acc, cl) => acc + (cl.items?.length || 0), 0)} listos`
+                            : '+ Crear'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Tile 6: Google Meet */}
+                    <button
+                      type="button"
+                      onClick={() => !isReadOnly && setIsMeetModalOpen(true)}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <GoogleMeetIcon size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">Google Meet</p>
+                        <p className={`text-[10px] truncate mt-0.5 ${card?.meetingData?.meetUrl ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                          {card?.meetingData?.meetUrl
+                            ? format(parseISO(card.meetingData.scheduledStart), 'd MMM · HH:mm', { locale: es })
+                            : '+ Agendar'}
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* NATIVE MOBILE ACTION SHEET (md:hidden) */}
@@ -2135,7 +2161,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     >
                       {!isReadOnly && <Edit2 size={16} className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-zinc-400 transition-opacity" />}
                       <div 
-                        className="prose prose-sm prose-zinc dark:prose-invert max-w-none" 
+                        className="prose prose-sm prose-zinc dark:prose-invert prose-a:text-[#0E8786] dark:prose-a:text-[#4ED4D2] max-w-none" 
                         dangerouslySetInnerHTML={{ __html: sanitizeHtmlForRender(fixEncoding(card.description)) }} 
                       />
                     </div>

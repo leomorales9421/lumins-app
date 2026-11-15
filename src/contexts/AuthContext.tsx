@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import apiClient from '../lib/api-client';
+import LuminsLogoLoader from '../components/ui/LuminsLogoLoader';
 import {
   applyAccentToDom,
   applyMenuLayout,
@@ -96,6 +99,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isAuthenticated = apiClient.isAuthenticated();
 
@@ -262,13 +266,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
-      await apiClient.post('/api/auth/logout');
+      await Promise.allSettled([
+        apiClient.post('/api/auth/logout'),
+        new Promise(resolve => setTimeout(resolve, 420)),
+      ]);
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
       apiClient.clearTokens();
-      setUser(null);
       try {
         localStorage.removeItem('lastActiveWorkspaceId');
         localStorage.removeItem('lumins_recent_workspaces');
@@ -277,9 +284,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem('lumins_menu_layout');
         localStorage.removeItem('lumins_sidebar_collapsed');
         sessionStorage.removeItem('lumins_impersonated_workspace');
-        applyAccentToDom('teal', false);
-        applyMenuLayout('top', false);
-        applyThemeToDom('light', false);
         Object.keys(sessionStorage).forEach((key) => {
           if (key.includes('onboarding')) sessionStorage.removeItem(key);
         });
@@ -306,5 +310,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const logoutOverlay = (
+    <AnimatePresence>
+      {isLoggingOut && (
+        <motion.div
+          key="lumins-logout-transition"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-[10090] flex flex-col items-center justify-center bg-[#FAFAFA]/95 dark:bg-[#14171C]/95 backdrop-blur-md px-6 text-center select-none"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center"
+          >
+            <div className="mb-6">
+              <LuminsLogoLoader size="lg" />
+            </div>
+            <h2 className="text-lg font-bold tracking-tight text-[#111827] dark:text-[#F3F4F6] mb-1.5">
+              Cerrando sesión...
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6B7280] dark:text-[#9CA3AF] max-w-[260px]">
+              Limpiando tu sesión de forma segura. ¡Hasta pronto!
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {typeof document !== 'undefined' ? createPortal(logoutOverlay, document.body) : logoutOverlay}
+    </AuthContext.Provider>
+  );
 };

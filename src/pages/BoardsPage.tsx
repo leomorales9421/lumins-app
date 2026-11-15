@@ -8,7 +8,8 @@ import BoardCard, { getStarredBoardIds } from '../components/BoardCard';
 import MembersModal from '../components/MembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Loader2, ChevronLeft, ChevronRight, Search, Check, Star } from 'lucide-react';
+import { Users, Filter, ChevronDown, Loader2, ChevronLeft, ChevronRight, Search, Check, Star, Archive, RotateCcw, ExternalLink, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { LuminsBoardIcon } from '../components/icons/LuminsIcons';
 import Badge from '../components/ui/Badge';
 import { useModuleLoading } from '../contexts/NavigationLoaderContext';
@@ -39,6 +40,40 @@ const BoardsPage: React.FC = () => {
   const [onlyStarred, setOnlyStarred] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'name' | 'cards'>('recent');
   const filterMenuRef = useRef<HTMLDivElement>(null);
+
+  const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
+  const [archivedBoards, setArchivedBoards] = useState<Board[]>([]);
+  const [isLoadingArchived, setIsLoadingArchived] = useState(false);
+  const [restoringBoardId, setRestoringBoardId] = useState<string | null>(null);
+
+  const fetchArchivedBoards = useCallback(async () => {
+    if (!workspaceId) return;
+    setIsLoadingArchived(true);
+    try {
+      const res = await apiClient.get<{ success: boolean; data: { boards: Board[] } }>(
+        `/api/boards?workspaceId=${workspaceId}&archived=true`
+      );
+      setArchivedBoards(res.data?.boards || []);
+    } catch {
+      toast.error('No se pudieron cargar los tableros archivados');
+    } finally {
+      setIsLoadingArchived(false);
+    }
+  }, [workspaceId]);
+
+  const handleRestoreArchivedBoard = async (boardIdToRestore: string, boardName: string) => {
+    setRestoringBoardId(boardIdToRestore);
+    try {
+      await apiClient.patch(`/api/boards/${boardIdToRestore}/unarchive`);
+      toast.success(`Tablero "${boardName}" restaurado`);
+      setArchivedBoards((prev) => prev.filter((b) => b.id !== boardIdToRestore));
+      window.dispatchEvent(new CustomEvent('lumins:board-updated'));
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'No se pudo restaurar el tablero');
+    } finally {
+      setRestoringBoardId(null);
+    }
+  };
 
   const activeFiltersCount =
     (visibilityFilter !== 'ALL' ? 1 : 0) + (onlyStarred ? 1 : 0) + (sortBy !== 'recent' ? 1 : 0);
@@ -229,6 +264,19 @@ const BoardsPage: React.FC = () => {
                         </select>
                         <ChevronDown size={13} className="absolute right-2.5 pointer-events-none text-slate-500" />
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsArchivedModalOpen(true);
+                          fetchArchivedBoards();
+                        }}
+                        className="shrink-0 h-9 px-3 text-xs font-semibold rounded-xl border bg-white dark:bg-[#212632] border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-zinc-100 shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                        title="Ver tableros archivados"
+                      >
+                        <Archive size={13} />
+                        <span>Archivados</span>
+                      </button>
 
                       <div className="relative shrink-0" ref={filterMenuRef}>
                         <button
@@ -489,6 +537,121 @@ const BoardsPage: React.FC = () => {
           workspaceName={workspaces.find(w => w.id === workspaceId)?.name || workspaces[0].name}
         />
       )}
+
+      {/* Archived Boards Modal / Mobile Bottom Sheet */}
+      <AnimatePresence>
+        {isArchivedModalOpen && (
+          <motion.div
+            key="archived-boards-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
+            onClick={() => setIsArchivedModalOpen(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'tween', duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full sm:max-w-lg bg-white dark:bg-[#1C1F26] text-slate-900 dark:text-zinc-100 rounded-t-[28px] sm:rounded-2xl shadow-2xl border-t sm:border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[85dvh] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-0"
+            >
+              <div
+                className="sm:hidden w-full flex items-center justify-center pt-2.5 pb-1 shrink-0 cursor-pointer"
+                onClick={() => setIsArchivedModalOpen(false)}
+              >
+                <div className="w-10 h-1.5 rounded-full bg-slate-300 dark:bg-white/20" />
+              </div>
+
+              <div className="px-5 py-3.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <Archive size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold">Tableros archivados</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      Solo propietarios o administradores de cada tablero pueden verlos y restaurarlos.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsArchivedModalOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="p-4 overflow-y-auto custom-scrollbar space-y-2.5 min-h-[180px]">
+                {isLoadingArchived ? (
+                  <div className="py-12 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+                    <Loader2 size={16} className="animate-spin text-[var(--lumins-accent)]" />
+                    <span>Cargando tableros archivados...</span>
+                  </div>
+                ) : archivedBoards.length === 0 ? (
+                  <div className="py-12 text-center space-y-1.5">
+                    <Archive size={24} className="mx-auto text-slate-300 dark:text-zinc-600" />
+                    <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      No hay tableros archivados
+                    </p>
+                    <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                      Los tableros que archives aparecerán aquí para poder acceder o restaurarlos.
+                    </p>
+                  </div>
+                ) : (
+                  archivedBoards.map((b) => (
+                    <div
+                      key={b.id}
+                      className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 dark:text-zinc-100 truncate">
+                          {b.name}
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">
+                          {b.archivedAt
+                            ? `Archivado el ${new Date(b.archivedAt).toLocaleDateString('es-ES')}`
+                            : 'Archivado'}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsArchivedModalOpen(false);
+                            navigate(`/boards/${b.id}`);
+                          }}
+                          className="h-8 px-2.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#212632] text-[11px] font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/10 inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <ExternalLink size={12} />
+                          <span>Abrir</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRestoreArchivedBoard(b.id, b.name)}
+                          disabled={restoringBoardId === b.id}
+                          className="h-8 px-2.5 rounded-lg bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] text-[11px] font-bold hover:brightness-95 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                        >
+                          {restoringBoardId === b.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <RotateCcw size={12} />
+                          )}
+                          <span>Restaurar</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

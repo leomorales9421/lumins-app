@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import {
   LuminsInfoIcon,
   LuminsErrorIcon,
@@ -91,8 +92,11 @@ export const Alert: React.FC<AlertProps> = ({
   }
 
   return (
-    <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border shadow-xs text-xs ${CALLOUT_SURFACES[tone]} ${className}`}
+    <motion.div
+      initial={{ opacity: 0, y: 4, scale: 0.99 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border shadow-xs text-xs backdrop-blur-xs ${CALLOUT_SURFACES[tone]} ${className}`}
     >
       <span className={`w-1 self-stretch rounded-full shrink-0 ${DOT_TONES[tone]}`} />
       <span className="shrink-0 flex items-center justify-center">
@@ -107,7 +111,7 @@ export const Alert: React.FC<AlertProps> = ({
         <div className="font-medium text-slate-700 dark:text-zinc-200">{children}</div>
       </div>
       {action && <div className="shrink-0 self-center">{action}</div>}
-    </div>
+    </motion.div>
   );
 };
 

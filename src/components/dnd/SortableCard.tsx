@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale';
 import { formatTime12h } from '../../lib/calendar-utils';
 import type { Card } from '../../types/board';
 import UserAvatar from '../ui/UserAvatar';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 
 interface SortableCardProps {
   card: Card;
@@ -143,6 +144,20 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
             {card.description && (
               <span className="text-zinc-400 dark:text-zinc-500" title="Tiene descripción">
                 <AlignLeft size={11} strokeWidth={2.5} />
+              </span>
+            )}
+
+            {/* Google Meet indicator */}
+            {card.meeting?.meetUrl && (
+              <span
+                className="inline-flex items-center justify-center rounded px-1 py-0.5 bg-emerald-500/10 border border-emerald-500/20"
+                title={
+                  card.meeting.scheduledStart
+                    ? `Google Meet · ${format(parseISO(card.meeting.scheduledStart), 'd MMM', { locale: es })} · ${formatTime12h(parseISO(card.meeting.scheduledStart))}`
+                    : 'Google Meet programado'
+                }
+              >
+                <GoogleMeetIcon size={12} />
               </span>
             )}
           </div>

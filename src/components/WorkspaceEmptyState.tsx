@@ -1,6 +1,6 @@
 import React from 'react';
-import { Sparkles, Plus } from 'lucide-react';
-import { LuminsRocketIcon } from './icons/LuminsIcons';
+import { Plus } from 'lucide-react';
+import { LuminsRocketIcon, LuminsGuidedIcon } from './icons/LuminsIcons';
 
 interface WorkspaceEmptyStateProps {
   onCreateClick?: () => void;
@@ -41,7 +41,7 @@ const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = () => {
           onClick={handleAssistedClick}
           className="h-9 px-5 bg-[#12A9A8] hover:bg-[#0E8786] text-white font-semibold text-xs rounded-lg shadow-xs transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
         >
-          <Sparkles size={14} />
+          <LuminsGuidedIcon size={15} active />
           <span>Crear con asistencia</span>
         </button>
 

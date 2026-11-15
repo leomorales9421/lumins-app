@@ -51,14 +51,16 @@ const SettingsTabLoader: React.FC<{ overlay?: boolean }> = ({ overlay = false })
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-    className={`w-full rounded-xl flex flex-col items-center justify-center gap-2.5 p-8 ${
+    className={`w-full rounded-xl flex flex-col items-center ${
       overlay
-        ? 'absolute inset-0 z-20 bg-[#F4F6F9]/92 dark:bg-[#151821]/92 backdrop-blur-sm'
-        : 'min-h-[280px] bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/[0.11]'
+        ? 'absolute inset-0 z-20 bg-[#F4F6F9]/92 dark:bg-[#151821]/92 backdrop-blur-sm justify-start pt-20 sm:pt-28 px-6'
+        : 'min-h-[280px] justify-center gap-2.5 p-8 bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/[0.11]'
     }`}
   >
-    <LuminsLogoLoader size="sm" />
-    <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Cargando...</span>
+    <div className="sticky top-28 flex flex-col items-center justify-center gap-2.5">
+      <LuminsLogoLoader size="sm" />
+      <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Cargando...</span>
+    </div>
   </motion.div>
 );
 

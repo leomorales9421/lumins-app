@@ -106,6 +106,12 @@ export const WorkspaceRolesHelpPopover: React.FC<WorkspaceRolesHelpPopoverProps>
               </div>
             );
           })}
+
+          <div className="rounded-lg p-2.5 border border-amber-200/80 dark:border-amber-500/20 bg-amber-50/70 dark:bg-amber-500/10 text-[11px] text-amber-900 dark:text-amber-200 leading-snug">
+            <strong className="font-bold">Tableros y archivo:</strong> Cualquier usuario con permiso{' '}
+            <span className="font-bold">Admin</span> en un tablero específico puede archivarlo y restaurarlo desde{' '}
+            <span className="font-bold">Tableros archivados</span>, incluso si no es dueño ni administrador de este espacio. Al archivar un tablero, se ocultan sus estadísticas y recordatorios, se cancelan sus Google Meets pendientes y se quitan sus eventos sincronizados de Google Calendar.
+          </div>
         </div>
       </div>
     </Popover>

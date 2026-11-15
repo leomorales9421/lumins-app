@@ -219,18 +219,20 @@
     pointer-events: none;
     height: 0;
   }
-  .prose-mirror-container { @apply outline-none; }
-  .prose-mirror-container h1 { @apply text-2xl font-black text-[#1E293B] mt-4 mb-2 tracking-tight; }
-  .prose-mirror-container h2 { @apply text-xl font-extrabold text-[#1E293B] mt-4 mb-2 tracking-tight; }
-  .prose-mirror-container p { @apply text-[#4B5563] text-sm leading-relaxed mb-2; }
-  .prose-mirror-container ul { @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
-  .prose-mirror-container ol { @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#4B5563]; }
-  .prose-mirror-container blockquote { @apply border-l-4 border-[#4338ca] pl-4 italic text-[#4B5563] bg-[#F4F5F7] p-2 rounded-r my-2; }
-  .prose-mirror-container pre { @apply bg-[#1E293B] text-zinc-100 p-3 rounded text-xs font-mono my-2 overflow-x-auto; }
-  .prose-mirror-container code { @apply bg-indigo-50 text-[#4338ca] px-1.5 py-0.5 rounded text-xs font-mono; }
-  .prose-mirror-container a { @apply text-[#4338ca] underline hover:text-indigo-700 transition-colors cursor-pointer; }
-  .prose-mirror-container img { @apply rounded max-w-full h-auto my-4 border border-[#E8E9EC] shadow-sm; }
-  .prose-mirror-container p { @apply mb-1 last:mb-0; }
+  .prose-mirror-container { @apply outline-none text-[#1E293B] dark:text-zinc-100; }
+  .prose-mirror-container h1 { @apply text-2xl font-black text-[#1E293B] dark:text-zinc-100 mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container h2 { @apply text-xl font-extrabold text-[#1E293B] dark:text-zinc-100 mt-4 mb-2 tracking-tight; }
+  .prose-mirror-container h3 { @apply text-lg font-bold text-[#1E293B] dark:text-zinc-100 mt-3 mb-1.5 tracking-tight; }
+  .prose-mirror-container p { @apply text-[#4B5563] dark:text-zinc-200 text-sm leading-relaxed mb-1 last:mb-0; }
+  .prose-mirror-container strong,
+  .prose-mirror-container b { @apply text-[#111827] dark:text-white font-bold; }
+  .prose-mirror-container ul { @apply list-disc pl-5 my-2 space-y-1 text-sm text-[#4B5563] dark:text-zinc-200; }
+  .prose-mirror-container ol { @apply list-decimal pl-5 my-2 space-y-1 text-sm text-[#4B5563] dark:text-zinc-200; }
+  .prose-mirror-container blockquote { @apply border-l-4 border-[#12A9A8] pl-4 italic text-[#4B5563] dark:text-zinc-300 bg-[#F4F5F7] dark:bg-white/[0.05] p-2 rounded-r my-2; }
+  .prose-mirror-container pre { @apply bg-[#1E293B] dark:bg-[#0D0F14] text-zinc-100 p-3 rounded text-xs font-mono my-2 overflow-x-auto border border-transparent dark:border-white/10; }
+  .prose-mirror-container code { @apply bg-[#12A9A8]/10 text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2] px-1.5 py-0.5 rounded text-xs font-mono; }
+  .prose-mirror-container a { @apply text-[#0E8786] dark:text-[#4ED4D2] underline hover:text-[#12A9A8] dark:hover:text-[#7CE5E3] transition-colors cursor-pointer; }
+  .prose-mirror-container img { @apply rounded max-w-full h-auto my-4 border border-[#E8E9EC] dark:border-white/10 shadow-sm; }
   .prose-mirror-container.is-comment-bubble img {
     max-width: 100%;
     border-radius: 4px;

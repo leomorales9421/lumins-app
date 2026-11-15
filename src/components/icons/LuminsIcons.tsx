@@ -503,3 +503,37 @@ export const LuminsMentionIcon: React.FC<IconProps> = ({ size = 18, className = 
     <circle cx="14.8" cy="11.5" r="1.3" fill="#FFCC40" />
   </svg>
 );
+
+/**
+ * Guía paso a paso Lumins: 3 barras ascendentes del isotipo oficial (sin estética de IA)
+ */
+export const LuminsGuidedIcon: React.FC<IconProps> = ({ size = 16, className = '', active = true }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <rect
+      x="3"
+      y="13.5"
+      width="4.5"
+      height="6.5"
+      rx="1.8"
+      fill={active ? 'currentColor' : '#FF665E'}
+      fillOpacity={active ? 0.85 : 1}
+    />
+    <rect
+      x="9.75"
+      y="8.5"
+      width="4.5"
+      height="11.5"
+      rx="1.8"
+      fill={active ? 'currentColor' : '#12A9A8'}
+      fillOpacity={active ? 0.95 : 1}
+    />
+    <rect
+      x="16.5"
+      y="4"
+      width="4.5"
+      height="16"
+      rx="1.8"
+      fill={active ? 'currentColor' : '#FFCC40'}
+    />
+  </svg>
+);
