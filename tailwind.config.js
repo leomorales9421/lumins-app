@@ -10,6 +10,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Official Lumins Identity
+        'lumins-coral': '#FF665E',
+        'lumins-turquesa': '#12A9A8',
+        'lumins-amarillo': '#FFCC40',
+        'lumins-slate': '#0F172A',
+        'lumins-dark': '#05040A',
+        'primary': '#12A9A8',
+
         // Core brand
         'brand-primary': '#4338ca',
         'brand-secondary': '#E91E63',
@@ -42,21 +50,21 @@ module.exports = {
       },
       borderRadius: {
         'none': '0',
-        'sm': '2px',
-        'DEFAULT': '4px',
-        'md': '4px',
-        'lg': '4px',
-        'xl': '4px',
-        '2xl': '4px',
-        '3xl': '4px',
-        'full': '4px',
+        'sm': '0.25rem',
+        'DEFAULT': '0.375rem',
+        'md': '0.375rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+        'full': '9999px',
       },
       boxShadow: {
         'soft': '0 1px 2px rgba(0,0,0,0.05)',
-        'card': '0 1px 2px rgba(0,0,0,0.05)',
-        'card-hover': '0 2px 8px rgba(67, 56, 202, 0.08)',
+        'card': '0 1px 3px rgba(15, 23, 42, 0.06)',
+        'card-hover': '0 6px 16px rgba(18, 169, 168, 0.12)',
         'modal': '0 10px 30px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05)',
-        'heavy': '0 10px 25px rgba(67, 56, 202, 0.1)',
+        'heavy': '0 10px 25px rgba(18, 169, 168, 0.12)',
         'dropdown': '0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
       }
     },

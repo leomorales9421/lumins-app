@@ -72,9 +72,9 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
             placeholder="Buscar miembros..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3]/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
           />
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[#6C5DD3] transition-colors" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[var(--lumins-accent-fg)] transition-colors" />
         </div>
       </div>
 
@@ -98,7 +98,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
                   name={member.name} 
                   avatarUrl={member.avatarUrl} 
                   size="sm"
-                  className="ring-2 ring-transparent group-hover:ring-[#6C5DD3]/20 shadow-sm"
+                  className="ring-2 ring-transparent group-hover:ring-[var(--lumins-accent)]/25 shadow-sm"
                 />
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[150px]">
@@ -111,8 +111,8 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
               </div>
 
               {isAssigned && (
-                <div className="w-6 h-6 bg-[#6C5DD3]/10 dark:bg-[#6C5DD3]/20 rounded flex items-center justify-center animate-in zoom-in duration-200">
-                  <Check size={14} className="text-[#6C5DD3]" strokeWidth={3} />
+                <div className="w-6 h-6 bg-[var(--lumins-accent-soft)] rounded flex items-center justify-center animate-in zoom-in duration-200">
+                  <Check size={14} className="text-[var(--lumins-accent-fg)]" strokeWidth={3} />
                 </div>
               )}
             </button>

@@ -80,7 +80,7 @@ const CommentInput: React.FC<{ onAddComment: (text: string) => void, isLoading?:
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded text-sm font-bold disabled:opacity-50 transition-all hover:bg-[#312e81] active:scale-95 shadow-sm shadow-[#6C5DD3]/20"
+                className="bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] px-3.5 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50 transition-all hover:brightness-95 active:scale-95 shadow-sm cursor-pointer"
               >
                 Guardar
               </button>
@@ -189,7 +189,7 @@ const ActivityFeedItem: React.FC<{
                    {canEdit && (
                      <button 
                       onClick={() => setIsEditing(true)}
-                      className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:underline cursor-pointer transition-colors"
+                      className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:underline cursor-pointer transition-colors"
                     >
                       Editar
                     </button>
@@ -262,15 +262,15 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3 text-zinc-900 dark:text-zinc-100">
-          <MessageSquare size={20} className="text-[#6C5DD3]" />
-          <h3 className="text-lg font-extrabold tracking-tight">Actividad</h3>
+    <div className="space-y-4 animate-in fade-in duration-500">
+       <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+          <MessageSquare size={16} className="text-[var(--lumins-accent-fg)]" />
+          <h3 className="text-sm font-bold tracking-tight">Actividad</h3>
         </div>
          <button 
           onClick={handleToggleDetails}
-          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] hover:bg-zinc-100 dark:hover:bg-white/5 px-2 py-1 rounded transition-colors cursor-pointer"
+          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-zinc-100 dark:hover:bg-white/5 px-2 py-1 rounded transition-colors cursor-pointer"
         >
           {showAllActivity ? 'Ocultar detalles' : 'Mostrar detalles'}
         </button>
@@ -303,7 +303,7 @@ export const ActivitySection: React.FC<ActivitySectionProps> = ({
            <button
             onClick={onLoadMore}
             disabled={isFetchingMore}
-            className="w-full bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold py-3 mt-4 rounded hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[#6C5DD3] transition-colors flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5"
+            className="w-full bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-xs font-bold py-2.5 mt-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] transition-colors flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 cursor-pointer"
           >
             {isFetchingMore ? (
               <>

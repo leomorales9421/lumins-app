@@ -137,15 +137,15 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
       }}
       className={`group/cell relative h-full flex flex-col justify-between p-1.5 border-r border-b border-zinc-200/70 dark:border-white/[0.06] last:border-r-0 transition-colors select-none ${
         isInRangeSelection
-          ? 'bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 ring-1 ring-inset ring-[#6C5DD3]'
+          ? 'bg-[var(--lumins-accent-soft)] ring-1 ring-inset ring-[var(--lumins-accent)]'
           : today
-          ? 'bg-[#6C5DD3]/[0.05] dark:bg-[#6C5DD3]/[0.11]'
+          ? 'bg-[var(--lumins-accent-soft)]/50'
           : weekend
           ? 'bg-zinc-50/75 dark:bg-white/[0.015]'
           : 'bg-white dark:bg-[#181B22]'
       } ${!isCurrentMonth ? 'opacity-45 bg-zinc-50/50 dark:bg-[#13151A]/60' : ''} ${
         isOver || isExternalOver
-          ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10'
+          ? 'ring-2 ring-inset ring-[var(--lumins-accent)] bg-[var(--lumins-accent-soft)] z-10'
           : ''
       }`}
     >
@@ -156,7 +156,7 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
             style={{ borderRadius: '9999px' }}
             className={`inline-flex items-center justify-center text-xs font-extrabold leading-none transition-all ${
               today
-                ? 'w-6 h-6 bg-[#6C5DD3] text-white shadow-sm shadow-[#6C5DD3]/40'
+                ? 'w-6 h-6 bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                 : 'w-6 h-6 text-zinc-700 dark:text-zinc-300'
             }`}
           >
@@ -178,7 +178,7 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
               e.stopPropagation();
               onOpenQuickCreate(day, day);
             }}
-            className="opacity-0 group-hover/cell:opacity-100 w-5 h-5 rounded-md flex items-center justify-center text-zinc-400 hover:text-[#6C5DD3] hover:bg-[#6C5DD3]/12 transition-all z-20"
+            className="opacity-0 group-hover/cell:opacity-100 w-5 h-5 rounded-md flex items-center justify-center text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)] transition-all z-20"
           >
             <Plus size={12} strokeWidth={2.5} />
           </button>
@@ -195,7 +195,7 @@ const DroppableDayCell: React.FC<DroppableDayCellProps> = ({
               const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
               onOpenOverflow(day, dayEvents, rect);
             }}
-            className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-[#6C5DD3]/10 hover:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-[#A599F9] transition-colors cursor-pointer"
+            className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-[var(--lumins-accent-soft)] hover:opacity-85 text-[var(--lumins-accent-fg)] transition-colors cursor-pointer"
           >
             +{hiddenCount} más
           </button>
@@ -779,18 +779,18 @@ const LuminsCalendarMonthView: React.FC<LuminsCalendarMonthViewProps> = ({
                   onClick={() => setMobileSelectedDay(day)}
                   className={`flex flex-col items-center justify-between p-1.5 border-r border-b border-zinc-200/70 dark:border-white/[0.06] last:border-r-0 transition-colors ${
                     selected
-                      ? 'bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25'
+                      ? 'bg-[var(--lumins-accent-soft)]'
                       : today
-                      ? 'bg-[#6C5DD3]/[0.05]'
+                      ? 'bg-[var(--lumins-accent-soft)]/50'
                       : 'bg-white dark:bg-[#181B22]'
                   } ${!inMonth ? 'opacity-40' : ''}`}
                 >
                   <span
                     className={`w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center ${
                       today
-                        ? 'bg-[#6C5DD3] text-white'
+                        ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]'
                         : selected
-                        ? 'text-[#6C5DD3] dark:text-[#A599F9] font-black'
+                        ? 'text-[var(--lumins-accent-fg)] font-black'
                         : 'text-zinc-700 dark:text-zinc-300'
                     }`}
                   >
@@ -807,13 +807,13 @@ const LuminsCalendarMonthView: React.FC<LuminsCalendarMonthViewProps> = ({
                           backgroundColor: isCardCompleted(ev)
                             ? '#10B981'
                             : isEventOverdue(ev)
-                            ? '#EF4444'
+                            ? '#FF665E'
                             : getEventAccentColor(ev, colorBy),
                         }}
                       />
                     ))}
                     {dayEvents.length > 4 && (
-                      <span className="text-[9px] font-black text-[#6C5DD3] leading-none">
+                      <span className="text-[9px] font-black text-[var(--lumins-accent-fg)] leading-none">
                         +{dayEvents.length - 4}
                       </span>
                     )}

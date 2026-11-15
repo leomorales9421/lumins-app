@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import AmbientBackground from '../components/layout/AmbientBackground';
-import { Skeleton } from '../components/ui/Skeleton';
+import BrandLogo from '../components/ui/BrandLogo';
+import { LuminsLogoLoader } from '../components/ui/LuminsLogoLoader';
 import { OtpInput } from '../components/auth/OtpInput';
 import { CountryPhoneInput, type CountryOption, COUNTRIES_LIST } from '../components/auth/CountryPhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -113,29 +114,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden bg-[#FAFAFA] dark:bg-[#14171C]">
         <AmbientBackground />
-        <div className="w-full max-w-[1000px] min-h-[600px] bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl flex overflow-hidden">
-          <div className="hidden md:flex flex-1 bg-[#09090B] p-16 flex-col justify-between">
-            <div className="flex flex-col items-center gap-6">
-              <Skeleton className="w-40 h-40 rounded bg-zinc-800" />
-            </div>
-            <div className="text-center">
-              <Skeleton className="h-10 w-full mb-4 bg-zinc-800" />
-              <Skeleton className="h-4 w-3/4 mx-auto bg-zinc-800" />
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              <Skeleton className="h-6 w-32 bg-zinc-800" />
-            </div>
-          </div>
-          <div className="flex-[1.2] p-10 md:p-20 bg-white flex flex-col justify-center">
-            <div className="space-y-6 max-w-[400px]">
-              <Skeleton className="h-8 w-60 mb-2" />
-              <Skeleton className="h-4 w-40 mb-6" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          </div>
+        <div className="relative z-10">
+          <LuminsLogoLoader size="lg" />
         </div>
       </div>
     );
@@ -311,69 +293,72 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
         <AmbientBackground />
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1020px] sm:min-h-[640px] bg-white sm:bg-white/95 sm:backdrop-blur-md sm:border sm:border-white/30 sm:rounded-2xl sm:shadow-2xl flex flex-col md:flex-row overflow-hidden relative z-10 min-h-screen sm:min-h-0"
+      <div 
+        className="w-full max-w-[1000px] sm:min-h-[620px] bg-white sm:border sm:border-slate-200/80 sm:rounded-[20px] sm:shadow-2xl sm:shadow-slate-300/40 flex flex-col md:flex-row overflow-hidden relative z-10 min-h-screen sm:min-h-0"
       >
-        {/* LEFT PANEL: Modern Professional Sidebar (Identidad visual estable, nunca se recarga ni parpadea) */}
-        <div className="hidden md:flex flex-1 bg-[#09090B] p-16 flex-col justify-center gap-16 text-white relative overflow-hidden">
-          {/* Radial Spotlight Effect */}
+        {/* LEFT PANEL: Modern Professional Lumins Brand Sidebar */}
+        <div className="hidden md:flex flex-1 bg-[#05040A] p-12 lg:p-14 flex-col justify-between text-white relative overflow-hidden">
+          {/* Subtle Luminous Mesh Gradient matching landing */}
           <div 
             className="absolute inset-0 pointer-events-none" 
             style={{ 
-              background: 'radial-gradient(circle at 50% 40%, rgba(30, 27, 75, 0.35) 0%, rgba(9, 9, 11, 0) 70%)' 
+              backgroundImage: `
+                radial-gradient(circle at 20% 20%, rgba(18, 169, 168, 0.24) 0%, transparent 55%),
+                radial-gradient(circle at 85% 85%, rgba(255, 204, 64, 0.16) 0%, transparent 50%),
+                radial-gradient(circle at 75% 25%, rgba(255, 102, 94, 0.12) 0%, transparent 45%)
+              `
             }} 
           />
 
-          {/* Grain Texture */}
-          <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <filter id="noiseFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-              </filter>
-              <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-            </svg>
+          {/* Top Brand Logo */}
+          <div className="relative z-10">
+            <BrandLogo size="md" variant="light-text" />
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 1 }}
-            className="flex justify-center relative z-10"
-          >
-            <img 
-              src="/lumins-log.webp" 
-              alt="Lumins Logo" 
-              className="h-40 w-auto object-contain drop-shadow-2xl" 
-            />
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative z-10 text-center"
-          >
-            <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white/95">
-              Productividad <br/> sin límites.
+          {/* Central Hero Tagline */}
+          <div className="relative z-10 my-auto py-8">
+            <h1 className="text-3xl lg:text-4xl font-extrabold mb-4 leading-tight tracking-tight text-white">
+              Productividad <br />
+              <span className="text-[#12A9A8]">sin límites.</span>
             </h1>
-            <p className="text-lg text-white/60 font-medium max-w-sm mx-auto leading-relaxed">
-              Gestiona tus proyectos con una interfaz profesional diseñada para el alto rendimiento y la claridad visual.
+
+            <p className="text-sm text-slate-300 font-normal leading-relaxed max-w-xs mb-8">
+              Gestiona tus proyectos con una interfaz profesional diseñada para la agilidad y el alto rendimiento.
             </p>
-          </motion.div>
+
+            {/* Feature Highlights with Brand Colors */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#12A9A8]" />
+                <span className="font-medium">Tableros Kanban ágiles y personalizables</span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#FFCC40]" />
+                <span className="font-medium">Calendario y fechas sincronizadas en vivo</span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#FF665E]" />
+                <span className="font-medium">Roles, métricas y control de acceso</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Footer Info */}
+          <div className="relative z-10 flex items-center gap-4 text-xs text-slate-400">
+            <span>© {new Date().getFullYear()} Lumins</span>
+            <span>•</span>
+            <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacidad</a>
+            <span>•</span>
+            <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Términos</a>
+          </div>
         </div>
 
-        {/* RIGHT PANEL: Dynamic Progressive Steps (Solo este panel transiciona suavemente) */}
-        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-16 lg:p-20 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
+        {/* RIGHT PANEL: Dynamic Progressive Steps */}
+        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-14 lg:p-16 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
           
           {/* Mobile Logo Branding */}
-          <div className="md:hidden flex flex-col items-center mb-8">
-            <img src="/lumins-log.webp" alt="Lumins" className="h-16 w-auto drop-shadow-sm mb-2" />
-            <h2 className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">
-              LUMINS
-            </h2>
+          <div className="md:hidden flex justify-center mb-8">
+            <BrandLogo size="md" />
           </div>
 
           <AnimatePresence mode="wait">
@@ -381,29 +366,31 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
             {currentStep === 'EMAIL' && (
               <motion.div
                 key="login-step-email"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
-                <div className="mb-8 text-center md:text-left">
-                  <h2 className="text-xl font-bold text-slate-500 mb-1 tracking-tight uppercase">
-                    Ingresa a <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] inline-block font-black ml-1">LUMINS</span>
+                <div className="mb-8 text-left">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                    Ingresa a Lumins
                   </h2>
-                  <p className="text-[#6B7280] font-medium text-base">Tu centro de operaciones inteligente</p>
+                  <p className="text-slate-500 font-medium text-sm mt-1">
+                    Tu centro de operaciones inteligente
+                  </p>
                 </div>
 
-                <form onSubmit={handleEmailSubmit} className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-bold text-zinc-700 ml-1">Email</label>
+                <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 ml-0.5">Correo electrónico</label>
                     <div className="relative flex items-center">
-                      <Mail className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Mail className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input 
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-12 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl pl-10 pr-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-zinc-400"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all placeholder:text-slate-400"
                         placeholder="ejemplo@correo.com"
                         autoComplete="email"
                         inputMode="email"
@@ -414,8 +401,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -423,15 +410,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   <Button 
                     type="submit" 
                     isLoading={isSubmitting}
-                    className="h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Verificando...' : 'Continuar con correo'}
                   </Button>
 
-                  <div className="flex items-center gap-4 py-1">
-                    <div className="h-px flex-1 bg-[#F0F1F3]" />
-                    <span className="text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest">o continúa con</span>
-                    <div className="h-px flex-1 bg-[#F0F1F3]" />
+                  <div className="flex items-center gap-3 py-0.5">
+                    <div className="h-px flex-1 bg-slate-200" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">o continúa con</span>
+                    <div className="h-px flex-1 bg-slate-200" />
                   </div>
 
                   {/* Google OAuth */}
@@ -445,9 +432,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                       googleAuthUrl.searchParams.set('redirect', redirect);
                       window.location.href = googleAuthUrl.toString();
                     }}
-                    className="h-12 border border-[#E8E9EC] rounded-xl text-[#374151] font-bold text-sm flex items-center justify-center gap-3 hover:bg-[#F4F5F7] transition-all active:scale-[0.98]"
+                    className="h-9 border border-slate-200 bg-white rounded-lg text-slate-700 font-bold text-xs flex items-center justify-center gap-2.5 hover:bg-slate-50 transition-all active:scale-[0.98] shadow-xs"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24">
+                    <svg width="16" height="16" viewBox="0 0 24 24">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                       <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
@@ -455,6 +442,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                     </svg>
                     Google
                   </button>
+
+                  <p className="mt-3 text-xs text-slate-500 text-center">
+                    ¿No tienes una cuenta?{' '}
+                    <Link to="/register" className="text-[#12A9A8] font-bold hover:underline">
+                      Regístrate gratis
+                    </Link>
+                  </p>
                 </form>
               </motion.div>
             )}
@@ -463,10 +457,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
             {currentStep === 'PASSWORD' && (
               <motion.div
                 key="login-step-password"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <button
@@ -476,25 +470,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                     setPassword('');
                     setError('');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Cambiar correo</span>
                 </button>
 
                 <div className="mb-6">
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     {existingUserName ? `Hola, ${existingUserName.split(' ')[0]}` : 'Bienvenido de nuevo'}
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-1.5">
-                    Introduce la contraseña para <span className="font-bold text-zinc-800">{email}</span>.
+                  <p className="text-slate-500 font-medium text-sm mt-1.5">
+                    Introduce la contraseña para <span className="font-bold text-slate-800">{email}</span>.
                   </p>
                 </div>
 
-                <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between ml-1">
-                      <label className="text-sm font-bold text-zinc-700">Contraseña</label>
+                <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between ml-0.5">
+                      <label className="text-xs font-bold text-slate-700">Contraseña</label>
                       <button
                         type="button"
                         onClick={() => {
@@ -504,18 +498,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                             window.history.pushState(null, '', '/forgot-password');
                           } catch {}
                         }}
-                        className="text-[12px] font-bold text-[#4338ca] hover:underline"
+                        className="text-[12px] font-bold text-[#12A9A8] hover:underline"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     </div>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Lock className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input 
                         type={showPassword ? 'text' : 'password'} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full h-12 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl pl-10 pr-10 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-zinc-400"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-9 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all placeholder:text-slate-400"
                         placeholder="••••••••"
                         autoComplete="current-password"
                         autoFocus
@@ -524,16 +518,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -541,7 +535,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   <Button 
                     type="submit" 
                     isLoading={isSubmitting}
-                    className="h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
                   </Button>
@@ -549,14 +543,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
               </motion.div>
             )}
 
-            {/* STEP 2B: FORGOT PASSWORD (DENTRO DEL MISMO FLUJO, MISMA TRANSICIÓN FLUIDA) */}
+            {/* STEP 2B: FORGOT PASSWORD */}
             {currentStep === 'FORGOT_PASSWORD' && (
               <motion.div
                 key="login-step-forgot"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <button
@@ -568,31 +562,31 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                       window.history.pushState(null, '', '/login');
                     } catch {}
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Volver a iniciar sesión</span>
                 </button>
 
                 <div className="mb-6">
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight mb-1.5">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-1.5">
                     ¿Olvidaste tu contraseña?
                   </h2>
-                  <p className="text-[#6B7280] font-medium text-sm leading-relaxed">
+                  <p className="text-slate-500 font-medium text-sm leading-relaxed">
                     Introduce tu correo y te enviaremos las instrucciones para restablecerla.
                   </p>
                 </div>
 
-                <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-bold text-zinc-700 ml-1">Correo electrónico</label>
+                <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 ml-0.5">Correo electrónico</label>
                     <div className="relative flex items-center">
-                      <Mail className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Mail className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input 
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-12 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl pl-10 pr-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all placeholder:text-zinc-400"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all placeholder:text-slate-400"
                         placeholder="ejemplo@correo.com"
                         autoComplete="email"
                         inputMode="email"
@@ -603,8 +597,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -612,7 +606,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   <Button 
                     type="submit" 
                     isLoading={isSubmitting}
-                    className="h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}
                   </Button>
@@ -624,36 +618,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
             {currentStep === 'FORGOT_PASSWORD_SUCCESS' && (
               <motion.div
                 key="login-step-forgot-success"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <div className="mb-6">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 border border-emerald-100/60">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                  <div className="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 border border-emerald-100">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   </div>
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight mb-2">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-2">
                     ¡Revisa tu bandeja de entrada!
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm leading-relaxed">
-                    Hemos enviado las instrucciones para restablecer tu contraseña a <strong className="text-zinc-800 font-semibold">{email}</strong>.
+                  <p className="text-slate-500 font-medium text-sm leading-relaxed">
+                    Hemos enviado las instrucciones para restablecer tu contraseña a <strong className="text-slate-800 font-semibold">{email}</strong>.
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep('FORGOT_PASSWORD');
-                      setError('');
-                    }}
-                    className="h-11 bg-[#F4F5F7] border border-[#E8E9EC] text-zinc-700 font-bold text-xs rounded-xl hover:bg-[#EAECEF] transition-all active:scale-[0.98]"
-                  >
-                    Probar con otro correo
-                  </button>
-
+                <div className="flex flex-col gap-2.5 pt-2">
                   <button 
                     type="button"
                     onClick={() => {
@@ -663,10 +646,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                         window.history.pushState(null, '', '/login');
                       } catch {}
                     }}
-                    className="h-11 bg-[#4338ca] text-white font-bold text-xs rounded-xl hover:bg-[#312e81] transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
+                    className="h-9 bg-[#12A9A8] hover:bg-[#0E8786] text-white font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-xs active:scale-[0.98]"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Volver al inicio de sesión</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep('FORGOT_PASSWORD');
+                      setError('');
+                    }}
+                    className="h-9 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition-all active:scale-[0.98]"
+                  >
+                    Probar con otro correo
                   </button>
                 </div>
               </motion.div>
@@ -676,10 +670,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
             {currentStep === 'OTP' && (
               <motion.div
                 key="login-step-otp"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <button
@@ -689,22 +683,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                     setOtpCode('');
                     setError('');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Cambiar correo</span>
                 </button>
 
                 <div className="mb-6">
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     Revisa tu correo
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-1.5 leading-relaxed">
-                    Hemos enviado un código de 6 dígitos a <span className="font-bold text-zinc-800">{email}</span>.
+                  <p className="text-slate-500 font-medium text-sm mt-1.5 leading-relaxed">
+                    Hemos enviado un código de 6 dígitos a <span className="font-bold text-slate-800">{email}</span>.
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
                   <OtpInput
                     value={otpCode}
                     onChange={(code) => {
@@ -716,8 +710,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   />
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -727,22 +721,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                     onClick={() => handleVerifyOtp()}
                     isLoading={isSubmitting}
                     disabled={otpCode.length !== 6}
-                    className="h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Verificando código...' : 'Verificar y continuar'}
                   </Button>
 
                   <div className="text-center pt-1">
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-slate-500">
                       ¿No recibiste el código?{' '}
                       {resendCooldown > 0 ? (
-                        <span className="text-zinc-400 font-semibold">Reenviar en {resendCooldown}s</span>
+                        <span className="text-slate-400 font-semibold">Reenviar en {resendCooldown}s</span>
                       ) : (
                         <button
                           type="button"
                           onClick={handleResendOtp}
                           disabled={isSubmitting}
-                          className="text-[#4338ca] font-bold hover:underline"
+                          className="text-[#12A9A8] font-bold hover:underline"
                         >
                           Reenviar código
                         </button>
@@ -757,29 +751,29 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
             {currentStep === 'PROFILE' && (
               <motion.div
                 key="login-step-profile"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <div className="mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3 border border-emerald-100">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Correo verificado</span>
                   </div>
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     Completa tu perfil
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-1">
+                  <p className="text-slate-500 font-medium text-sm mt-1">
                     Un último paso para ingresar a tus tableros.
                   </p>
                 </div>
 
-                <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
-                  <div className="flex gap-3">
+                <form onSubmit={handleProfileSubmit} className="flex flex-col gap-3">
+                  <div className="flex gap-2.5">
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <label className="text-xs font-bold text-zinc-700 ml-1">Nombre</label>
+                      <label className="text-xs font-bold text-slate-700 ml-0.5">Nombre</label>
                       <input
                         type="text"
                         value={firstName}
@@ -788,18 +782,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                         autoComplete="given-name"
                         autoFocus
                         required
-                        className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl px-3.5 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <label className="text-xs font-bold text-zinc-700 ml-1">Apellido</label>
+                      <label className="text-xs font-bold text-slate-700 ml-0.5">Apellido</label>
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Morales"
                         autoComplete="family-name"
-                        className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl px-3.5 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                     </div>
                   </div>
@@ -812,33 +806,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   />
 
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center ml-1">
-                      <label className="text-xs font-bold text-zinc-700">Contraseña de acceso</label>
-                      <span className="text-[11px] text-zinc-400 font-medium">(mínimo 8 caracteres)</span>
+                    <div className="flex justify-between items-center ml-0.5">
+                      <label className="text-xs font-bold text-slate-700">Contraseña de acceso</label>
+                      <span className="text-[11px] text-slate-400 font-medium">(mínimo 8 caracteres)</span>
                     </div>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Lock className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="••••••••"
                         autoComplete="new-password"
-                        className="w-full h-11 bg-[#F4F5F7] border border-[#E8E9EC] rounded-xl pl-10 pr-10 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/15 focus:border-[#4338ca]/40 transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-9 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -846,7 +840,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
-                    className="mt-2 h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#312e81] transition-all shadow-sm active:scale-[0.98]"
+                    className="mt-2 h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Guardando...' : 'Comenzar a usar Lumins'}
                   </Button>
@@ -856,7 +850,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
           </AnimatePresence>
 
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

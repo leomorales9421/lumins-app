@@ -134,7 +134,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
               placeholder="Ej: Frontend, Urgente..."
               value={labelName}
               onChange={(e) => setLabelName(e.target.value)}
-              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
             />
           </div>
 
@@ -149,7 +149,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
                   style={{ backgroundColor: color }}
                   className={`
                     h-8 rounded transition-all flex items-center justify-center relative group
-                    ${labelColor === color ? 'ring-2 ring-[#6C5DD3] ring-offset-2 dark:ring-offset-[#1C1F26] scale-110 z-10' : 'hover:scale-105'}
+                    ${labelColor === color ? 'ring-2 ring-[var(--lumins-accent)] ring-offset-2 dark:ring-offset-[#1C1F26] scale-110 z-10' : 'hover:scale-105'}
                   `}
                 >
                   {labelColor === color && (
@@ -166,7 +166,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             <button 
               type="submit"
               disabled={!labelName.trim()}
-              className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded transition-all shadow-lg shadow-[#6C5DD3]/20 disabled:opacity-50 active:scale-[0.98] text-sm"
+              className="flex-1 bg-[var(--lumins-accent)] hover:brightness-95 text-[var(--lumins-accent-on)] font-bold py-3 rounded-lg transition-all shadow-sm disabled:opacity-50 active:scale-[0.98] text-sm cursor-pointer"
             >
               {isEdit ? 'Guardar' : 'Crear'}
             </button>
@@ -218,9 +218,9 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             placeholder="Buscar etiquetas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
           />
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[#6C5DD3] transition-colors" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[var(--lumins-accent-fg)] transition-colors" />
         </div>
       </div>
 
@@ -234,7 +234,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
                 onClick={() => onToggleLabel(label.id)}
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
                   isSelected 
-                    ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                    ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' 
                     : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
                 }`}
               >
@@ -252,7 +252,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
                   e.stopPropagation();
                   openEditView(label);
                 }}
-                className="w-8 h-8 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] hover:bg-zinc-50 dark:hover:bg-white/5 rounded transition-all opacity-0 group-hover:opacity-100"
+                className="w-8 h-8 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-[var(--lumins-accent-fg)] hover:bg-zinc-50 dark:hover:bg-white/5 rounded transition-all opacity-0 group-hover:opacity-100"
               >
                 <Edit2 size={14} />
               </button>
@@ -280,7 +280,7 @@ const LabelsPopover: React.FC<LabelsPopoverProps> = ({
             setLabelColor(PRESET_COLORS[0]);
             setCurrentView('create');
           }}
-          className="w-full flex items-center gap-2 text-xs font-bold text-[#6C5DD3] hover:bg-white dark:hover:bg-[#1C1F26] p-2.5 rounded transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-sm"
+          className="w-full flex items-center gap-2 text-xs font-bold text-[var(--lumins-accent-fg)] hover:bg-white dark:hover:bg-[#1C1F26] p-2.5 rounded transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-sm cursor-pointer"
         >
           <Plus size={16} />
           Crear nueva etiqueta

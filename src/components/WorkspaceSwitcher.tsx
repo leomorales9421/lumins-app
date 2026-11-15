@@ -72,7 +72,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
       const recents: string[] = raw ? JSON.parse(raw) : [];
       const updated = [id, ...recents.filter(x => x !== id)].slice(0, 15);
       localStorage.setItem('lumins_recent_workspaces', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSwitch = (id: string) => {
@@ -112,8 +112,8 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
   };
 
   const colors = [
-    'bg-indigo-500', 'bg-blue-500', 'bg-emerald-500', 
-    'bg-amber-500', 'bg-rose-500', 'bg-indigo-500'
+    'bg-[#12A9A8]', 'bg-[#FF665E]', 'bg-[#0E8786]',
+    'bg-amber-500', 'bg-slate-700', 'bg-[#12A9A8]'
   ];
 
   const getColor = (id: string) => {
@@ -132,7 +132,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
     try {
       const raw = localStorage.getItem('lumins_recent_workspaces');
       if (raw) recentIds = JSON.parse(raw);
-    } catch (e) {}
+    } catch (e) { }
 
     const sorted = [...workspaces].sort((a, b) => {
       // Current active workspace always first
@@ -158,35 +158,35 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
   }
 
   const popoverContent = (
-    <div className="w-72 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-zinc-200 dark:border-white/10 p-2 z-50 flex flex-col max-h-[460px] overflow-hidden animate-in fade-in zoom-in duration-200">
-      <div className="px-2 pt-1.5 pb-2">
-        <div className="flex items-center justify-between mb-2 px-1">
-          <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-            {searchQuery.trim() ? 'Resultados' : 'Tus Espacios Frecuentes'}
+    <div className="w-68 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-slate-200/90 dark:border-white/10 p-1.5 z-50 flex flex-col max-h-[460px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="px-1.5 pt-1 pb-1.5">
+        <div className="flex items-center justify-between mb-1.5 px-1.5">
+          <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+            {searchQuery.trim() ? 'Resultados' : 'Espacios'}
           </p>
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
+          <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
             {workspaces.length} en total
           </span>
         </div>
 
         {/* Search input if more than 4 workspaces */}
         {workspaces.length > 4 && (
-          <div className="relative mb-2">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+          <div className="relative mb-1.5">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Buscar espacio..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-2.5 py-1.5 bg-zinc-100 dark:bg-white/5 rounded-lg text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-[#6C5DD3]"
+              className="w-full h-8 pl-8 pr-2.5 bg-slate-100/80 dark:bg-white/5 rounded-lg text-xs font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--lumins-accent)]/25 focus:bg-white transition-all"
             />
           </div>
         )}
 
         {/* Scrollable list with max height */}
-        <div className="space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar pr-0.5">
+        <div className="space-y-0.5 max-h-[250px] overflow-y-auto custom-scrollbar pr-0.5">
           {visibleWorkspaces.length === 0 ? (
-            <p className="text-xs text-zinc-400 text-center py-4">No se encontraron espacios</p>
+            <p className="text-xs text-slate-400 text-center py-4">No se encontraron espacios</p>
           ) : (
             visibleWorkspaces.map(workspace => {
               const isCurrent = workspace.id === currentWorkspace?.id;
@@ -195,36 +195,35 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
               return (
                 <div
                   key={workspace.id}
-                  className={`group/item flex items-center justify-between rounded-lg transition-all ${
-                    isCurrent
-                      ? 'bg-zinc-100 dark:bg-white/5 text-[#6C5DD3]'
-                      : 'hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
-                  }`}
+                  className={`group/item flex items-center justify-between rounded-lg transition-all ${isCurrent
+                    ? 'bg-slate-100/90 dark:bg-white/[0.07] text-slate-900 dark:text-zinc-100'
+                    : 'hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-zinc-300'
+                    }`}
                 >
                   <button
                     type="button"
                     onClick={() => handleSwitch(workspace.id)}
-                    className="flex-1 flex items-center gap-2.5 p-2 min-w-0 text-left"
+                    className="flex-1 flex items-center gap-2.5 px-2 py-1.5 min-w-0 text-left cursor-pointer"
                   >
                     <div
-                      className={`w-7 h-7 rounded-lg ${getColor(workspace.id)} flex items-center justify-center text-white text-[10px] font-bold shadow-sm shrink-0`}
+                      className={`w-6 h-6 rounded-md ${isCurrent ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' : `${getColor(workspace.id)} text-white`} flex items-center justify-center text-[10px] font-bold shadow-xs shrink-0`}
                     >
                       {getInitials(workspace.name)}
                     </div>
-                    <span className="text-xs font-bold truncate">
+                    <span className={`text-xs truncate ${isCurrent ? 'font-semibold' : 'font-medium'}`}>
                       {workspace.name}
                     </span>
                   </button>
 
                   <div className="flex items-center gap-1 pr-2 shrink-0">
                     {isCurrent && (
-                      <Check size={14} className="text-[#6C5DD3] shrink-0" />
+                      <Check size={14} className="text-[var(--lumins-accent-fg)] shrink-0" />
                     )}
                     {canManage && (
                       <button
                         type="button"
                         onClick={(e) => handleEditClick(e, workspace)}
-                        className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-400 hover:text-[#6C5DD3] rounded-md transition-all"
+                        className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 rounded-md transition-all cursor-pointer"
                         title="Propiedades del espacio"
                       >
                         <Settings size={13} />
@@ -238,10 +237,10 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
         </div>
       </div>
 
-      <div className="h-px bg-zinc-100 dark:bg-white/5 my-1" />
+      <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
 
       {/* Footer Actions */}
-      <div className="px-1 space-y-1">
+      <div className="px-1 space-y-0.5">
         {canManageWorkspace(currentWorkspace) && (
           <button
             type="button"
@@ -252,13 +251,13 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
                 setIsOpen(false);
               }
             }}
-            className="w-full flex items-center justify-between p-2 rounded-lg text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-[#6C5DD3] hover:bg-zinc-50 dark:hover:bg-white/5 transition-all group"
+            className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-zinc-300 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-white/5 transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Sliders size={14} className="text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
+              <Sliders size={13} className="text-slate-400 group-hover:text-slate-700 transition-colors" />
               <span>Propiedades del espacio</span>
             </div>
-            <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-[#6C5DD3]">Editar</span>
+            <span className="text-[10px] font-medium text-slate-400 group-hover:text-slate-700">Editar</span>
           </button>
         )}
 
@@ -267,24 +266,24 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
             navigate('/workspaces');
             setIsOpen(false);
           }}
-          className="w-full flex items-center justify-between p-2 rounded-lg text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-[#6C5DD3] hover:bg-zinc-50 dark:hover:bg-white/5 transition-all group"
+          className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-zinc-300 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-white/5 transition-all group cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <Grid size={14} className="text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
+            <Grid size={13} className="text-slate-400 group-hover:text-slate-700 transition-colors" />
             <span>Ver todos los espacios</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-zinc-400 group-hover:text-[#6C5DD3]">
+          <div className="flex items-center gap-1 text-[11px] text-slate-400 group-hover:text-slate-700">
             <span>{workspaces.length}</span>
-            <ArrowRight size={12} />
+            <ArrowRight size={11} />
           </div>
         </button>
 
         <button
           onClick={handleCreate}
-          className="w-full flex items-center gap-2.5 p-2 rounded-lg text-[#6C5DD3] hover:bg-[#6C5DD3]/5 transition-all font-bold text-xs"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-700 dark:text-zinc-200 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-white/5 transition-all font-semibold text-xs cursor-pointer group"
         >
-          <div className="w-6 h-6 rounded-md bg-[#6C5DD3]/10 flex items-center justify-center">
-            <Plus size={14} />
+          <div className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 text-[var(--lumins-accent-fg)] group-hover:bg-[var(--lumins-accent)] group-hover:text-[var(--lumins-accent-on)] flex items-center justify-center transition-colors">
+            <Plus size={12} strokeWidth={2.5} />
           </div>
           <span>Crear nuevo espacio</span>
         </button>
@@ -294,60 +293,60 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
 
   return (
     <>
-    <SmartPopover
-      isOpen={isOpen}
-      onClose={() => {
-        setIsOpen(false);
-        setSearchQuery('');
-      }}
-      trigger={
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-3 py-2'} rounded transition-all group w-full ${isFloating ? 'hover:bg-white/10' : 'hover:bg-zinc-100 dark:hover:bg-white/5 border border-transparent hover:border-zinc-200 dark:hover:border-white/10'}`}
-        >
-          <div className="w-8 h-8 rounded bg-gradient-to-tr from-indigo-500 to-violet-500 flex-shrink-0 flex items-center justify-center text-white text-[10px] font-black shadow-lg group-hover:scale-105 transition-transform">
-            {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
-          </div>
-          
-          <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-3'}`}>
-            <span className={`text-[13px] font-bold truncate ${isFloating ? 'text-white' : 'text-zinc-800 dark:text-zinc-100'}`}>
-              {currentWorkspace?.name || 'Sin Espacios'}
-            </span>
-            <ChevronDown size={14} className={`${isFloating ? 'text-white/50' : 'text-zinc-400 dark:text-zinc-500'} min-w-[14px]`} />
-          </div>
-        </button>
-      }
-      content={popoverContent}
-    />
-    
-    {workspaceToEdit && (
-      <EditWorkspaceModal
-        isOpen={editModalOpen}
+      <SmartPopover
+        isOpen={isOpen}
         onClose={() => {
-          setEditModalOpen(false);
-          setWorkspaceToEdit(null);
+          setIsOpen(false);
+          setSearchQuery('');
         }}
-        workspace={workspaceToEdit}
-        onWorkspaceUpdated={(updated) => {
-          setWorkspaces(prev => prev.map(w => w.id === updated.id ? { ...w, ...updated } : w));
-        }}
-        onRequestDelete={(id, name) => {
-          setWorkspaceToDelete({ id, name });
-          setDeleteModalOpen(true);
-        }}
-      />
-    )}
+        trigger={
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-2.5 py-1.5'} rounded-xl transition-all group w-full cursor-pointer ${isFloating ? 'hover:bg-white/10' : 'hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent hover:border-slate-200/80 dark:hover:border-white/10'}`}
+          >
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)] flex-shrink-0 flex items-center justify-center text-[var(--lumins-accent-on)] text-[10px] font-black shadow-xs group-hover:scale-105 transition-transform">
+              {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
+            </div>
 
-    {workspaceToDelete && (
-      <DeleteWorkspaceModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        workspaceId={workspaceToDelete.id}
-        workspaceName={workspaceToDelete.name}
+            <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-2.5'}`}>
+              <span className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-slate-800 dark:text-zinc-100'}`}>
+                {currentWorkspace?.name || 'Sin Espacios'}
+              </span>
+              <ChevronDown size={14} className={`${isFloating ? 'text-white/50' : 'text-slate-400 dark:text-zinc-500'} min-w-[14px]`} />
+            </div>
+          </button>
+        }
+        content={popoverContent}
       />
-    )}
-  </>
+
+      {workspaceToEdit && (
+        <EditWorkspaceModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setWorkspaceToEdit(null);
+          }}
+          workspace={workspaceToEdit}
+          onWorkspaceUpdated={(updated) => {
+            setWorkspaces(prev => prev.map(w => w.id === updated.id ? { ...w, ...updated } : w));
+          }}
+          onRequestDelete={(id, name) => {
+            setWorkspaceToDelete({ id, name });
+            setDeleteModalOpen(true);
+          }}
+        />
+      )}
+
+      {workspaceToDelete && (
+        <DeleteWorkspaceModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          workspaceId={workspaceToDelete.id}
+          workspaceName={workspaceToDelete.name}
+        />
+      )}
+    </>
   );
 };
 

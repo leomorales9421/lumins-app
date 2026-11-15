@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, Loader2, Trash2, Layout, Users, Calendar, AlertTriangle } from 'lucide-react';
+import { X, Loader2, Trash2, Calendar } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import Alert from './ui/Alert';
+import Badge from './ui/Badge';
+import {
+  LuminsSettingsIcon,
+  LuminsBoardIcon,
+  LuminsMembersIcon
+} from './icons/LuminsIcons';
 
 export interface WorkspaceEditableData {
   id: string;
@@ -78,10 +85,8 @@ const EditWorkspaceModal: React.FC<EditWorkspaceModalProps> = ({
       };
 
       toast.success('Espacio de trabajo actualizado correctamente');
-      
-      // Dispatch global event so sidebar and switcher update in real time
       window.dispatchEvent(new CustomEvent('workspace-changed'));
-      
+
       if (onWorkspaceUpdated) {
         onWorkspaceUpdated(updated);
       }
@@ -114,31 +119,31 @@ const EditWorkspaceModal: React.FC<EditWorkspaceModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-md"
+            className="fixed inset-0 bg-[#13151A]/50 backdrop-blur-sm"
           />
 
-          {/* Modal Card (Native Bottom Sheet on mobile / Centered Dialog on desktop) */}
+          {/* Modal Card */}
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.96 }}
-            transition={{ type: "spring", damping: 25, stiffness: 320 }}
-            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-modal border border-zinc-200 dark:border-white/10 p-5 sm:p-7 relative overflow-hidden z-10 max-h-[90dvh] overflow-y-auto overscroll-contain pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+            exit={{ opacity: 0, y: 24, scale: 0.97 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+            className="w-full max-w-lg bg-white dark:bg-[#1C1F26] rounded-t-2xl sm:rounded-xl shadow-modal border border-slate-200/90 dark:border-white/10 p-5 sm:p-6 relative overflow-hidden z-10 max-h-[90dvh] overflow-y-auto overscroll-contain pb-[max(1.5rem,env(safe-area-inset-bottom))]"
           >
-            {/* Native Mobile Pull Handle */}
-            <div className="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-3 sm:hidden" />
+            {/* Mobile Pull Handle */}
+            <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-zinc-700 mx-auto mb-3 sm:hidden" />
 
             {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-zinc-100 dark:border-white/10 mb-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shadow-xs shrink-0">
-                  <Settings size={22} strokeWidth={2.2} />
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-white/10 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-100/90 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 flex items-center justify-center shrink-0">
+                  <LuminsSettingsIcon size={18} />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-none">
                     Propiedades del Espacio
                   </h2>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-1">
                     Configura el nombre y detalles de este espacio de trabajo
                   </p>
                 </div>
@@ -146,124 +151,112 @@ const EditWorkspaceModal: React.FC<EditWorkspaceModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all shrink-0"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-zinc-100 transition-all shrink-0 cursor-pointer"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle size={15} className="shrink-0" />
-                <span>{error}</span>
-              </div>
+              <Alert tone="coral" className="mb-4">
+                {error}
+              </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name Field */}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Name Field (small) */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Nombre del Espacio <span className="text-rose-500">*</span>
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                  Nombre del Espacio <span className="text-[#FF665E]">*</span>
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Marketing & Producto"
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] transition-all"
+                  className="w-full h-9 px-3 bg-slate-50/90 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs sm:text-[13px] font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all"
                   autoFocus
                 />
               </div>
 
               {/* Description Field */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Descripción <span className="text-zinc-400 font-normal lowercase">(opcional)</span>
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                  Descripción <span className="text-slate-400 font-normal lowercase">(opcional)</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Describe los objetivos o proyectos que se gestionan aquí..."
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] transition-all resize-none"
+                  className="w-full px-3 py-2 bg-slate-50/90 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs sm:text-[13px] font-normal text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all resize-none"
                 />
               </div>
 
               {/* Stats Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400">
-                <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/5">
+                <div className="flex items-center gap-3.5">
                   {workspace._count?.boards !== undefined && (
-                    <div className="flex items-center gap-1.5" title="Tableros">
-                      <Layout size={13} className="text-[#6C5DD3]" />
-                      <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                        {workspace._count.boards}
-                      </span>
-                      <span className="text-[11px]">tableros</span>
-                    </div>
+                    <Badge variant="inline" icon={<LuminsBoardIcon size={13} />}>
+                      <span className="font-semibold text-slate-800 dark:text-zinc-200">{workspace._count.boards}</span> tableros
+                    </Badge>
                   )}
                   {workspace._count?.members !== undefined && (
-                    <div className="flex items-center gap-1.5" title="Miembros">
-                      <Users size={13} className="text-emerald-500" />
-                      <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                        {workspace._count.members}
-                      </span>
-                      <span className="text-[11px]">miembros</span>
-                    </div>
+                    <Badge variant="inline" icon={<LuminsMembersIcon size={13} />}>
+                      <span className="font-semibold text-slate-800 dark:text-zinc-200">{workspace._count.members}</span> miembros
+                    </Badge>
                   )}
                 </div>
 
                 {formattedDate && (
-                  <div className="flex items-center gap-1 text-[11px] text-zinc-400">
-                    <Calendar size={12} />
-                    <span>Creado {formattedDate}</span>
-                  </div>
+                  <Badge variant="inline" icon={<Calendar size={12} className="text-slate-400" />}>
+                    Creado {formattedDate}
+                  </Badge>
                 )}
               </div>
 
-              {/* Actions Footer */}
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+              {/* Actions Footer (small) */}
+              <div className="flex items-center justify-end gap-2 pt-1.5">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                  className="h-9 px-3.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !name.trim()}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-bold transition-all shadow-md shadow-[#6C5DD3]/25 disabled:opacity-50 active:scale-95"
+                  className="h-9 px-4 rounded-lg bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-semibold transition-all shadow-xs disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  {isLoading && <Loader2 size={14} className="animate-spin" />}
+                  {isLoading && <Loader2 size={13} className="animate-spin" />}
                   <span>Guardar cambios</span>
                 </button>
               </div>
             </form>
 
-            {/* Danger Zone: only for owners */}
+            {/* Danger Zone: using global Alert component */}
             {isOwner && onRequestDelete && (
-              <div className="mt-5 pt-4 border-t border-rose-100 dark:border-rose-500/10">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl bg-rose-50/50 dark:bg-rose-500/[0.04] border border-rose-100 dark:border-rose-500/15">
-                  <div>
-                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                      Zona de peligro
-                    </h4>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                      Eliminar permanentemente este espacio y sus tableros
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onRequestDelete(workspace.id, workspace.name);
-                    }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-bold transition-colors shrink-0"
-                  >
-                    <Trash2 size={13} />
-                    <span>Eliminar espacio</span>
-                  </button>
-                </div>
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5">
+                <Alert
+                  tone="coral"
+                  title="Zona de peligro"
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onRequestDelete(workspace.id, workspace.name);
+                      }}
+                      className="h-8 px-3 rounded-lg border border-slate-200 dark:border-white/10 hover:border-[#FF665E]/50 hover:bg-[#FF665E]/[0.06] text-[#C83730] dark:text-[#FF857E] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    >
+                      <Trash2 size={12} />
+                      <span>Eliminar espacio</span>
+                    </button>
+                  }
+                >
+                  Eliminar permanentemente este espacio y sus tableros.
+                </Alert>
               </div>
             )}
           </motion.div>

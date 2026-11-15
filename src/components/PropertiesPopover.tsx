@@ -90,7 +90,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Nivel de Prioridad</label>
           <button
             onClick={() => setActiveSelect(activeSelect === 'priority' ? null : 'priority')}
-            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[var(--lumins-accent)]/15 cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <Circle size={8} fill={PRIORITIES.find(p => p.id === priority)?.color || '#71717A'} className="text-transparent" />
@@ -120,7 +120,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
           <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Nivel de Riesgo</label>
           <button
             onClick={() => setActiveSelect(activeSelect === 'risk' ? null : 'risk')}
-            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[#6C5DD3]/15"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full flex justify-between items-center border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors outline-none focus:ring-2 focus:ring-[var(--lumins-accent)]/15 cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${RISK_LEVELS.find(r => r.id === riskLevel)?.bg || 'bg-zinc-100'} ${RISK_LEVELS.find(r => r.id === riskLevel)?.text || 'text-zinc-700'}`}>
@@ -157,7 +157,7 @@ const PropertiesPopover: React.FC<PropertiesPopoverProps> = ({
             onBlur={handleModuleBlur}
             onKeyDown={(e) => e.key === 'Enter' && handleModuleBlur()}
             placeholder="Ej. Frontend, Backend..."
-            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:bg-white dark:focus:bg-[#1C1F26] transition-all"
+            className="bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] focus:bg-white dark:focus:bg-[#1C1F26] transition-all"
           />
         </div>
       </div>

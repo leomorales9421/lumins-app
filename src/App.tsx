@@ -8,20 +8,23 @@ import { ProductUpdatesModal } from './components/updates/ProductUpdatesModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import MainLayout from './components/layout/MainLayout';
 import { useEffect, useState, lazy, Suspense } from 'react';
 import apiClient from './lib/api-client';
 import { GlobalToaster } from './components/GlobalToaster';
 import Cookies from 'js-cookie';
-import { Loader2 } from 'lucide-react';
+import LuminsLogoLoader from './components/ui/LuminsLogoLoader';
+import { NavigationLoaderProvider } from './contexts/NavigationLoaderContext';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Lazy Loaded Pages
 const BoardsPage = lazy(() => import('./pages/BoardsPage'));
 const BoardDetailPage = lazy(() => import('./pages/BoardDetailPage'));
 const InvitePage = lazy(() => import('./pages/InvitePage'));
 const MembersPage = lazy(() => import('./pages/MembersPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const WorkspaceActivityPage = lazy(() => import('./pages/WorkspaceActivityPage'));
 const WorkspaceCalendarPage = lazy(() => import('./pages/WorkspaceCalendarPage'));
 const SystemAdminPage = lazy(() => import('./pages/SystemAdminPage'));
@@ -37,9 +40,8 @@ const InsightsBoardDetailPage = lazy(() => import('./pages/InsightsBoardDetailPa
 const WorkspacesDirectoryPage = lazy(() => import('./pages/WorkspacesDirectoryPage'));
 
 const PageLoader = () => (
-  <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#F4F6F9] dark:bg-[#13151A] text-[#6C5DD3]">
-    <Loader2 className="animate-spin mb-4" size={48} />
-    <span className="text-sm font-bold uppercase tracking-widest animate-pulse">Cargando Lumins...</span>
+  <div className="flex-1 h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#14171C]">
+    <LuminsLogoLoader size="lg" />
   </div>
 );
 
@@ -102,7 +104,9 @@ const GlobalInvitationDetector: React.FC = () => {
 
 function App() {
   return (
+    <ErrorBoundary>
     <Router>
+      <NavigationLoaderProvider>
       <AuthProvider>
         <PermissionProvider>
           <SocketProvider>
@@ -151,7 +155,7 @@ function App() {
                   <Route path="/b/:id" element={<BoardShortLinkRedirect />} />
 
                   <Route path="/" element={<Navigate to="/app" replace />} />
-                  <Route path="*" element={<Navigate to="/app" replace />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>
               <GlobalToaster />
@@ -160,7 +164,9 @@ function App() {
           </SocketProvider>
         </PermissionProvider>
       </AuthProvider>
+      </NavigationLoaderProvider>
     </Router>
+    </ErrorBoundary>
   );
 }
 

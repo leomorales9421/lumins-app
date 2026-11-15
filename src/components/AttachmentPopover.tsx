@@ -41,8 +41,8 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
       {/* Loading Overlay */}
       {isUploading && (
         <div className="absolute inset-0 bg-white/60 dark:bg-[#1C1F26]/60 backdrop-blur-[1px] z-50 flex flex-col items-center justify-center gap-3">
-          <div className="w-10 h-10 border-4 border-[#6C5DD3]/20 border-t-[#6C5DD3] rounded-full animate-spin" />
-          <p className="text-[10px] font-black text-[#6C5DD3] uppercase tracking-[0.2em]">Cargando...</p>
+          <div className="w-10 h-10 border-4 border-[var(--lumins-accent)]/20 border-t-[var(--lumins-accent)] rounded-full animate-spin" />
+          <p className="text-[10px] font-black text-[var(--lumins-accent-fg)] uppercase tracking-[0.2em]">Cargando...</p>
         </div>
       )}
 
@@ -72,9 +72,9 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
         <button 
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[#6C5DD3] dark:text-[#8E82E3] font-bold py-4 rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-1.5 group disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-zinc-50/50 dark:bg-black/20 text-[var(--lumins-accent-fg)] font-bold py-4 rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer text-sm text-center border-2 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center gap-1.5 group disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="w-9 h-9 bg-[#6C5DD3]/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-9 h-9 bg-[var(--lumins-accent-soft)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
             <Upload size={18} strokeWidth={2.5} />
           </div>
           <span>Seleccionar archivo</span>
@@ -98,14 +98,14 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
               onClose();
               onOpenGoogleDrive();
             }}
-            className="mt-2.5 w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-[#13151A] hover:bg-[#6C5DD3]/10 dark:hover:bg-[#6C5DD3]/15 border border-zinc-200/80 dark:border-white/10 hover:border-[#6C5DD3]/40 transition-all group"
+            className="mt-2.5 w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-[#13151A] hover:bg-[var(--lumins-accent-soft)]/50 border border-zinc-200/80 dark:border-white/10 hover:border-[var(--lumins-accent-border)] transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-2.5 min-w-0 text-left">
               <div className="w-7 h-7 rounded-md bg-white dark:bg-[#1C1F26] border border-zinc-200/60 dark:border-white/10 flex items-center justify-center shrink-0">
                 <GoogleDriveIcon size={15} />
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 block group-hover:text-[#6C5DD3] dark:group-hover:text-[#8E82E3] transition-colors">
+                <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 block group-hover:text-[var(--lumins-accent-fg)] transition-colors">
                   Google Drive
                 </span>
                 <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 block truncate">
@@ -113,13 +113,13 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-extrabold text-[#6C5DD3] dark:text-[#8E82E3] uppercase tracking-wider shrink-0">
+            <span className="text-[10px] font-extrabold text-[var(--lumins-accent-fg)] uppercase tracking-wider shrink-0">
               Abrir
             </span>
           </button>
         ) : (
-          <div className="mt-3 p-2.5 rounded-lg bg-[#6C5DD3]/5 border border-[#6C5DD3]/15 flex items-start gap-2 text-zinc-600 dark:text-zinc-300">
-            <Info size={14} className="text-[#6C5DD3] shrink-0 mt-0.5" />
+          <div className="mt-3 p-2.5 rounded-lg bg-[var(--lumins-accent-soft)]/50 border border-[var(--lumins-accent-border)] flex items-start gap-2 text-zinc-600 dark:text-zinc-300">
+            <Info size={14} className="text-[var(--lumins-accent-fg)] shrink-0 mt-0.5" />
             <p className="text-[11px] leading-relaxed">
               ¿Tu video o archivo supera el límite? Súbelo a <strong>Google Drive</strong> o <strong>Dropbox</strong> y pega el enlace abajo.
             </p>
@@ -140,14 +140,14 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
             Enlace *
           </label>
           <div className="relative group">
-            <Link size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[#6C5DD3] transition-colors" />
+            <Link size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-[var(--lumins-accent-fg)] transition-colors" />
             <input 
               type="text"
               placeholder="Pega un enlace de Drive, Dropbox o web..."
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               disabled={isUploading}
-              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs font-medium w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
+              className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs font-medium w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
             />
           </div>
         </div>
@@ -162,7 +162,7 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
             value={linkName}
             onChange={(e) => setLinkName(e.target.value)}
             disabled={isUploading}
-            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 px-4 text-xs font-medium w-full outline-none focus:ring-4 focus:ring-[#6C5DD3]/10 focus:border-[#6C5DD3] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
+            className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 px-4 text-xs font-medium w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
           />
         </div>
       </div>
@@ -172,14 +172,14 @@ const AttachmentPopover: React.FC<AttachmentPopoverProps> = ({
         <button 
           onClick={onClose}
           disabled={isUploading}
-          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-4 py-2 transition-colors disabled:opacity-50"
+          className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-4 py-2 transition-colors disabled:opacity-50 cursor-pointer"
         >
           Cancelar
         </button>
         <button 
           onClick={handleInsertLink}
           disabled={!linkUrl.trim() || isUploading}
-          className="bg-[#6C5DD3] hover:bg-[#5848C2] text-white px-5 py-2 rounded-lg text-xs font-bold shadow-lg shadow-[#6C5DD3]/20 transition-all disabled:opacity-50 active:scale-95"
+          className="bg-[var(--lumins-accent)] hover:brightness-95 text-[var(--lumins-accent-on)] px-5 py-2 rounded-lg text-xs font-bold shadow-sm transition-all disabled:opacity-50 active:scale-95 cursor-pointer"
         >
           Adjuntar enlace
         </button>

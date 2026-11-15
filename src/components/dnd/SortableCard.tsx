@@ -40,11 +40,11 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
   return (
     <div
       className={`cu-card ${priorityClass} group
-        rounded-xl md:rounded-lg mb-2 shadow-sm hover:shadow-md
+        rounded-lg mb-1.5 shadow-[0_1px_2px_rgba(9,30,66,0.14)] hover:shadow-md
         ${isDragging ? 'opacity-40 scale-105 shadow-2xl z-[1000] rotate-[1deg] !transition-none' : 'transition-shadow duration-150'}
       `}
     >
-      <div className="px-2.5 pt-2.5 pb-2 flex flex-col gap-2">
+      <div className="px-2.5 py-2 flex flex-col gap-1.5">
         {card.labels && card.labels.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {card.labels.map((item: any, idx: number) => (
@@ -62,7 +62,7 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
         <div className="flex items-start justify-between gap-2 relative min-w-0">
           <p 
             style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-            className={`text-[13px] font-semibold leading-snug group-hover:text-[#6C5DD3] transition-colors whitespace-pre-wrap break-all sm:break-words min-w-0 flex-1 ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}
+            className={`text-[13px] font-semibold leading-snug group-hover:text-[var(--lumins-accent-fg)] transition-colors whitespace-pre-wrap break-all sm:break-words min-w-0 flex-1 ${card.isDone ? 'text-zinc-400 dark:text-zinc-500 line-through decoration-zinc-300 dark:decoration-zinc-700' : 'text-zinc-900 dark:text-zinc-100'}`}
           >
             {card.title}
           </p>
@@ -80,7 +80,7 @@ export const CardView: React.FC<{ card: Card; isDragging?: boolean }> = ({ card,
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1 bg-zinc-100 dark:bg-white/5 rounded overflow-hidden">
               <div
-                className={`h-full rounded transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[#6C5DD3]'}`}
+                className={`h-full rounded transition-all ${doneItems === totalItems ? 'bg-emerald-500' : 'bg-[var(--lumins-accent)]'}`}
                 style={{ width: `${checklistPct}%` }}
               />
             </div>

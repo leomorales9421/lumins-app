@@ -14,6 +14,7 @@ import { GoogleCalendarIcon } from '../../components/ui/GoogleCalendarIcon';
 import { GoogleMeetIcon, GoogleDriveIcon } from '../../components/ui/GoogleIcons';
 import { toast } from 'sonner';
 import { apiClient } from '../../lib/api-client';
+import { Badge } from '../../components/ui/Badge';
 
 const TrelloIcon = ({ size = 24, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -389,68 +390,52 @@ const IntegrationsSettings: React.FC = () => {
   const connectedCount =
     (gcalStatus.connected ? 1 : 0) +
     (gmeetStatus.connected ? 1 : 0) +
-    (gdriveStatus.connected ? 1 : 0) +
     (trelloToken ? 1 : 0);
 
   return (
     <div className="space-y-4">
       {/* Compact Header with Status & Upcoming Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-2">
-        <div className="hidden lg:block">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter">
-              Integraciones
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#9E92F5] border border-[#6C5DD3]/20">
-              {connectedCount}/4 activas
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Conecta Lumins con tus herramientas favoritas para potenciar tu productividad, videollamadas y archivos en la nube.
-          </p>
-        </div>
-
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-100/80 dark:bg-white/[0.04] border border-dashed border-zinc-300/80 dark:border-white/10 self-start sm:self-auto shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500/80 animate-pulse" />
-          <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400">
-            Próximamente: <strong className="text-zinc-700 dark:text-zinc-300">Slack, Jira y GitHub</strong>
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <Badge tone="teal" variant="dot" size="sm">
+            {connectedCount}/3 activas
+          </Badge>
+          <span className="text-xs text-slate-500 dark:text-zinc-400">
+            Conecta tus herramientas externas para sincronizar tareas y reuniones.
           </span>
         </div>
+
+        <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500">
+          Próximamente: <strong className="text-slate-600 dark:text-zinc-300">Google Drive, Slack, Jira y GitHub</strong>
+        </span>
       </div>
 
-      {/* 2x2 BENTO GRID (Zero Vertical Scroll on Desktop) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Compact 4-column Architectural Grid (scales cleanly for 10+ integrations) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {/* 1. GOOGLE CALENDAR INTEGRATION */}
-        <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between shadow-xs hover:border-zinc-300/90 dark:hover:border-white/15 transition-all">
+        <section className="bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 p-3.5 flex flex-col justify-between shadow-xs hover:border-[var(--lumins-accent-border)] transition-all">
           <div>
             {/* Card Header */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-2 shadow-2xs shrink-0">
-                  <GoogleCalendarIcon size={24} />
+            <div className="flex items-start justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-1.5 shrink-0">
+                  <GoogleCalendarIcon size={20} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
-                      Google Calendar
-                    </h3>
+                  <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                    Google Calendar
+                  </h3>
+                  <div className="mt-0.5">
                     {isLoadingGcal ? (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <Loader2 size={10} className="animate-spin" /> ...
+                      <span className="text-[10px] font-semibold text-zinc-400 inline-flex items-center gap-1">
+                        <Loader2 size={10} className="animate-spin" /> Cargando...
                       </span>
                     ) : gcalStatus.connected ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20 inline-flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Conectado
-                      </span>
+                      <Badge variant="dot" tone="teal" size="xs">Conectado</Badge>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <AlertCircle size={10} /> No vinculado
-                      </span>
+                      <Badge variant="dot" tone="neutral" size="xs">No vinculado</Badge>
                     )}
                   </div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold truncate">
-                    Calendario dedicado y fechas de entrega
-                  </p>
                 </div>
               </div>
 
@@ -460,90 +445,84 @@ const IntegrationsSettings: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Abrir Google Calendar"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors shrink-0"
+                  className="p-1 rounded-md text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)] transition-colors shrink-0"
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={13} />
                 </a>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
-              Sincroniza automáticamente tus tarjetas y fechas de entrega en un calendario dedicado sin alterar tus eventos personales.
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-snug line-clamp-2">
+              Sincroniza tarjetas y fechas de entrega en un calendario dedicado.
             </p>
 
             {/* Connected Metadata Pills */}
             {gcalStatus.connected && (
-              <div className="flex flex-wrap items-center gap-1.5 mt-3">
+              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                 {gcalStatus.accountEmail && (
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-100/80 dark:bg-white/5 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100/80 dark:bg-white/5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                     <span className="truncate">{gcalStatus.accountEmail}</span>
                   </span>
                 )}
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-100/80 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
+                <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100/80 dark:bg-white/5 border border-zinc-200/70 dark:border-white/10">
                   <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Sync:</span>
                   <select
                     value={gcalStatus.syncFrequency || 'auto'}
                     onChange={handleFrequencyChange}
                     disabled={isUpdatingFrequency}
-                    className="bg-transparent text-[11px] font-extrabold text-blue-600 dark:text-blue-400 outline-none cursor-pointer"
+                    className="bg-transparent text-[10px] font-bold text-[var(--lumins-accent-fg)] outline-none cursor-pointer"
                   >
-                    <option value="auto">Automática (Tiempo real)</option>
+                    <option value="auto">Automática</option>
                     <option value="30m">Cada 30m</option>
                     <option value="2h">Cada 2h</option>
                     <option value="6h">Cada 6h</option>
                     <option value="daily">Diaria</option>
                     <option value="manual">Manual</option>
                   </select>
-                  {isUpdatingFrequency && <Loader2 size={10} className="animate-spin text-blue-500" />}
+                  {isUpdatingFrequency && <Loader2 size={10} className="animate-spin text-[var(--lumins-accent-fg)]" />}
                 </div>
               </div>
             )}
           </div>
 
           {/* Card Footer Actions */}
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
               {gcalStatus.connected
                 ? gcalStatus.lastSyncAt
-                  ? `Sync: ${new Date(gcalStatus.lastSyncAt).toLocaleString('es-ES', {
+                  ? `${new Date(gcalStatus.lastSyncAt).toLocaleString('es-ES', {
                       day: '2-digit',
                       month: 'short',
                       hour: '2-digit',
                       minute: '2-digit',
                     })}`
-                  : `Calendario: ${gcalStatus.calendarName || 'Lumins'}`
-                : 'Sincronización bidireccional'}
+                  : gcalStatus.calendarName || 'Lumins'
+                : 'Bidireccional'}
             </span>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {gcalStatus.connected ? (
                 <>
                   <button
                     type="button"
                     onClick={handleSyncGoogleCalendar}
                     disabled={isSyncingGcal || isUnlinkingGcal}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
+                    title="Sincronizar ahora"
+                    className="inline-flex items-center justify-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-bold bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] shadow-2xs active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                   >
-                    <RefreshCw size={12} className={isSyncingGcal ? 'animate-spin' : ''} />
-                    <span>{isSyncingGcal ? 'Sincronizando...' : 'Sincronizar'}</span>
+                    <RefreshCw size={11} className={isSyncingGcal ? 'animate-spin' : ''} />
+                    <span>{isSyncingGcal ? 'Sync...' : 'Sync'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleUnlinkGoogleCalendar}
                     disabled={isUnlinkingGcal || isSyncingGcal}
                     title="Desvincular Google Calendar"
-                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 bg-zinc-100/80 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-500/10 border border-zinc-200/80 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
+                    className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-zinc-400 hover:text-[#D94841] hover:bg-[#FF665E]/10 border border-zinc-200/80 dark:border-white/10 transition-all disabled:opacity-50 cursor-pointer"
                   >
-                    {isUnlinkingGcal ? (
-                      <Loader2 size={12} className="animate-spin" />
-                    ) : (
-                      <>
-                        <Link2Off size={12} />
-                        <span>Desvincular</span>
-                      </>
-                    )}
+                    {isUnlinkingGcal ? <Loader2 size={11} className="animate-spin" /> : <Link2Off size={12} />}
                   </button>
                 </>
               ) : (
@@ -551,17 +530,17 @@ const IntegrationsSettings: React.FC = () => {
                   type="button"
                   onClick={handleConnectGoogleCalendar}
                   disabled={isConnectingGcal || isLoadingGcal}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1 h-7 px-3 rounded-lg text-[11px] font-bold bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] shadow-2xs active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isConnectingGcal ? (
                     <>
-                      <Loader2 size={12} className="animate-spin" />
-                      <span>Conectando...</span>
+                      <Loader2 size={11} className="animate-spin" />
+                      <span>Conectando</span>
                     </>
                   ) : (
                     <>
-                      <span>Vincular cuenta</span>
-                      <ArrowRight size={13} />
+                      <span>Vincular</span>
+                      <ArrowRight size={11} />
                     </>
                   )}
                 </button>
@@ -571,36 +550,29 @@ const IntegrationsSettings: React.FC = () => {
         </section>
 
         {/* 2. GOOGLE MEET INTEGRATION */}
-        <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between shadow-xs hover:border-zinc-300/90 dark:hover:border-white/15 transition-all">
+        <section className="bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 p-3.5 flex flex-col justify-between shadow-xs hover:border-[var(--lumins-accent-border)] transition-all">
           <div>
             {/* Card Header */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-2 shadow-2xs shrink-0">
-                  <GoogleMeetIcon size={24} />
+            <div className="flex items-start justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-1.5 shrink-0">
+                  <GoogleMeetIcon size={20} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
-                      Google Meet
-                    </h3>
+                  <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                    Google Meet
+                  </h3>
+                  <div className="mt-0.5">
                     {isLoadingGmeet ? (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <Loader2 size={10} className="animate-spin" /> ...
+                      <span className="text-[10px] font-semibold text-zinc-400 inline-flex items-center gap-1">
+                        <Loader2 size={10} className="animate-spin" /> Cargando...
                       </span>
                     ) : gmeetStatus.connected ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20 inline-flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Conectado
-                      </span>
+                      <Badge variant="dot" tone="teal" size="xs">Conectado</Badge>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <AlertCircle size={10} /> No vinculado
-                      </span>
+                      <Badge variant="dot" tone="neutral" size="xs">No vinculado</Badge>
                     )}
                   </div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold truncate">
-                    Salas de videollamada e invitados externos
-                  </p>
                 </div>
               </div>
 
@@ -610,22 +582,22 @@ const IntegrationsSettings: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Abrir Google Meet"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors shrink-0"
+                  className="p-1 rounded-md text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)] transition-colors shrink-0"
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={13} />
                 </a>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
-              Agenda videollamadas en tus tarjetas y calendario, confirmando qué asignados asisten y agregando correos externos.
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-snug line-clamp-2">
+              Agenda videollamadas en tarjetas y calendario con invitados externos.
             </p>
 
             {/* Connected Metadata Pills */}
             {gmeetStatus.connected && gmeetStatus.accountEmail && (
-              <div className="flex flex-wrap items-center gap-1.5 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-100/80 dark:bg-white/5 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
+              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100/80 dark:bg-white/5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                   <span className="truncate">{gmeetStatus.accountEmail}</span>
                 </span>
@@ -634,28 +606,28 @@ const IntegrationsSettings: React.FC = () => {
           </div>
 
           {/* Card Footer Actions */}
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
               {gmeetStatus.connected
-                ? 'Salas e invitaciones activas'
+                ? 'Salas activas'
                 : gmeetStatus.canQuickLinkFromCalendar
-                ? 'Compatible con tu Calendar'
-                : 'Videollamadas en 1 clic'}
+                ? 'Compatible con Calendar'
+                : 'Videollamadas 1 clic'}
             </span>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {gmeetStatus.connected ? (
                 <button
                   type="button"
                   onClick={handleUnlinkGoogleMeet}
                   disabled={isUnlinkingGmeet}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 bg-zinc-100/80 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-500/10 border border-zinc-200/80 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-bold text-zinc-500 hover:text-[#D94841] bg-zinc-100/80 hover:bg-[#FF665E]/10 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isUnlinkingGmeet ? (
-                    <Loader2 size={12} className="animate-spin" />
+                    <Loader2 size={11} className="animate-spin" />
                   ) : (
                     <>
-                      <Link2Off size={12} />
+                      <Link2Off size={11} />
                       <span>Desvincular</span>
                     </>
                   )}
@@ -667,28 +639,28 @@ const IntegrationsSettings: React.FC = () => {
                       type="button"
                       onClick={handleQuickLinkGoogleMeet}
                       disabled={isConnectingGmeet || isLoadingGmeet}
-                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 active:scale-95 transition-all disabled:opacity-50"
-                      title="Activar usando la misma cuenta ya vinculada en Google Calendar"
+                      className="inline-flex items-center justify-center gap-1 h-7 px-2 rounded-lg text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-all disabled:opacity-50 cursor-pointer"
+                      title="Activar usando tu cuenta de Google Calendar"
                     >
-                      <Sparkles size={12} />
-                      <span>Usar Calendar</span>
+                      <Sparkles size={11} />
+                      <span>Calendar</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={handleConnectGoogleMeet}
                     disabled={isConnectingGmeet || isLoadingGmeet}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-xs shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-1 h-7 px-3 rounded-lg text-[11px] font-bold bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] shadow-2xs active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {isConnectingGmeet ? (
                       <>
-                        <Loader2 size={12} className="animate-spin" />
-                        <span>Conectando...</span>
+                        <Loader2 size={11} className="animate-spin" />
+                        <span>Conectando</span>
                       </>
                     ) : (
                       <>
-                        <span>Vincular cuenta</span>
-                        <ArrowRight size={13} />
+                        <span>Vincular</span>
+                        <ArrowRight size={11} />
                       </>
                     )}
                   </button>
@@ -698,143 +670,26 @@ const IntegrationsSettings: React.FC = () => {
           </div>
         </section>
 
-        {/* 3. GOOGLE DRIVE INTEGRATION */}
-        <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between shadow-xs hover:border-zinc-300/90 dark:hover:border-white/15 transition-all">
+        {/* 3. TRELLO INTEGRATION */}
+        <section className="bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 p-3.5 flex flex-col justify-between shadow-xs hover:border-[var(--lumins-accent-border)] transition-all">
           <div>
             {/* Card Header */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-2 shadow-2xs shrink-0">
-                  <GoogleDriveIcon size={24} />
+            <div className="flex items-start justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-[#0079BF] flex items-center justify-center text-white shrink-0">
+                  <TrelloIcon size={18} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
-                      Google Drive
-                    </h3>
-                    {isLoadingGdrive ? (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <Loader2 size={10} className="animate-spin" /> ...
-                      </span>
-                    ) : gdriveStatus.connected ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20 inline-flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Conectado
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <AlertCircle size={10} /> No vinculado
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold truncate">
-                    Explorador de archivos y subida en la nube
-                  </p>
-                </div>
-              </div>
-
-              {gdriveStatus.connected && (
-                <a
-                  href="https://drive.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Abrir Google Drive"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-[#6C5DD3]/10 transition-colors shrink-0"
-                >
-                  <ExternalLink size={14} />
-                </a>
-              )}
-            </div>
-
-            {/* Description */}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
-              Complementa la subida manual adjuntando documentos, hojas de cálculo y videos pesados desde tu Google Drive.
-            </p>
-
-            {/* Connected Metadata Pills */}
-            {gdriveStatus.connected && gdriveStatus.accountEmail && (
-              <div className="flex flex-wrap items-center gap-1.5 mt-3">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-100/80 dark:bg-white/5 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="truncate">{gdriveStatus.accountEmail}</span>
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Card Footer Actions */}
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
-              {gdriveStatus.connected ? 'Selector y vista previa activos' : 'Sin consumir espacio local'}
-            </span>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {gdriveStatus.connected ? (
-                <button
-                  type="button"
-                  onClick={handleUnlinkGoogleDrive}
-                  disabled={isUnlinkingGdrive}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 bg-zinc-100/80 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-500/10 border border-zinc-200/80 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {isUnlinkingGdrive ? (
-                    <Loader2 size={12} className="animate-spin" />
-                  ) : (
-                    <>
-                      <Link2Off size={12} />
-                      <span>Desvincular</span>
-                    </>
-                  )}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleConnectGoogleDrive}
-                  disabled={isConnectingGdrive || isLoadingGdrive}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#6C5DD3] hover:bg-[#5848C2] shadow-xs shadow-[#6C5DD3]/20 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {isConnectingGdrive ? (
-                    <>
-                      <Loader2 size={12} className="animate-spin" />
-                      <span>Conectando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Vincular cuenta</span>
-                      <ArrowRight size={13} />
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* 4. TRELLO INTEGRATION */}
-        <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between shadow-xs hover:border-zinc-300/90 dark:hover:border-white/15 transition-all">
-          <div>
-            {/* Card Header */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-[#0079BF] flex items-center justify-center text-white shadow-2xs shrink-0">
-                  <TrelloIcon size={22} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
-                      Trello
-                    </h3>
+                  <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                    Trello
+                  </h3>
+                  <div className="mt-0.5">
                     {trelloToken ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20 inline-flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Conectado
-                      </span>
+                      <Badge variant="dot" tone="teal" size="xs">Conectado</Badge>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-extrabold uppercase tracking-wider border border-zinc-200/80 dark:border-white/10 inline-flex items-center gap-1">
-                        <AlertCircle size={10} /> No vinculado
-                      </span>
+                      <Badge variant="dot" tone="neutral" size="xs">No vinculado</Badge>
                     )}
                   </div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold truncate">
-                    Migración e importación de tableros
-                  </p>
                 </div>
               </div>
 
@@ -844,38 +699,38 @@ const IntegrationsSettings: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Gestionar en Trello"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-[#0079BF] dark:hover:text-[#388dc2] hover:bg-[#0079BF]/10 transition-colors shrink-0"
+                  className="p-1 rounded-md text-zinc-400 hover:text-[#0079BF] hover:bg-[#0079BF]/10 transition-colors shrink-0"
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={13} />
                 </a>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
-              Importa tus tableros, listas y tarjetas directamente a Lumins manteniendo tus asignaciones y estructura.
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-snug line-clamp-2">
+              Importa tableros, listas y tarjetas manteniendo asignaciones y estructura.
             </p>
           </div>
 
           {/* Card Footer Actions */}
-          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
-              {trelloToken ? 'Token cifrado localmente' : 'Importación rápida'}
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+              {trelloToken ? 'Token cifrado' : 'Importación rápida'}
             </span>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {trelloToken ? (
                 <button
                   type="button"
                   onClick={handleUnlinkTrello}
                   disabled={isUnlinkingTrello}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 bg-zinc-100/80 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-500/10 border border-zinc-200/80 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-bold text-zinc-500 hover:text-[#D94841] bg-zinc-100/80 hover:bg-[#FF665E]/10 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isUnlinkingTrello ? (
-                    <Loader2 size={12} className="animate-spin" />
+                    <Loader2 size={11} className="animate-spin" />
                   ) : (
                     <>
-                      <Link2Off size={12} />
+                      <Link2Off size={11} />
                       <span>Desvincular</span>
                     </>
                   )}
@@ -890,13 +745,55 @@ const IntegrationsSettings: React.FC = () => {
                       '_blank'
                     )
                   }
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0079BF] hover:bg-[#026aa7] shadow-xs shadow-[#0079BF]/20 active:scale-95 transition-all"
+                  className="inline-flex items-center justify-center gap-1 h-7 px-3 rounded-lg text-[11px] font-bold bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] shadow-2xs active:scale-95 transition-all cursor-pointer"
                 >
-                  <span>Vincular cuenta</span>
-                  <ArrowRight size={13} />
+                  <span>Vincular</span>
+                  <ArrowRight size={11} />
                 </button>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* 4. GOOGLE DRIVE INTEGRATION (Disabled - Pronto) */}
+        <section className="bg-white/80 dark:bg-[#1C1F26]/70 rounded-xl border border-slate-200/80 dark:border-white/10 p-3.5 flex flex-col justify-between opacity-80">
+          <div>
+            {/* Card Header */}
+            <div className="flex items-start justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-1.5 shrink-0 grayscale-[35%]">
+                  <GoogleDriveIcon size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                    Google Drive
+                  </h3>
+                  <div className="mt-0.5">
+                    <Badge variant="dot" tone="amber" size="xs">Pronto</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-snug line-clamp-2">
+              Adjunta documentos, hojas de cálculo y archivos pesados desde Google Drive.
+            </p>
+          </div>
+
+          {/* Card Footer Actions */}
+          <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+              En desarrollo
+            </span>
+
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center justify-center h-7 px-3 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500 border border-slate-200/70 dark:border-white/10 cursor-not-allowed"
+            >
+              Pronto
+            </button>
           </div>
         </section>
       </div>

@@ -99,40 +99,40 @@ export interface WeekEventSegment {
 }
 
 export const BOARD_ACCENT_PALETTE = [
-  '#6C5DD3', // Indigo / Lumins Primary
+  '#12A9A8', // Lumins Turquoise Primary
+  '#FF665E', // Lumins Coral
+  '#F59E0B', // Lumins Amber
   '#0EA5E9', // Sky Blue
   '#10B981', // Emerald
-  '#F59E0B', // Amber
   '#EC4899', // Pink
   '#8B5CF6', // Violet
   '#14B8A6', // Teal
   '#F97316', // Orange
   '#3B82F6', // Blue
-  '#EF4444', // Red
   '#6366F1', // Indigo 500
   '#84CC16', // Lime
 ];
 
 export const PRIORITY_COLORS: Record<string, { hex: string; label: string; badgeClass: string }> = {
   P0: {
-    hex: '#EF4444',
+    hex: '#FF665E',
     label: 'P0 · Crítica',
-    badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
+    badgeClass: 'bg-slate-100/80 dark:bg-white/[0.06] text-[#D94841] dark:text-[#FF857E] border-transparent',
   },
   P1: {
-    hex: '#F97316',
+    hex: '#FFCC40',
     label: 'P1 · Alta',
-    badgeClass: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30',
+    badgeClass: 'bg-slate-100/80 dark:bg-white/[0.06] text-amber-800 dark:text-[#FFCC40] border-transparent',
   },
   P2: {
-    hex: '#3B82F6',
+    hex: '#12A9A8',
     label: 'P2 · Media',
-    badgeClass: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    badgeClass: 'bg-slate-100/80 dark:bg-white/[0.06] text-[#0E8786] dark:text-[#4ED4D2] border-transparent',
   },
   P3: {
-    hex: '#64748B',
+    hex: '#94A3B8',
     label: 'P3 · Baja',
-    badgeClass: 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30',
+    badgeClass: 'bg-slate-100/80 dark:bg-white/[0.06] text-slate-600 dark:text-zinc-300 border-transparent',
   },
 };
 
@@ -304,21 +304,21 @@ export function getEventAccentColor(
     props.boardAccentColor ||
     resolveBoardAccentColor(props.boardId, props.boardBackground) ||
     event.backgroundColor ||
-    '#6C5DD3';
+    '#12A9A8';
 
   switch (colorBy) {
     case 'priority': {
       const p = props.priority || 'P2';
-      return PRIORITY_COLORS[p]?.hex || '#3B82F6';
+      return PRIORITY_COLORS[p]?.hex || '#12A9A8';
     }
     case 'label': {
       return props.labels?.[0]?.color || boardColor;
     }
     case 'status': {
-      if (isCardCompleted(event)) return '#10B981';
+      if (isCardCompleted(event)) return '#12A9A8';
       if (props.blocked) return '#F59E0B';
-      if (isEventOverdue(event, todayDate)) return '#EF4444';
-      return '#6C5DD3';
+      if (isEventOverdue(event, todayDate)) return '#FF665E';
+      return '#12A9A8';
     }
     case 'board':
     default:

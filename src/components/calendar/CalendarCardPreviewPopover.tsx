@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
@@ -39,7 +39,7 @@ export const getAvatarUrl = (user: { name: string; avatarUrl?: string | null }) 
     if (user.avatarUrl.startsWith('http')) return user.avatarUrl;
     return `${API_BASE_URL}${user.avatarUrl.startsWith('/') ? '' : '/'}${user.avatarUrl}`;
   }
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=6C5DD3&color=fff`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=12A9A8&color=fff`;
 };
 
 const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
@@ -126,7 +126,7 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
         {/* Date & Priority Row */}
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 text-[11px] font-semibold capitalize">
-            <CalendarIcon size={12} className="text-[#6C5DD3]" />
+            <CalendarIcon size={12} className="text-[#12A9A8]" />
             <span>{dateText}</span>
           </div>
 
@@ -174,7 +174,7 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
               <span
                 key={label.id}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-xs"
-                style={{ backgroundColor: label.color || '#6C5DD3' }}
+                style={{ backgroundColor: label.color || '#12A9A8' }}
               >
                 {label.name || 'Etiqueta'}
               </span>
@@ -189,7 +189,7 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
                   <span className="inline-flex items-center gap-1">
-                    <CheckSquare size={12} className="text-[#6C5DD3]" />
+                    <CheckSquare size={12} className="text-[#12A9A8]" />
                     Checklist
                   </span>
                   <span>
@@ -199,7 +199,7 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
                 <div className="w-full h-1.5 bg-zinc-100 dark:bg-white/10 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      checklistPct === 100 ? 'bg-emerald-500' : 'bg-[#6C5DD3]'
+                      checklistPct === 100 ? 'bg-emerald-500' : 'bg-[#12A9A8]'
                     }`}
                     style={{ width: `${checklistPct}%` }}
                   />
@@ -274,7 +274,7 @@ const CalendarCardPreviewPopover: React.FC<CalendarCardPreviewPopoverProps> = ({
           <button
             type="button"
             onClick={() => onOpenDetail(event)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] hover:bg-[#6C5DD3] hover:text-white transition-colors ml-auto"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#12A9A8]/10 text-[#12A9A8] dark:text-[#4ED4D2] hover:bg-[#12A9A8] hover:text-white transition-colors ml-auto"
           >
             <span>Abrir tarjeta</span>
             <ExternalLink size={12} />

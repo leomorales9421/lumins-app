@@ -135,7 +135,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
           map.set(bId, {
             id: bId,
             title: ev.extendedProps.boardName,
-            accentColor: ev.extendedProps.boardAccentColor || '#6C5DD3',
+            accentColor: ev.extendedProps.boardAccentColor || '#12A9A8',
             items: [],
           });
         }
@@ -153,7 +153,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
             id: key,
             title: ev.extendedProps.listName,
             subtitle: ev.extendedProps.boardName,
-            accentColor: ev.extendedProps.boardAccentColor || '#6C5DD3',
+            accentColor: ev.extendedProps.boardAccentColor || '#12A9A8',
             items: [],
           });
         }
@@ -175,7 +175,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
         id: m.id,
         title: m.name,
         avatarUrl: getAvatarUrl(m),
-        accentColor: '#6C5DD3',
+        accentColor: '#12A9A8',
         items: [],
       });
     }
@@ -190,7 +190,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
               id: a.id,
               title: a.name,
               avatarUrl: getAvatarUrl(a),
-              accentColor: '#6C5DD3',
+              accentColor: '#12A9A8',
               items: [],
             });
           }
@@ -272,11 +272,11 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
   const totalGridWidth = timelineDays.length * dayColWidth;
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-[#181B22] rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-xs">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-[#1B1F29] rounded-xl border border-zinc-200/80 dark:border-white/[0.12] shadow-xs">
       {/* Top Timeline Controls */}
-      <div className="px-3 py-2 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/90 dark:bg-[#14171E] flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0">
+      <div className="px-3 py-2 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/90 dark:bg-[#1E222D] flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0">
         <div className="flex items-center gap-2 shrink-0">
-          <GanttChart size={15} className="text-[#6C5DD3]" />
+          <GanttChart size={15} className="text-[var(--lumins-accent-fg)]" />
           <span className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-100 whitespace-nowrap">
             Cronograma Timeline
           </span>
@@ -341,7 +341,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                 onClick={() => setScale(s.id)}
                 className={`px-2.5 py-1 rounded-md transition-all ${
                   scale === s.id
-                    ? 'bg-[#6C5DD3] text-white shadow-2xs'
+                    ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-2xs'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
               >
@@ -359,8 +359,8 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
           style={{ minWidth: `calc(110px + ${totalGridWidth}px)` }}
         >
           {/* Sticky Timeline Dates Header */}
-          <div className="sticky top-0 z-20 flex border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#15181F]">
-            <div className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3.5 py-2.5 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-30 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+          <div className="sticky top-0 z-20 flex border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#1E222D]">
+            <div className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3.5 py-2.5 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-30 bg-zinc-50 dark:bg-[#1E222D] flex items-center justify-between text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
               <span className="truncate">
                 {groupBy === 'board'
                   ? 'Tablero / Tarea'
@@ -380,12 +380,12 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                   <div
                     key={key}
                     style={{ width: dayColWidth }}
-                    className={`py-1.5 border-r border-zinc-200/50 dark:border-white/[0.04] flex flex-col items-center justify-center shrink-0 ${
+                    className={`py-1.5 border-r border-zinc-200/50 dark:border-white/[0.08] flex flex-col items-center justify-center shrink-0 ${
                       today
-                        ? 'bg-[#6C5DD3]/15 text-[#6C5DD3] dark:text-[#A599F9]'
+                        ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]'
                         : weekend
-                        ? 'bg-zinc-100/60 dark:bg-white/[0.02] text-zinc-400'
-                        : 'text-zinc-600 dark:text-zinc-300'
+                        ? 'bg-zinc-100/60 dark:bg-white/[0.03] text-zinc-400'
+                        : 'text-zinc-600 dark:text-zinc-200'
                     }`}
                   >
                     {scale !== 'quarter' && (
@@ -407,18 +407,18 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
           </div>
 
           {/* Groups & Gantt Rows */}
-          <div className="divide-y divide-zinc-200/60 dark:divide-white/[0.05]">
+          <div className="divide-y divide-zinc-200/60 dark:divide-white/[0.08]">
             {groups.map(group => {
               const isCollapsed = Boolean(collapsedGroupIds[group.id]);
 
               return (
                 <div key={group.id} className="flex flex-col">
                   {/* Group Header Bar */}
-                  <div className="flex bg-zinc-50/70 dark:bg-[#15181F]/80 border-b border-zinc-200/50 dark:border-white/[0.04]">
+                  <div className="flex bg-zinc-50/70 dark:bg-[#191D27] border-b border-zinc-200/50 dark:border-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => toggleGroup(group.id)}
-                      className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3 py-2 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-zinc-50 dark:bg-[#15181F] flex items-center justify-between gap-1.5 text-left hover:bg-zinc-100/80 dark:hover:bg-white/[0.04] transition-colors"
+                      className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 px-2 sm:px-3 py-2 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-zinc-50 dark:bg-[#191D27] flex items-center justify-between gap-1.5 text-left hover:bg-zinc-100/80 dark:hover:bg-white/[0.05] transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {isCollapsed ? (
@@ -436,7 +436,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                         ) : (
                           <span
                             className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: group.accentColor || '#6C5DD3' }}
+                            style={{ backgroundColor: group.accentColor || '#12A9A8' }}
                           />
                         )}
                         <div className="min-w-0">
@@ -516,7 +516,7 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                               e.preventDefault();
                               onOpenQuickMenu?.(ev, { x: e.clientX, y: e.clientY });
                             }}
-                            className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 h-full px-2 sm:px-3 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-white dark:bg-[#181B22] flex items-center justify-between gap-1.5 cursor-pointer hover:text-[#6C5DD3]"
+                            className="w-[140px] sm:w-[200px] md:w-[280px] lg:w-[320px] shrink-0 h-full px-2 sm:px-3 border-r border-zinc-200/80 dark:border-white/10 sticky left-0 z-10 bg-white dark:bg-[#1B1F29] flex items-center justify-between gap-1.5 cursor-pointer hover:text-[var(--lumins-accent-fg)]"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
                               {done ? (
@@ -566,11 +566,11 @@ const LuminsCalendarTimelineView: React.FC<LuminsCalendarTimelineViewProps> = ({
                                   <div
                                     key={getDayKey(day)}
                                     style={{ width: dayColWidth }}
-                                    className={`h-full border-r border-zinc-100 dark:border-white/[0.03] shrink-0 ${
+                                    className={`h-full border-r border-zinc-100 dark:border-white/[0.07] shrink-0 ${
                                       today
-                                        ? 'bg-[#6C5DD3]/[0.05]'
+                                        ? 'bg-[var(--lumins-accent-soft)]/50'
                                         : weekend
-                                        ? 'bg-zinc-50/40 dark:bg-white/[0.01]'
+                                        ? 'bg-zinc-50/40 dark:bg-white/[0.025]'
                                         : ''
                                     }`}
                                   />

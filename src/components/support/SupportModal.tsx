@@ -1,23 +1,26 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   X, 
-  HelpCircle, 
-  AlertCircle, 
   Lightbulb, 
-  MessageSquareWarning, 
   Send, 
   Loader2, 
-  CheckCircle2,
   Paperclip,
   UploadCloud,
   FileText,
-  Trash2,
-  Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
 import { useAuth } from '../../contexts/AuthContext';
 import { compressSupportAttachment } from '../../lib/image-utils';
+import { Badge } from '../ui/Badge';
+import {
+  LuminsSupportIcon,
+  LuminsErrorIcon,
+  LuminsInfoIcon,
+  LuminsWarningIcon,
+  LuminsSuccessIcon,
+  LuminsTrashIcon,
+} from '../icons/LuminsIcons';
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -31,40 +34,44 @@ const CATEGORIES: Array<{
   label: string;
   description: string;
   icon: React.ReactNode;
-  activeColor: string;
-  badgeBg: string;
+  activeAccent: string;
+  activeTitle: string;
 }> = [
   {
     id: 'problema',
     label: 'Problema / Error',
     description: 'Fallo técnico, error en pantalla o algo no funciona.',
-    icon: <AlertCircle size={18} />,
-    activeColor: 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-500/10',
-    badgeBg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+    icon: <LuminsErrorIcon size={20} />,
+    activeAccent: 'border-l-[3px] border-l-[#FF665E] border-[#FF665E]/35',
+    activeTitle: 'text-[#D94841] dark:text-[#FF857E]',
   },
   {
     id: 'duda',
     label: 'Duda o Consulta',
     description: 'Preguntas sobre cómo usar una función en Lumins.',
-    icon: <HelpCircle size={18} />,
-    activeColor: 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-500/10',
-    badgeBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    icon: <LuminsInfoIcon size={20} />,
+    activeAccent: 'border-l-[3px] border-l-[#12A9A8] border-[#12A9A8]/35',
+    activeTitle: 'text-[#0E8786] dark:text-[#4CD4D3]',
   },
   {
     id: 'sugerencia',
     label: 'Sugerencia',
     description: 'Ideas de mejora o nuevas funciones que te gustaría ver.',
-    icon: <Lightbulb size={18} />,
-    activeColor: 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/60 dark:bg-purple-500/10',
-    badgeBg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+    icon: (
+      <span className="w-5 h-5 rounded-md bg-[#12A9A8] text-white flex items-center justify-center">
+        <Lightbulb size={13} strokeWidth={2.4} />
+      </span>
+    ),
+    activeAccent: 'border-l-[3px] border-l-[#12A9A8] border-[#12A9A8]/35',
+    activeTitle: 'text-[#0E8786] dark:text-[#4CD4D3]',
   },
   {
     id: 'queja',
     label: 'Queja o Reclamo',
     description: 'Inconformidad con el servicio o la experiencia.',
-    icon: <MessageSquareWarning size={18} />,
-    activeColor: 'border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-500/10',
-    badgeBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    icon: <LuminsWarningIcon size={20} />,
+    activeAccent: 'border-l-[3px] border-l-[#FFCC40] border-[#FFCC40]/50',
+    activeTitle: 'text-[#9A6700] dark:text-[#FFCC40]',
   },
 ];
 
@@ -301,17 +308,17 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
       onPaste={handlePaste}
     >
       <div 
-        className="w-full max-w-xl bg-white dark:bg-[#1C1F26] rounded-3xl border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+        className="w-full max-w-xl bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/60 dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#A599F9] flex items-center justify-center shrink-0">
-              <HelpCircle size={20} />
+            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0">
+              <LuminsSupportIcon size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-100">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                 Centro de Soporte y Ayuda
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -321,7 +328,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
           </div>
           <button
             onClick={handleResetAndClose}
-            className="w-8 h-8 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -330,13 +337,11 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
         {/* Modal Body */}
         {submittedTicket ? (
           <div className="p-8 text-center flex flex-col items-center justify-center space-y-4 my-auto">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/10">
-              <CheckCircle2 size={36} />
-            </div>
-            <h4 className="text-xl font-black text-zinc-900 dark:text-zinc-100">
+            <LuminsSuccessIcon size={44} />
+            <h4 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
               ¡Mensaje enviado con éxito!
             </h4>
-            <div className="inline-block px-3 py-1 rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
+            <div className="inline-block px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
               Código de Ticket: {submittedTicket.ticketCode}
             </div>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
@@ -344,19 +349,19 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
             </p>
             <button
               onClick={handleResetAndClose}
-              className="mt-4 px-6 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white text-xs font-extrabold uppercase tracking-wider transition-all shadow-md shadow-[#6C5DD3]/25 cursor-pointer"
+              className="mt-4 px-6 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm shadow-[#12A9A8]/20 cursor-pointer"
             >
               Entendido
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             {/* Category selection */}
             <div>
-              <label className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-2">
+              <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-2">
                 ¿Qué tipo de mensaje deseas enviar?
               </label>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {CATEGORIES.map(cat => {
                   const isSelected = category === cat.id;
                   return (
@@ -365,16 +370,18 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                       type="button"
                       onClick={() => setCategory(cat.id)}
                       className={`
-                        flex items-start gap-2.5 p-3 rounded-2xl border text-left transition-all cursor-pointer active:scale-[0.98]
+                        flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer active:scale-[0.99]
                         ${isSelected 
-                          ? `${cat.activeColor} border-2 shadow-xs ring-2 ring-current/10 font-bold` 
-                          : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-zinc-50/50 dark:bg-[#13151A] text-zinc-600 dark:text-zinc-300'}
+                          ? `bg-white dark:bg-[#1C1F26] ${cat.activeAccent} shadow-xs` 
+                          : 'border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-slate-50/50 dark:bg-[#13151A] text-zinc-600 dark:text-zinc-300'}
                       `}
                     >
                       <span className="shrink-0 mt-0.5">{cat.icon}</span>
                       <div className="min-w-0">
-                        <div className="text-xs font-extrabold">{cat.label}</div>
-                        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5 truncate">
+                        <div className={`text-xs font-bold ${isSelected ? cat.activeTitle : 'text-zinc-800 dark:text-zinc-200'}`}>
+                          {cat.label}
+                        </div>
+                        <div className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight mt-0.5 truncate">
                           {cat.description}
                         </div>
                       </div>
@@ -386,7 +393,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
 
             {/* Asunto */}
             <div>
-              <label className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5">
+              <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5">
                 Asunto / Título
               </label>
               <input
@@ -395,7 +402,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                 onChange={e => setSubject(e.target.value)}
                 placeholder="Ej. Problema al sincronizar Google Calendar"
                 maxLength={120}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A] text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all"
+                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all"
                 required
               />
             </div>
@@ -403,7 +410,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
             {/* Mensaje */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
+                <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
                   Descripción detallada
                 </label>
                 <span className="text-[10px] text-zinc-400 font-semibold">
@@ -416,7 +423,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                 placeholder="Explica qué sucedió, pasos para reproducir el error o los detalles de tu sugerencia..."
                 rows={3}
                 maxLength={1000}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A] text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all resize-none"
+                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all resize-none"
                 required
               />
             </div>
@@ -424,8 +431,8 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
             {/* Sección de Archivo Adjunto */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-                  <Paperclip size={13} className="text-[#6C5DD3]" />
+                <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                  <Paperclip size={13} className="text-[#12A9A8]" />
                   <span>Adjuntar Archivo o Captura (Opcional)</span>
                 </label>
                 <span className="text-[10px] text-zinc-400">
@@ -447,22 +454,22 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
               />
 
               {isCompressing ? (
-                <div className="p-4 rounded-2xl border border-dashed border-[#6C5DD3]/40 bg-[#6C5DD3]/5 flex items-center justify-center gap-3 text-xs text-[#6C5DD3] font-bold animate-pulse">
+                <div className="p-4 rounded-xl border border-dashed border-[#12A9A8]/40 bg-[#12A9A8]/5 flex items-center justify-center gap-3 text-xs text-[#12A9A8] font-bold animate-pulse">
                   <Loader2 size={18} className="animate-spin" />
                   <span>Minimizando y optimizando imagen...</span>
                 </div>
               ) : attachedFile ? (
                 /* Archivo cargado con preview y opción de eliminar */
-                <div className="p-3 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] flex items-center justify-between gap-3 shadow-xs">
+                <div className="p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/80 dark:bg-[#13151A] flex items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     {previewUrl ? (
                       <img 
                         src={previewUrl} 
                         alt="Vista previa" 
-                        className="w-12 h-12 rounded-xl object-cover border border-zinc-200 dark:border-white/10 shrink-0" 
+                        className="w-12 h-12 rounded-lg object-cover border border-zinc-200 dark:border-white/10 shrink-0" 
                       />
                     ) : (
-                      <div className="w-11 h-11 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#A599F9] flex items-center justify-center shrink-0">
+                      <div className="w-11 h-11 rounded-lg bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center shrink-0">
                         <FileText size={20} />
                       </div>
                     )}
@@ -475,9 +482,9 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                           {formatBytes(attachedFile.size)}
                         </span>
                         {compressionSavings && (
-                          <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold">
+                          <Badge tone="teal" variant="inline" size="xs">
                             Comprimida (-{Math.round((1 - compressionSavings.compressed / compressionSavings.original) * 100)}%)
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -486,10 +493,10 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                   <button
                     type="button"
                     onClick={handleRemoveFile}
-                    className="w-8 h-8 rounded-xl text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                    className="w-8 h-8 rounded-lg text-zinc-400 hover:text-[#FF665E] hover:bg-[#FF665E]/10 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
                     title="Eliminar archivo adjunto"
                   >
-                    <Trash2 size={16} />
+                    <LuminsTrashIcon size={16} />
                   </button>
                 </div>
               ) : (
@@ -500,21 +507,21 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                   className={`
-                    p-4 rounded-2xl border border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center
+                    p-4 rounded-xl border border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center
                     ${isDragging 
-                      ? 'border-[#6C5DD3] bg-[#6C5DD3]/10 ring-2 ring-[#6C5DD3]/30 scale-[0.99]' 
-                      : 'border-zinc-300 dark:border-white/15 hover:border-[#6C5DD3] dark:hover:border-[#6C5DD3] bg-zinc-50/60 dark:bg-[#13151A]/60 hover:bg-[#6C5DD3]/5'}
+                      ? 'border-[#12A9A8] bg-[#12A9A8]/5 ring-2 ring-[#12A9A8]/20 scale-[0.99]' 
+                      : 'border-zinc-300 dark:border-white/15 hover:border-[#12A9A8] dark:hover:border-[#12A9A8] bg-slate-50/60 dark:bg-[#13151A]/60 hover:bg-[#12A9A8]/[0.03]'}
                   `}
                 >
                   <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                    <UploadCloud size={20} className="text-[#6C5DD3]" />
+                    <UploadCloud size={19} className="text-[#12A9A8]" />
                     <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">
                       Haz clic para examinar o arrastra aquí tu archivo
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-400 flex items-center gap-1">
                     <span>O puedes pegar una captura directamente con</span>
-                    <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-mono text-[10px] font-semibold border border-zinc-300 dark:border-zinc-700">
+                    <kbd className="px-1.5 py-0.5 rounded bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-mono text-[10px] font-semibold border border-zinc-300 dark:border-zinc-700">
                       Ctrl + V
                     </kbd>
                   </p>
@@ -523,19 +530,19 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
             </div>
 
             {/* Footer Buttons */}
-            <div className="pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-end gap-3">
+            <div className="pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={handleResetAndClose}
                 disabled={loading || isCompressing}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading || isCompressing || !subject.trim() || !message.trim()}
-                className="px-6 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white text-xs font-extrabold flex items-center gap-2 transition-all shadow-md shadow-[#6C5DD3]/25 disabled:opacity-50 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm shadow-[#12A9A8]/20 disabled:opacity-50 active:scale-95 cursor-pointer"
               >
                 {loading ? (
                   <>

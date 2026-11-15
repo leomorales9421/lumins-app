@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import { toast } from 'sonner';
 
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -421,8 +422,8 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     <div className={`flex flex-col w-full bg-zinc-50 dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 focus-within:ring-2 focus-within:ring-[#6C5DD3]/15 transition-all overflow-hidden relative`}>
       {isUploading && (
         <div className="absolute inset-0 bg-white/50 dark:bg-black/40 backdrop-blur-[2px] z-50 flex items-center justify-center flex-col gap-2">
-          <Loader2 size={isCompact ? 24 : 32} className="text-[#6C5DD3] animate-spin" />
-          <span className="text-[#6C5DD3] font-bold text-xs">Subiendo...</span>
+          <LuminsLogoLoader size={isCompact ? 'xs' : 'sm'} />
+          <span className="text-[#12A9A8] font-bold text-xs">Subiendo...</span>
         </div>
       )}
       

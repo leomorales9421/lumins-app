@@ -67,16 +67,16 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       {/* Join / Leave */}
       <button 
         onClick={handleJoinClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[var(--lumins-accent-fg)] transition-colors cursor-pointer group"
       >
         {isJoined ? (
           <>
-            <UserMinus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
+            <UserMinus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[var(--lumins-accent-fg)]" />
             <span>Abandonar tarjeta</span>
           </>
         ) : (
           <>
-            <UserPlus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
+            <UserPlus size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[var(--lumins-accent-fg)]" />
             <span>Unirse</span>
           </>
         )}
@@ -85,7 +85,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
       {/* Share */}
       <button 
         onClick={handleShareClick}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#6C5DD3] dark:hover:text-[#6C5DD3] transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[var(--lumins-accent-fg)] transition-colors cursor-pointer group"
       >
         {copied ? (
           <>
@@ -94,7 +94,7 @@ const CardOptionsMenu: React.FC<CardOptionsMenuProps> = ({
           </>
         ) : (
           <>
-            <Link size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[#6C5DD3]" />
+            <Link size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-[var(--lumins-accent-fg)]" />
             <span>Copiar enlace</span>
           </>
         )}

@@ -70,19 +70,19 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-bold text-zinc-700 ml-1">Teléfono</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-bold text-slate-700 ml-0.5">Teléfono</label>
       
       <div className="relative flex items-center" ref={dropdownRef}>
         {/* Country Selector Button */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="h-12 sm:h-11 px-3 bg-[#F4F6F9] border border-transparent rounded-l-xl sm:rounded-l flex items-center gap-2 hover:bg-[#EBEEF2] transition-colors shrink-0 text-sm font-semibold text-zinc-800"
+          className="h-9 px-2.5 bg-[#F8FAFC] border border-slate-200 border-r-0 rounded-l-lg flex items-center gap-1.5 hover:bg-slate-100 transition-colors shrink-0 text-xs font-semibold text-slate-800"
         >
-          <span className="text-xl leading-none">{selectedCountry.flag}</span>
-          <span className="text-xs text-zinc-600 font-bold">{selectedCountry.dialCode}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+          <span className="text-base leading-none">{selectedCountry.flag}</span>
+          <span className="text-[11px] text-slate-600 font-bold">{selectedCountry.dialCode}</span>
+          <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
 
         {/* Local Phone Number Input */}
@@ -90,27 +90,27 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
           type="tel"
           value={phoneNumber}
           onChange={(e) => onPhoneNumberChange(e.target.value.replace(/[^0-9]/g, ''))}
-          className="w-full h-12 sm:h-11 bg-[#F4F6F9] border-l border-y-0 border-r-0 border-zinc-200 rounded-r-xl sm:rounded-r px-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3] transition-all placeholder:text-zinc-400"
+          className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-r-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all placeholder:text-slate-400"
           placeholder="412 123 4567"
           autoComplete="tel-national"
         />
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-2 border-b border-zinc-100 flex items-center gap-2 bg-zinc-50/80">
-              <Search className="w-4 h-4 text-zinc-400 shrink-0 ml-1" />
+          <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-[12px] shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-2 border-b border-slate-100 flex items-center gap-2 bg-slate-50">
+              <Search className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar país o código..."
-                className="w-full bg-transparent text-xs text-zinc-800 outline-none font-medium placeholder:text-zinc-400"
+                className="w-full bg-transparent text-xs text-slate-800 outline-none font-medium placeholder:text-slate-400"
                 autoFocus
               />
             </div>
 
-            <div className="max-h-56 overflow-y-auto p-1 divide-y divide-zinc-50">
+            <div className="max-h-56 overflow-y-auto p-1 divide-y divide-slate-50">
               {filteredCountries.length > 0 ? (
                 filteredCountries.map((c) => {
                   const isSelected = c.code === selectedCountry.code;
@@ -123,8 +123,8 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
                         setIsOpen(false);
                         setSearch('');
                       }}
-                      className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs rounded-lg transition-colors ${
-                        isSelected ? 'bg-indigo-50 text-[#4338ca] font-bold' : 'hover:bg-zinc-50 text-zinc-700'
+                      className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs rounded-[8px] transition-colors ${
+                        isSelected ? 'bg-[#12A9A8]/10 text-[#12A9A8] font-bold' : 'hover:bg-slate-50 text-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -132,14 +132,14 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
                         <span className="truncate max-w-[140px]">{c.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-zinc-400 font-mono font-medium">{c.dialCode}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#4338ca]" />}
+                        <span className="text-slate-400 font-mono font-medium">{c.dialCode}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#12A9A8]" />}
                       </div>
                     </button>
                   );
                 })
               ) : (
-                <div className="py-4 text-center text-xs text-zinc-400">
+                <div className="py-4 text-center text-xs text-slate-400">
                   No se encontraron países
                 </div>
               )}

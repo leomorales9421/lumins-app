@@ -256,7 +256,7 @@ const LuminsCalendarAgendaView: React.FC<LuminsCalendarAgendaViewProps> = ({
                 <span
                   key={lbl.id}
                   className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white"
-                  style={{ backgroundColor: lbl.color || '#6C5DD3' }}
+                  style={{ backgroundColor: lbl.color || '#12A9A8' }}
                 >
                   {lbl.name || 'Etiqueta'}
                 </span>
@@ -335,9 +335,9 @@ const LuminsCalendarAgendaView: React.FC<LuminsCalendarAgendaViewProps> = ({
                 onClick={() => handleSelectStripDay(day)}
                 className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all ${
                   selected
-                    ? 'bg-[#6C5DD3] text-white shadow-sm shadow-[#6C5DD3]/30'
+                    ? 'bg-[#12A9A8] text-white shadow-sm shadow-[#12A9A8]/30'
                     : today
-                    ? 'bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#A599F9]'
+                    ? 'bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#4ED4D2]'
                     : 'hover:bg-zinc-200/50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
                 }`}
               >
@@ -418,12 +418,12 @@ const LuminsCalendarAgendaView: React.FC<LuminsCalendarAgendaViewProps> = ({
               <div className="sticky top-0 z-10 flex items-center justify-between py-1.5 px-2 rounded-lg bg-zinc-100/90 dark:bg-[#1E222B]/95 backdrop-blur-xs">
                 <div className="flex items-center gap-2">
                   {today && (
-                    <span className="px-2 py-0.5 rounded-md bg-[#6C5DD3] text-white text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-md bg-[#12A9A8] text-white text-[10px] font-black uppercase tracking-wider">
                       Hoy
                     </span>
                   )}
                   {tomorrow && (
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-500/15 text-[#6C5DD3] dark:text-[#A599F9] text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-md bg-[#F59E0B]/15 text-[#D97706] dark:text-[#FFCC40] text-[10px] font-black uppercase tracking-wider">
                       Mañana
                     </span>
                   )}
@@ -438,7 +438,7 @@ const LuminsCalendarAgendaView: React.FC<LuminsCalendarAgendaViewProps> = ({
 
               {group.items.length === 0 ? (
                 <div className="px-3 py-4 rounded-xl border border-dashed border-zinc-200 dark:border-white/10 text-center text-xs font-semibold text-zinc-400 flex items-center justify-center gap-2">
-                  <Sparkles size={14} className="text-[#6C5DD3]" />
+                  <Sparkles size={14} className="text-[#12A9A8]" />
                   <span>Día despejado sin entregas programadas</span>
                 </div>
               ) : (

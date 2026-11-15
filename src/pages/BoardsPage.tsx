@@ -1,16 +1,18 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
 import Button from '../components/ui/Button';
-import BoardCard from '../components/BoardCard';
+import BoardCard, { getStarredBoardIds } from '../components/BoardCard';
 import MembersModal from '../components/MembersModal';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Filter, ChevronDown, Layout, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Users, Filter, ChevronDown, Loader2, ChevronLeft, ChevronRight, Search, Check, Star } from 'lucide-react';
+import { LuminsBoardIcon } from '../components/icons/LuminsIcons';
+import Badge from '../components/ui/Badge';
+import { useModuleLoading } from '../contexts/NavigationLoaderContext';
 
-import { Skeleton } from '../components/ui/Skeleton';
 const BoardsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -18,9 +20,11 @@ const BoardsPage: React.FC = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
+  const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
+  const isRedirectingToWorkspace = !workspaceId && !isLoadingWorkspaces && workspaces.length > 0;
+  useModuleLoading(isLoadingWorkspaces || Boolean(workspaceId && isLoading) || isRedirectingToWorkspace, 'boards-page');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [workspaces, setWorkspaces] = useState<{ id: string, name: string, members?: { role: string }[] }[]>([]);
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
     const saved = localStorage.getItem('lumins_boards_per_page');
@@ -30,12 +34,58 @@ const BoardsPage: React.FC = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [isPaginating, setIsPaginating] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [visibilityFilter, setVisibilityFilter] = useState<'ALL' | 'WORKSPACE' | 'PRIVATE'>('ALL');
+  const [onlyStarred, setOnlyStarred] = useState(false);
+  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'cards'>('recent');
+  const filterMenuRef = useRef<HTMLDivElement>(null);
+
+  const activeFiltersCount =
+    (visibilityFilter !== 'ALL' ? 1 : 0) + (onlyStarred ? 1 : 0) + (sortBy !== 'recent' ? 1 : 0);
+
+  useEffect(() => {
+    if (!isFilterOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFilterOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isFilterOpen]);
+
+  const [starredIds, setStarredIds] = useState<string[]>(() => getStarredBoardIds());
+
+  useEffect(() => {
+    const syncStarred = () => setStarredIds(getStarredBoardIds());
+    window.addEventListener('lumins:starred-updated', syncStarred);
+    return () => window.removeEventListener('lumins:starred-updated', syncStarred);
+  }, []);
 
   const filteredBoards = useMemo(() => {
-    if (!searchQuery.trim()) return boards;
-    const lowerQuery = searchQuery.toLowerCase();
-    return boards.filter(b => b.name.toLowerCase().includes(lowerQuery));
-  }, [boards, searchQuery]);
+    const lowerQuery = searchQuery.trim().toLowerCase();
+    const result = boards.filter((b) => {
+      if (lowerQuery && !b.name.toLowerCase().includes(lowerQuery)) return false;
+      if (visibilityFilter !== 'ALL' && b.visibility !== visibilityFilter) return false;
+      if (onlyStarred && !b.starred && !starredIds.includes(b.id)) return false;
+      return true;
+    });
+
+    if (sortBy === 'name') {
+      return [...result].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    }
+    if (sortBy === 'cards') {
+      return [...result].sort((a, b) => (b._count?.cards || 0) - (a._count?.cards || 0));
+    }
+    return result;
+  }, [boards, searchQuery, visibilityFilter, onlyStarred, sortBy, starredIds]);
 
   const totalPages = itemsPerPage === -1 ? 1 : Math.max(1, Math.ceil(filteredBoards.length / itemsPerPage));
   const currentBoards = useMemo(
@@ -112,59 +162,32 @@ const BoardsPage: React.FC = () => {
       <main className="flex-1 p-3.5 sm:p-6 lg:p-10 min-w-0 w-full">
         <div className="max-w-[1600px] mx-auto w-full min-w-0">
           
-          {(isLoadingWorkspaces || (workspaceId && isLoading)) ? (
-            <div className="flex-1">
-               {/* Header Skeleton */}
-               <div className="flex flex-col gap-1 mb-8">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-9 w-64" />
-               </div>
-               
-               {/* Grid Skeleton */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                    <div key={i} className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 h-48 shadow-soft flex flex-col gap-4">
-                      <div className="flex justify-between items-start">
-                         <Skeleton className="w-10 h-10 rounded" />
-                         <Skeleton className="w-6 h-6 rounded" />
-                      </div>
-                      <Skeleton className="h-5 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                      <div className="mt-auto flex gap-2">
-                         <Skeleton className="h-4 w-12" />
-                         <Skeleton className="h-4 w-12" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-            </div>
-          ) : workspaces.length === 0 ? (
+          {(isLoadingWorkspaces || (workspaceId && isLoading)) ? null : workspaces.length === 0 ? (
             <WorkspaceEmptyState onCreateClick={() => {
               // Trigger onboarding flow for new users
               window.dispatchEvent(new CustomEvent('open-onboarding'));
             }} />
           ) : (
             <>
-              {/* Header: ClickUp Style */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-8 w-full min-w-0">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-7 w-full min-w-0">
                  <div className="flex flex-col gap-1 w-full md:w-auto">
-                    <div className="flex items-center gap-2 text-[#6C5DD3] mb-1">
-                       <Layout size={18} strokeWidth={2.5} />
+                    <div className="flex items-center gap-2 text-[#0E8786] dark:text-[#12A9A8] mb-0.5">
+                       <LuminsBoardIcon size={16} />
                        <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Panel de Control</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Tus Proyectos</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">Tus Proyectos</h1>
                     {isRefreshing && (
-                       <div className="flex items-center gap-2 mt-1 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300 w-fit">
-                          <Loader2 size={14} className="animate-spin" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
-                       </div>
+                       <Badge variant="dot" tone="teal" pulse className="mt-1 w-fit">
+                          Actualizando
+                       </Badge>
                     )}
                  </div>
 
-                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto min-w-0">
-                    {/* Search bar */}
-                    <div className="relative flex items-center bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200 dark:border-white/10 px-3 py-2 shadow-soft w-full sm:w-[220px]">
-                      <Search size={15} className="text-zinc-400 mr-2 shrink-0" />
+                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto min-w-0">
+                    {/* Search bar (small) */}
+                    <div className="relative flex items-center h-9 bg-white dark:bg-[#212632] rounded-xl border border-slate-200/90 dark:border-white/10 px-3 shadow-xs focus-within:border-[var(--lumins-accent)] focus-within:ring-2 focus-within:ring-[var(--lumins-accent)]/15 transition-all w-full sm:w-[210px]">
+                      <Search size={14} className="text-slate-400 mr-2 shrink-0" />
                       <input 
                         type="text"
                         placeholder="Buscar tablero..."
@@ -173,12 +196,12 @@ const BoardsPage: React.FC = () => {
                           setSearchQuery(e.target.value);
                           setPage(1);
                         }}
-                        className="w-full bg-transparent text-[13px] font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
+                        className="w-full bg-transparent text-xs font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none"
                       />
                     </div>
 
-                    {/* Action buttons row - scrollable on mobile */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 min-w-0">
+                    {/* Action buttons row - small & rounded-xl */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto sm:overflow-visible no-scrollbar py-0.5 -mx-1 px-1 min-w-0">
                       <div className="relative flex items-center shrink-0">
                         <select 
                           value={itemsPerPage}
@@ -197,36 +220,153 @@ const BoardsPage: React.FC = () => {
                               }
                             }
                           }}
-                          className="appearance-none bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg pl-3 pr-8 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer focus:outline-none shadow-soft hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors"
+                          className="appearance-none h-9 bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/10 rounded-xl pl-3 pr-8 text-xs font-semibold text-slate-700 dark:text-zinc-300 cursor-pointer focus:outline-none focus:border-[var(--lumins-accent)] shadow-xs hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
                         >
                           <option value={10}>10 tableros</option>
                           <option value={20}>20 tableros</option>
                           <option value={50}>50 tableros</option>
                           <option value={-1}>Todos</option>
                         </select>
-                        <ChevronDown size={14} className="absolute right-2.5 pointer-events-none text-zinc-500" />
+                        <ChevronDown size={13} className="absolute right-2.5 pointer-events-none text-slate-500" />
                       </div>
 
-                      <button className="shrink-0 px-3 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:text-[#6C5DD3] hover:border-[#6C5DD3]/30 transition-colors flex items-center gap-1.5">
-                        <Filter size={14} />
-                        <span>Filtros</span>
-                      </button>
+                      <div className="relative shrink-0" ref={filterMenuRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsFilterOpen((v) => !v)}
+                          aria-expanded={isFilterOpen}
+                          className={`shrink-0 h-9 px-3 text-xs font-semibold rounded-xl border shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer ${
+                            isFilterOpen || activeFiltersCount > 0
+                              ? 'bg-slate-100 dark:bg-[#2A3040] border-slate-300 dark:border-white/20 text-slate-900 dark:text-zinc-100'
+                              : 'bg-white dark:bg-[#212632] border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-zinc-100'
+                          }`}
+                        >
+                          <Filter size={13} />
+                          <span>Filtros</span>
+                          {activeFiltersCount > 0 && (
+                            <span className="ml-0.5 px-1.5 py-0.2 rounded-md text-[10px] font-bold bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]">
+                              {activeFiltersCount}
+                            </span>
+                          )}
+                        </button>
+
+                        {isFilterOpen && (
+                          <div className="fixed sm:absolute right-4 sm:right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/[0.12] shadow-xl p-3.5 z-50 space-y-3.5">
+                            <div>
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                                Visibilidad
+                              </div>
+                              <div className="grid grid-cols-3 gap-1 bg-slate-100/80 dark:bg-[#181B24] p-1 rounded-xl">
+                                {[
+                                  { id: 'ALL', label: 'Todos' },
+                                  { id: 'WORKSPACE', label: 'Público' },
+                                  { id: 'PRIVATE', label: 'Privado' },
+                                ].map((opt) => (
+                                  <button
+                                    key={opt.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setVisibilityFilter(opt.id as 'ALL' | 'WORKSPACE' | 'PRIVATE');
+                                      setPage(1);
+                                    }}
+                                    className={`py-1 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                                      visibilityFilter === opt.id
+                                        ? 'bg-white dark:bg-[#2A3040] text-slate-900 dark:text-zinc-100 shadow-2xs'
+                                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOnlyStarred((v) => !v);
+                                setPage(1);
+                              }}
+                              className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl bg-slate-50/80 dark:bg-[#181B24] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                            >
+                              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-zinc-200">
+                                <Star size={13} className={onlyStarred ? 'text-amber-400 fill-amber-400' : 'text-slate-400'} />
+                                Solo destacados
+                              </span>
+                              <span
+                                className={`w-4 h-4 rounded flex items-center justify-center border ${
+                                  onlyStarred
+                                    ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)]'
+                                    : 'border-slate-300 dark:border-white/20'
+                                }`}
+                              >
+                                {onlyStarred && <Check size={11} strokeWidth={3} />}
+                              </span>
+                            </button>
+
+                            <div>
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                                Ordenar por
+                              </div>
+                              <div className="space-y-1">
+                                {[
+                                  { id: 'recent', label: 'Más recientes' },
+                                  { id: 'name', label: 'Nombre (A–Z)' },
+                                  { id: 'cards', label: 'Más tarjetas' },
+                                ].map((opt) => (
+                                  <button
+                                    key={opt.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSortBy(opt.id as 'recent' | 'name' | 'cards');
+                                      setPage(1);
+                                    }}
+                                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                                      sortBy === opt.id
+                                        ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-zinc-100 font-semibold'
+                                        : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <span>{opt.label}</span>
+                                    {sortBy === opt.id && <Check size={13} className="text-[var(--lumins-accent-fg)]" />}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {activeFiltersCount > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVisibilityFilter('ALL');
+                                  setOnlyStarred(false);
+                                  setSortBy('recent');
+                                  setPage(1);
+                                }}
+                                className="w-full pt-2 border-t border-slate-100 dark:border-white/10 text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 text-center cursor-pointer"
+                              >
+                                Limpiar filtros
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
 
                       {(workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'OWNER' || workspaces.find(w => w.id === workspaceId)?.members?.[0]?.role === 'ADMIN') && (
                        <button 
                          onClick={() => setShowInviteModal(true)}
-                         className="shrink-0 px-3 py-2 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:text-[#6C5DD3] hover:border-[#6C5DD3]/30 transition-colors flex items-center gap-1.5"
+                         className="shrink-0 h-9 px-3 text-xs font-semibold text-slate-700 dark:text-zinc-300 bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/10 rounded-xl shadow-xs hover:bg-slate-50 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-zinc-100 transition-colors flex items-center gap-1.5 cursor-pointer"
                        >
-                         <Users size={14} />
+                         <Users size={13} />
                          <span>Miembros</span>
                        </button>
                       )}
 
                       <button 
                         onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
-                        className="shrink-0 px-3 py-2 text-[12px] font-bold text-[#0079BF] bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-soft hover:bg-[#0079BF]/5 dark:hover:bg-[#0079BF]/10 transition-all flex items-center gap-1.5 group"
+                        className="shrink-0 h-9 px-3 text-xs font-semibold text-[#0079BF] bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/10 rounded-xl shadow-xs hover:bg-[#0079BF]/5 hover:border-[#0079BF]/30 dark:hover:bg-[#0079BF]/10 transition-all flex items-center gap-1.5 group cursor-pointer"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="group-hover:scale-110 transition-transform">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="group-hover:scale-110 transition-transform">
                           <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
                         </svg>
                         <span>Importar Trello</span>
@@ -237,26 +377,26 @@ const BoardsPage: React.FC = () => {
 
                 {/* Board Grid */}
                 {boards.length === 0 ? (
-                  <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-20 text-center flex flex-col items-center shadow-soft">
-                     <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
-                        <Layout size={32} />
+                  <div className="bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/10 p-16 text-center flex flex-col items-center shadow-xs">
+                     <div className="w-14 h-14 bg-[var(--lumins-accent-soft)] border border-[var(--lumins-accent-border)] rounded-2xl flex items-center justify-center mb-4">
+                        <LuminsBoardIcon size={26} />
                      </div>
-                     <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">No hay proyectos activos</h3>
-                     <p className="text-zinc-500 dark:text-zinc-400 mb-6">Comienza creando tu primer tablero para organizar el trabajo.</p>
-                      <div className="flex gap-4">
+                     <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">No hay proyectos activos</h3>
+                     <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 mb-5">Comienza creando tu primer tablero para organizar el trabajo.</p>
+                      <div className="flex gap-3">
                          <Button 
                           onClick={() => window.dispatchEvent(new CustomEvent('open-create-board'))}
                           variant="outlined"
-                          className="border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]"
+                          className="h-9 px-4 text-xs rounded-xl border-slate-200 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:border-[var(--lumins-accent)] hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)]"
                          >
                            Crear tablero
                          </Button>
                          <Button 
                           onClick={() => window.dispatchEvent(new CustomEvent('open-trello-import'))}
                           variant="outlined"
-                          className="border-[#0079BF]/30 text-[#0079BF] hover:bg-[#0079BF] hover:text-white dark:hover:bg-[#0079BF] dark:hover:text-white transition-all flex items-center gap-2"
+                          className="h-9 px-4 text-xs rounded-xl border-[#0079BF]/30 text-[#0079BF] hover:bg-[#0079BF] hover:text-white transition-all flex items-center gap-2"
                          >
-                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                              <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
                            </svg>
                            Importar de Trello
@@ -277,11 +417,34 @@ const BoardsPage: React.FC = () => {
                      </div>
                    )}
 
-                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-4 min-h-[300px]">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 min-h-[200px]">
                      <AnimatePresence mode="popLayout">
                        {isPaginating ? (
                          <div className="col-span-full flex items-center justify-center py-20">
-                           <Loader2 size={32} className="animate-spin text-[#6C5DD3]" />
+                           <Loader2 size={28} className="animate-spin text-[var(--lumins-accent)]" />
+                         </div>
+                       ) : currentBoards.length === 0 ? (
+                         <div className="col-span-full bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/[0.11] p-12 text-center flex flex-col items-center">
+                           <Filter size={22} className="text-slate-400 dark:text-zinc-500 mb-3" />
+                           <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
+                             No hay tableros con estos filtros
+                           </h3>
+                           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 mb-4">
+                             Prueba ajustando la búsqueda o limpiando los filtros activos.
+                           </p>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setSearchQuery('');
+                               setVisibilityFilter('ALL');
+                               setOnlyStarred(false);
+                               setSortBy('recent');
+                               setPage(1);
+                             }}
+                             className="h-8 px-3.5 rounded-xl bg-slate-100 dark:bg-[#2A3040] text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                           >
+                             Limpiar filtros
+                           </button>
                          </div>
                        ) : (
                          currentBoards.map((board, index) => (
@@ -332,31 +495,31 @@ function PaginationControls({ page, totalPages, onPageChange }: {
   }, [page, totalPages]);
 
   return (
-    <div className="flex items-center gap-1.5 bg-white dark:bg-[#1C1F26] p-1.5 rounded border border-zinc-200 dark:border-white/10 shadow-soft text-[13px] font-bold">
+    <div className="flex items-center gap-1 bg-white dark:bg-[#212632] p-1 rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs text-xs font-semibold">
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="h-7 px-2.5 rounded-lg flex items-center gap-1 text-slate-500 dark:text-zinc-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:text-zinc-100 dark:hover:bg-white/5 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
       >
-        <ChevronLeft size={14} />
+        <ChevronLeft size={13} />
         Anterior
       </button>
 
       <div className="flex items-center gap-1">
         {pages[0] > 1 && (
           <>
-            <button onClick={() => onPageChange(1)} className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">1</button>
-            {pages[0] > 2 && <span className="px-1 text-zinc-400">...</span>}
+            <button onClick={() => onPageChange(1)} className="w-7 h-7 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-zinc-400 rounded-lg transition-colors cursor-pointer">1</button>
+            {pages[0] > 2 && <span className="px-1 text-slate-400">...</span>}
           </>
         )}
         {pages.map(p => (
           <button
             key={p}
             onClick={() => onPageChange(p)}
-            className={`w-8 h-8 rounded transition-colors ${
+            className={`w-7 h-7 rounded-lg transition-all cursor-pointer ${
               p === page
-                ? 'bg-[#6C5DD3] text-white shadow-sm'
-                : 'hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400'
+                ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs font-bold'
+                : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-zinc-400'
             }`}
           >
             {p}
@@ -364,8 +527,8 @@ function PaginationControls({ page, totalPages, onPageChange }: {
         ))}
         {pages[pages.length - 1] < totalPages && (
           <>
-            {pages[pages.length - 1] < totalPages - 1 && <span className="px-1 text-zinc-400">...</span>}
-            <button onClick={() => onPageChange(totalPages)} className="w-8 h-8 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded transition-colors">{totalPages}</button>
+            {pages[pages.length - 1] < totalPages - 1 && <span className="px-1 text-slate-400">...</span>}
+            <button onClick={() => onPageChange(totalPages)} className="w-7 h-7 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-zinc-400 rounded-lg transition-colors cursor-pointer">{totalPages}</button>
           </>
         )}
       </div>
@@ -373,10 +536,10 @@ function PaginationControls({ page, totalPages, onPageChange }: {
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="px-3 py-1.5 flex items-center gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="h-7 px-2.5 rounded-lg flex items-center gap-1 text-slate-500 dark:text-zinc-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:text-zinc-100 dark:hover:bg-white/5 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
       >
         Siguiente
-        <ChevronRight size={14} />
+        <ChevronRight size={13} />
       </button>
     </div>
   );

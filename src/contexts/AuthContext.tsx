@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import apiClient from '../lib/api-client';
-import { applyThemeToDom, isValidTheme, resolveCurrentTheme } from '../lib/theme';
+import {
+  applyAccentToDom,
+  applyMenuLayout,
+  applyThemeToDom,
+  resolveAccentColor,
+  resolveCurrentTheme,
+  resolveMenuLayout,
+} from '../lib/theme';
 
 interface User {
   id: string;
@@ -135,9 +142,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const fetchedUser = response.data.user;
       setUser(fetchedUser);
 
-      // Sync theme directly with the logged-in user's account preference
+      // Sync UI preferences directly with the logged-in user's account
+      const effectiveAccent = resolveAccentColor(fetchedUser?.preferences?.accentColor);
+      applyAccentToDom(effectiveAccent, true);
       const effectiveTheme = resolveCurrentTheme(fetchedUser?.theme);
       applyThemeToDom(effectiveTheme, true);
+      const effectiveLayout = resolveMenuLayout(fetchedUser?.preferences?.menuLayout);
+      applyMenuLayout(effectiveLayout, true);
     } catch (error) {
       console.error('Failed to refresh user:', error);
       throw error;
@@ -260,6 +271,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       try {
         localStorage.removeItem('theme');
+        localStorage.removeItem('lumins_accent');
+        localStorage.removeItem('lumins_menu_layout');
+        localStorage.removeItem('lumins_sidebar_collapsed');
+        applyAccentToDom('teal', false);
+        applyMenuLayout('top', false);
         applyThemeToDom('light', false);
         Object.keys(sessionStorage).forEach((key) => {
           if (key.includes('onboarding')) sessionStorage.removeItem(key);

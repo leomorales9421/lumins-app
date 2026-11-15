@@ -6,10 +6,12 @@ import NavBar from './NavBar';
 import Sidebar from './Sidebar';
 import CreateWorkspaceModal from '../CreateWorkspaceModal';
 import CreateBoardModal from '../CreateBoardModal';
+import MembersModal from '../MembersModal';
 import TrelloImportModal from '../TrelloImportModal';
 import OnboardingStepperModal from '../onboarding/OnboardingStepperModal';
 import ThemePreferenceModal from '../ThemePreferenceModal';
 import PageTransitionWrapper from '../PageTransitionWrapper';
+import { ModuleLoaderOverlay } from '../../contexts/NavigationLoaderContext';
 import { motion } from 'framer-motion';
 
 import { toast } from 'sonner';
@@ -20,6 +22,7 @@ import {
   preloadImageUrl,
   resolveBoardBackground,
 } from '../../lib/board-backgrounds';
+import { type MenuLayout, resolveMenuLayout } from '../../lib/theme';
 
 interface Workspace {
   id: string;
@@ -37,6 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateBoardModal, setShowCreateBoardModal] = useState(false);
+  const [showInviteMembersModal, setShowInviteMembersModal] = useState(false);
   const [showTrelloImportModal, setShowTrelloImportModal] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -50,7 +54,16 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const isBoardView = location.pathname.startsWith('/boards/') || location.pathname.startsWith('/b/');
   const [boardBackground, setBoardBackground] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [menuLayout, setMenuLayout] = useState<MenuLayout>(() => resolveMenuLayout());
   const [isLoadingBg, setIsLoadingBg] = useState(false);
+
+  useEffect(() => {
+    const handleMenuLayoutChange = () => {
+      setMenuLayout(resolveMenuLayout());
+    };
+    window.addEventListener('menu-layout-changed', handleMenuLayoutChange);
+    return () => window.removeEventListener('menu-layout-changed', handleMenuLayoutChange);
+  }, []);
   const bgRequestRef = useRef(0);
   const resolvedBackground = resolveBoardBackground(boardBackground);
 
@@ -194,15 +207,28 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   }, []);
 
+  // Sync lastActiveWorkspaceId whenever URL workspaceId or workspaces list updates
+  useEffect(() => {
+    if (workspaceId && workspaceId !== 'global') {
+      localStorage.setItem('lastActiveWorkspaceId', workspaceId);
+    } else if (!isLoadingWorkspaces && workspaces.length > 0 && !localStorage.getItem('lastActiveWorkspaceId')) {
+      localStorage.setItem('lastActiveWorkspaceId', workspaces[0].id);
+    }
+  }, [workspaceId, isLoadingWorkspaces, workspaces]);
+
   // Check if user has 0 workspaces and automatically show onboarding
   useEffect(() => {
     if (!isLoadingWorkspaces && workspaces.length === 0 && user?.id) {
+      localStorage.removeItem('lastActiveWorkspaceId');
+      if (workspaceId) {
+        navigate('/app', { replace: true });
+      }
       if (!hasAutoOpenedOnboardingRef.current) {
         hasAutoOpenedOnboardingRef.current = true;
         setShowOnboardingModal(true);
       }
     }
-  }, [isLoadingWorkspaces, workspaces.length, user]);
+  }, [isLoadingWorkspaces, workspaces.length, user, workspaceId, navigate]);
 
   const currentWorkspace = workspaces.find(w => w.id === workspaceId);
   
@@ -227,7 +253,7 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
   return (
     <div 
-      className={`flex flex-col min-h-[100dvh] overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#13151A]' : resolvedBackground.kind === 'image' ? 'bg-zinc-900' : resolvedBackground.kind === 'preset' ? resolvedBackground.value : DEFAULT_BOARD_BACKGROUND}`}
+      className={`flex flex-col min-h-[100dvh] overflow-hidden transition-all duration-700 relative ${!isBoardView ? 'bg-[#F4F6F9] dark:bg-[#151821]' : resolvedBackground.kind === 'image' ? 'bg-zinc-900' : resolvedBackground.kind === 'preset' ? resolvedBackground.value : DEFAULT_BOARD_BACKGROUND}`}
       style={isBoardView && resolvedBackground.kind === 'image' ? {
         backgroundImage: `url(${resolvedBackground.value})`,
         backgroundSize: 'cover',
@@ -318,26 +344,55 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
 
 
       {/* UI Content Layer */}
-      <div className="flex flex-col h-screen overflow-hidden w-full relative z-10">
-        <NavBar 
-          user={user} 
-          onCreateBoard={() => setShowCreateBoardModal(true)}
-          onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
-          canCreateBoard={canCreateBoard}
-          isBoardView={isBoardView}
-        />
-
-        <div className="flex flex-1 overflow-hidden min-w-0 w-full">
-          {/* Sidebar - Conditional behavior */}
-          <Sidebar 
-            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)} 
-            isFloating={isBoardView}
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
+      <div className="flex flex-col h-[100dvh] overflow-hidden w-full relative z-10">
+        {!isBoardView && (
+          <NavBar 
+            user={user} 
+            onCreateBoard={() => setShowCreateBoardModal(true)}
+            onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+            onInviteMember={() => setShowInviteMembersModal(true)}
+            canCreateBoard={canCreateBoard}
+            isBoardView={isBoardView}
+            hideDesktopNav={menuLayout === 'sidebar'}
             logout={logout}
           />
+        )}
+
+        <div className="flex flex-1 overflow-hidden min-w-0 w-full">
+          {/* En vista de tablero el menú siempre es flotante (sin importar si el usuario usa barra superior o lateral) */}
+          {isBoardView ? (
+            <Sidebar 
+              onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+              onCreateBoard={() => setShowCreateBoardModal(true)}
+              canCreateBoard={canCreateBoard}
+              isFloating
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              logout={logout}
+            />
+          ) : (
+            /* Sidebar: móvil siempre en drawer; en desktop anima su aparición/ocultamiento */
+            <div
+              className={`lg:shrink-0 lg:transition-[max-width,opacity,transform] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                menuLayout === 'sidebar'
+                  ? 'lg:max-w-[16rem] lg:opacity-100 lg:translate-x-0 lg:overflow-visible lg:z-30'
+                  : 'lg:max-w-0 lg:opacity-0 lg:-translate-x-4 lg:overflow-hidden lg:pointer-events-none'
+              }`}
+            >
+              <Sidebar 
+                onCreateWorkspace={() => setShowCreateWorkspaceModal(true)}
+                onCreateBoard={() => setShowCreateBoardModal(true)}
+                canCreateBoard={canCreateBoard}
+                isFloating={false}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                logout={logout}
+              />
+            </div>
+          )}
           
           <main className="flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden custom-scrollbar relative">
+            <ModuleLoaderOverlay />
             <PageTransitionWrapper>
               <Outlet />
             </PageTransitionWrapper>
@@ -357,6 +412,14 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
         onBoardCreated={handleBoardCreated}
         workspaces={workspaces}
         defaultWorkspaceId={workspaceId}
+      />
+
+      <MembersModal
+        isOpen={showInviteMembersModal}
+        onClose={() => setShowInviteMembersModal(false)}
+        workspaceId={currentWorkspace?.id || (workspaceId && workspaceId !== 'global' ? workspaceId : undefined) || localStorage.getItem('lastActiveWorkspaceId') || undefined}
+        workspaceName={currentWorkspace?.name}
+        onUpdate={() => window.dispatchEvent(new CustomEvent('workspace-changed'))}
       />
 
       <TrelloImportModal

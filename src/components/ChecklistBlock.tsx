@@ -90,7 +90,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3 flex-1 min-w-0 text-zinc-900 dark:text-zinc-100">
-          <CheckSquare size={20} className="text-[#6C5DD3] flex-shrink-0" />
+          <CheckSquare size={18} className="text-[var(--lumins-accent-fg)] flex-shrink-0" />
           {isEditingTitle ? (
             <div className="flex items-center gap-2 flex-1">
               <input
@@ -107,12 +107,12 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                   }
                 }}
                 onBlur={handleSaveTitle}
-                className="flex-1 bg-white dark:bg-[#13151A] border border-[#6C5DD3] rounded px-2.5 py-1 text-base font-bold text-zinc-900 dark:text-zinc-100 outline-none shadow-sm"
+                className="flex-1 bg-white dark:bg-[#13151A] border border-[var(--lumins-accent)] rounded px-2.5 py-1 text-base font-bold text-zinc-900 dark:text-zinc-100 outline-none shadow-sm"
               />
               <button
                 type="button"
                 onClick={handleSaveTitle}
-                className="p-1.5 rounded bg-[#6C5DD3] text-white hover:bg-[#5b4ebf] transition-colors"
+                className="p-1.5 rounded bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] hover:brightness-95 transition-all cursor-pointer"
                 title="Guardar título"
               >
                 <Check size={14} />
@@ -121,7 +121,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
           ) : (
             <h3 
               onClick={() => !isReadOnly && setIsEditingTitle(true)}
-              className={`text-lg font-extrabold tracking-tight truncate ${!isReadOnly ? 'cursor-pointer hover:text-[#6C5DD3] transition-colors' : ''}`}
+              className={`text-base font-bold tracking-tight truncate ${!isReadOnly ? 'cursor-pointer hover:text-[var(--lumins-accent-fg)] transition-colors' : ''}`}
               title={checklist.title}
             >
               {checklist.title}
@@ -134,7 +134,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
             <button 
               type="button"
               onClick={() => setIsEditingTitle(true)}
-              className="bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[#6C5DD3] dark:hover:text-white text-xs font-semibold px-2.5 py-1.5 rounded transition-colors flex items-center gap-1.5 border border-zinc-200/60 dark:border-white/5"
+              className="bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] text-xs font-semibold px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 border border-zinc-200/60 dark:border-white/5 cursor-pointer"
               title="Editar título del checklist"
             >
               <Edit2 size={12} />
@@ -159,7 +159,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
         <div className="flex-1 h-2 bg-zinc-200 dark:bg-white/5 rounded overflow-hidden shadow-inner">
           <div 
             className={`h-full rounded transition-all duration-500 ease-out ${
-              progress === 100 ? 'bg-emerald-500' : 'bg-[#6C5DD3]'
+              progress === 100 ? 'bg-emerald-500' : 'bg-[var(--lumins-accent)]'
             }`}
             style={{ width: `${progress}%` }}
           />
@@ -176,7 +176,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                 checked={item.done}
                 disabled={isReadOnly}
                 onChange={(e) => onToggleItem(item.id, e.target.checked)}
-                className={`peer w-4 h-4 accent-[#6C5DD3] rounded border-zinc-300 dark:border-white/10 transition-all bg-white dark:bg-[#1C1F26] ${isReadOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110 active:scale-95'}`}
+                className={`peer w-4 h-4 accent-[var(--lumins-accent)] rounded border-zinc-300 dark:border-white/10 transition-all bg-white dark:bg-[#1C1F26] ${isReadOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110 active:scale-95'}`}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -194,7 +194,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                     }
                     if (e.key === 'Escape') setEditingItemId(null);
                   }}
-                  className="w-full bg-white dark:bg-[#13151A] border border-[#6C5DD3] rounded px-2.5 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none resize-none overflow-hidden min-h-[32px] shadow-sm leading-relaxed"
+                  className="w-full bg-white dark:bg-[#13151A] border border-[var(--lumins-accent)] rounded px-2.5 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none resize-none overflow-hidden min-h-[32px] shadow-sm leading-relaxed"
                   rows={1}
                 />
               ) : (
@@ -202,7 +202,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                   onClick={() => handleStartEditItem(item)}
                   className={`text-sm text-zinc-900 dark:text-zinc-100 break-words transition-all whitespace-pre-wrap leading-relaxed py-0.5 ${
                     item.done ? 'line-through text-zinc-400 dark:text-zinc-500 opacity-70' : ''
-                  } ${!isReadOnly ? 'cursor-text hover:text-[#6C5DD3]' : ''}`}
+                  } ${!isReadOnly ? 'cursor-text hover:text-[var(--lumins-accent-fg)]' : ''}`}
                 >
                   {item.title}
                 </p>
@@ -214,7 +214,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                 <button 
                   type="button"
                   onClick={() => handleStartEditItem(item)}
-                  className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] transition-all hover:bg-zinc-100 dark:hover:bg-white/10 rounded"
+                  className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-[var(--lumins-accent-fg)] transition-all hover:bg-zinc-100 dark:hover:bg-white/10 rounded"
                   title="Editar elemento"
                 >
                   <Edit2 size={13} />
@@ -253,13 +253,13 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
                     setIsAddingItem(false);
                   }
                 }}
-                className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 transition-all resize-none overflow-hidden shadow-sm min-h-[44px] leading-relaxed"
+                className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] transition-all resize-none overflow-hidden shadow-sm min-h-[44px] leading-relaxed"
                 rows={1}
               />
               <div className="flex items-center gap-2">
                 <button
                   type="submit"
-                  className="bg-[#6C5DD3] text-white px-4 py-1.5 rounded text-sm font-bold hover:bg-[#312e81] transition-colors shadow-lg shadow-[#6C5DD3]/20"
+                  className="bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] px-4 py-1.5 rounded-lg text-sm font-bold hover:brightness-95 transition-all shadow-sm cursor-pointer"
                 >
                   Añadir
                 </button>
@@ -275,7 +275,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
           ) : (
             <button
               onClick={() => setIsAddingItem(true)}
-              className="text-sm font-bold text-zinc-500 dark:text-zinc-300 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-zinc-100 dark:hover:bg-white/5 px-4 py-2 rounded transition-all flex items-center gap-2 group/btn"
+              className="text-xs font-bold text-zinc-500 dark:text-zinc-300 hover:text-[var(--lumins-accent-fg)] hover:bg-zinc-100 dark:hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 group/btn cursor-pointer"
             >
               <span className="text-lg leading-none group-hover/btn:scale-125 transition-transform">+</span>
               Añadir un elemento

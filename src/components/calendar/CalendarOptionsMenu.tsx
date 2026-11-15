@@ -255,11 +255,11 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
         title="Opciones, Vistas e Integraciones"
         className={`inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shadow-sm ${
           isOpen
-            ? 'bg-[#6C5DD3]/10 border-[#6C5DD3]/40 text-[#6C5DD3]'
+            ? 'bg-[var(--lumins-accent-soft)] border-[var(--lumins-accent-border)] text-[var(--lumins-accent-fg)]'
             : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5'
         }`}
       >
-        <Settings2 size={14} className={isOpen ? 'text-[#6C5DD3]' : 'text-zinc-500'} />
+        <Settings2 size={14} className={isOpen ? 'text-[var(--lumins-accent-fg)]' : 'text-zinc-500'} />
         <span className="hidden sm:inline">Opciones</span>
       </button>
 
@@ -275,7 +275,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
             {/* Header del Menú */}
             <div className="flex items-center justify-between px-2 pt-1 pb-1.5 border-b border-zinc-100 dark:border-white/5">
               <span className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
-                <Settings2 size={13} className="text-[#6C5DD3]" />
+                <Settings2 size={13} className="text-[var(--lumins-accent-fg)]" />
                 Opciones del Calendario
               </span>
             </div>
@@ -318,7 +318,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                       type="button"
                       onClick={handleSyncGcal}
                       disabled={isSyncingGcal}
-                      className="text-[11px] font-bold text-[#6C5DD3] hover:underline flex items-center gap-1"
+                      className="text-[11px] font-bold text-[var(--lumins-accent-fg)] hover:underline flex items-center gap-1"
                     >
                       <RefreshCw size={11} className={isSyncingGcal ? 'animate-spin' : ''} />
                       {isSyncingGcal ? 'Sincronizando...' : 'Sincronizar ahora'}
@@ -337,7 +337,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                 <button
                   type="button"
                   onClick={handleConnectGcal}
-                  className="w-full py-1.5 px-2 bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white rounded-lg text-[11px] font-bold transition-colors shadow-xs"
+                  className="w-full py-1.5 px-2 bg-[var(--lumins-accent)] hover:brightness-95 text-[var(--lumins-accent-on)] rounded-lg text-[11px] font-bold transition-all shadow-xs"
                 >
                   Vincular con Google
                 </button>
@@ -348,14 +348,14 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
             <div className="p-2.5 bg-zinc-50/60 dark:bg-white/[0.02] rounded-xl space-y-2 border border-zinc-200/50 dark:border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold uppercase text-[10px] tracking-wider text-zinc-400 flex items-center gap-1">
-                  <Bookmark size={12} className="text-[#6C5DD3]" />
+                  <Bookmark size={12} className="text-[var(--lumins-accent-fg)]" />
                   Vistas Guardadas
                 </span>
                 {!isCreatingView && (
                   <button
                     type="button"
                     onClick={() => setIsCreatingView(true)}
-                    className="text-[10px] font-bold text-[#6C5DD3] hover:underline flex items-center gap-0.5"
+                    className="text-[10px] font-bold text-[var(--lumins-accent-fg)] hover:underline flex items-center gap-0.5"
                   >
                     <Plus size={11} />
                     Guardar actual
@@ -376,12 +376,12 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                       if (e.key === 'Enter') handleCreateView();
                       if (e.key === 'Escape') setIsCreatingView(false);
                     }}
-                    className="flex-1 px-2 py-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-md text-xs font-semibold outline-none focus:border-[#6C5DD3]"
+                    className="flex-1 px-2 py-1 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-md text-xs font-semibold outline-none focus:border-[var(--lumins-accent)]"
                   />
                   <button
                     type="button"
                     onClick={handleCreateView}
-                    className="p-1 rounded bg-[#6C5DD3] text-white hover:bg-[#5b4eb8]"
+                    className="p-1 rounded bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] hover:brightness-95"
                     title="Guardar"
                   >
                     <Check size={12} />
@@ -406,7 +406,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                     onClick={() => handleSelectView(sv)}
                     className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
                       activeViewId === sv.id
-                        ? 'bg-[#6C5DD3]/15 text-[#6C5DD3] font-bold'
+                        ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold'
                         : 'hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
                     }`}
                   >
@@ -414,7 +414,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                       <Sparkles size={11} className="text-amber-500 shrink-0" />
                       <span className="truncate">{sv.name}</span>
                     </div>
-                    {activeViewId === sv.id && <Check size={12} className="shrink-0 text-[#6C5DD3]" />}
+                    {activeViewId === sv.id && <Check size={12} className="shrink-0 text-[var(--lumins-accent-fg)]" />}
                   </button>
                 ))}
 
@@ -424,17 +424,17 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                     key={cv.id}
                     className={`group flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       activeViewId === cv.id
-                        ? 'bg-[#6C5DD3]/15 text-[#6C5DD3] font-bold'
+                        ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold'
                         : 'hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
                     }`}
                     onClick={() => handleSelectView(cv)}
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <Bookmark size={11} className="text-[#6C5DD3] shrink-0" />
+                      <Bookmark size={11} className="text-[var(--lumins-accent-fg)] shrink-0" />
                       <span className="truncate">{cv.name}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      {activeViewId === cv.id && <Check size={12} className="text-[#6C5DD3]" />}
+                      {activeViewId === cv.id && <Check size={12} className="text-[var(--lumins-accent-fg)]" />}
                       <button
                         type="button"
                         onClick={(e) => handleDeleteView(cv.id, cv.name, e)}
@@ -465,7 +465,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                 className="w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-white/5 font-semibold text-zinc-700 dark:text-zinc-300 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <CalendarIcon size={14} className="text-[#6C5DD3]" />
+                  <CalendarIcon size={14} className="text-[var(--lumins-accent-fg)]" />
                   <span>Suscripción iCal (.ics)</span>
                 </div>
                 <span className="text-[10px] text-zinc-400">Apple/Outlook</span>
@@ -519,7 +519,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                         }}
                         className={`w-full text-left px-2 py-1 rounded text-[11px] flex items-center justify-between ${
                           colorBy === mode
-                            ? 'text-[#6C5DD3] font-bold bg-[#6C5DD3]/10'
+                            ? 'text-[var(--lumins-accent-fg)] font-bold bg-[var(--lumins-accent-soft)]'
                             : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
                         }`}
                       >
@@ -533,7 +533,7 @@ export const CalendarOptionsMenu: React.FC<CalendarOptionsMenuProps> = ({
                         setIsOpen(false);
                         onOpenLegendPopover();
                       }}
-                      className="w-full text-left px-2 py-1 text-[10px] font-bold text-[#6C5DD3] hover:underline"
+                      className="w-full text-left px-2 py-1 text-[10px] font-bold text-[var(--lumins-accent-fg)] hover:underline"
                     >
                       Ver Leyenda de Tableros
                     </button>

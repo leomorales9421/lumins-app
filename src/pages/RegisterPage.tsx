@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, type GeoInfo } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import AmbientBackground from '../components/layout/AmbientBackground';
+import BrandLogo from '../components/ui/BrandLogo';
 import { OtpInput } from '../components/auth/OtpInput';
 import { CountryPhoneInput, type CountryOption, COUNTRIES_LIST } from '../components/auth/CountryPhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -212,72 +213,71 @@ const RegisterPage: React.FC = () => {
         <AmbientBackground />
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1020px] sm:min-h-[660px] bg-white sm:bg-white/95 sm:backdrop-blur-md sm:border sm:border-white/30 sm:rounded-2xl sm:shadow-2xl flex flex-col md:flex-row overflow-hidden relative z-10 min-h-screen sm:min-h-0"
+      <div 
+        className="w-full max-w-[1000px] sm:min-h-[620px] bg-white sm:border sm:border-slate-200/80 sm:rounded-[20px] sm:shadow-2xl sm:shadow-slate-300/40 flex flex-col md:flex-row overflow-hidden relative z-10 min-h-screen sm:min-h-0"
       >
         {/* LEFT PANEL: Branding & Visual Experience */}
-        <div className="hidden md:flex flex-1 bg-[#09090B] p-14 flex-col justify-between text-white relative overflow-hidden">
-          {/* Radial Spotlight Effect */}
+        <div className="hidden md:flex flex-1 bg-[#05040A] p-12 lg:p-14 flex-col justify-between text-white relative overflow-hidden">
+          {/* Subtle Luminous Mesh Gradient matching landing */}
           <div 
             className="absolute inset-0 pointer-events-none" 
             style={{ 
-              background: 'radial-gradient(circle at 50% 35%, rgba(67, 56, 202, 0.28) 0%, rgba(9, 9, 11, 0) 70%)' 
+              backgroundImage: `
+                radial-gradient(circle at 20% 20%, rgba(18, 169, 168, 0.24) 0%, transparent 55%),
+                radial-gradient(circle at 85% 85%, rgba(255, 204, 64, 0.16) 0%, transparent 50%),
+                radial-gradient(circle at 75% 25%, rgba(255, 102, 94, 0.12) 0%, transparent 45%)
+              `
             }} 
           />
 
-          {/* Grain Texture */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <filter id="noiseFilterRegister">
-                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-              </filter>
-              <rect width="100%" height="100%" filter="url(#noiseFilterRegister)" />
-            </svg>
+          {/* Top Brand Logo */}
+          <div className="relative z-10">
+            <BrandLogo size="md" variant="light-text" />
           </div>
 
-          <div className="relative z-10 flex items-center gap-3">
-            <img src="/lumins-log.webp" alt="Lumins Logo" className="h-9 w-auto object-contain" />
-            <span className="brand-logotype text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-indigo-200">
-              LUMINS
-            </span>
-          </div>
-
-          <div className="relative z-10 my-auto py-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs font-semibold mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Espacio de Trabajo Conectado</span>
-            </div>
-
-            <h1 className="text-4xl lg:text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white/95">
-              Empieza a <br /> iluminar tus <br /> proyectos.
+          <div className="relative z-10 my-auto py-8">
+            <h1 className="text-3xl lg:text-4xl font-extrabold mb-4 leading-tight tracking-tight text-white">
+              Empieza a <br />
+              <span className="text-[#12A9A8]">iluminar tus</span> <br />
+              proyectos.
             </h1>
-            <p className="text-base text-white/65 font-medium max-w-sm leading-relaxed">
+            <p className="text-sm text-slate-300 font-normal leading-relaxed max-w-xs mb-8">
               Crea tableros intuitivos, sincroniza tus calendarios y colabora en tiempo real con todo tu equipo.
             </p>
+
+            {/* Feature Highlights with Brand Colors */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#12A9A8]" />
+                <span className="font-medium">Tableros Kanban ágiles y personalizables</span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#FFCC40]" />
+                <span className="font-medium">Calendario y fechas sincronizadas en vivo</span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-[#FF665E]" />
+                <span className="font-medium">Roles, métricas y control de acceso</span>
+              </div>
+            </div>
           </div>
 
           {/* Footer Indicators */}
-          <div className="relative z-10 flex items-center gap-6 text-xs text-white/40">
+          <div className="relative z-10 flex items-center gap-4 text-xs text-slate-400">
             <span>© {new Date().getFullYear()} Lumins</span>
             <span>•</span>
-            <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="hover:text-white/80 transition-colors">Privacidad</a>
+            <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacidad</a>
             <span>•</span>
-            <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="hover:text-white/80 transition-colors">Términos</a>
+            <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Términos</a>
           </div>
         </div>
 
         {/* RIGHT PANEL: Dynamic Step Workflow */}
-        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-12 lg:p-14 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
+        <div className="flex-1 md:flex-[1.2] p-8 sm:p-10 md:p-14 lg:p-16 bg-white flex flex-col justify-center min-h-screen sm:min-h-0">
           
           {/* Mobile Logo Branding */}
-          <div className="md:hidden flex flex-col items-center mb-8">
-            <img src="/lumins-log.webp" alt="Lumins" className="h-12 w-auto drop-shadow-sm mb-2" />
-            <span className="brand-logotype text-xl bg-clip-text text-transparent bg-gradient-to-tr from-[#312E81] via-[#4338ca] to-[#7C3AED] font-black tracking-tighter">
-              LUMINS
-            </span>
+          <div className="md:hidden flex justify-center mb-8">
+            <BrandLogo size="md" />
           </div>
 
           <AnimatePresence mode="wait">
@@ -285,32 +285,32 @@ const RegisterPage: React.FC = () => {
             {currentStep === 'EMAIL' && (
               <motion.div
                 key="step-email"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[420px] mx-auto md:mx-0"
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="w-full max-w-[400px] mx-auto md:mx-0"
               >
-                <div className="mb-8">
-                  <h2 className="text-3xl font-black text-zinc-900 tracking-tight leading-tight">
-                    Crea tu cuenta o inicia sesión
+                <div className="mb-8 text-left">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                    Crea tu cuenta en Lumins
                   </h2>
-                  <p className="text-zinc-500 font-medium text-base mt-2">
-                    Introduce tu correo de trabajo o personal para continuar.
+                  <p className="text-slate-500 font-medium text-sm mt-1">
+                    Introduce tu correo de trabajo o personal para comenzar.
                   </p>
                 </div>
 
-                <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-bold text-zinc-700 ml-1">Correo electrónico</label>
+                <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 ml-0.5">Correo electrónico</label>
                     <div className="relative flex items-center">
-                      <Mail className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Mail className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="tu.nombre@empresa.com"
-                        className="w-full h-12 bg-[#F4F6F9] border border-transparent rounded-xl pl-10 pr-4 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/20 focus:border-[#4338ca] transition-all placeholder:text-zinc-400"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all placeholder:text-slate-400"
                         autoComplete="email"
                         autoFocus
                         required
@@ -319,8 +319,8 @@ const RegisterPage: React.FC = () => {
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -328,26 +328,26 @@ const RegisterPage: React.FC = () => {
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
-                    className="mt-2 h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#3730a3] transition-all shadow-md shadow-indigo-100 active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Verificando...' : 'Continuar con correo'}
                   </Button>
 
-                  <div className="flex items-center gap-4 py-2">
-                    <div className="h-px flex-1 bg-zinc-100" />
-                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">o continúa con</span>
-                    <div className="h-px flex-1 bg-zinc-100" />
+                  <div className="flex items-center gap-3 py-0.5">
+                    <div className="h-px flex-1 bg-slate-200" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">o continúa con</span>
+                    <div className="h-px flex-1 bg-slate-200" />
                   </div>
 
-                  {/* Google OAuth (Funciona tal cual está) */}
+                  {/* Google OAuth */}
                   <button
                     type="button"
                     onClick={() => {
                       window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/auth/google`;
                     }}
-                    className="h-12 bg-white border border-zinc-200 rounded-xl text-zinc-800 font-semibold text-sm flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-[0.98] shadow-sm"
+                    className="h-9 bg-white border border-slate-200 rounded-lg text-slate-700 font-bold text-xs flex items-center justify-center gap-2.5 hover:bg-slate-50 transition-all active:scale-[0.98] shadow-xs"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24">
+                    <svg width="16" height="16" viewBox="0 0 24 24">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                       <path d="M5.84 14.11c-.22-.67-.35-1.39-.35-2.11s.13-1.44.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
@@ -356,13 +356,20 @@ const RegisterPage: React.FC = () => {
                     Continuar con Google
                   </button>
 
-                  <p className="mt-4 text-[12px] text-zinc-400 text-center leading-relaxed">
+                  <p className="mt-2 text-xs text-slate-500 text-center">
+                    ¿Ya tienes una cuenta?{' '}
+                    <Link to="/login" className="text-[#12A9A8] font-bold hover:underline">
+                      Inicia sesión
+                    </Link>
+                  </p>
+
+                  <p className="mt-2 text-[11px] text-slate-400 text-center leading-relaxed">
                     Al continuar, aceptas nuestros{' '}
-                    <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="text-zinc-600 font-semibold underline hover:text-zinc-900">
+                    <a href={`${LEGAL_BASE_URL}/terminos`} target="_blank" rel="noopener noreferrer" className="text-slate-600 font-medium underline hover:text-slate-900">
                       Términos de Servicio
                     </a>{' '}
                     y{' '}
-                    <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="text-zinc-600 font-semibold underline hover:text-zinc-900">
+                    <a href={`${LEGAL_BASE_URL}/privacidad`} target="_blank" rel="noopener noreferrer" className="text-slate-600 font-medium underline hover:text-slate-900">
                       Política de Privacidad
                     </a>.
                   </p>
@@ -374,11 +381,11 @@ const RegisterPage: React.FC = () => {
             {currentStep === 'OTP' && (
               <motion.div
                 key="step-otp"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[420px] mx-auto md:mx-0"
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <button
                   type="button"
@@ -386,22 +393,22 @@ const RegisterPage: React.FC = () => {
                     setCurrentStep('EMAIL');
                     setError('');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Cambiar correo</span>
                 </button>
 
                 <div className="mb-6">
-                  <h2 className="text-3xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     Revisa tu bandeja
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-2 leading-relaxed">
-                    Hemos enviado un código de 6 dígitos a <span className="font-bold text-zinc-800">{email}</span>.
+                  <p className="text-slate-500 font-medium text-sm mt-1.5 leading-relaxed">
+                    Hemos enviado un código de 6 dígitos a <span className="font-bold text-slate-800">{email}</span>.
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-5">
                   <OtpInput
                     value={otpCode}
                     onChange={(code) => {
@@ -413,8 +420,8 @@ const RegisterPage: React.FC = () => {
                   />
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -424,22 +431,22 @@ const RegisterPage: React.FC = () => {
                     onClick={() => handleVerifyOtp()}
                     isLoading={isSubmitting}
                     disabled={otpCode.length !== 6}
-                    className="h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#3730a3] transition-all shadow-md shadow-indigo-100 active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Verificando código...' : 'Verificar y continuar'}
                   </Button>
 
-                  <div className="text-center pt-2">
-                    <p className="text-xs text-zinc-500">
+                  <div className="text-center pt-1">
+                    <p className="text-xs text-slate-500">
                       ¿No recibiste el código?{' '}
                       {resendCooldown > 0 ? (
-                        <span className="text-zinc-400 font-semibold">Reenviar en {resendCooldown}s</span>
+                        <span className="text-slate-400 font-semibold">Reenviar en {resendCooldown}s</span>
                       ) : (
                         <button
                           type="button"
                           onClick={handleResendOtp}
                           disabled={isSubmitting}
-                          className="text-[#4338ca] font-bold hover:underline"
+                          className="text-[#12A9A8] font-bold hover:underline"
                         >
                           Reenviar código
                         </button>
@@ -454,30 +461,30 @@ const RegisterPage: React.FC = () => {
             {currentStep === 'PROFILE' && (
               <motion.div
                 key="step-profile"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[420px] mx-auto md:mx-0"
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <div className="mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3 border border-emerald-100">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Correo verificado</span>
                   </div>
-                  <h2 className="text-3xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     Personaliza tu cuenta
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-1.5">
+                  <p className="text-slate-500 font-medium text-sm mt-1">
                     Completa tus datos para preparar tus tableros de Lumins.
                   </p>
                 </div>
 
-                <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
+                <form onSubmit={handleProfileSubmit} className="flex flex-col gap-3">
                   {/* Name Fields */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-2.5">
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <label className="text-xs font-bold text-zinc-700 ml-1">Nombre</label>
+                      <label className="text-xs font-bold text-slate-700 ml-0.5">Nombre</label>
                       <input
                         type="text"
                         value={firstName}
@@ -486,18 +493,18 @@ const RegisterPage: React.FC = () => {
                         autoComplete="given-name"
                         autoFocus
                         required
-                        className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl px-3.5 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/20 focus:border-[#4338ca] transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <label className="text-xs font-bold text-zinc-700 ml-1">Apellido</label>
+                      <label className="text-xs font-bold text-slate-700 ml-0.5">Apellido</label>
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Morales"
                         autoComplete="family-name"
-                        className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl px-3.5 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/20 focus:border-[#4338ca] transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                     </div>
                   </div>
@@ -510,35 +517,35 @@ const RegisterPage: React.FC = () => {
                     onPhoneNumberChange={setPhoneNumber}
                   />
 
-                  {/* Optional Password Field */}
+                  {/* Password Field */}
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center ml-1">
-                      <label className="text-xs font-bold text-zinc-700">Contraseña de acceso</label>
-                      <span className="text-[11px] text-zinc-400 font-medium">(mínimo 8 caracteres)</span>
+                    <div className="flex justify-between items-center ml-0.5">
+                      <label className="text-xs font-bold text-slate-700">Contraseña de acceso</label>
+                      <span className="text-[11px] text-slate-400 font-medium">(mínimo 8 caracteres)</span>
                     </div>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Lock className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
                         autoComplete="new-password"
-                        className="w-full h-11 bg-[#F4F6F9] border border-transparent rounded-xl pl-10 pr-10 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/20 focus:border-[#4338ca] transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-9 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -546,7 +553,7 @@ const RegisterPage: React.FC = () => {
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
-                    className="mt-2 h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#3730a3] transition-all shadow-md shadow-indigo-100 active:scale-[0.98]"
+                    className="mt-2 h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Creando tu espacio...' : 'Comenzar a usar Lumins'}
                   </Button>
@@ -558,11 +565,11 @@ const RegisterPage: React.FC = () => {
             {currentStep === 'EXISTING_PASSWORD' && (
               <motion.div
                 key="step-existing-password"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[420px] mx-auto md:mx-0"
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                className="w-full max-w-[400px] mx-auto md:mx-0"
               >
                 <button
                   type="button"
@@ -570,31 +577,31 @@ const RegisterPage: React.FC = () => {
                     setCurrentStep('EMAIL');
                     setError('');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Cambiar correo</span>
                 </button>
 
                 <div className="mb-6">
-                  <h2 className="text-3xl font-black text-zinc-900 tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
                     {existingUserName ? `Hola, ${existingUserName.split(' ')[0]}` : 'Bienvenido de nuevo'}
                   </h2>
-                  <p className="text-zinc-500 font-medium text-sm mt-1.5">
-                    Introduce la contraseña para <span className="font-bold text-zinc-800">{email}</span>.
+                  <p className="text-slate-500 font-medium text-sm mt-1.5">
+                    Introduce la contraseña para <span className="font-bold text-slate-800">{email}</span>.
                   </p>
                 </div>
 
-                <form onSubmit={handleExistingUserLogin} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center ml-1">
-                      <label className="text-sm font-bold text-zinc-700">Contraseña</label>
-                      <Link to="/forgot-password" className="text-xs text-[#4338ca] font-bold hover:underline">
+                <form onSubmit={handleExistingUserLogin} className="flex flex-col gap-3.5">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center ml-0.5">
+                      <label className="text-xs font-bold text-slate-700">Contraseña</label>
+                      <Link to="/forgot-password" className="text-xs text-[#12A9A8] font-bold hover:underline">
                         ¿La olvidaste?
                       </Link>
                     </div>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3.5 w-4 h-4 text-zinc-400" />
+                      <Lock className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={existingUserPassword}
@@ -603,21 +610,21 @@ const RegisterPage: React.FC = () => {
                         autoComplete="current-password"
                         autoFocus
                         required
-                        className="w-full h-12 bg-[#F4F6F9] border border-transparent rounded-xl pl-10 pr-10 text-sm font-medium text-zinc-900 outline-none focus:ring-2 focus:ring-[#4338ca]/20 focus:border-[#4338ca] transition-all"
+                        className="w-full h-9 bg-[#F8FAFC] border border-slate-200 rounded-lg pl-9 pr-9 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-xs font-semibold animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-semibold animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -625,7 +632,7 @@ const RegisterPage: React.FC = () => {
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
-                    className="mt-2 h-12 bg-[#4338ca] text-white text-sm font-bold rounded-xl hover:bg-[#3730a3] transition-all shadow-md shadow-indigo-100 active:scale-[0.98]"
+                    className="h-9 w-full bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-[0.98]"
                   >
                     {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
                   </Button>
@@ -635,7 +642,7 @@ const RegisterPage: React.FC = () => {
           </AnimatePresence>
 
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

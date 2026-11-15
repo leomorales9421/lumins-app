@@ -76,10 +76,10 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
   if (activeCount >= overloadThreshold) {
     return {
       label: `${activeCount} · Sobrecarga`,
-      dotColor: '#EF4444',
-      badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
-      textClass: 'text-rose-600 dark:text-rose-400',
-      cellBg: 'bg-rose-500/[0.04] dark:bg-rose-500/[0.07]',
+      dotColor: '#FF665E',
+      badgeClass: 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E]',
+      textClass: 'text-[#D94841] dark:text-[#FF857E]',
+      cellBg: 'bg-[#FF665E]/[0.04] dark:bg-[#FF665E]/[0.07]',
       status: 'overload' as const,
     };
   }
@@ -87,17 +87,17 @@ function getLoadBadge(activeCount: number, overloadThreshold: number) {
     return {
       label: `${activeCount} · Alta`,
       dotColor: '#F59E0B',
-      badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
-      textClass: 'text-amber-600 dark:text-amber-400',
-      cellBg: 'bg-amber-500/[0.03] dark:bg-amber-500/[0.05]',
+      badgeClass: 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40]',
+      textClass: 'text-amber-700 dark:text-[#FFCC40]',
+      cellBg: 'bg-[#FFCC40]/[0.05] dark:bg-[#FFCC40]/[0.06]',
       status: 'high' as const,
     };
   }
   return {
     label: `${activeCount} · OK`,
-    dotColor: '#10B981',
-    badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
-    textClass: 'text-emerald-600 dark:text-emerald-400',
+    dotColor: '#12A9A8',
+    badgeClass: 'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2]',
+    textClass: 'text-[#0E8786] dark:text-[#4ED4D2]',
     cellBg: '',
     status: 'healthy' as const,
   };
@@ -153,7 +153,7 @@ const DraggableTeamChip: React.FC<DraggableTeamChipProps> = ({
       }}
       className={`group px-2 py-1.5 rounded-lg border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#1E222B] shadow-2xs transition-all select-none ${
         canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
-      } ${isDragging ? 'opacity-35 scale-95' : 'hover:border-[#6C5DD3]/50'} ${
+      } ${isDragging ? 'opacity-35 scale-95' : 'hover:border-[#12A9A8]/50'} ${
         done ? 'opacity-65' : ''
       }`}
     >
@@ -266,8 +266,8 @@ const DroppableTeamCell: React.FC<DroppableTeamCellProps> = ({
       }}
       className={`p-1.5 border-r border-zinc-200/60 dark:border-white/[0.05] last:border-r-0 flex flex-col gap-1.5 min-h-[84px] transition-all ${
         load.cellBg
-      } ${today ? 'bg-[#6C5DD3]/[0.03]' : ''} ${
-        isOver || isExternalOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10 shadow-inner' : ''
+      } ${today ? 'bg-[var(--lumins-accent-soft)]/40' : ''} ${
+        isOver || isExternalOver ? 'ring-2 ring-inset ring-[var(--lumins-accent)] bg-[var(--lumins-accent-soft)] z-10 shadow-inner' : ''
       }`}
     >
       {/* Cards */}
@@ -420,7 +420,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
         {/* Top Workload Toolbar & Legend (Requirement 3.2) */}
         <div className="px-3.5 py-2 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/90 dark:bg-[#14171E] flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0">
           <div className="flex items-center gap-2 shrink-0">
-            <Users size={15} className="text-[#6C5DD3]" />
+            <Users size={15} className="text-[#F59E0B]" />
             <span className="text-xs font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-100 whitespace-nowrap">
               Carga de Trabajo
             </span>
@@ -553,7 +553,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                         <div
                           key={key}
                           className={`py-1 rounded-lg flex flex-col items-center justify-center ${
-                            today ? 'bg-[#6C5DD3]/15 text-[#6C5DD3]' : 'bg-zinc-50 dark:bg-white/[0.03]'
+                            today ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]' : 'bg-zinc-50 dark:bg-white/[0.03]'
                           }`}
                         >
                           <span className="text-[9px] font-bold uppercase text-zinc-400">
@@ -561,7 +561,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                           </span>
                           <span className="text-[11px] font-black">{format(day, 'd')}</span>
                           {dayTasks.length > 0 ? (
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#6C5DD3] mt-0.5" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--lumins-accent)] mt-0.5" />
                           ) : (
                             <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-0.5" />
                           )}
@@ -625,7 +625,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                   <div
                     key={key}
                     className={`px-2.5 py-2 border-r border-zinc-200/60 dark:border-white/[0.05] last:border-r-0 flex items-center justify-between ${
-                      today ? 'bg-[#6C5DD3]/[0.08]' : ''
+                      today ? 'bg-[var(--lumins-accent-soft)]/70' : ''
                     }`}
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
@@ -633,7 +633,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                         style={{ borderRadius: '9999px' }}
                         className={`w-6 h-6 text-[11px] font-black flex items-center justify-center shrink-0 ${
                           today
-                            ? 'bg-[#6C5DD3] text-white'
+                            ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]'
                             : 'bg-zinc-200/70 dark:bg-white/10 text-zinc-700 dark:text-zinc-200'
                         }`}
                       >
@@ -654,7 +654,7 @@ const LuminsCalendarTeamView: React.FC<LuminsCalendarTeamViewProps> = ({
                         type="button"
                         onClick={() => onOpenQuickCreate(day)}
                         title="Crear tarea en este día"
-                        className="p-1 rounded-md text-zinc-400 hover:text-[#6C5DD3] hover:bg-[#6C5DD3]/10 transition-colors"
+                        className="p-1 rounded-md text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)] transition-colors"
                       >
                         <Plus size={12} />
                       </button>

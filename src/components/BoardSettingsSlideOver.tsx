@@ -670,7 +670,7 @@ const BoardSettingsSlideOver: React.FC<BoardSettingsSlideOverProps> = ({
               {!showDeleteConfirm ? (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded border-2 border-rose-100 dark:border-rose-500/20 bg-white dark:bg-[#13151A] text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-rose-200 dark:border-rose-500/30 bg-white dark:bg-[#212632] text-rose-600 dark:text-rose-300 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white transition-all font-bold text-sm cursor-pointer"
                 >
                   <Trash2 size={18} />
                   Eliminar este tablero

@@ -137,17 +137,17 @@ export const SortableList: React.FC<SortableListProps> = ({
       data-list-id={list.id}
       className={`
         cu-column h-fit max-h-full flex flex-col
-        w-[85vw] sm:w-[85vw] md:w-[300px] flex-shrink-0
-        bg-white/85 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-2xl md:rounded-lg border border-white/30 dark:border-white/10 p-2 sm:p-3 shadow-xl
+        w-[82vw] sm:w-[272px] flex-shrink-0
+        bg-[#F1F2F4]/95 dark:bg-[#191C24]/92 backdrop-blur-md rounded-xl border border-black/5 dark:border-white/[0.12] p-2 shadow-[0_6px_20px_rgba(15,23,42,0.12)]
         ${isDragging ? 'opacity-40 scale-[0.98] z-50 !transition-none' : 'transition-shadow duration-150'}
-        ${isDraggingCardOver ? 'ring-2 ring-[#6C5DD3]/40 ring-offset-1 bg-white/95 dark:bg-[#1C1F26]' : ''}
+        ${isDraggingCardOver ? 'ring-2 ring-[var(--lumins-accent)]/55 bg-white dark:bg-[#212632]' : ''}
       `}
     >
       {/* Column Header */}
       <div
         {...attributes}
         {...listeners}
-        className="px-1 py-1 md:py-2 mb-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
+        className="px-1.5 pt-1 pb-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-2 flex-1 overflow-hidden">
           {isEditingTitle ? (
@@ -162,7 +162,7 @@ export const SortableList: React.FC<SortableListProps> = ({
             </form>
           ) : (
             <h3
-              className="font-bold text-zinc-900 dark:text-zinc-100 text-[14px] truncate cursor-text hover:text-[#6C5DD3] transition-colors"
+              className="font-bold text-zinc-900 dark:text-zinc-100 text-[13.5px] truncate cursor-text hover:text-[var(--lumins-accent-fg)] transition-colors"
               onClick={(e) => { 
                 if (!canEdit) return;
                 e.stopPropagation(); 
@@ -172,7 +172,7 @@ export const SortableList: React.FC<SortableListProps> = ({
               {list.name || list.title}
             </h3>
           )}
-          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded bg-white/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold border border-zinc-200 dark:border-white/5">
+          <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md bg-slate-100/90 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 text-[10px] font-bold border border-slate-200/70 dark:border-white/5">
             {cards.length}
           </span>
         </div>
@@ -182,7 +182,7 @@ export const SortableList: React.FC<SortableListProps> = ({
             {/* Quick add card */}
             <button
               onClick={(e) => { e.stopPropagation(); setIsAddingCard(true); }}
-              className="p-1.5 rounded text-zinc-400 dark:text-zinc-500 hover:text-[#6C5DD3] hover:bg-white dark:hover:bg-white/5 transition-colors"
+              className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-[var(--lumins-accent-fg)] hover:bg-white dark:hover:bg-white/5 transition-colors cursor-pointer"
               title="Añadir tarjeta"
             >
               <Plus size={15} strokeWidth={2.5} />
@@ -222,7 +222,7 @@ export const SortableList: React.FC<SortableListProps> = ({
                           setIsEditingTitle(true);
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] rounded-lg transition-all flex items-center gap-3"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[var(--lumins-accent-soft)] hover:text-[var(--lumins-accent-fg)] rounded-lg transition-all flex items-center gap-3"
                       >
                         <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center shrink-0">
                           <Pencil size={14} strokeWidth={2.5} />
@@ -346,15 +346,15 @@ export const SortableList: React.FC<SortableListProps> = ({
 
         {/* Creating Card Loader Placeholder */}
         {isSubmittingCard && (
-          <div className="bg-white/90 dark:bg-[#1C1F26]/90 p-3 rounded-lg border border-[#6C5DD3]/30 shadow-md flex items-center gap-2.5 animate-pulse">
-            <Loader2 size={15} className="animate-spin text-[#6C5DD3]" />
+          <div className="bg-white/90 dark:bg-[#1C1F26]/90 p-3 rounded-lg border border-[var(--lumins-accent-border)] shadow-md flex items-center gap-2.5 animate-pulse">
+            <Loader2 size={15} className="animate-spin text-[var(--lumins-accent-fg)]" />
             <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Creando tarjeta...</span>
           </div>
         )}
       </div>
 
       {canEdit && (
-        <div className="px-1 md:px-2 pt-0.5 pb-2">
+        <div className="px-0.5 pt-1 pb-0.5">
           {isAddingCard ? (
             <form onSubmit={handleAddCard} className="flex flex-col gap-2 p-2 bg-zinc-50 dark:bg-[#13151A] rounded border border-zinc-200 dark:border-white/5">
               <textarea
@@ -379,13 +379,13 @@ export const SortableList: React.FC<SortableListProps> = ({
                   wordBreak: 'break-word',
                   overflowWrap: 'anywhere'
                 }}
-                className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded px-2.5 py-2 text-[13px] text-zinc-900 dark:text-zinc-100 outline-none w-full resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-[#6C5DD3] focus:ring-2 focus:ring-[#6C5DD3]/10 no-scrollbar leading-snug transition-[border-color,box-shadow]"
+                className="bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-2 text-[13px] text-zinc-900 dark:text-zinc-100 outline-none w-full resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-[var(--lumins-accent)] focus:ring-2 focus:ring-[var(--lumins-accent)]/15 no-scrollbar leading-snug transition-[border-color,box-shadow]"
               />
               <div className="flex items-center gap-2">
                 <button
                   type="submit"
                   disabled={isSubmittingCard || !newCardTitle.trim()}
-                  className="bg-[#6C5DD3] text-white px-3 py-1.5 rounded text-[12px] font-semibold hover:bg-[#5b4ebf] disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-sm"
+                  className="bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] px-3 py-1.5 rounded-lg text-[12px] font-semibold hover:brightness-95 disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   {isSubmittingCard ? (
                     <>
@@ -409,7 +409,7 @@ export const SortableList: React.FC<SortableListProps> = ({
           ) : (
             <button
               onClick={() => setIsAddingCard(true)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 rounded text-zinc-500 dark:text-zinc-400 hover:text-[#6C5DD3] dark:hover:text-[#8E82E3] hover:bg-white/50 dark:hover:bg-white/5 transition-all text-[13px] font-bold group mt-2"
+              className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-black/5 dark:hover:bg-white/5 transition-all text-xs font-semibold group cursor-pointer"
             >
               <Plus size={16} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
               Añadir tarjeta

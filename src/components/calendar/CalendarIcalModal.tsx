@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -114,7 +114,7 @@ export const CalendarIcalModal: React.FC<CalendarIcalModalProps> = ({
           {/* Header */}
           <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-[#6C5DD3] flex items-center justify-center border border-[#6C5DD3]/20">
+              <div className="w-10 h-10 rounded-xl bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center border border-[#12A9A8]/20">
                 <CalendarIcon size={20} />
               </div>
               <div>
@@ -138,7 +138,7 @@ export const CalendarIcalModal: React.FC<CalendarIcalModalProps> = ({
           <div className="p-6 space-y-5">
             {isLoading ? (
               <div className="py-12 flex flex-col items-center justify-center text-zinc-400 gap-2">
-                <Loader2 size={28} className="animate-spin text-[#6C5DD3]" />
+                <Loader2 size={28} className="animate-spin text-[#12A9A8]" />
                 <span className="text-xs font-semibold">Generando enlace seguro...</span>
               </div>
             ) : (
@@ -185,7 +185,7 @@ export const CalendarIcalModal: React.FC<CalendarIcalModalProps> = ({
                       type="button"
                       onClick={handleCopy}
                       title="Copiar enlace"
-                      className="flex-shrink-0 px-3.5 py-2 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                      className="flex-shrink-0 px-3.5 py-2 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
                     >
                       {copied ? <Check size={14} /> : <Copy size={14} />}
                       <span>{copied ? 'Copiado' : 'Copiar'}</span>
@@ -195,7 +195,7 @@ export const CalendarIcalModal: React.FC<CalendarIcalModalProps> = ({
                     <div className="mt-2 flex items-center gap-2">
                       <a
                         href={activeWebcal}
-                        className="text-[11px] font-bold text-[#6C5DD3] hover:underline flex items-center gap-1"
+                        className="text-[11px] font-bold text-[#12A9A8] hover:underline flex items-center gap-1"
                       >
                         Abrir directamente en Apple Calendar / Outlook (webcal://)
                         <ExternalLink size={11} />

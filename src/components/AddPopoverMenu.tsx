@@ -88,7 +88,7 @@ const AddPopoverMenu: React.FC<AddPopoverMenuProps> = ({ onClose, onSelectOption
               }}
               className="w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-white/5 group cursor-pointer border-b border-zinc-100 dark:border-white/5 last:border-0"
             >
-              <div className="bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 p-2 rounded group-hover:bg-white dark:group-hover:bg-[#1C1F26] group-hover:text-[#6C5DD3] transition-colors border border-transparent group-hover:border-zinc-200 dark:group-hover:border-white/10">
+              <div className="bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 p-2 rounded group-hover:bg-[var(--lumins-accent-soft)] group-hover:text-[var(--lumins-accent-fg)] transition-colors border border-transparent group-hover:border-[var(--lumins-accent-border)]">
                 <Icon size={18} />
               </div>
               <div className="flex flex-col">

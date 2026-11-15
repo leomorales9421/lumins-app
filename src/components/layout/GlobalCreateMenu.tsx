@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Layout, 
-  Briefcase, 
-  ChevronRight 
-} from 'lucide-react';
+import { Plus, ChevronRight } from 'lucide-react';
 import SmartPopover from '../SmartPopover';
+import { LuminsBoardIcon, LuminsWorkspaceIcon, LuminsMembersIcon } from '../icons/LuminsIcons';
 
 interface GlobalCreateMenuProps {
   onCreateBoard: () => void;
   onCreateWorkspace: () => void;
+  onInviteMember?: () => void;
   canCreateBoard: boolean;
 }
 
 const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({ 
   onCreateBoard, 
   onCreateWorkspace,
+  onInviteMember,
   canCreateBoard
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,47 +28,73 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
     setIsOpen(false);
   };
 
+  const handleInviteMember = () => {
+    onInviteMember?.();
+    setIsOpen(false);
+  };
+
   const menuContent = (
-    <div className="w-64 bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-100 dark:border-white/10 p-2 z-50 animate-in fade-in zoom-in duration-200">
+    <div className="w-64 bg-white dark:bg-[#1C1F26] rounded-xl shadow-xl border border-slate-200/90 dark:border-white/10 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
       {/* Nuevo Tablero */}
       <button
         disabled={!canCreateBoard}
         onClick={handleCreateBoard}
-        className={`w-full flex items-center gap-3 p-3 rounded transition-all text-left group/item
+        className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-all text-left group/item
           ${canCreateBoard 
-            ? 'hover:bg-indigo-50 dark:hover:bg-[#6C5DD3]/10 cursor-pointer' 
+            ? 'hover:bg-[var(--lumins-accent-soft)] cursor-pointer' 
             : 'opacity-50 cursor-not-allowed grayscale'
           }
         `}
       >
-        <div className={`w-9 h-9 rounded flex items-center justify-center transition-colors
-          ${canCreateBoard ? 'bg-indigo-100 dark:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-indigo-400' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-600'}
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0
+          ${canCreateBoard ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]' : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-600'}
         `}>
-          <Layout size={18} strokeWidth={2.5} />
+          <LuminsBoardIcon size={20} />
         </div>
-        <div className="flex-1">
-          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover/item:text-[#6C5DD3] dark:group-hover/item:text-indigo-400 transition-colors">Tablero</h4>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Crea un tablero en el espacio actual</p>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover/item:text-[var(--lumins-accent-fg)] transition-colors">Tablero</h4>
+          <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-snug">Crea un tablero en el espacio actual</p>
         </div>
-        <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600 group-hover/item:text-[#6C5DD3] dark:group-hover/item:text-indigo-400 group-hover/item:translate-x-0.5 transition-all" />
+        <ChevronRight size={14} className="text-slate-300 dark:text-zinc-600 group-hover/item:text-[var(--lumins-accent-fg)] group-hover/item:translate-x-0.5 transition-all shrink-0" />
       </button>
 
-      <hr className="my-1.5 border-zinc-100 dark:border-white/5" />
+      <hr className="my-1 border-slate-100 dark:border-white/5" />
 
       {/* Nuevo Espacio de Trabajo */}
       <button
         onClick={handleCreateWorkspace}
-        className="w-full flex items-center gap-3 p-3 rounded hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group/item"
+        className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--lumins-accent-soft)] transition-all text-left group/item cursor-pointer"
       >
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-white/10 text-zinc-500 dark:text-zinc-400 rounded flex items-center justify-center group-hover/item:bg-zinc-200 dark:group-hover/item:bg-white/20 transition-colors">
-          <Briefcase size={18} strokeWidth={2.5} />
+        <div className="w-9 h-9 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-zinc-200 rounded-lg flex items-center justify-center group-hover/item:bg-[var(--lumins-accent-soft)] group-hover/item:text-[var(--lumins-accent-fg)] transition-colors shrink-0">
+          <LuminsWorkspaceIcon size={20} />
         </div>
-        <div className="flex-1">
-          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Espacio de Trabajo</h4>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Crea una organización para tus equipos</p>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover/item:text-[var(--lumins-accent-fg)] transition-colors">Espacio de Trabajo</h4>
+          <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-snug">Crea una organización para tus equipos</p>
         </div>
-        <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600 group-hover/item:translate-x-0.5 transition-all" />
+        <ChevronRight size={14} className="text-slate-300 dark:text-zinc-600 group-hover/item:text-[var(--lumins-accent-fg)] group-hover/item:translate-x-0.5 transition-all shrink-0" />
       </button>
+
+      {onInviteMember && (
+        <>
+          <hr className="my-1 border-slate-100 dark:border-white/5" />
+
+          {/* Invitar Miembro */}
+          <button
+            onClick={handleInviteMember}
+            className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--lumins-accent-soft)] transition-all text-left group/item cursor-pointer"
+          >
+            <div className="w-9 h-9 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-zinc-200 rounded-lg flex items-center justify-center group-hover/item:bg-[var(--lumins-accent-soft)] group-hover/item:text-[var(--lumins-accent-fg)] transition-colors shrink-0">
+              <LuminsMembersIcon size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover/item:text-[var(--lumins-accent-fg)] transition-colors">Miembro</h4>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-snug">Invita personas a un espacio o tablero</p>
+            </div>
+            <ChevronRight size={14} className="text-slate-300 dark:text-zinc-600 group-hover/item:text-[var(--lumins-accent-fg)] group-hover/item:translate-x-0.5 transition-all shrink-0" />
+          </button>
+        </>
+      )}
     </div>
   );
 
@@ -82,15 +106,15 @@ const GlobalCreateMenu: React.FC<GlobalCreateMenuProps> = ({
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className={`
-            h-10 px-3 rounded-[4px] font-bold text-[13px] transition-all flex items-center justify-center gap-2
+            h-9 px-2.5 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer
             ${isOpen 
-              ? 'bg-zinc-100 dark:bg-white/10 text-indigo-600 dark:text-indigo-400' 
-              : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
+              ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]' 
+              : 'text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-zinc-100'
             }
           `}
         >
-          <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isOpen ? 'bg-indigo-100 dark:bg-[#6C5DD3]/20' : 'bg-zinc-100 dark:bg-white/10'}`}>
-            <Plus size={14} strokeWidth={3} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200 ${isOpen ? 'text-indigo-600' : ''}`} />
+          <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${isOpen ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' : 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]'}`}>
+            <Plus size={13} strokeWidth={2.75} className={`${isOpen ? 'rotate-45' : ''} transition-transform duration-200`} />
           </div>
           <span className="uppercase tracking-wider hidden sm:block">Nuevo</span>
         </button>

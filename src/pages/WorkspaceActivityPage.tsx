@@ -16,13 +16,20 @@ import {
   Loader2
 } from 'lucide-react';
 import apiClient from '../lib/api-client';
-import { Skeleton } from '../components/ui/Skeleton';
+import { useModuleLoading } from '../contexts/NavigationLoaderContext';
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import CardDetailModal from '../components/CardDetailModal';
 import UserAvatar from '../components/ui/UserAvatar';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
+import {
+  LuminsActivityIcon,
+  LuminsFilterIcon,
+  LuminsClockIcon,
+  LuminsBoardIcon,
+} from '../components/icons/LuminsIcons';
+import Select from '../components/ui/Select';
 
 interface CardEvent {
   id: string;
@@ -51,6 +58,7 @@ const WorkspaceActivityPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [activity, setActivity] = useState<CardEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  useModuleLoading(isLoading && activity.length === 0, 'workspace-activity');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filterBoard, setFilterBoard] = useState('');
   const [filterUser, setFilterUser] = useState('');
@@ -132,11 +140,11 @@ const WorkspaceActivityPage: React.FC = () => {
 
   const getEventIconStyles = (type: string) => {
     switch (type) {
-      case 'COMMENT': return 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
-      case 'MOVE': return 'bg-indigo-100 dark:bg-[#6C5DD3]/10 text-indigo-600 dark:text-[#8E82E3] border-indigo-200 dark:border-[#6C5DD3]/20';
-      case 'ATTACHMENT': return 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20';
-      case 'MEMBER': return 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20';
-      default: return 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/10';
+      case 'COMMENT': return 'bg-[#0EA5E9]/[0.10] text-[#0284C7] dark:bg-[#0EA5E9]/15 dark:text-[#38BDF8] border-transparent';
+      case 'MOVE': return 'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2] border-transparent';
+      case 'ATTACHMENT': return 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40] border-transparent';
+      case 'MEMBER': return 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E] border-transparent';
+      default: return 'bg-slate-100 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300 border-transparent';
     }
   };
 
@@ -177,21 +185,21 @@ const WorkspaceActivityPage: React.FC = () => {
   const groupedActivity = groupEventsByDate(activity);
 
   const FiltersContent = ({ isMobile = false }) => (
-    <div className={`bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-5 sm:p-6 ${!isMobile ? 'shadow-xl shadow-slate-200/40 dark:shadow-none' : ''}`}>
-      <div className="flex items-center justify-between mb-6">
+    <div className={`bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-5 ${!isMobile ? 'shadow-sm' : ''}`}>
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-[#6C5DD3]">
-            <Filter size={16} />
+          <div className="w-7 h-7 bg-gradient-to-br from-[#12A9A8]/12 via-[#FFCC40]/12 to-[#FF665E]/12 border border-[#12A9A8]/20 rounded-lg flex items-center justify-center text-zinc-700 dark:text-zinc-200">
+            <LuminsFilterIcon size={15} />
           </div>
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Filtros</h2>
+          <h2 className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Filtros</h2>
         </div>
         
         {isMobile && (
           <button 
             onClick={() => setIsMobileFiltersOpen(false)}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-colors"
+            className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors"
           >
-            <ChevronDown size={20} className="text-zinc-400" />
+            <ChevronDown size={18} className="text-zinc-400" />
           </button>
         )}
 
@@ -202,67 +210,52 @@ const WorkspaceActivityPage: React.FC = () => {
               setFilterUser('');
               setFilterType('');
             }}
-            className="text-[10px] font-bold text-rose-500 uppercase tracking-tight hover:underline"
+            className="text-[10px] font-bold text-[#FF665E] uppercase tracking-tight hover:underline"
           >
             Limpiar
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6">
-        <div>
-          <label className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2 block">Tablero</label>
-          <div className="relative">
-            <select 
-              value={filterBoard}
-              onChange={(e) => setFilterBoard(e.target.value)}
-              className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
-            >
-              <option value="">Todos los tableros</option>
-              {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={14} />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-3.5">
+        <Select
+          label="Tablero"
+          uiSize="sm"
+          value={filterBoard}
+          onChange={(e) => setFilterBoard(e.target.value)}
+        >
+          <option value="">Todos los tableros</option>
+          {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+        </Select>
 
-        <div>
-          <label className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2 block">Miembro</label>
-          <div className="relative">
-            <select 
-              value={filterUser}
-              onChange={(e) => setFilterUser(e.target.value)}
-              className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
-            >
-              <option value="">Todos los miembros</option>
-              {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={14} />
-          </div>
-        </div>
+        <Select
+          label="Miembro"
+          uiSize="sm"
+          value={filterUser}
+          onChange={(e) => setFilterUser(e.target.value)}
+        >
+          <option value="">Todos los miembros</option>
+          {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </Select>
 
-        <div>
-          <label className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2 block">Acción</label>
-          <div className="relative">
-            <select 
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full bg-zinc-100 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded py-3 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-200 focus:ring-2 focus:ring-[#6C5DD3]/20 appearance-none outline-none transition-all cursor-pointer"
-            >
-              <option value="">Cualquier acción</option>
-              <option value="MOVE">Movimientos</option>
-              <option value="COMMENT">Comentarios</option>
-              <option value="ATTACHMENT">Adjuntos</option>
-              <option value="MEMBER">Miembros</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={14} />
-          </div>
-        </div>
+        <Select
+          label="Acción"
+          uiSize="sm"
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+        >
+          <option value="">Cualquier acción</option>
+          <option value="MOVE">Movimientos</option>
+          <option value="COMMENT">Comentarios</option>
+          <option value="ATTACHMENT">Adjuntos</option>
+          <option value="MEMBER">Miembros</option>
+        </Select>
 
         {isMobile && (
           <div className="pt-2">
             <button 
               onClick={() => setIsMobileFiltersOpen(false)}
-              className="w-full py-4 bg-[#6C5DD3] text-white rounded font-bold text-sm shadow-lg shadow-[#6C5DD3]/20 active:scale-95 transition-transform"
+              className="w-full py-2.5 bg-[#12A9A8] hover:bg-[#0E8786] text-white rounded-lg font-bold text-xs shadow-sm shadow-[#12A9A8]/20 active:scale-95 transition-all"
             >
               Aplicar Filtros
             </button>
@@ -304,21 +297,16 @@ const WorkspaceActivityPage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-[#6C5DD3] mb-1">
-              <Activity size={18} strokeWidth={2.5} />
+            <div className="flex items-center gap-2 text-[#0E8786] dark:text-[#4ED4D2] mb-1">
+              <LuminsActivityIcon size={18} />
               <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Workspace Audit Log</span>
             </div>
-            {isLoading && activity.length === 0 ? (
-              <>
-                <Skeleton className="h-9 w-64 mb-2" />
-                <Skeleton className="h-4 w-96" />
-              </>
-            ) : (
+            {isLoading && activity.length === 0 ? null : (
               <>
                 <div className="flex items-center gap-4">
                   <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">Actividad del Espacio</h1>
                   {isRefreshing && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#6C5DD3]/5 border border-[#6C5DD3]/10 text-[#6C5DD3] animate-in fade-in zoom-in duration-300">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#4ED4D2] animate-in fade-in zoom-in duration-300">
                       <Loader2 size={14} className="animate-spin" />
                       <span className="text-[10px] font-bold uppercase tracking-wider">Actualizando</span>
                     </div>
@@ -332,41 +320,26 @@ const WorkspaceActivityPage: React.FC = () => {
           {/* Mobile Filter Trigger */}
           <button 
             onClick={() => setIsMobileFiltersOpen(true)}
-            className="lg:hidden flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded shadow-sm text-zinc-700 dark:text-zinc-300 font-bold text-sm active:scale-95 transition-all"
+            className="lg:hidden flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg shadow-2xs text-zinc-700 dark:text-zinc-300 font-bold text-xs active:scale-95 transition-all"
           >
-            <Filter size={16} className="text-[#6C5DD3]" />
+            <LuminsFilterIcon size={15} />
             Filtros
             {(filterBoard || filterUser || filterType) && (
-              <span className="w-2 h-2 rounded bg-[#6C5DD3] animate-pulse ml-1" />
+              <span className="w-2 h-2 rounded-full bg-[#FF665E] animate-pulse ml-1" />
             )}
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Main Feed Column */}
           <div className="flex-1 min-w-0 lg:w-[70%] w-full">
-            {isLoading && activity.length === 0 ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-4 flex items-start gap-4 shadow-sm">
-                    <Skeleton className="w-9 h-9 rounded flex-shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <div className="flex gap-2">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-3 w-16" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : activity.length === 0 ? (
-              <div className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/10 p-12 sm:p-20 text-center flex flex-col items-center shadow-soft">
-                 <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
-                    <Clock size={32} />
+            {isLoading && activity.length === 0 ? null : activity.length === 0 ? (
+              <div className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200/80 dark:border-white/10 p-10 sm:p-16 text-center flex flex-col items-center shadow-2xs">
+                 <div className="w-14 h-14 bg-gradient-to-br from-[#12A9A8]/10 via-[#FFCC40]/10 to-[#FF665E]/10 border border-[#12A9A8]/20 rounded-xl flex items-center justify-center text-zinc-700 dark:text-zinc-200 mb-3.5">
+                    <LuminsClockIcon size={28} />
                  </div>
-                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Sin actividad</h3>
-                 <p className="text-zinc-500 dark:text-zinc-400">No se han encontrado eventos con los filtros seleccionados.</p>
+                 <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">Sin actividad</h3>
+                 <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">No se han encontrado eventos con los filtros seleccionados.</p>
               </div>
             ) : (
               <div className="space-y-8">
@@ -384,7 +357,7 @@ const WorkspaceActivityPage: React.FC = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.05 }}
                           onClick={() => setSelectedCard({ cardId: event.card.id, boardId: event.card.board.id })}
-                          className="bg-white dark:bg-[#1C1F26] rounded shadow-[0_2px_10px_rgba(108,93,211,0.03)] border border-zinc-200 dark:border-white/10 p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer group hover:border-[#6C5DD3]/30"
+                          className="bg-white dark:bg-[#1C1F26] rounded-xl shadow-[0_2px_10px_rgba(18,169,168,0.04)] border border-zinc-200 dark:border-white/10 p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer group hover:border-[#12A9A8]/35"
                         >
                           <div className="shrink-0">
                             <UserAvatar 
@@ -402,7 +375,7 @@ const WorkspaceActivityPage: React.FC = () => {
                             
                             <div className="mt-2.5 flex items-center gap-3 flex-wrap">
                               <div className="flex items-center gap-2">
-                                <div className={`flex items-center justify-center p-1 rounded border ${getEventIconStyles(event.type)} shadow-sm`}>
+                                <div className={`flex items-center justify-center p-1 rounded border ${getEventIconStyles(event.type)}`}>
                                   {getEventIcon(event.type)}
                                 </div>
                                 <div className="flex items-center gap-1 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tight">
@@ -413,15 +386,15 @@ const WorkspaceActivityPage: React.FC = () => {
                               
                               <div className="h-3 w-px bg-zinc-200 dark:bg-white/10 hidden xs:block" />
                               
-                              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 dark:bg-white/5 rounded border border-zinc-200 dark:border-white/10 group-hover:border-[#6C5DD3]/20 transition-colors">
-                                <Layout size={10} className="text-zinc-400 group-hover:text-[#6C5DD3] transition-colors" />
-                                <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-[#6C5DD3] transition-colors truncate max-w-[120px]">{event.card.board.name}</span>
+                              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 dark:bg-white/5 rounded-md group-hover:bg-[#12A9A8]/[0.08] transition-colors">
+                                <LuminsBoardIcon size={12} />
+                                <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-[#0E8786] dark:group-hover:text-[#4ED4D2] transition-colors truncate max-w-[120px]">{event.card.board.name}</span>
                               </div>
                             </div>
 
                             {event.type === 'COMMENT' && event.comment && (
-                               <div className="mt-3 p-3 bg-zinc-50 dark:bg-white/5 rounded border border-zinc-200 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400 italic line-clamp-2 break-words [overflow-wrap:anywhere] relative overflow-hidden group-hover:bg-white dark:group-hover:bg-[#252a33] transition-colors">
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6C5DD3]/40" />
+                               <div className="mt-3 p-3 bg-zinc-50 dark:bg-white/5 rounded-lg border border-zinc-200 dark:border-white/5 text-xs text-zinc-500 dark:text-zinc-400 italic line-clamp-2 break-words [overflow-wrap:anywhere] relative overflow-hidden group-hover:bg-white dark:group-hover:bg-[#252a33] transition-colors">
+                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#12A9A8]/50" />
                                   "{event.comment.body.replace(/<[^>]*>/g, '')}"
                                </div>
                             )}
@@ -461,7 +434,7 @@ const WorkspaceActivityPage: React.FC = () => {
                                 onClick={() => setCurrentPage(pageNum)}
                                 className={`w-8 h-8 flex-shrink-0 rounded text-xs font-bold transition-all ${
                                   currentPage === pageNum 
-                                    ? 'bg-[#6C5DD3] text-white shadow-md shadow-[#6C5DD3]/20' 
+                                    ? 'bg-[#12A9A8] text-white shadow-md shadow-[#12A9A8]/20' 
                                     : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5'
                                 }`}
                               >

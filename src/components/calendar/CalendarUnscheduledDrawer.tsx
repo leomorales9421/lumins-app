@@ -97,7 +97,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
       {/* Header */}
       <div className="px-3.5 py-2.5 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/80 dark:bg-[#15181F] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-[#6C5DD3]/12 text-[#6C5DD3] dark:text-[#A599F9] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center shrink-0">
             <Inbox size={15} />
           </div>
           <div className="min-w-0">
@@ -105,7 +105,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
               <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100 truncate">
                 Sin fecha
               </h3>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#6C5DD3]/15 text-[#6C5DD3] dark:text-[#A599F9]">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]">
                 {filteredCards.length}
               </span>
             </div>
@@ -137,7 +137,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar tarjeta sin fecha..."
-            className="w-full h-8 pl-8 pr-7 rounded-lg bg-zinc-100/80 dark:bg-white/[0.05] border border-transparent focus:border-[#6C5DD3] text-xs font-medium text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
+            className="w-full h-8 pl-8 pr-7 rounded-lg bg-zinc-100/80 dark:bg-white/[0.05] border border-transparent focus:border-[var(--lumins-accent)] text-xs font-medium text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
           />
           {search && (
             <button
@@ -154,7 +154,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
           <select
             value={boardFilter}
             onChange={e => setBoardFilter(e.target.value)}
-            className="h-7 px-2 rounded-lg bg-zinc-50 dark:bg-[#14171E] border border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:border-[#6C5DD3]"
+            className="h-7 px-2 rounded-lg bg-zinc-50 dark:bg-[#14171E] border border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:border-[var(--lumins-accent)]"
           >
             <option value="ALL">Todos los tableros</option>
             {boards.map(b => (
@@ -167,7 +167,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="h-7 px-2 rounded-lg bg-zinc-50 dark:bg-[#14171E] border border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:border-[#6C5DD3]"
+            className="h-7 px-2 rounded-lg bg-zinc-50 dark:bg-[#14171E] border border-zinc-200/80 dark:border-white/10 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:border-[var(--lumins-accent)]"
           >
             <option value="ALL">Cualquier prioridad</option>
             <option value="P0">P0 · Crítica</option>
@@ -225,11 +225,11 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                   borderLeftWidth: '4px',
                   borderLeftColor: accentColor,
                 }}
-                className={`group p-2.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#1E222B] hover:border-[#6C5DD3]/50 shadow-2xs transition-all space-y-1.5 ${
+                className={`group p-2.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#1E222B] hover:border-[var(--lumins-accent-border)] shadow-2xs transition-all space-y-1.5 ${
                   canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                 } ${
                   draggingCardId === ev.id
-                    ? 'opacity-40 scale-95 border-dashed border-[#6C5DD3] dark:border-[#6C5DD3]'
+                    ? 'opacity-40 scale-95 border-dashed border-[var(--lumins-accent)]'
                     : ''
                 }`}
               >
@@ -269,7 +269,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                 {/* Title */}
                 <p
                   onClick={() => onSelectEvent(ev)}
-                  className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] cursor-pointer hover:text-[#6C5DD3]"
+                  className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] cursor-pointer hover:text-[var(--lumins-accent-fg)]"
                 >
                   {ev.title}
                 </p>
@@ -313,10 +313,10 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                         e.stopPropagation();
                         setActiveScheduleCardId(isScheduling ? null : ev.id);
                       }}
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold transition-colors ${
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold transition-colors cursor-pointer ${
                         isScheduling
-                          ? 'bg-[#6C5DD3] text-white'
-                          : 'bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#A599F9] hover:bg-[#6C5DD3]/20'
+                          ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]'
+                          : 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] hover:opacity-85'
                       }`}
                     >
                       <CalendarPlus size={11} />
@@ -338,7 +338,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                           onScheduleCard(ev, today);
                           setActiveScheduleCardId(null);
                         }}
-                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[#6C5DD3] hover:text-white text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
+                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[var(--lumins-accent)] hover:text-[var(--lumins-accent-on)] text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
                       >
                         Hoy
                       </button>
@@ -348,7 +348,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                           onScheduleCard(ev, tomorrow);
                           setActiveScheduleCardId(null);
                         }}
-                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[#6C5DD3] hover:text-white text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
+                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[var(--lumins-accent)] hover:text-[var(--lumins-accent-on)] text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
                       >
                         Mañana
                       </button>
@@ -358,7 +358,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                           onScheduleCard(ev, upcomingMonday);
                           setActiveScheduleCardId(null);
                         }}
-                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[#6C5DD3] hover:text-white text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
+                        className="py-1 rounded-md bg-zinc-100 dark:bg-white/[0.06] hover:bg-[var(--lumins-accent)] hover:text-[var(--lumins-accent-on)] text-[10px] font-extrabold text-zinc-700 dark:text-zinc-200 transition-colors"
                       >
                         Próx. Lun
                       </button>
@@ -380,7 +380,7 @@ const CalendarUnscheduledDrawer: React.FC<CalendarUnscheduledDrawerProps> = ({
                             setActiveScheduleCardId(null);
                           }
                         }}
-                        className="h-7 px-2.5 rounded-md bg-[#6C5DD3] text-white text-[10px] font-extrabold hover:bg-[#5b4eb8]"
+                        className="h-7 px-2.5 rounded-md bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] text-[10px] font-extrabold hover:bg-[var(--lumins-accent-hover)]"
                       >
                         Asignar
                       </button>

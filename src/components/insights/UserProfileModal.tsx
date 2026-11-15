@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { X, PieChart, Clock, CheckSquare, AlertCircle } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 
@@ -49,7 +49,7 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
           <div className="flex items-center gap-3">
             {!isLoading && profile?.user && (
               <img 
-                src={profile.user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.name)}&background=6C5DD3&color=fff`} 
+                src={profile.user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.user.name)}&background=12A9A8&color=fff`} 
                 alt="Avatar" 
                 className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-zinc-800 shadow-sm"
               />
@@ -75,7 +75,7 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Board Distribution */}
                 <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm">
-                  <h3 className="font-bold flex items-center gap-2 mb-4"><PieChart size={18} className="text-[#6C5DD3]" /> Distribución por Proyectos</h3>
+                  <h3 className="font-bold flex items-center gap-2 mb-4"><PieChart size={18} className="text-[#12A9A8]" /> Distribución por Proyectos</h3>
                   <div className="space-y-4">
                     {profile.boardDistribution.map((b: any, idx: number) => {
                        const total = profile.boardDistribution.reduce((acc: number, curr: any) => acc + curr.count, 0);
@@ -87,7 +87,7 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
                              <span className="whitespace-nowrap">{pct}% ({b.count})</span>
                            </div>
                            <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2">
-                             <div className="bg-[#6C5DD3] h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%` }}></div>
+                             <div className="bg-[#12A9A8] h-full rounded-full transition-all duration-1000" style={{ width: `${pct}%` }}></div>
                            </div>
                          </div>
                        )
@@ -97,13 +97,13 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
 
                 {/* Timeline */}
                 <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm">
-                  <h3 className="font-bold flex items-center gap-2 mb-4"><Clock size={18} className="text-[#6C5DD3]" /> Actividad Reciente</h3>
+                  <h3 className="font-bold flex items-center gap-2 mb-4"><Clock size={18} className="text-[#12A9A8]" /> Actividad Reciente</h3>
                   <div className="space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-2">
                     {profile.timeline.length === 0 ? (
                       <p className="text-sm text-zinc-500">Sin actividad reciente.</p>
                     ) : (
                       profile.timeline.map((event: any) => (
-                        <div key={event.id} className="flex gap-3 text-sm border-l-2 border-[#6C5DD3]/30 pl-3 py-1">
+                        <div key={event.id} className="flex gap-3 text-sm border-l-2 border-[#12A9A8]/30 pl-3 py-1">
                            <div className="flex-1 overflow-hidden">
                              <p className="text-zinc-800 dark:text-zinc-200 font-medium capitalize">{event.type.toLowerCase()} en tarjeta</p>
                              <p className="text-zinc-500 text-xs truncate" title={event.card?.title}>{event.card?.title}</p>
@@ -118,7 +118,7 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
 
               {/* Current Tasks */}
               <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm">
-                <h3 className="font-bold flex items-center gap-2 mb-4"><CheckSquare size={18} className="text-[#6C5DD3]" /> Matriz de Tareas Pendientes</h3>
+                <h3 className="font-bold flex items-center gap-2 mb-4"><CheckSquare size={18} className="text-[#12A9A8]" /> Matriz de Tareas Pendientes</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                    {profile.currentTasks.length === 0 ? (
                      <p className="text-sm text-zinc-500 col-span-full">El usuario no tiene tareas pendientes en estos proyectos.</p>
@@ -131,10 +131,10 @@ export default function UserProfileModal({ userId, boardId, workspaceId, onClose
                            href={`/boards/${task.boardId}?cardId=${task.id}`}
                            target="_blank"
                            rel="noreferrer"
-                           className={`block p-3 rounded-lg border transition-all bg-[#F8FAFC] dark:bg-zinc-800/50 group ${isOverdue ? 'border-red-200 dark:border-red-500/20 hover:border-red-400 dark:hover:border-red-400' : 'border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md'}`}
+                           className={`block p-3 rounded-lg border transition-all bg-[#F8FAFC] dark:bg-zinc-800/50 group ${isOverdue ? 'border-red-200 dark:border-red-500/20 hover:border-red-400 dark:hover:border-red-400' : 'border-zinc-200 dark:border-zinc-800 hover:border-[#12A9A8] hover:shadow-md'}`}
                          >
                            <div className="flex items-start justify-between gap-2">
-                             <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2 group-hover:text-[#6C5DD3] transition-colors">{task.title}</p>
+                             <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2 group-hover:text-[#12A9A8] transition-colors">{task.title}</p>
                              {isOverdue && (
                                <span className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">
                                  <AlertCircle size={10} />

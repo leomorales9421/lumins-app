@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, CheckCircle2, ChevronRight, Briefcase, RefreshCw, AlertCircle, Search } from 'lucide-react';
+import { X, ChevronRight, RefreshCw, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '../lib/api-client';
 import Button from './ui/Button';
+import Alert from './ui/Alert';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
+import {
+  LuminsSuccessIcon,
+  LuminsWorkspaceIcon,
+  LuminsRocketIcon,
+} from './icons/LuminsIcons';
 
 interface TrelloBoard {
   id: string;
@@ -169,41 +176,40 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
       
       {/* Modal Content */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative bg-white dark:bg-[#1C1F26] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative bg-white dark:bg-[#1C1F26] w-full max-w-lg rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
       >
         {/* Header */}
-        <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/[0.02]">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#0079BF] rounded-xl flex items-center justify-center shadow-lg shadow-[#0079BF]/20">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+        <div className="px-5 py-4 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/60 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-[#0079BF] rounded-lg flex items-center justify-center shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                 <path d="M19.7,2H4.3C3,2,2,3,2,4.3v15.4C2,21,3,22,4.3,22h15.4c1.3,0,2.3-1,2.3-2.3V4.3C22,3,21,2,19.7,2z M10.3,16.7c0,0.7-0.6,1.3-1.3,1.3H5.7c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3H9c0.7,0,1.3,0.6,1.3,1.3V16.7z M19.7,11.7 c0,0.7-0.6,1.3-1.3,1.3h-3.3c-0.7,0-1.3-0.6-1.3-1.3V5.3c0-0.7,0.6-1.3,1.3-1.3h3.3c0.7,0,1.3,0.6,1.3,1.3V11.7z"/>
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">Importar desde Trello</h2>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Sincroniza tus proyectos en segundos</p>
+              <h2 className="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-white tracking-tight">Importar desde Trello</h2>
+              <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Sincroniza tus tableros y tarjetas en segundos</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-full transition-colors text-zinc-400"
+            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-5">
           {error && (
             <motion.div 
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400"
+              className="mb-4"
             >
-              <AlertCircle size={20} />
-              <p className="text-sm font-bold">{error}</p>
+              <Alert tone="coral">{error}</Alert>
             </motion.div>
           )}
 
@@ -211,22 +217,22 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
             {step === 'AUTH' && (
               <motion.div 
                 key="auth"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="text-center py-10"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="text-center py-5"
               >
-                <div className="mb-8 inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#0079BF]/10 text-[#0079BF]">
-                  <ExternalLink size={40} />
+                <div className="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-[#12A9A8]/12 via-[#FFCC40]/12 to-[#FF665E]/12 border border-[#12A9A8]/20 text-zinc-800 dark:text-zinc-100">
+                  <LuminsRocketIcon size={32} />
                 </div>
-                <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-3">Conectar con Trello</h3>
-                <p className="text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-10 font-medium">
+                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mb-1.5">Conectar con Trello</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto mb-6 leading-relaxed">
                   Necesitamos tu autorización para leer tus tableros de Trello. No guardaremos tu contraseña.
                 </p>
                 <Button 
                   onClick={handleAuthorize}
                   isLoading={isLoading}
-                  className="h-14 px-10 bg-[#0079BF] hover:bg-[#026AA7] text-white font-black text-lg shadow-xl shadow-[#0079BF]/20 uppercase tracking-widest"
+                  className="h-9 px-5 rounded-lg bg-[#12A9A8] hover:bg-[#0E8786] text-white font-bold text-xs shadow-xs shadow-[#12A9A8]/25"
                 >
                   Autorizar Trello
                 </Button>
@@ -236,76 +242,73 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
             {step === 'SELECT' && (
               <motion.div 
                 key="select"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-8"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-5"
               >
                 {/* Board Selection */}
                 <div>
-                  <div className="flex justify-between items-end mb-4">
-                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">1. Selecciona el Tablero</label>
-                    <div className="flex items-center gap-2">
+                  <div className="flex justify-between items-center gap-2 mb-3">
+                    <label className="text-[10.5px] font-extrabold text-zinc-400 uppercase tracking-widest">1. Selecciona el Tablero</label>
+                    <div className="flex items-center gap-1.5">
                       <button 
                         onClick={() => trelloToken && fetchInitialData(trelloToken)}
                         disabled={isLoading}
-                        className="p-1.5 bg-zinc-100 dark:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-colors"
+                        className="p-1.5 bg-zinc-100 dark:bg-white/5 rounded-lg text-zinc-400 hover:text-[#12A9A8] transition-colors"
                         title="Refrescar tableros"
                       >
-                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#12A9A8]' : ''} />
                       </button>
                       <div className="relative">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                        <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                         <input 
                           type="text" 
                           placeholder="Buscar tablero..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9 pr-4 py-1.5 bg-zinc-100 dark:bg-white/5 border-none rounded-lg text-sm focus:ring-2 focus:ring-[#0079BF] transition-all w-48"
+                          className="h-8 pl-8 pr-3 bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-[#12A9A8] focus:bg-white dark:focus:bg-[#13151A] rounded-lg text-xs font-medium outline-none transition-all w-44"
                         />
                       </div>
                     </div>
-
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
                     {isLoading ? (
-                      Array(4).fill(0).map((_, i) => (
-                        <div key={i} className="h-20 bg-zinc-100 dark:bg-white/5 rounded-xl animate-pulse" />
-                      ))
+                      <div className="col-span-2 py-8 flex justify-center">
+                        <LuminsLogoLoader size="sm" />
+                      </div>
                     ) : filteredBoards.length > 0 ? (
                       filteredBoards.map(board => (
                         <button
                           key={board.id}
                           onClick={() => setSelectedBoardId(board.id)}
-                          className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                          className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left ${
                             selectedBoardId === board.id 
-                            ? 'border-[#0079BF] bg-[#0079BF]/5 shadow-lg shadow-[#0079BF]/10' 
-                            : 'border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10'
+                            ? 'border-[#12A9A8] bg-[#12A9A8]/[0.06]' 
+                            : 'border-zinc-200/80 dark:border-white/10 hover:border-[#12A9A8]/40'
                           }`}
                         >
                           <div 
-                            className="w-10 h-10 rounded-lg flex-shrink-0"
+                            className="w-8 h-8 rounded-md flex-shrink-0"
                             style={{ 
-                              backgroundColor: board.prefs?.backgroundColor || '#0079BF',
+                              backgroundColor: board.prefs?.backgroundColor || '#12A9A8',
                               backgroundImage: board.prefs?.backgroundImage ? `url(${board.prefs.backgroundImage})` : 'none',
                               backgroundSize: 'cover',
                               backgroundPosition: 'center'
                             }}
                           />
-                          <div className="min-w-0">
-                            <p className="font-bold text-zinc-900 dark:text-white truncate">{board.name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">{board.name}</p>
                             <p className="text-[10px] text-zinc-500 truncate">{board.desc || 'Sin descripción'}</p>
                           </div>
                           {selectedBoardId === board.id && (
-                            <div className="ml-auto text-[#0079BF]">
-                              <CheckCircle2 size={20} fill="currentColor" className="text-white" />
-                            </div>
+                            <LuminsSuccessIcon size={15} className="shrink-0" />
                           )}
                         </button>
                       ))
                     ) : (
-                      <div className="col-span-2 py-10 text-center text-zinc-500">
+                      <div className="col-span-2 py-8 text-center text-xs text-zinc-500">
                         No se encontraron tableros.
                       </div>
                     )}
@@ -314,26 +317,24 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
 
                 {/* Workspace Selection */}
                 <div>
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest block mb-4">2. Espacio de Destino (Lumins)</label>
-                  <div className="grid grid-cols-1 gap-3">
+                  <label className="text-[10.5px] font-extrabold text-zinc-400 uppercase tracking-widest block mb-2.5">2. Espacio de Destino (Lumins)</label>
+                  <div className="grid grid-cols-1 gap-2">
                     {workspaces.map(ws => (
                       <button
                         key={ws.id}
                         onClick={() => setSelectedWorkspaceId(ws.id)}
-                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left ${
                           selectedWorkspaceId === ws.id 
-                          ? 'border-[#6C5DD3] bg-[#6C5DD3]/5' 
-                          : 'border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10'
+                          ? 'border-[#12A9A8] bg-[#12A9A8]/[0.06]' 
+                          : 'border-zinc-200/80 dark:border-white/10 hover:border-[#12A9A8]/40'
                         }`}
                       >
-                        <div className="w-10 h-10 bg-[#6C5DD3]/10 text-[#6C5DD3] rounded-lg flex items-center justify-center">
-                          <Briefcase size={20} />
+                        <div className="w-8 h-8 bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#4ED4D2] rounded-md flex items-center justify-center shrink-0">
+                          <LuminsWorkspaceIcon size={16} />
                         </div>
-                        <p className="font-bold text-zinc-900 dark:text-white">{ws.name}</p>
+                        <p className="text-xs font-bold text-zinc-900 dark:text-white flex-1 truncate">{ws.name}</p>
                         {selectedWorkspaceId === ws.id && (
-                          <div className="ml-auto text-[#6C5DD3]">
-                            <CheckCircle2 size={20} />
-                          </div>
+                          <LuminsSuccessIcon size={15} className="shrink-0" />
                         )}
                       </button>
                     ))}
@@ -345,25 +346,21 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
             {step === 'IMPORTING' && (
               <motion.div 
                 key="importing"
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-20"
+                className="text-center py-10"
               >
-                <div className="relative mb-8 inline-block">
-                  <div className="w-24 h-24 rounded-full border-4 border-zinc-100 dark:border-white/5" />
-                  <div className="absolute inset-0 w-24 h-24 rounded-full border-4 border-[#0079BF] border-t-transparent animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center text-[#0079BF]">
-                    <RefreshCw size={32} />
-                  </div>
+                <div className="mb-5 flex justify-center">
+                  <LuminsLogoLoader size="md" />
                 </div>
-                <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">Importando Datos...</h3>
-                <p className="text-zinc-500 dark:text-zinc-400 font-medium">Estamos transfiriendo tus listas, tarjetas y etiquetas.</p>
-                <div className="mt-8 max-w-xs mx-auto h-2 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mb-1.5">Importando datos...</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Transfiriendo listas, tarjetas y etiquetas a Lumins.</p>
+                <div className="mt-6 max-w-xs mx-auto h-1.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 15 }}
-                    className="h-full bg-gradient-to-r from-[#0079BF] to-[#6C5DD3]"
+                    className="h-full bg-gradient-to-r from-[#FF665E] via-[#12A9A8] to-[#FFCC40]"
                   />
                 </div>
               </motion.div>
@@ -372,25 +369,25 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
             {step === 'SUCCESS' && (
               <motion.div 
                 key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-16"
+                className="text-center py-8"
               >
-                <div className="mb-8 inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-500/10 text-green-500">
-                  <CheckCircle2 size={64} />
+                <div className="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#12A9A8]/10">
+                  <LuminsSuccessIcon size={32} />
                 </div>
-                <h3 className="text-3xl font-black text-zinc-900 dark:text-white mb-3">¡Importación Exitosa!</h3>
-                <p className="text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-10 font-medium">
-                  Tu tablero de Trello se ha recreado perfectamente en Lumins.
+                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white mb-1.5">¡Importación exitosa!</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto mb-6">
+                  Tu tablero de Trello se recreó correctamente en Lumins.
                 </p>
                 <Button 
                   onClick={() => {
                     onClose();
                     window.location.reload();
                   }}
-                  className="h-14 px-12 bg-green-500 hover:bg-green-600 text-white font-black text-lg shadow-xl shadow-green-500/20 uppercase tracking-widest"
+                  className="h-9 px-6 rounded-lg bg-[#12A9A8] hover:bg-[#0E8786] text-white font-bold text-xs shadow-xs shadow-[#12A9A8]/25"
                 >
-                  Ver Tablero
+                  Ver tablero
                 </Button>
               </motion.div>
             )}
@@ -399,18 +396,18 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
 
         {/* Footer */}
         {step === 'SELECT' && (
-          <div className="p-6 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] flex justify-between items-center">
-            <div className="flex flex-col">
+          <div className="px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/60 dark:bg-white/[0.02] flex justify-between items-center gap-3">
+            <div className="flex flex-col min-w-0">
               {selectedBoard && (
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1.5 text-[11px] truncate">
                   <span className="text-zinc-400">Origen:</span>
-                  <span className="font-bold text-[#0079BF]">{selectedBoard.name}</span>
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{selectedBoard.name}</span>
                 </div>
               )}
               {selectedWorkspace && (
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1.5 text-[11px] truncate">
                   <span className="text-zinc-400">Destino:</span>
-                  <span className="font-bold text-[#6C5DD3]">{selectedWorkspace.name}</span>
+                  <span className="font-bold text-[#0E8786] dark:text-[#4ED4D2] truncate">{selectedWorkspace.name}</span>
                 </div>
               )}
             </div>
@@ -418,14 +415,14 @@ const TrelloImportModal: React.FC<TrelloImportModalProps> = ({ isOpen, onClose }
             <Button
               onClick={handleStartImport}
               disabled={!selectedBoardId || !selectedWorkspaceId || isLoading}
-              className={`h-14 px-8 font-black text-sm uppercase tracking-widest flex items-center gap-3 transition-all ${
+              className={`h-9 px-4 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shrink-0 ${
                 selectedBoardId && selectedWorkspaceId 
-                ? 'bg-gradient-to-r from-[#0079BF] to-[#6C5DD3] text-white shadow-lg' 
+                ? 'bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs shadow-[#12A9A8]/25' 
                 : 'bg-zinc-200 dark:bg-white/5 text-zinc-400'
               }`}
             >
-              <span>Iniciar Importación</span>
-              <ChevronRight size={18} />
+              <span>Iniciar importación</span>
+              <ChevronRight size={14} />
             </Button>
           </div>
         )}

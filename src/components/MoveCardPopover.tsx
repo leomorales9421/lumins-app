@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Loader2 } from 'lucide-react';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import apiClient from '../lib/api-client';
 import { toast } from 'sonner';
 import type { Board } from '../types/board';
@@ -122,8 +123,9 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`bg-white dark:bg-[#1C1F26] p-8 flex items-center justify-center ${className || 'w-[320px] rounded shadow-2xl border border-zinc-200 dark:border-white/10'}`}>
-        <Loader2 className="animate-spin text-zinc-400 dark:text-zinc-500" />
+      <div className={`bg-white dark:bg-[#1C1F26] p-8 flex flex-col items-center justify-center gap-2 ${className || 'w-[320px] rounded shadow-2xl border border-zinc-200 dark:border-white/10'}`}>
+        <LuminsLogoLoader size="xs" />
+        <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Cargando...</span>
       </div>
     );
   }
@@ -147,7 +149,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
           <select
             value={selectedBoardId}
             onChange={(e) => setSelectedBoardId(e.target.value)}
-            className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+            className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
           >
             {Object.entries(groupedBoards).map(([wsName, wsBoards]) => (
               <optgroup key={wsName} label={wsName}>
@@ -171,7 +173,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
             <select
               value={selectedListId}
               onChange={(e) => setSelectedListId(e.target.value)}
-              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
             >
               {lists.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -189,7 +191,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
             <select
               value={selectedPosition}
               onChange={(e) => setSelectedPosition(Number(e.target.value))}
-              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
             >
               {positions.map((p) => (
                 <option key={p} value={p}>
@@ -206,7 +208,7 @@ const MoveCardPopover: React.FC<MoveCardPopoverProps> = ({
       <button
         onClick={handleMove}
         disabled={isMoving || (selectedBoardId === currentBoardId && selectedListId === currentListId && selectedPosition === 1)}
-        className="w-full bg-[#6C5DD3] text-white font-bold py-2.5 rounded mt-6 hover:bg-[#312e81] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#6C5DD3]/20"
+        className="w-full bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] font-bold py-2.5 rounded-lg mt-6 hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm cursor-pointer"
       >
         {isMoving && <Loader2 size={16} className="animate-spin" />}
         Mover

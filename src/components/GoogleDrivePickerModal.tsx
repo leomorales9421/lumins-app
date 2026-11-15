@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import {
   X,
   Search,
@@ -241,7 +242,7 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
 
         {isCheckingStatus ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3">
-            <Loader2 size={24} className="animate-spin text-[#6C5DD3]" />
+            <LuminsLogoLoader size="xs" />
             <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
               Comprobando conexión con Google Drive...
             </p>

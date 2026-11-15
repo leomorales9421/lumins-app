@@ -108,7 +108,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   }, [displayAvatarUrl, propUser?.id, authUser?.id]);
 
 
-  const containerClasses = `relative flex items-center justify-center rounded border border-zinc-100 shadow-sm flex-shrink-0 overflow-hidden bg-zinc-50 ${sizeClasses[size]} ${className}`;
+  const containerClasses = `relative flex items-center justify-center rounded-lg border border-slate-100 dark:border-white/10 shadow-xs flex-shrink-0 overflow-hidden bg-slate-50 ${sizeClasses[size]} ${className}`;
 
   // Usar cachedUrl si está disponible, sino el original
   const finalSrc = cachedUrl || displayAvatarUrl;
@@ -127,21 +127,21 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     );
   }
 
-  // Generate a consistent color based on the name
+  // Generate a consistent brand-aligned color based on the name
   const colors = [
-    'from-blue-500 to-blue-600',
-    'from-indigo-500 to-indigo-600',
-    'from-indigo-500 to-indigo-600',
-    'from-rose-500 to-rose-600',
-    'from-amber-500 to-amber-600',
-    'from-emerald-500 to-emerald-600',
+    { bg: 'from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)]', text: 'text-[var(--lumins-accent-on)]' },
+    { bg: 'from-[#FF665E] to-[#E64D45]', text: 'text-white' },
+    { bg: 'from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)]', text: 'text-[var(--lumins-accent-on)]' },
+    { bg: 'from-amber-400 to-amber-500', text: 'text-[#13151A]' },
+    { bg: 'from-[#FF665E] to-[#E64D45]', text: 'text-white' },
+    { bg: 'from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)]', text: 'text-[var(--lumins-accent-on)]' },
   ];
   
   const colorIndex = displayName ? displayName.length % colors.length : 0;
   const selectedColor = colors[colorIndex];
 
   return (
-    <div className={`${containerClasses} bg-gradient-to-br ${selectedColor} text-white font-medium`}>
+    <div className={`${containerClasses} bg-gradient-to-br ${selectedColor.bg} ${selectedColor.text} font-medium`}>
       {initials}
     </div>
   );

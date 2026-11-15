@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Camera, Save, Loader2, Globe, CheckCircle2, Mail, Phone, ChevronDown, Clock } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, CheckCircle2, Mail, Phone, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
 import { Skeleton } from '../ui/Skeleton';
 import { compressImage } from '../../lib/image-utils';
+import { Select } from '../ui/Select';
+import Button from '../ui/Button';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -277,11 +279,11 @@ const UserProfileForm: React.FC = () => {
   };
 
   const inputBaseClasses =
-    'w-full py-2.5 sm:py-3 rounded-xl border border-zinc-200/90 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A] text-base sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent focus:bg-white dark:focus:bg-[#13151A] outline-none transition-all';
-  const inputClasses = `${inputBaseClasses} px-3.5 sm:px-4`;
-  const inputWithIconClasses = `${inputBaseClasses} pl-10 sm:pl-10 pr-3.5 sm:pr-4`;
+    'w-full h-9 rounded-lg border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#13151A] text-xs font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[var(--lumins-accent)]/20 focus:border-[var(--lumins-accent)] outline-none transition-all';
+  const inputClasses = `${inputBaseClasses} px-3`;
+  const inputWithIconClasses = `${inputBaseClasses} pl-8 pr-3`;
   const labelClasses =
-    'text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5';
+    'text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5';
 
   if (!user) {
     return (
@@ -339,17 +341,18 @@ const UserProfileForm: React.FC = () => {
     ? formData.avatarUrl.startsWith('http') || formData.avatarUrl.startsWith('data:')
       ? formData.avatarUrl
       : `${API_BASE_URL}${formData.avatarUrl.startsWith('/') ? '' : '/'}${formData.avatarUrl}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=6C5DD3&color=fff`;
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=12A9A8&color=fff`;
 
   return (
-    <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 shadow-xs overflow-hidden">
-      <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-5 sm:space-y-6">
-        {/* Native App Horizontal Profile Header */}
-        <div className="flex items-center gap-4 pb-4 sm:pb-6 border-b border-zinc-100 dark:border-white/5">
+    <div className="h-full bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden flex flex-col">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 flex-1 flex flex-col justify-between gap-5">
+        <div className="space-y-4 sm:space-y-5">
+          {/* Compact Profile Header */}
+          <div className="flex items-center gap-3.5 sm:gap-4 pb-4 border-b border-slate-100 dark:border-white/5">
           <label className="relative group cursor-pointer shrink-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-100 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-xs">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 dark:bg-[#13151A] border border-slate-200/80 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-xs">
               {avatarUploading ? (
-                <Loader2 size={22} className="animate-spin text-[#6C5DD3]" />
+                <Loader2 size={20} className="animate-spin text-[var(--lumins-accent-fg)]" />
               ) : (
                 <img
                   src={resolvedAvatarSrc}
@@ -359,9 +362,14 @@ const UserProfileForm: React.FC = () => {
               )}
             </div>
 
-            {/* Always-visible native camera badge for touch & desktop */}
-            <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#6C5DD3] text-white flex items-center justify-center shadow-md ring-2 ring-white dark:ring-[#1C1F26] active:scale-90 transition-transform">
-              <Camera size={13} />
+            <span
+              style={{
+                backgroundColor: 'var(--lumins-accent)',
+                color: 'var(--lumins-accent-on)',
+              }}
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-sm ring-2 ring-white dark:ring-[#1C1F26] active:scale-90 transition-transform"
+            >
+              <Camera size={12} />
             </span>
 
             <input
@@ -374,14 +382,14 @@ const UserProfileForm: React.FC = () => {
           </label>
 
           <div className="min-w-0 flex-1">
-            <h3 className="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-zinc-100 truncate">
+            <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
               {user?.name || 'Tu Perfil'}
             </h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mb-2">
               {formData.email}
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6C5DD3]/10 hover:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-[#A599F9] text-xs font-extrabold cursor-pointer active:scale-95 transition-all">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <label className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white dark:bg-[#13151A] border border-slate-200/90 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:border-[var(--lumins-accent)] hover:text-[var(--lumins-accent-fg)] cursor-pointer active:scale-95 transition-all">
                 <Camera size={13} />
                 <span>{avatarUploading ? 'Subiendo...' : 'Cambiar foto'}</span>
                 <input
@@ -392,16 +400,16 @@ const UserProfileForm: React.FC = () => {
                   disabled={avatarUploading}
                 />
               </label>
-              <span className="text-[10px] font-semibold text-zinc-400">
+              <span className="text-[11px] font-medium text-zinc-400">
                 JPG, PNG o WebP · Máx. 12MB
               </span>
             </div>
-            {avatarError && <p className="text-xs text-rose-500 mt-1.5 font-semibold">{avatarError}</p>}
+            {avatarError && <p className="text-xs text-[#D94841] dark:text-[#FF857E] mt-1.5 font-semibold">{avatarError}</p>}
           </div>
         </div>
 
-        {/* Form Fields - 2 columns for Name & Last Name even on mobile for native compactness */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-5">
+        {/* Form Fields - Compact Lumins proportions */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className={labelClasses}>Nombre</label>
             <input
@@ -427,59 +435,40 @@ const UserProfileForm: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-          <div>
-            <label className={labelClasses}>País / Región</label>
-            <div className="relative">
-              <select
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                className={`${inputWithIconClasses} appearance-none cursor-pointer pr-10`}
-              >
-                <option value="">Seleccionar país...</option>
-                {LATAM_COUNTRIES.map(c => (
-                  <option key={c.code} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <Globe
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
-              />
-              <ChevronDown
-                size={16}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
-              />
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
-          <div>
-            <label className={labelClasses}>Zona Horaria</label>
-            <div className="relative">
-              <select
-                name="timezone"
-                value={formData.timezone}
-                onChange={handleChange}
-                className={`${inputWithIconClasses} appearance-none cursor-pointer pr-10`}
-              >
-                {allTimezones.map(tz => (
-                  <option key={tz.value} value={tz.value}>
-                    {tz.label}
-                  </option>
-                ))}
-              </select>
-              <Clock
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
-              />
-              <ChevronDown
-                size={16}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
-              />
-            </div>
-          </div>
+          <Select
+            label="País / Región"
+            name="country"
+            uiSize="sm"
+            className="!h-9 !text-xs !font-medium"
+            leftIcon={<Globe size={14} />}
+            value={formData.country}
+            onChange={handleChange}
+          >
+            <option value="">Seleccionar país...</option>
+            {LATAM_COUNTRIES.map(c => (
+              <option key={c.code} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+
+          <Select
+            label="Zona Horaria"
+            name="timezone"
+            uiSize="sm"
+            className="!h-9 !text-xs !font-medium"
+            leftIcon={<Clock size={14} />}
+            value={formData.timezone}
+            onChange={handleChange}
+          >
+            {allTimezones.map(tz => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
+          </Select>
 
           <div>
             <label className={labelClasses}>Teléfono</label>
@@ -493,8 +482,8 @@ const UserProfileForm: React.FC = () => {
                 placeholder="+58 412 ..."
               />
               <Phone
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none"
               />
             </div>
           </div>
@@ -507,32 +496,36 @@ const UserProfileForm: React.FC = () => {
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full py-2.5 sm:py-3 pl-10 sm:pl-10 pr-3.5 sm:pr-4 rounded-xl border border-zinc-200/60 dark:border-white/5 bg-zinc-100/80 dark:bg-white/[0.03] text-sm font-semibold text-zinc-500 dark:text-zinc-500 cursor-not-allowed outline-none"
+                className="w-full h-9 pl-8 pr-3 rounded-lg border border-zinc-200/70 dark:border-white/5 bg-slate-100/80 dark:bg-white/[0.03] text-xs font-medium text-zinc-500 dark:text-zinc-500 cursor-not-allowed outline-none"
               />
               <Mail
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 pointer-events-none"
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 pointer-events-none"
               />
             </div>
           </div>
         </div>
 
         {success && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-xl border border-emerald-200/70 dark:border-emerald-500/20">
-            <CheckCircle2 size={16} className="shrink-0" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-200/70 dark:border-emerald-500/20">
+            <CheckCircle2 size={15} className="shrink-0" />
             <span>¡Perfil actualizado correctamente!</span>
           </div>
         )}
+        </div>
 
-        <div className="pt-3 sm:pt-5 border-t border-zinc-100 dark:border-white/5 flex justify-end">
-          <button
+        <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex justify-end">
+          <Button
             type="submit"
-            disabled={loading || avatarUploading}
-            className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-extrabold py-3.5 sm:py-3 px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#6C5DD3]/25 disabled:opacity-50 active:scale-[0.98] text-sm"
+            variant="primary"
+            size="sm"
+            isLoading={loading}
+            disabled={avatarUploading}
+            leftIcon={<Save size={14} />}
+            className="w-full sm:w-auto h-10 sm:h-9"
           >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-            <span>Guardar Cambios</span>
-          </button>
+            Guardar Cambios
+          </Button>
         </div>
       </form>
     </div>

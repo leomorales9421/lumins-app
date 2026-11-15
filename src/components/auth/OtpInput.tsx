@@ -98,11 +98,11 @@ export const OtpInput: React.FC<OtpInputProps> = ({
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             className={`
-              w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold rounded-xl sm:rounded-2xl 
-              bg-[#F4F6F9] border transition-all outline-none font-mono
+              w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold rounded-[14px] sm:rounded-[16px] 
+              bg-[#F8FAFC] border transition-all outline-none font-mono
               ${isFilled 
-                ? 'border-[#4338ca] text-zinc-900 bg-indigo-50/30 ring-2 ring-[#4338ca]/10' 
-                : 'border-transparent text-zinc-900 focus:border-[#4338ca] focus:bg-white focus:ring-2 focus:ring-[#4338ca]/20'
+                ? 'border-[#12A9A8] text-slate-900 bg-[#12A9A8]/5 ring-2 ring-[#12A9A8]/15' 
+                : 'border-slate-200 text-slate-900 focus:border-[#12A9A8] focus:bg-white focus:ring-2 focus:ring-[#12A9A8]/20'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
             `}

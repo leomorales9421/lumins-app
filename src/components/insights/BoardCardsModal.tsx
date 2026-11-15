@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Circle, Users, ListTodo, ExternalLink, Calendar, Clock } from 'lucide-react';
 import apiClient from '../../lib/api-client';
 
@@ -114,7 +114,7 @@ export default function BoardCardsModal({
               onClick={() => setFilter(f)}
               className={`whitespace-nowrap px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-colors ${
                 filter === f
-                  ? 'bg-[#6C5DD3] text-white'
+                  ? 'bg-[#12A9A8] text-white'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
@@ -146,7 +146,7 @@ export default function BoardCardsModal({
               {Object.entries(groupedByList).map(([listName, listCards]) => (
                 <div key={listName}>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#6C5DD3]" />
+                    <span className="w-2 h-2 rounded-full bg-[#12A9A8]" />
                     {listName}
                     <span className="text-zinc-300 font-normal">({listCards.length})</span>
                   </h4>
@@ -159,7 +159,7 @@ export default function BoardCardsModal({
                         href={`/boards/${boardId}?cardId=${card.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-[#6C5DD3] hover:shadow-md transition-all group ${urgency?.border || ''} border-l-2`}
+                        className={`flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-[#12A9A8] hover:shadow-md transition-all group ${urgency?.border || ''} border-l-2`}
                       >
                         {card.isDone ? (
                           <CheckCircle2 size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
@@ -168,7 +168,7 @@ export default function BoardCardsModal({
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm font-bold truncate ${card.isDone ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'} group-hover:text-[#6C5DD3] transition-colors`}>
+                            <p className={`text-sm font-bold truncate ${card.isDone ? 'text-zinc-400 line-through' : 'text-zinc-800 dark:text-zinc-200'} group-hover:text-[#12A9A8] transition-colors`}>
                               {card.title}
                             </p>
                             {urgency && (
@@ -204,7 +204,7 @@ export default function BoardCardsModal({
                                   a.user.avatarUrl ? (
                                     <img key={i} src={a.user.avatarUrl} alt={a.user.name} className="w-5 h-5 rounded-full border-2 border-white dark:border-zinc-900" />
                                   ) : (
-                                    <div key={i} className="w-5 h-5 rounded-full bg-[#6C5DD3] text-white flex items-center justify-center text-[8px] font-bold border-2 border-white dark:border-zinc-900">
+                                    <div key={i} className="w-5 h-5 rounded-full bg-[#12A9A8] text-white flex items-center justify-center text-[8px] font-bold border-2 border-white dark:border-zinc-900">
                                       {a.user.name.charAt(0)}
                                     </div>
                                   )

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bookmark, Plus, Trash2, Check, X, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -154,14 +154,14 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
         title="Vistas guardadas del calendario"
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition-all shadow-sm ${
           activeViewId
-            ? 'bg-[#6C5DD3]/10 border-[#6C5DD3]/30 text-[#6C5DD3]'
+            ? 'bg-[#12A9A8]/10 border-[#12A9A8]/30 text-[#12A9A8]'
             : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-200 hover:border-zinc-300'
         }`}
       >
-        <Bookmark size={13} className={activeViewId ? 'fill-[#6C5DD3]' : ''} />
+        <Bookmark size={13} className={activeViewId ? 'fill-[#12A9A8]' : ''} />
         <span className="hidden sm:inline">Vistas</span>
         {activeViewId && (
-          <span className="w-1.5 h-1.5 rounded-full bg-[#6C5DD3]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#12A9A8]" />
         )}
       </button>
 
@@ -181,7 +181,7 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                 <button
                   type="button"
                   onClick={() => setIsCreating(true)}
-                  className="text-[11px] font-bold text-[#6C5DD3] hover:underline flex items-center gap-1"
+                  className="text-[11px] font-bold text-[#12A9A8] hover:underline flex items-center gap-1"
                 >
                   <Plus size={12} />
                   Guardar actual
@@ -198,7 +198,7 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                   placeholder="Nombre de la vista..."
                   value={newViewName}
                   onChange={(e) => setNewViewName(e.target.value)}
-                  className="w-full bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#6C5DD3]"
+                  className="w-full bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#12A9A8]"
                 />
                 <div className="flex items-center justify-end gap-1.5">
                   <button
@@ -210,7 +210,7 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                   </button>
                   <button
                     type="submit"
-                    className="px-2.5 py-1 rounded bg-[#6C5DD3] text-white text-[11px] font-bold hover:bg-[#5b4eb8]"
+                    className="px-2.5 py-1 rounded bg-[#12A9A8] text-white text-[11px] font-bold hover:bg-[#0E8786]"
                   >
                     Guardar
                   </button>
@@ -230,7 +230,7 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                   onClick={() => handleSelectView(sv)}
                   className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between text-xs font-semibold transition-colors ${
                     activeViewId === sv.id
-                      ? 'bg-[#6C5DD3]/10 text-[#6C5DD3] font-bold'
+                      ? 'bg-[#12A9A8]/10 text-[#12A9A8] font-bold'
                       : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                   }`}
                 >
@@ -238,7 +238,7 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                     <Sparkles size={12} className="text-amber-500 flex-shrink-0" />
                     <span className="truncate">{sv.name}</span>
                   </span>
-                  {activeViewId === sv.id && <Check size={13} className="text-[#6C5DD3]" />}
+                  {activeViewId === sv.id && <Check size={13} className="text-[#12A9A8]" />}
                 </button>
               ))}
             </div>
@@ -255,13 +255,13 @@ export const CalendarSavedViewsDropdown: React.FC<CalendarSavedViewsDropdownProp
                     onClick={() => handleSelectView(cv)}
                     className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors group ${
                       activeViewId === cv.id
-                        ? 'bg-[#6C5DD3]/10 text-[#6C5DD3] font-bold'
+                        ? 'bg-[#12A9A8]/10 text-[#12A9A8] font-bold'
                         : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                     }`}
                   >
                     <span className="truncate pr-1">{cv.name}</span>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      {activeViewId === cv.id && <Check size={13} className="text-[#6C5DD3]" />}
+                      {activeViewId === cv.id && <Check size={13} className="text-[#12A9A8]" />}
                       <button
                         type="button"
                         onClick={(e) => handleDeleteView(cv.id, cv.name, e)}

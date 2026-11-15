@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import { format, parseISO } from 'date-fns';
 import {
   X,
@@ -370,7 +371,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
 
         {isCheckingStatus ? (
           <div className="p-10 flex flex-col items-center justify-center gap-3">
-            <Loader2 size={24} className="animate-spin text-emerald-500" />
+            <LuminsLogoLoader size="xs" />
             <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
               Verificando conexión con Google Meet...
             </p>
@@ -577,7 +578,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
             <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A]/60 space-y-2.5">
               <div>
                 <label className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <Mail size={13} className="text-[#6C5DD3]" />
+                  <Mail size={13} className="text-[#12A9A8]" />
                   Correos adicionales (Invitados externos o clientes)
                 </label>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -592,12 +593,12 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   onChange={e => setGuestEmailInput(e.target.value)}
                   onKeyDown={handleGuestKeyDown}
                   placeholder="ejemplo@cliente.com (presiona Enter)"
-                  className="flex-1 px-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1C1F26] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#6C5DD3]"
+                  className="flex-1 px-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#1C1F26] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#12A9A8]"
                 />
                 <button
                   type="button"
                   onClick={handleAddExternalGuest}
-                  className="px-3 py-2 rounded-xl text-xs font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] hover:bg-[#6C5DD3] hover:text-white transition-colors inline-flex items-center gap-1 shrink-0"
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-[#12A9A8]/10 text-[#12A9A8] dark:text-[#4ED4D2] hover:bg-[#12A9A8] hover:text-white transition-colors inline-flex items-center gap-1 shrink-0"
                 >
                   <Plus size={13} />
                   <span>Agregar</span>
@@ -609,7 +610,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   {externalGuests.map(email => (
                     <span
                       key={email}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] border border-[#6C5DD3]/25"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#12A9A8]/10 text-[#12A9A8] dark:text-[#4ED4D2] border border-[#12A9A8]/25"
                     >
                       <Mail size={11} />
                       <span>{email}</span>
@@ -632,7 +633,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   onClick={() => setHideInternalDetails(!hideInternalDetails)}
                   className={`mt-0.5 w-4 h-4 rounded flex items-center justify-center border shrink-0 transition-colors ${
                     hideInternalDetails
-                      ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white'
+                      ? 'bg-[#12A9A8] border-[#12A9A8] text-white'
                       : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-black/20'
                   }`}
                 >
@@ -643,7 +644,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   className="cursor-pointer select-none"
                 >
                   <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200 flex items-center gap-1">
-                    <Shield size={11} className="text-[#6C5DD3]" />
+                    <Shield size={11} className="text-[#12A9A8]" />
                     Ocultar detalles internos del tablero en la invitación de correo
                   </span>
                   <span className="text-[10px] text-zinc-400 dark:text-zinc-500 block">

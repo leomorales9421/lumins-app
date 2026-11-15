@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Monitor, Save, Loader2, CheckCircle2, Smartphone, Trash2, AlertTriangle } from 'lucide-react';
+import { Key, Monitor, Save, Loader2, CheckCircle2, Smartphone, AlertTriangle } from 'lucide-react';
+import { Badge } from '../../components/ui/Badge';
+import { LuminsTrashIcon } from '../../components/icons/LuminsIcons';
+import LuminsLogoLoader from '../../components/ui/LuminsLogoLoader';
 import apiClient from '../../lib/api-client';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { useModuleLoading } from '../../contexts/NavigationLoaderContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ConfirmActionModal from '../../components/ConfirmActionModal';
@@ -48,6 +51,7 @@ const SecuritySettings: React.FC = () => {
   // Sessions state
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  useModuleLoading(sessionsLoading, 'settings-security');
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
   const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false);
@@ -131,26 +135,22 @@ const SecuritySettings: React.FC = () => {
 
   const isFormValid = formData.currentPassword && formData.newPassword && formData.confirmPassword && (formData.newPassword === formData.confirmPassword);
 
-  const inputClasses = "w-full px-3.5 py-2.5 sm:p-3 rounded-xl border border-zinc-200/90 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A] text-base sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent focus:bg-white dark:focus:bg-[#13151A] outline-none transition-all";
-  const labelClasses = "text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5";
+  const inputClasses = "w-full h-9 px-3 rounded-lg border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#13151A] text-xs font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-[var(--lumins-accent)]/20 focus:border-[var(--lumins-accent)] outline-none transition-all";
+  const labelClasses = "text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block mb-1.5";
 
   return (
-    <div className="space-y-4 sm:space-y-8">
-      <div className="hidden lg:block mb-6">
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">Seguridad</h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Protege tu cuenta y gestiona tus accesos.</p>
-      </div>
-
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
       {/* Change Password Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
-        <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
-            <Key size={18} />
+      <section className="lg:col-span-5 bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 p-4 sm:p-5 shadow-xs flex flex-col">
+        <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
+          <Key size={16} className="text-[var(--lumins-accent-fg)] shrink-0" />
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">Cambiar Contraseña</h3>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-400">Actualiza tu clave de acceso</p>
           </div>
-          <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Cambiar Contraseña</h3>
         </div>
 
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} className="w-full space-y-4">
           <div className="space-y-2">
             <label className={labelClasses}>Contraseña Actual</label>
             <input
@@ -182,15 +182,15 @@ const SecuritySettings: React.FC = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`w-full p-3 rounded border ${formData.confirmPassword && formData.newPassword !== formData.confirmPassword ? 'border-red-500' : 'border-zinc-200 dark:border-white/10'} bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-[#6C5DD3] focus:border-transparent outline-none transition-all`}
+              className={`w-full h-9 px-3 rounded-lg border ${formData.confirmPassword && formData.newPassword !== formData.confirmPassword ? 'border-[#FF665E]' : 'border-slate-200/90 dark:border-white/10'} bg-white dark:bg-[#13151A] text-xs font-medium text-slate-900 dark:text-zinc-100 focus:ring-2 focus:ring-[var(--lumins-accent)]/20 focus:border-[var(--lumins-accent)] outline-none transition-all`}
               placeholder="••••••••"
             />
           </div>
 
-          {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+          {error && <p className="text-xs font-semibold text-[#D94841] dark:text-[#FF857E]">{error}</p>}
           {success && (
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded border border-emerald-100 dark:border-emerald-500/20">
-              <CheckCircle2 size={16} />
+            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+              <CheckCircle2 size={15} />
               ¡Contraseña actualizada con éxito!
             </div>
           )}
@@ -199,9 +199,13 @@ const SecuritySettings: React.FC = () => {
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="w-full sm:w-auto bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white font-bold py-3 px-6 rounded flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:shadow-none active:scale-95"
+              style={{
+                backgroundColor: 'var(--lumins-accent)',
+                color: 'var(--lumins-accent-on)',
+              }}
+              className="w-full sm:w-auto h-9 px-4 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs hover:opacity-95 disabled:opacity-50 active:scale-[0.98] cursor-pointer text-xs"
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
               Actualizar contraseña
             </button>
           </div>
@@ -209,15 +213,13 @@ const SecuritySettings: React.FC = () => {
       </section>
 
       {/* Active Sessions Card */}
-      <section className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-4 sm:p-8 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
-              <Monitor size={18} />
-            </div>
+      <section className="lg:col-span-7 bg-white dark:bg-[#1C1F26] rounded-xl border border-slate-200/90 dark:border-white/10 p-4 sm:p-5 shadow-xs flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
+          <div className="flex items-center gap-2.5">
+            <Monitor size={16} className="text-[var(--lumins-accent-fg)] shrink-0" />
             <div>
-              <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">Sesiones Activas</h3>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Dispositivos con acceso a tu cuenta.</p>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">Sesiones Activas</h3>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Dispositivos con acceso a tu cuenta.</p>
             </div>
           </div>
           
@@ -225,78 +227,66 @@ const SecuritySettings: React.FC = () => {
             <button
               onClick={handleRevokeOtherSessions}
               disabled={revokingOthers}
-              className="text-xs sm:text-sm font-bold text-rose-500 hover:text-rose-600 flex items-center gap-2 px-3 py-1.5 rounded bg-rose-50 dark:bg-rose-500/10 transition-colors disabled:opacity-50"
+              className="text-xs font-bold text-[#D94841] dark:text-[#FF857E] hover:bg-[#FF665E]/10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FF665E]/25 transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {revokingOthers ? <Loader2 size={14} className="animate-spin" /> : <AlertTriangle size={14} />}
-              Cerrar todas las demás sesiones
+              {revokingOthers ? <Loader2 size={13} className="animate-spin" /> : <AlertTriangle size={13} />}
+              Cerrar las demás
             </button>
           )}
         </div>
 
         {sessionError && (
-          <div className="flex items-center gap-2 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded border border-rose-100 dark:border-rose-500/20 mb-4">
-            <AlertTriangle size={16} />
+          <div className="flex items-center gap-2 text-xs font-medium text-[#D94841] dark:text-[#FF857E] bg-[#FF665E]/10 p-3 rounded-xl border border-[#FF665E]/25 mb-4">
+            <AlertTriangle size={15} />
             {sessionError}
           </div>
         )}
 
-        <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
           {sessionsLoading ? (
-            <>
-              {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-16 w-full rounded" />
-              ))}
-            </>
+            <div className="py-8 flex flex-col items-center justify-center gap-2">
+              <LuminsLogoLoader size="xs" />
+              <span className="text-xs font-semibold text-slate-400">Cargando sesiones...</span>
+            </div>
           ) : sessions.length === 0 ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">No se encontraron sesiones activas.</p>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 text-center py-4">No se encontraron sesiones activas.</p>
           ) : (
             sessions.map(session => (
               <div
                 key={session.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 gap-4"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-slate-200/70 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] gap-3"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded bg-white dark:bg-[#1C1F26] flex items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-white/10 flex-shrink-0">
-                    {session.userAgent?.includes('Mobi') ? <Smartphone size={20} /> : <Monitor size={20} />}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-white dark:bg-[#13151A] flex items-center justify-center text-slate-400 dark:text-zinc-500 border border-slate-200/80 dark:border-white/10 flex-shrink-0">
+                    {session.userAgent?.includes('Mobi') ? <Smartphone size={18} /> : <Monitor size={18} />}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[13px] sm:text-sm leading-tight sm:leading-normal">
-                        {parseUA(session.userAgent)} • {getBrowser(session.userAgent)}
-                      </p>
-                      {session.isCurrent && (
-                        <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase">
-                          Actual
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-0.5 mt-0.5">
-                      <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400">
-                        Iniciada el {format(new Date(session.createdAt), "d 'de' MMMM, HH:mm", { locale: es })}
-                        {session.ipAddress && ` • IP: ${session.ipAddress}`}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                        Expira el {format(new Date(session.expiresAt), "d 'de' MMMM, yyyy", { locale: es })}
-                      </p>
-                    </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-zinc-100 text-xs sm:text-sm truncate">
+                      {parseUA(session.userAgent)} · {getBrowser(session.userAgent)}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
+                      {format(new Date(session.createdAt), "d 'de' MMM, HH:mm", { locale: es })}
+                      {session.ipAddress && ` · IP: ${session.ipAddress}`}
+                      {` · Expira ${format(new Date(session.expiresAt), "d MMM yyyy", { locale: es })}`}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-zinc-100 dark:border-white/5">
+                <div className="flex items-center justify-end gap-2 flex-shrink-0">
                   {session.isCurrent ? (
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded uppercase tracking-wider">
-                      En Línea
-                    </span>
+                    <Badge tone="teal" variant="dot" size="xs">
+                      Sesión actual
+                    </Badge>
                   ) : (
                     <button
                       onClick={() => handleRevokeSession(session.id)}
                       disabled={revokingId === session.id}
-                      className="flex items-center gap-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded px-3 py-1.5 text-xs sm:text-sm font-bold transition-colors disabled:opacity-50 active:scale-95"
+                      className="flex items-center gap-1.5 text-[#D94841] dark:text-[#FF857E] hover:bg-[#FF665E]/10 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {revokingId === session.id ? (
-                        <Loader2 size={14} className="animate-spin" />
+                        <Loader2 size={13} className="animate-spin" />
                       ) : (
-                        <Trash2 size={14} />
+                        <LuminsTrashIcon size={14} />
                       )}
                       Cerrar sesión
                     </button>

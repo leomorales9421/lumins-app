@@ -112,11 +112,11 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
             className="object-cover w-full h-full hover:scale-110 transition-transform duration-500"
           />
         ) : isVideo ? (
-          <div className="text-indigo-400">
+          <div className="text-[var(--lumins-accent-fg)]">
             <Video size={22} />
           </div>
         ) : isAudio ? (
-          <div className="text-violet-400">
+          <div className="text-[var(--lumins-accent-fg)]">
             <Music size={22} />
           </div>
         ) : (
@@ -137,10 +137,10 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4 pt-4 border-t border-zinc-200 dark:border-white/5">
-      <div className="flex items-center gap-3 text-zinc-900 dark:text-zinc-100">
-        <Paperclip size={20} className="text-[#6C5DD3]" />
-        <h3 className="text-lg font-extrabold tracking-tight">Adjuntos</h3>
+    <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-white/5">
+      <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+        <Paperclip size={16} className="text-[var(--lumins-accent-fg)]" />
+        <h3 className="text-sm font-bold tracking-tight">Adjuntos</h3>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -160,11 +160,11 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
 
               <div className="flex flex-col min-w-0 z-10">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[240px] group-hover:text-[#6C5DD3] transition-colors">
+                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[240px] group-hover:text-[var(--lumins-accent-fg)] transition-colors">
                     {attachment.name}
                   </span>
                   {isDrive && (
-                    <span className="px-1.5 py-0.5 rounded bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] text-[9px] font-extrabold uppercase tracking-wider shrink-0">
+                    <span className="px-1.5 py-0.5 rounded bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] text-[9px] font-extrabold uppercase tracking-wider shrink-0">
                       {getDriveTypeLabel(attachment.mime, attachment.url)}
                     </span>
                   )}
@@ -208,7 +208,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
                     href={attachment.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[11px] font-bold text-[#6C5DD3] hover:underline cursor-pointer group/link"
+                    className="flex items-center gap-1 text-[11px] font-bold text-[var(--lumins-accent-fg)] hover:underline cursor-pointer group/link"
                   >
                     <ExternalLink
                       size={10}
@@ -255,7 +255,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
                   href={previewAttachment.originalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#8E82E3] hover:bg-[#6C5DD3] hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent)] hover:text-[var(--lumins-accent-on)] transition-colors"
                 >
                   <span>Abrir en Google Drive</span>
                   <ExternalLink size={12} />

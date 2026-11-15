@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -338,7 +338,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
       desc: 'Formato A4 apaisado de alta resolución con membrete corporativo, métricas y grilla completa lista para compartir.',
       icon: FileText,
       badge: 'Recomendado',
-      accentColor: '#6C5DD3',
+      accentColor: '#12A9A8',
     },
     {
       id: 'png' as const,
@@ -378,7 +378,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
           {/* Header */}
           <div className="px-6 py-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center border border-[#6C5DD3]/20">
+              <div className="w-10 h-10 rounded-xl bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center border border-[#12A9A8]/20">
                 <Download size={20} />
               </div>
               <div>
@@ -436,7 +436,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
                     disabled={isExporting}
                     className={`w-full p-3.5 rounded-xl border transition-all text-left flex items-start gap-3 relative ${
                       isSelected
-                        ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/10 shadow-xs'
+                        ? 'border-[#12A9A8] bg-[#12A9A8]/5 dark:bg-[#12A9A8]/10 shadow-xs'
                         : 'border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-white dark:bg-[#1C1F26]'
                     }`}
                   >
@@ -456,7 +456,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
                           {fmt.name}
                         </span>
                         {fmt.badge && (
-                          <span className="px-1.5 py-0.2 rounded-full bg-[#6C5DD3]/15 text-[#6C5DD3] text-[9px] font-black uppercase">
+                          <span className="px-1.5 py-0.2 rounded-full bg-[#12A9A8]/15 text-[#12A9A8] text-[9px] font-black uppercase">
                             {fmt.badge}
                           </span>
                         )}
@@ -470,7 +470,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
                     <div
                       className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-1 transition-all ${
                         isSelected
-                          ? 'border-[#6C5DD3] bg-[#6C5DD3]'
+                          ? 'border-[#12A9A8] bg-[#12A9A8]'
                           : 'border-zinc-300 dark:border-white/20 bg-transparent'
                       }`}
                     >
@@ -497,7 +497,7 @@ export const CalendarExportModal: React.FC<CalendarExportModalProps> = ({
               type="button"
               onClick={handleExport}
               disabled={isExporting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-extrabold shadow-md shadow-[#6C5DD3]/25 transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-extrabold shadow-md shadow-[#12A9A8]/25 transition-all disabled:opacity-50"
             >
               {isExporting ? (
                 <>

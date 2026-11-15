@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../lib/api-client';
-import { Users, ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import UserProfileModal from './UserProfileModal';
 import { UserAvatar } from '../ui/UserAvatar';
+import { LuminsMembersIcon } from '../icons/LuminsIcons';
 
 export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { selectedBoardId?: string; workspaceId?: string }) {
   const [workload, setWorkload] = useState<any[]>([]);
@@ -20,7 +21,7 @@ export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { se
       const boardParam = selectedBoardId ? `boardId=${selectedBoardId}` : '';
       const params = [wsParam, boardParam].filter(Boolean).join('&');
       const res = await apiClient.get<any>(`/api/analytics/workload${params ? `?${params}` : ''}`);
-      setWorkload(res.data);
+      setWorkload(Array.isArray(res?.data) ? res.data : []);
     } catch (error) {
       console.error('Error fetching workload:', error);
     } finally {
@@ -33,15 +34,20 @@ export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { se
     setWorkload(sorted);
   };
 
-  if (isLoading) return <div className="h-40 bg-zinc-200 dark:bg-zinc-800 rounded-2xl md:rounded-xl animate-pulse"></div>;
+  if (isLoading) return null;
 
   return (
     <>
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl md:rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-[#F8FAFC] dark:bg-zinc-900">
-          <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
-            <Users className="text-[#6C5DD3]" size={18} /> Directorio de Carga de Trabajo
+      <div className="bg-white dark:bg-[#1C1F26] rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
+        <div className="px-4 py-3.5 border-b border-zinc-200/80 dark:border-white/10 flex justify-between items-center bg-zinc-50/70 dark:bg-white/[0.02]">
+          <h3 className="text-sm sm:text-base font-extrabold flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+            <LuminsMembersIcon size={17} /> Directorio de Carga de Trabajo
           </h3>
+          {workload.length > 0 && (
+            <span className="text-[11px] font-bold text-zinc-400">
+              {workload.length} {workload.length === 1 ? 'miembro' : 'miembros'}
+            </span>
+          )}
         </div>
         
         {/* Desktop Table View */}
@@ -82,15 +88,15 @@ export default function WorkloadDirectory({ selectedBoardId, workspaceId }: { se
                         <p className="text-xs text-zinc-500">{row.user.email}</p>
                       </div>
                     </td>
-                    <td className="p-4 text-sm font-medium">
-                      <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-md">{row.activeLoad} tareas</span>
+                    <td className="px-4 py-3 text-xs font-bold">
+                      <span className="bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2] px-2 py-1 rounded-md">{row.activeLoad} tareas</span>
                     </td>
-                    <td className="p-4 text-sm font-medium">
-                      <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded-md">{row.recentProductivity} tareas</span>
+                    <td className="px-4 py-3 text-xs font-bold">
+                      <span className="bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40] px-2 py-1 rounded-md">{row.recentProductivity} tareas</span>
                     </td>
-                    <td className="p-4 text-sm font-medium">
+                    <td className="px-4 py-3 text-xs font-bold">
                       {row.bottlenecks > 0 ? (
-                         <span className="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-2 py-1 rounded-md flex w-max items-center gap-1">
+                         <span className="bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E] px-2 py-1 rounded-md flex w-max items-center gap-1">
                            {row.bottlenecks} atrasadas
                          </span>
                       ) : (

@@ -20,22 +20,20 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded';
+  const baseClasses = 'inline-flex items-center justify-center font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-[10px]';
   
   const variantClasses = {
-    // Exact colors from Identity Graph
-    // Primary Accent: Identical in both modes
-    primary: 'bg-[#6C5DD3] text-white shadow-soft hover:bg-[#5b4dbf]',
-    secondary: 'bg-[#F4F5F7] dark:bg-white/5 text-zinc-700 dark:text-zinc-300 border border-[#E8E9EC] dark:border-white/10 hover:bg-[#EAECF0] dark:hover:bg-white/10',
-    inverted: 'bg-[#100B26] dark:bg-[#080808] text-white hover:bg-[#000000]',
-    outlined: 'bg-transparent border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-[#6C5DD3] hover:text-[#6C5DD3] dark:hover:border-[#6C5DD3] dark:hover:text-[#6C5DD3]',
-    danger: 'bg-red-500 text-white hover:bg-red-600 shadow-soft',
+    primary: 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-sm hover:bg-[var(--lumins-accent-hover)]',
+    secondary: 'bg-white dark:bg-white/5 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10',
+    inverted: 'bg-[#0F172A] text-white hover:bg-slate-900',
+    outlined: 'bg-transparent border border-slate-200 text-slate-600 hover:border-[#12A9A8] hover:text-[#12A9A8]',
+    danger: 'bg-red-500 text-white hover:bg-red-600 shadow-sm',
   };
 
   const sizeClasses = {
-    sm: 'h-10 px-5 text-xs',
-    md: 'h-12 px-7 text-sm',
-    lg: 'h-14 px-9 text-base',
+    sm: 'h-9 px-4 text-xs',
+    md: 'h-11 px-5 text-sm',
+    lg: 'h-12 px-7 text-sm',
   };
 
   return (

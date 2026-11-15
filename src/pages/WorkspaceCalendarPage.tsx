@@ -48,7 +48,10 @@ import ConfirmActionModal from '../components/ConfirmActionModal';
 import GoogleMeetScheduleModal from '../components/GoogleMeetScheduleModal';
 import { GoogleMeetIcon } from '../components/ui/GoogleIcons';
 import { useNotificationHelpers } from '../components/NotificationProvider';
+import { useModuleLoading } from '../contexts/NavigationLoaderContext';
 import WorkspaceEmptyState from '../components/WorkspaceEmptyState';
+import ErrorView, { type ErrorCode } from '../components/ui/ErrorView';
+import { LuminsCalendarIcon } from '../components/icons/LuminsIcons';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import {
@@ -148,6 +151,8 @@ const WorkspaceCalendarPage: React.FC = () => {
     () => initialCache?.members || []
   );
   const [isLoading, setIsLoading] = useState<boolean>(() => !initialCache);
+  const [loadError, setLoadError] = useState<ErrorCode | null>(null);
+  useModuleLoading(isLoading, 'workspace-calendar');
   const eventsRef = useRef<CalendarCardEvent[]>(initialCache?.events || []);
   useEffect(() => {
     eventsRef.current = events;
@@ -265,6 +270,7 @@ const WorkspaceCalendarPage: React.FC = () => {
       if (!silent && !hasCachedData) {
         setIsLoading(true);
       }
+      setLoadError(null);
       try {
         const response = await apiClient.get<{
           data: {
@@ -300,8 +306,15 @@ const WorkspaceCalendarPage: React.FC = () => {
           boards: newBoards,
           members: newMembers,
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to fetch calendar events', err);
+        if (!hasCachedData) {
+          const status = err?.response?.status;
+          if (status === 403) setLoadError('403');
+          else if (status === 404) setLoadError('404');
+          else if (status && status >= 500) setLoadError('500');
+          else setLoadError('network');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -418,7 +431,7 @@ const WorkspaceCalendarPage: React.FC = () => {
           map.set(l.id, {
             id: l.id,
             name: l.name || 'Sin nombre',
-            color: l.color || '#6C5DD3',
+            color: l.color || '#12A9A8',
           });
         }
       });
@@ -1236,15 +1249,15 @@ const WorkspaceCalendarPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden bg-[#F4F6F9] dark:bg-[#13151A] px-2.5 sm:px-5 py-2.5 font-sans select-none">
+    <div className="h-full w-full flex flex-col overflow-hidden bg-[#F4F6F9] dark:bg-[#151821] px-2.5 sm:px-5 py-2.5 font-sans select-none">
       {/* 1. CLEAN MODERN HEADER (Linear & Native App UX) */}
       <header className="flex flex-col gap-2 pb-2 shrink-0">
         {/* Tier 1: Main Control Bar */}
         <div className="flex items-center justify-between gap-2">
           {/* Left: Month Navigation & Title */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-            <div className="hidden sm:flex w-8 h-8 rounded-lg bg-[#6C5DD3]/10 dark:bg-[#6C5DD3]/20 text-[#6C5DD3] dark:text-[#A599F9] items-center justify-center shrink-0">
-              <CalendarIcon size={16} />
+            <div className="hidden sm:flex w-8 h-8 rounded-lg bg-gradient-to-br from-[#12A9A8]/12 via-[#FFCC40]/12 to-[#FF665E]/12 border border-[#12A9A8]/20 text-zinc-800 dark:text-zinc-100 items-center justify-center shrink-0">
+              <LuminsCalendarIcon size={17} />
             </div>
 
             <h1 className="text-sm sm:text-lg lg:text-xl font-black capitalize text-zinc-900 dark:text-zinc-100 tracking-tight shrink-0">
@@ -1252,7 +1265,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             </h1>
 
             {/* ‹ Hoy › Navigation Capsule */}
-            <div className="flex items-center bg-white dark:bg-[#1C1F26] rounded-lg border border-zinc-200/80 dark:border-white/10 p-0.5 shadow-2xs shrink-0">
+            <div className="flex items-center bg-white dark:bg-[#212632] rounded-lg border border-zinc-200/80 dark:border-white/10 p-0.5 shadow-2xs shrink-0">
               <button
                 type="button"
                 onClick={handlePrev}
@@ -1283,7 +1296,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setQuickCreateDates({ startDate: currentDate, dueDate: currentDate })}
-              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-extrabold shadow-xs shadow-[#6C5DD3]/25 transition-all shrink-0"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] text-xs font-extrabold shadow-xs transition-all shrink-0 cursor-pointer"
             >
               <Plus size={14} strokeWidth={2.5} />
               <span>Nueva tarea</span>
@@ -1304,7 +1317,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Buscar... (/)"
-                className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 outline-none focus:border-[#6C5DD3] transition-all"
+                className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 outline-none focus:border-[var(--lumins-accent)] transition-all"
               />
               {searchQuery && (
                 <button
@@ -1318,7 +1331,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             </div>
 
             {/* View Switcher Capsule (Mes · Semana · Agenda · Equipo · Timeline) */}
-            <div className="flex items-center bg-white dark:bg-[#1C1F26] p-0.5 rounded-lg border border-zinc-200/80 dark:border-white/10 shadow-2xs">
+            <div className="flex items-center bg-white dark:bg-[#212632] p-0.5 rounded-lg border border-zinc-200/80 dark:border-white/10 shadow-2xs">
               {(
                 [
                   { id: 'month', label: 'Mes' },
@@ -1332,9 +1345,9 @@ const WorkspaceCalendarPage: React.FC = () => {
                   key={v.id}
                   type="button"
                   onClick={() => setActiveView(v.id)}
-                  className={`px-2.5 py-1 text-xs font-extrabold rounded-md transition-all shrink-0 ${
+                  className={`px-2.5 py-1 text-xs font-extrabold rounded-md transition-all shrink-0 cursor-pointer ${
                     activeView === v.id
-                      ? 'bg-zinc-900 dark:bg-[#6C5DD3] text-white shadow-xs'
+                      ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                       : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
                   }`}
                 >
@@ -1352,16 +1365,18 @@ const WorkspaceCalendarPage: React.FC = () => {
               title="Ver tarjetas sin fecha asignada"
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                 showUnscheduledDrawer
-                  ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-xs'
-                  : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
+                  ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
+                  : 'bg-white dark:bg-[#212632] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
               }`}
             >
-              <Inbox size={13} />
+              <Inbox size={13} className={showUnscheduledDrawer ? 'text-[var(--lumins-accent-on)]' : 'text-[#FF665E]'} />
               <span>Sin fecha</span>
               <span
                 className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
                   showUnscheduledDrawer
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-black/15 text-[var(--lumins-accent-on)]'
+                    : unscheduledEvents.length > 0
+                    ? 'bg-[#FF665E]/12 text-[#FF665E]'
                     : 'bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300'
                 }`}
               >
@@ -1375,14 +1390,14 @@ const WorkspaceCalendarPage: React.FC = () => {
               onClick={() => setShowDesktopFilters(prev => !prev)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                 activeFiltersCount > 0
-                  ? 'bg-[#6C5DD3]/10 border-[#6C5DD3]/40 text-[#6C5DD3] dark:text-[#A599F9]'
-                  : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
+                  ? 'bg-[var(--lumins-accent-soft)] border-[var(--lumins-accent-border)] text-[var(--lumins-accent-fg)]'
+                  : 'bg-white dark:bg-[#212632] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
               }`}
             >
               <Filter size={13} />
               <span>Filtros</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#6C5DD3] text-white text-[10px] font-black flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] text-[10px] font-black flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -1418,7 +1433,7 @@ const WorkspaceCalendarPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setQuickCreateDates({ startDate: currentDate, dueDate: currentDate })}
-              className="w-7 h-7 rounded-lg bg-[#6C5DD3] text-white flex items-center justify-center shadow-xs shadow-[#6C5DD3]/25 active:scale-95 transition-all"
+              className="w-7 h-7 rounded-lg bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] flex items-center justify-center shadow-xs active:scale-95 transition-all"
               title="Nueva tarea"
             >
               <Plus size={15} strokeWidth={2.5} />
@@ -1428,12 +1443,12 @@ const WorkspaceCalendarPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowUnscheduledDrawer(prev => !prev)}
-              className="relative w-7 h-7 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 flex items-center justify-center active:scale-95 transition-all"
+              className="relative w-7 h-7 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 flex items-center justify-center active:scale-95 transition-all"
               title="Sin fecha"
             >
               <Inbox size={13} />
               {unscheduledEvents.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#6C5DD3] text-white text-[8px] font-black flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#FF665E] text-white text-[8px] font-black flex items-center justify-center">
                   {unscheduledEvents.length}
                 </span>
               )}
@@ -1445,14 +1460,14 @@ const WorkspaceCalendarPage: React.FC = () => {
               onClick={() => setShowMobileFilterSheet(true)}
               className={`relative w-7 h-7 rounded-lg border flex items-center justify-center active:scale-95 transition-all ${
                 activeFiltersCount > 0
-                  ? 'bg-[#6C5DD3]/10 border-[#6C5DD3]/40 text-[#6C5DD3]'
-                  : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300'
+                  ? 'bg-[var(--lumins-accent-soft)] border-[var(--lumins-accent-border)] text-[var(--lumins-accent-fg)]'
+                  : 'bg-white dark:bg-[#212632] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300'
               }`}
               title="Filtros"
             >
               <Filter size={13} />
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#6C5DD3] text-white text-[8px] font-black flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] text-[8px] font-black flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -1484,7 +1499,7 @@ const WorkspaceCalendarPage: React.FC = () => {
         </div>
 
         {/* Tier 2 (Mobile/Tablet only): Native View Switcher Pill Bar */}
-        <div className="flex md:hidden items-center bg-white dark:bg-[#1C1F26] p-0.5 rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-2xs overflow-x-auto no-scrollbar shrink-0">
+        <div className="flex md:hidden items-center bg-white dark:bg-[#212632] p-0.5 rounded-xl border border-zinc-200/80 dark:border-white/10 shadow-2xs overflow-x-auto no-scrollbar shrink-0">
           {(
             [
               { id: 'month', label: 'Mes' },
@@ -1500,7 +1515,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               onClick={() => setActiveView(v.id)}
               className={`flex-1 py-1 px-1.5 text-[11px] font-black rounded-lg transition-all text-center min-w-[52px] ${
                 activeView === v.id
-                  ? 'bg-[#6C5DD3] text-white shadow-xs'
+                  ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                   : 'text-zinc-500 dark:text-zinc-400 active:bg-zinc-100 dark:active:bg-white/5'
               }`}
             >
@@ -1522,11 +1537,11 @@ const WorkspaceCalendarPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: -8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -8 }}
-              className="fixed top-16 right-4 sm:right-10 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 p-4 z-[150] space-y-3"
+              className="fixed top-16 right-4 sm:right-10 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#212632] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 p-4 z-[150] space-y-3"
             >
               <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/5">
                 <div className="flex items-center gap-2">
-                  <Palette size={15} className="text-[#6C5DD3]" />
+                  <Palette size={15} className="text-[var(--lumins-accent)]" />
                   <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
                     Leyenda & Calendarios
                   </h3>
@@ -1609,25 +1624,25 @@ const WorkspaceCalendarPage: React.FC = () => {
                 onClick={() => setOnlyMyTasks(prev => !prev)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all shrink-0 ${
                   onlyMyTasks
-                    ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-xs'
-                    : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[#6C5DD3]/50'
+                    ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
+                    : 'bg-white dark:bg-[#212632] border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-[var(--lumins-accent-border)]'
                 }`}
               >
-                <UserCheck size={12} />
+                <UserCheck size={12} className={onlyMyTasks ? 'text-[var(--lumins-accent-on)]' : 'text-[var(--lumins-accent-fg)]'} />
                 <span>Mis tareas</span>
               </button>
 
               {/* Tablero Chip */}
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
-                <Layout size={12} className="text-[#6C5DD3]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
+                <Layout size={12} className="text-[var(--lumins-accent)]" />
                 <select
                   value={boardFilter}
                   onChange={e => setBoardFilter(e.target.value)}
                   className="bg-transparent outline-none cursor-pointer max-w-[140px] truncate"
                 >
-                  <option value="all" className="dark:bg-[#1C1F26]">Todos los tableros</option>
+                  <option value="all" className="dark:bg-[#212632]">Todos los tableros</option>
                   {uniqueBoards.map(b => (
-                    <option key={b.id} value={b.id} className="dark:bg-[#1C1F26]">
+                    <option key={b.id} value={b.id} className="dark:bg-[#212632]">
                       {b.name}
                     </option>
                   ))}
@@ -1635,17 +1650,17 @@ const WorkspaceCalendarPage: React.FC = () => {
               </div>
 
               {/* Asignado Chip */}
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
-                <Users size={12} className="text-[#6C5DD3]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
+                <Users size={12} className="text-[#F59E0B]" />
                 <select
                   value={memberFilter}
                   onChange={e => setMemberFilter(e.target.value)}
                   className="bg-transparent outline-none cursor-pointer max-w-[130px] truncate"
                 >
-                  <option value="all" className="dark:bg-[#1C1F26]">Cualquier miembro</option>
-                  <option value="unassigned" className="dark:bg-[#1C1F26]">Sin asignar</option>
+                  <option value="all" className="dark:bg-[#212632]">Cualquier miembro</option>
+                  <option value="unassigned" className="dark:bg-[#212632]">Sin asignar</option>
                   {uniqueMembers.map(m => (
-                    <option key={m.id} value={m.id} className="dark:bg-[#1C1F26]">
+                    <option key={m.id} value={m.id} className="dark:bg-[#212632]">
                       {m.name}
                     </option>
                   ))}
@@ -1653,33 +1668,33 @@ const WorkspaceCalendarPage: React.FC = () => {
               </div>
 
               {/* Prioridad Chip */}
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
-                <Flag size={12} className="text-[#6C5DD3]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
+                <Flag size={12} className="text-[#FF665E]" />
                 <select
                   value={priorityFilter}
                   onChange={e => setPriorityFilter(e.target.value)}
                   className="bg-transparent outline-none cursor-pointer"
                 >
-                  <option value="all" className="dark:bg-[#1C1F26]">Prioridad</option>
-                  <option value="P0" className="dark:bg-[#1C1F26]">P0 · Crítica</option>
-                  <option value="P1" className="dark:bg-[#1C1F26]">P1 · Alta</option>
-                  <option value="P2" className="dark:bg-[#1C1F26]">P2 · Media</option>
-                  <option value="P3" className="dark:bg-[#1C1F26]">P3 · Baja</option>
+                  <option value="all" className="dark:bg-[#212632]">Prioridad</option>
+                  <option value="P0" className="dark:bg-[#212632]">P0 · Crítica</option>
+                  <option value="P1" className="dark:bg-[#212632]">P1 · Alta</option>
+                  <option value="P2" className="dark:bg-[#212632]">P2 · Media</option>
+                  <option value="P3" className="dark:bg-[#212632]">P3 · Baja</option>
                 </select>
               </div>
 
               {/* Etiqueta Chip */}
               {uniqueLabels.length > 0 && (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
-                  <Tag size={12} className="text-[#6C5DD3]" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-300 shrink-0">
+                  <Tag size={12} className="text-[var(--lumins-accent)]" />
                   <select
                     value={labelFilter}
                     onChange={e => setLabelFilter(e.target.value)}
                     className="bg-transparent outline-none cursor-pointer max-w-[120px] truncate"
                   >
-                    <option value="all" className="dark:bg-[#1C1F26]">Etiqueta</option>
+                    <option value="all" className="dark:bg-[#212632]">Etiqueta</option>
                     {uniqueLabels.map(l => (
-                      <option key={l.id} value={l.id} className="dark:bg-[#1C1F26]">
+                      <option key={l.id} value={l.id} className="dark:bg-[#212632]">
                         {l.name}
                       </option>
                     ))}
@@ -1704,14 +1719,14 @@ const WorkspaceCalendarPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSetStatusFilter(statusFilter === 'done' ? 'all' : 'done')}
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                   statusFilter === 'done'
-                    ? 'bg-emerald-500 text-white border-emerald-500'
-                    : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-emerald-600 dark:text-emerald-400 hover:border-emerald-500/40'
+                    ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-2xs'
+                    : 'bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                 }`}
                 title="Filtrar completadas"
               >
-                <CheckCircle2 size={11} />
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusFilter === 'done' ? 'bg-[var(--lumins-accent-on)]' : 'bg-[var(--lumins-accent)]'}`} />
                 <span>
                   {metrics.completed}/{metrics.total} ({metrics.pct}%)
                 </span>
@@ -1721,14 +1736,14 @@ const WorkspaceCalendarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSetStatusFilter(statusFilter === 'due_soon' ? 'all' : 'due_soon')}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                     statusFilter === 'due_soon'
-                      ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'bg-white dark:bg-[#1C1F26] border-zinc-200/80 dark:border-white/10 text-indigo-600 dark:text-indigo-400 hover:border-indigo-500/40'
+                      ? 'bg-[#F59E0B] text-white shadow-2xs'
+                      : 'bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                   }`}
                   title="Filtrar tareas que vencen en 48h"
                 >
-                  <Clock size={11} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusFilter === 'due_soon' ? 'bg-white' : 'bg-[#FFCC40]'}`} />
                   <span>{metrics.dueSoon} pronto</span>
                 </button>
               )}
@@ -1737,14 +1752,14 @@ const WorkspaceCalendarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSetStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                     statusFilter === 'overdue'
-                      ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/30'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20'
+                      ? 'bg-[#FF665E] text-white shadow-2xs'
+                      : 'bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                   }`}
                   title="Filtrar tareas vencidas"
                 >
-                  <AlertCircle size={11} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusFilter === 'overdue' ? 'bg-white' : 'bg-[#FF665E]'}`} />
                   <span>{metrics.overdue} vencidas</span>
                 </button>
               )}
@@ -1753,10 +1768,10 @@ const WorkspaceCalendarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSetStatusFilter(statusFilter === 'has_meet' ? 'all' : 'has_meet')}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                     statusFilter === 'has_meet'
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                      ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-2xs'
+                      : 'bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                   }`}
                   title="Filtrar reuniones de Google Meet"
                 >
@@ -1769,14 +1784,14 @@ const WorkspaceCalendarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSetStatusFilter(statusFilter === 'blocked' ? 'all' : 'blocked')}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
                     statusFilter === 'blocked'
-                      ? 'bg-amber-500 text-white border-amber-500'
-                      : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+                      ? 'bg-[#F59E0B] text-white shadow-2xs'
+                      : 'bg-white dark:bg-[#212632] border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'
                   }`}
                   title="Filtrar tareas bloqueadas"
                 >
-                  <Lock size={11} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusFilter === 'blocked' ? 'bg-white' : 'bg-[#FFCC40]'}`} />
                   <span>{metrics.blocked} bloq.</span>
                 </button>
               )}
@@ -1838,7 +1853,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCurrentDate(getEventDateRange(filteredEvents[0]).end)}
-                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-50 dark:hover:bg-white/5 transition-all"
+                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#212632] border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-bold hover:bg-rose-50 dark:hover:bg-white/5 transition-all"
               >
                 Ir a {format(getEventDateRange(filteredEvents[0]).end, 'MMMM', { locale: es })}
               </button>
@@ -1847,7 +1862,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveView('agenda')}
-                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
+                className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#212632] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-bold hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
               >
                 Ver en Agenda
               </button>
@@ -1865,30 +1880,12 @@ const WorkspaceCalendarPage: React.FC = () => {
 
       {/* 3. MAIN CALENDAR WORKSPACE + UNSCHEDULED BACKLOG DRAWER */}
       <div id="lumins-calendar-export-target" className="flex-1 min-h-0 flex gap-2.5 overflow-hidden">
-        {isLoading ? (
-          <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-[#181B22] rounded-xl border border-zinc-200/80 dark:border-white/10 overflow-hidden animate-pulse">
-            <div className="grid grid-cols-7 border-b border-zinc-200/70 dark:border-white/10 py-2.5 px-4 bg-zinc-50 dark:bg-[#15181F]">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <div key={i} className="h-3 w-10 bg-zinc-200 dark:bg-white/10 rounded mx-auto" />
-              ))}
-            </div>
-            <div className="flex-1 grid grid-cols-7 grid-rows-5">
-              {Array.from({ length: 35 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="p-2 border-r border-b border-zinc-100 dark:border-white/[0.04] space-y-2"
-                >
-                  <div className="h-5 w-5 rounded-full bg-zinc-200/80 dark:bg-white/10" />
-                  {i % 3 === 0 && (
-                    <div className="h-4 w-4/5 rounded bg-zinc-200/70 dark:bg-white/5" />
-                  )}
-                  {i % 5 === 0 && (
-                    <div className="h-4 w-3/5 rounded bg-zinc-200/50 dark:bg-white/5" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+        {isLoading ? null : loadError ? (
+          <ErrorView
+            code={loadError}
+            onRetry={() => fetchEvents(false)}
+            className="flex-1 min-h-[60vh]"
+          />
         ) : activeView === 'month' ? (
           <LuminsCalendarMonthView
             currentDate={currentDate}
@@ -2038,7 +2035,7 @@ const WorkspaceCalendarPage: React.FC = () => {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="fixed inset-x-0 bottom-0 z-[140] md:hidden bg-white dark:bg-[#1C1F26] rounded-t-2xl border-t border-zinc-200 dark:border-white/10 shadow-2xl max-h-[85dvh] flex flex-col"
+              className="fixed inset-x-0 bottom-0 z-[140] md:hidden bg-white dark:bg-[#212632] rounded-t-2xl border-t border-zinc-200 dark:border-white/10 shadow-2xl max-h-[85dvh] flex flex-col"
             >
               <div className="w-10 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5" />
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5">
@@ -2064,7 +2061,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Título, tablero o lista..."
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-semibold text-zinc-900 dark:text-zinc-100 outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#151821] border border-zinc-200 dark:border-white/10 text-sm font-semibold text-zinc-900 dark:text-zinc-100 outline-none"
                   />
                 </div>
 
@@ -2073,8 +2070,8 @@ const WorkspaceCalendarPage: React.FC = () => {
                   onClick={() => setOnlyMyTasks(prev => !prev)}
                   className={`w-full py-3 px-4 rounded-xl text-sm font-bold border flex items-center justify-between ${
                     onlyMyTasks
-                      ? 'bg-[#6C5DD3]/10 border-[#6C5DD3] text-[#6C5DD3] dark:text-[#A599F9]'
-                      : 'bg-zinc-50 dark:bg-[#13151A] border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300'
+                      ? 'bg-[var(--lumins-accent-soft)] border-[var(--lumins-accent)] text-[var(--lumins-accent-fg)]'
+                      : 'bg-zinc-50 dark:bg-[#151821] border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -2091,7 +2088,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                   <select
                     value={boardFilter}
                     onChange={e => setBoardFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#151821] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
                   >
                     <option value="all">Todos los tableros</option>
                     {uniqueBoards.map(b => (
@@ -2109,7 +2106,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                   <select
                     value={statusFilter}
                     onChange={e => handleSetStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#151821] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
                   >
                     <option value="all">Cualquier estado</option>
                     <option value="pending">Pendientes</option>
@@ -2127,7 +2124,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                   <select
                     value={priorityFilter}
                     onChange={e => setPriorityFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#151821] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
                   >
                     <option value="all">Cualquier prioridad</option>
                     <option value="P0">P0 · Crítica</option>
@@ -2144,7 +2141,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                   <select
                     value={colorBy}
                     onChange={e => setColorBy(e.target.value as CalendarColorBy)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#151821] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-zinc-200"
                   >
                     <option value="board">Tablero</option>
                     <option value="priority">Prioridad</option>
@@ -2165,7 +2162,7 @@ const WorkspaceCalendarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowMobileFilterSheet(false)}
-                  className="flex-1 py-3 rounded-xl bg-[#6C5DD3] text-xs font-extrabold text-white shadow-lg shadow-[#6C5DD3]/25"
+                  className="flex-1 py-3 rounded-xl bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-xs font-extrabold text-[var(--lumins-accent-on)] shadow-sm"
                 >
                   Ver {filteredEvents.length} tareas
                 </button>

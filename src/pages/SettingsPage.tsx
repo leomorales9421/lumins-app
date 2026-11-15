@@ -1,60 +1,9 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { User, Lock, Bell, Palette, Share2 } from 'lucide-react';
-
-const SettingsContentSkeleton: React.FC = () => (
-  <div className="space-y-4 sm:space-y-6 animate-pulse">
-    {/* Page Title skeleton (Desktop) */}
-    <div className="hidden lg:block space-y-2 mb-6">
-      <div className="h-8 w-44 bg-zinc-200 dark:bg-white/10 rounded-xl" />
-      <div className="h-4 w-72 bg-zinc-200/60 dark:bg-white/5 rounded-lg" />
-    </div>
-
-    {/* Main Card Skeleton */}
-    <div className="bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200/80 dark:border-white/10 p-5 sm:p-8 space-y-6 shadow-xs">
-      {/* Top Banner / Avatar */}
-      <div className="flex items-center gap-4 pb-6 border-b border-zinc-100 dark:border-white/5">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-200 dark:bg-white/10 shrink-0" />
-        <div className="space-y-2 flex-1">
-          <div className="h-5 w-44 bg-zinc-200 dark:bg-white/10 rounded-lg" />
-          <div className="h-3.5 w-60 bg-zinc-200/70 dark:bg-white/5 rounded-md" />
-          <div className="h-7 w-28 bg-zinc-200/60 dark:bg-white/5 rounded-lg mt-1" />
-        </div>
-      </div>
-
-      {/* Grid Fields */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-5">
-        <div className="space-y-2">
-          <div className="h-3 w-16 bg-zinc-200/80 dark:bg-white/10 rounded" />
-          <div className="h-11 w-full bg-zinc-200/60 dark:bg-white/5 rounded-xl" />
-        </div>
-        <div className="space-y-2">
-          <div className="h-3 w-16 bg-zinc-200/80 dark:bg-white/10 rounded" />
-          <div className="h-11 w-full bg-zinc-200/60 dark:bg-white/5 rounded-xl" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        <div className="space-y-2">
-          <div className="h-3 w-24 bg-zinc-200/80 dark:bg-white/10 rounded" />
-          <div className="h-11 w-full bg-zinc-200/60 dark:bg-white/5 rounded-xl" />
-        </div>
-        <div className="space-y-2">
-          <div className="h-3 w-20 bg-zinc-200/80 dark:bg-white/10 rounded" />
-          <div className="h-11 w-full bg-zinc-200/60 dark:bg-white/5 rounded-xl" />
-        </div>
-        <div className="sm:col-span-2 space-y-2">
-          <div className="h-3 w-48 bg-zinc-200/80 dark:bg-white/10 rounded" />
-          <div className="h-11 w-full bg-zinc-200/60 dark:bg-white/5 rounded-xl" />
-        </div>
-      </div>
-
-      <div className="pt-4 border-t border-zinc-100 dark:border-white/5 flex justify-end">
-        <div className="h-11 w-36 bg-zinc-200 dark:bg-white/10 rounded-xl" />
-      </div>
-    </div>
-  </div>
-);
+import { LuminsSettingsIcon } from '../components/icons/LuminsIcons';
+import LuminsLogoLoader from '../components/ui/LuminsLogoLoader';
 
 const NAV_ITEMS = [
   {
@@ -89,38 +38,77 @@ const NAV_ITEMS = [
     path: '/settings/preferences',
     label: 'Preferencias',
     shortLabel: 'Tema',
-    subtitle: 'Personaliza la apariencia de la app',
+    subtitle: 'Tema, acento y disposición del menú',
     icon: Palette,
   },
 ];
 
+const MIN_TAB_LOADER_MS = 1000;
+
+const SettingsTabLoader: React.FC<{ overlay?: boolean }> = ({ overlay = false }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+    className={`w-full rounded-xl flex flex-col items-center justify-center gap-2.5 p-8 ${
+      overlay
+        ? 'absolute inset-0 z-20 bg-[#F4F6F9]/92 dark:bg-[#151821]/92 backdrop-blur-sm'
+        : 'min-h-[280px] bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/[0.11]'
+    }`}
+  >
+    <LuminsLogoLoader size="sm" />
+    <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Cargando...</span>
+  </motion.div>
+);
+
 const SettingsPage: React.FC = () => {
   const location = useLocation();
+  const [trackedPath, setTrackedPath] = useState(location.pathname);
+  const [isSwitchingTab, setIsSwitchingTab] = useState(false);
+  const timerRef = useRef<number | null>(null);
+
+  // Activar de forma síncrona durante el render para evitar cualquier flash de la nueva pestaña
+  if (location.pathname !== trackedPath) {
+    setTrackedPath(location.pathname);
+    setIsSwitchingTab(true);
+  }
+
+  useEffect(() => {
+    if (!isSwitchingTab) return;
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => {
+      setIsSwitchingTab(false);
+    }, MIN_TAB_LOADER_MS);
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, [trackedPath, isSwitchingTab]);
+
   const activeItem =
     NAV_ITEMS.find(item => location.pathname.startsWith(item.path)) || NAV_ITEMS[0];
 
   return (
-    <div className="w-full max-w-6xl mx-auto pb-10 sm:py-8 px-0 sm:px-6 flex flex-col lg:flex-row gap-4 lg:gap-10 min-h-[calc(100dvh-64px)]">
-      {/* MOBILE & TABLET NATIVE STICKY HEADER + 5-TAB SEGMENTED BAR (< lg) */}
-      <div className="lg:hidden sticky top-0 z-30 bg-[#F4F6F9]/95 dark:bg-[#13151A]/95 backdrop-blur-md border-b border-zinc-200/80 dark:border-white/10 px-3.5 pt-3 pb-2.5">
-        <div className="flex items-center justify-between mb-2.5 px-0.5">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#6C5DD3] block leading-none mb-0.5">
-              Configuración
-            </span>
-            <h1 className="text-lg font-black text-zinc-900 dark:text-zinc-100 leading-tight">
-              {activeItem.label}
-            </h1>
+    <div className="flex-1 px-3.5 py-4 sm:p-6 lg:p-8 font-sans max-w-[1600px] mx-auto w-full flex flex-col gap-4 sm:gap-6">
+      {/* Header: en desktop menú a la izquierda y título a la derecha */}
+      <div className="flex flex-col lg:flex-row-reverse lg:items-end justify-between gap-3.5 sm:gap-4">
+        <div className="flex flex-col gap-0.5 sm:gap-1 lg:items-end lg:text-right">
+          <div className="flex items-center gap-2 text-[var(--lumins-accent-fg)] mb-0.5">
+            <LuminsSettingsIcon size={15} active />
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em]">Cuenta y Preferencias</span>
           </div>
-          <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 text-right max-w-[180px] sm:max-w-xs truncate">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">
+            Configuración de Cuenta
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             {activeItem.subtitle}
           </p>
         </div>
 
-        {/* Native 5-Column Segmented Control (zero horizontal scroll/clipping) */}
+        {/* Platform-consistent Segmented Navigation (native 5-col bar on mobile/tablet, inline capsule on desktop) */}
         <nav
           aria-label="Secciones de configuración"
-          className="grid grid-cols-5 gap-1 p-1 rounded-2xl bg-zinc-200/70 dark:bg-[#1C1F26] border border-zinc-200/60 dark:border-white/5"
+          className="grid grid-cols-5 sm:inline-flex items-center gap-1 p-1 rounded-xl bg-white dark:bg-[#212632] border border-slate-200/90 dark:border-white/[0.11] shadow-xs w-full sm:w-auto"
         >
           {NAV_ITEMS.map(item => {
             const Icon = item.icon;
@@ -128,57 +116,45 @@ const SettingsPage: React.FC = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        backgroundColor: 'var(--lumins-accent)',
+                        color: 'var(--lumins-accent-on)',
+                      }
+                    : undefined
+                }
                 className={({ isActive }) =>
-                  `flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-xl transition-all select-none ${
+                  `inline-flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs transition-all whitespace-nowrap shrink-0 select-none active:scale-[0.97] ${
                     isActive
-                      ? 'bg-white dark:bg-[#6C5DD3] text-[#6C5DD3] dark:text-white shadow-xs font-extrabold'
-                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 font-bold'
+                      ? 'shadow-xs font-bold'
+                      : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100/80 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-zinc-100 font-semibold'
                   }`
                 }
               >
-                <Icon size={16} className="shrink-0" />
-                <span className="text-[10px] sm:text-xs tracking-tight leading-none truncate max-w-full">
-                  <span className="sm:hidden">{item.shortLabel}</span>
-                  <span className="hidden sm:inline">{item.label}</span>
-                </span>
+                <Icon size={14} className="shrink-0" />
+                <span className="sm:hidden truncate max-w-full leading-none">{item.shortLabel}</span>
+                <span className="hidden sm:inline">{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
       </div>
 
-      {/* DESKTOP SIDEBAR (>= lg) */}
-      <aside className="hidden lg:block w-[240px] flex-shrink-0">
-        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-6 uppercase tracking-tighter">
-          Configuraciones
-        </h1>
-        <nav className="flex flex-col gap-1.5">
-          {NAV_ITEMS.map(item => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 p-3 rounded-xl transition-all whitespace-nowrap ${
-                    isActive
-                      ? 'bg-white dark:bg-white/10 text-[#6C5DD3] dark:text-white font-bold shadow-xs border border-zinc-200/70 dark:border-white/10'
-                      : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
-                  }`
-                }
-              >
-                <Icon size={19} className="shrink-0" />
-                <span className="text-xs uppercase font-black tracking-widest">{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      </aside>
-
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 min-w-0 px-3.5 sm:px-0">
-        <Suspense fallback={<SettingsContentSkeleton />}>
-          <Outlet />
+      <main className="flex-1 min-w-0 w-full relative min-h-[300px]">
+        <AnimatePresence>
+          {isSwitchingTab && <SettingsTabLoader key="settings-tab-loader" overlay />}
+        </AnimatePresence>
+        <Suspense fallback={<SettingsTabLoader />}>
+          <motion.div
+            key={trackedPath}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: isSwitchingTab ? 0 : 1, y: isSwitchingTab ? 6 : 0 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="h-full w-full"
+          >
+            <Outlet />
+          </motion.div>
         </Suspense>
       </main>
     </div>

@@ -3,14 +3,16 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import type { Board, List, Card as CardType } from '../types/board';
-import { Skeleton } from '../components/ui/Skeleton';
-import { 
-  ChevronLeft, 
+import { useModuleLoading } from '../contexts/NavigationLoaderContext';
+import ErrorView from '../components/ui/ErrorView';
+import { BrandLogo } from '../components/ui/BrandLogo';
+import {
+  ChevronLeft,
   ChevronRight,
-  Filter, 
-  Users, 
-  Settings, 
-  Plus, 
+  Filter,
+  Users,
+  Settings,
+  Plus,
   Search,
   MoreHorizontal,
   Menu,
@@ -26,30 +28,30 @@ import {
 import { toast } from 'sonner';
 import { useStructuredLogger } from '../components/NotificationProvider';
 
-import { 
-  DndContext, 
-  closestCorners, 
+import {
+  DndContext,
+  closestCorners,
   closestCenter,
   pointerWithin,
-  MouseSensor, 
+  MouseSensor,
   TouchSensor,
-  useSensor, 
-  useSensors, 
+  useSensor,
+  useSensors,
   DragOverlay,
   defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection, DropAnimation } from '@dnd-kit/core';
-import { 
-  SortableContext, 
-  horizontalListSortingStrategy, 
-  arrayMove 
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  arrayMove
 } from '@dnd-kit/sortable';
 import { SortableList } from '../components/dnd/SortableList';
 import { SortableCard, CardView } from '../components/dnd/SortableCard';
 import UserAvatar from '../components/ui/UserAvatar';
 import CardDetailModal from '../components/CardDetailModal';
 import MembersModal from '../components/MembersModal';
-import BoardSettingsSlideOver from '../components/BoardSettingsSlideOver';
+import BoardOptionsMenu from '../components/BoardOptionsMenu';
 import ConfirmActionModal from '../components/ConfirmActionModal';
 import ArchivedItemsModal from '../components/ArchivedItemsModal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,10 +71,10 @@ const BoardDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Initialize Socket.io for this board
   useBoardSocket(id);
-  
+
   const cachedData = id ? boardMemoryCache.get(id) : null;
   const [board, setBoard] = useState<Board | null>(cachedData ? cachedData.board : null);
   const boardRef = useRef<Board | null>(board);
@@ -86,6 +88,7 @@ const BoardDetailPage: React.FC = () => {
     }));
   });
   const [isLoading, setIsLoading] = useState(!cachedData);
+  useModuleLoading(isLoading, 'board-detail');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(
     () => searchParams.get('cardId') || searchParams.get('card') || null
@@ -104,7 +107,7 @@ const BoardDetailPage: React.FC = () => {
     isLoading,
     isDragging: !!activeCard || !!activeList
   });
-  
+
   // New States for Logic
   const [filterUserId, setFilterUserId] = useState<string | null>(null);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
@@ -150,7 +153,7 @@ const BoardDetailPage: React.FC = () => {
   const handleMouseDown = (e: React.MouseEvent) => {
     // Only scroll if we're clicking on the main canvas background
     if ((e.target as HTMLElement).id !== 'board-canvas' && !(e.target as HTMLElement).classList.contains('canvas-spacer')) return;
-    
+
     setIsPanning(true);
     setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
     setScrollLeft(scrollRef.current?.scrollLeft || 0);
@@ -190,10 +193,10 @@ const BoardDetailPage: React.FC = () => {
       const response = await apiClient.get<{ data: { board: Board, userRole: string } }>(`/api/boards/${id}`);
       setBoard(response.data.board);
       setUserRole(response.data.userRole);
-      
+
       // Update memory cache
       boardMemoryCache.set(id, { board: response.data.board, userRole: response.data.userRole });
-      
+
       // Filter out archived (closed) cards
       let filteredLists = (response.data.board.lists || []).map(list => ({
         ...list,
@@ -204,7 +207,7 @@ const BoardDetailPage: React.FC = () => {
       if (filterUserId) {
         filteredLists = filteredLists.map(list => ({
           ...list,
-          cards: list.cards?.filter(card => 
+          cards: list.cards?.filter(card =>
             card.assignees?.some(a => a.user.id === filterUserId)
           ) || []
         }));
@@ -270,7 +273,7 @@ const BoardDetailPage: React.FC = () => {
 
   const handleUpdateVisibility = async (newVisibility: 'PRIVATE' | 'WORKSPACE') => {
     if (!id || !board) return;
-    
+
     // Optimistic update
     const previousVisibility = board.visibility;
     setBoard({ ...board, visibility: newVisibility });
@@ -329,7 +332,7 @@ const BoardDetailPage: React.FC = () => {
   };
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { 
+    useSensor(MouseSensor, {
       activationConstraint: { distance: 8 },
       disabled: !canEdit
     }),
@@ -402,7 +405,7 @@ const BoardDetailPage: React.FC = () => {
     const activeId = active.id as string;
     const container = findContainer(lists, activeId);
     setOriginalContainer(container || null);
-    
+
     // Haptic feedback for mobile
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(10);
@@ -444,7 +447,7 @@ const BoardDetailPage: React.FC = () => {
 
       const activeItems = activeList.cards || [];
       const overItems = overList.cards || [];
-      
+
       const activeIndex = activeItems.findIndex((item) => item.id === activeId);
       const overIndex = overItems.findIndex((item) => item.id === overId);
 
@@ -491,7 +494,7 @@ const BoardDetailPage: React.FC = () => {
     const activeId = active.id as string;
     const overId = over.id as string;
     const activeType = active.data.current?.type;
-    
+
     if (activeType === 'list') {
       const targetListId = lists.some((l) => l.id === overId)
         ? overId
@@ -500,10 +503,10 @@ const BoardDetailPage: React.FC = () => {
       if (targetListId && activeId !== targetListId) {
         const oldIndex = lists.findIndex((l) => l.id === activeId);
         const newIndex = lists.findIndex((l) => l.id === targetListId);
-        
+
         if (oldIndex !== -1 && newIndex !== -1) {
           const newListsOrder = arrayMove(lists, oldIndex, newIndex);
-          
+
           setLists(newListsOrder);
 
           try {
@@ -556,7 +559,7 @@ const BoardDetailPage: React.FC = () => {
       setIsSaving(true);
       const targetList = finalLists.find(l => l.id === overContainer);
       const cardsInTarget = targetList?.cards || [];
-      
+
       if (originalContainer === overContainer) {
         await apiClient.post(`/api/cards/lists/${overContainer}/reorder`, {
           cards: cardsInTarget.map((c, index) => ({ id: c.id, position: (index + 1) * 1000 }))
@@ -600,7 +603,7 @@ const BoardDetailPage: React.FC = () => {
     e.preventDefault();
     if (!newListTitle.trim() || !id) return;
     try {
-      await apiClient.post(`/api/lists/boards/${id}/lists`, { 
+      await apiClient.post(`/api/lists/boards/${id}/lists`, {
         name: newListTitle.trim(),
         position: (lists.length + 1) * 1000
       });
@@ -746,200 +749,159 @@ const BoardDetailPage: React.FC = () => {
   }, [board?.members]);
 
   if (isLoading) {
-    return (
-      <div 
-        className="flex flex-col h-full bg-transparent font-sans overflow-hidden transition-colors duration-500"
-      >
-        {/* Header Skeleton - Matches 72px height */}
-        <div className="h-[72px] px-8 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#13151A] z-30">
-           <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded" />
-                <div className="space-y-2">
-                  <Skeleton className="h-5 w-32 rounded" />
-                  <Skeleton className="h-3 w-20 rounded opacity-50" />
-                </div>
-              </div>
-              <div className="hidden md:block h-8 w-px bg-zinc-100 dark:bg-white/5" />
-              <div className="hidden lg:flex gap-4">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-           </div>
-           <div className="flex items-center gap-4">
-              <div className="flex -space-x-2">
-                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
-                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
-                <Skeleton className="h-8 w-8 rounded border-2 border-white dark:border-[#13151A]" />
-              </div>
-              <div className="h-8 w-px bg-zinc-100 dark:bg-white/5" />
-              <div className="flex gap-3">
-                <Skeleton className="h-10 w-24 rounded" />
-                <Skeleton className="h-10 w-32 rounded" />
-              </div>
-           </div>
-        </div>
+    return null;
+  }
 
-        {/* Canvas Skeleton */}
-        <div className="flex-1 p-6 md:p-10 flex gap-6 overflow-hidden">
-           {[1, 2, 3, 4].map(i => (
-             <div key={i} className="min-w-[272px] max-w-[272px] h-full flex flex-col gap-4">
-                <div className="flex justify-between items-center px-1">
-                   <Skeleton className="h-6 w-32 rounded" />
-                   <div className="flex gap-1">
-                     <Skeleton className="h-6 w-6 rounded" />
-                     <Skeleton className="h-6 w-6 rounded" />
-                   </div>
-                </div>
-                
-                <div className="space-y-3">
-                   {[1, 2, 3].map(j => (
-                     <div key={j} className="bg-white dark:bg-[#1C1F26] rounded border border-zinc-200 dark:border-white/5 p-4 space-y-4 shadow-sm">
-                        <Skeleton className="h-4 w-[90%] rounded" />
-                        <div className="flex justify-between items-center pt-2">
-                           <Skeleton className="h-3 w-16 rounded" />
-                           <div className="flex gap-1">
-                              <Skeleton className="h-5 w-5 rounded" />
-                           </div>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-                
-                <Skeleton className="h-[52px] w-full rounded opacity-40" />
-             </div>
-           ))}
-        </div>
-      </div>
+  if (!board) {
+    return (
+      <ErrorView
+        code="404"
+        title="No pudimos cargar este tablero"
+        description="Es posible que el tablero no exista, haya sido eliminado o no tengas permisos para acceder."
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
-  if (!board) return null;
-
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="flex flex-col h-full font-sans"
     >
-      
-      {/* Board Header (Sub-navigation) - Premium Glass Mode */}
-      <header className="h-[56px] sm:h-[60px] md:h-[72px] bg-black/20 backdrop-blur-xl border-b border-white/10 px-3 sm:px-6 md:px-8 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-2xl">
-        {/* Left Side: Sidebar Toggle, Breadcrumbs and Title */}
-        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 min-w-0 flex-1 sm:flex-initial mr-2 sm:mr-0">
-          <button 
+
+      {/* Floating Compact Board Bar */}
+      <header className="mx-3 sm:mx-5 mt-2 mb-1 h-11 bg-[#14171F]/65 backdrop-blur-xl border border-white/15 rounded-xl px-2.5 sm:px-3.5 flex items-center justify-between flex-shrink-0 z-20 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        {/* Left Side: Sidebar Toggle, Back, Title & Visibility */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1 sm:flex-initial mr-2 sm:mr-0">
+          <button
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
-            className="p-2 sm:p-2.5 bg-white/5 hover:bg-white/15 active:scale-95 rounded text-white/90 transition-all border border-white/10 shadow-sm flex-shrink-0 group"
-            title="Toggle Sidebar"
+            className="w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-white/15 active:scale-95 rounded-lg text-white/85 hover:text-white transition-all flex-shrink-0 cursor-pointer"
+            title="Menú de Lumins"
+            aria-label="Abrir menú de navegación"
           >
-            <Menu size={18} className="sm:w-5 sm:h-5 text-white/90 group-hover:text-white transition-colors" />
+            <Menu size={15} />
           </button>
 
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
-            <Link 
-              to={`/w/${board.workspaceId}/dashboard`} 
-              className="hidden md:flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 hover:text-white transition-all hover:translate-x-[-2px] flex-shrink-0"
+          <Link
+            to="/app"
+            className="flex items-center flex-shrink-0 hover:opacity-90 transition-opacity"
+            title="Ir al inicio de Lumins"
+          >
+            <BrandLogo size="xs" variant="light-text" showWordmark={false} className="sm:hidden" />
+            <BrandLogo size="xs" variant="light-text" className="hidden sm:inline-flex" />
+          </Link>
+
+          <span className="h-3.5 w-px bg-white/15 flex-shrink-0" />
+
+          <Link
+            to={`/w/${board.workspaceId}/dashboard`}
+            className="hidden md:flex items-center gap-1 px-1.5 py-1 rounded-md text-[11px] font-semibold text-white/65 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+            title="Volver a tableros"
+          >
+            <ChevronLeft size={13} strokeWidth={2.5} />
+            <span>Tableros</span>
+          </Link>
+
+          <span className="hidden md:block h-3.5 w-px bg-white/15 flex-shrink-0" />
+
+          <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-initial">
+            <div
+              style={{
+                backgroundColor: 'var(--lumins-accent)',
+                color: 'var(--lumins-accent-on)',
+              }}
+              className="w-6 h-6 rounded-md flex items-center justify-center shadow-sm flex-shrink-0"
             >
-              <ChevronLeft size={14} strokeWidth={3} />
-              Tableros
-            </Link>
-            
-            <span className="hidden md:block text-white/10 font-thin text-2xl flex-shrink-0">|</span>
-            
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white shadow-lg border border-white/20 flex-shrink-0">
-                <span className="font-black text-xs sm:text-sm">
-                  {Array.from(board.name.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s]+/u, '') || board.name)[0]?.toUpperCase() || 'L'}
-                </span>
-              </div>
-              
-              <div className="flex flex-col min-w-0 flex-1">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <h1 className="text-sm sm:text-lg md:text-xl font-black text-white truncate drop-shadow-md tracking-tight">
-                    {board.name}
-                  </h1>
+              <span className="font-black text-[11px]">
+                {Array.from(board.name.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s]+/u, '') || board.name)[0]?.toUpperCase() || 'L'}
+              </span>
+            </div>
 
-                  {/* Visibility Selector */}
-                  <div className="relative flex-shrink-0">
-                    {isAdmin ? (
-                      <button 
-                        onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
-                        className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
-                        title={board.visibility === 'PRIVATE' ? 'Click para cambiar visibilidad (Privado)' : 'Click para cambiar visibilidad (Espacio de trabajo)'}
-                      >
-                        {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
-                      </button>
-                    ) : (
-                      <div 
-                        className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 text-white/40 flex items-center gap-2 cursor-default"
-                        title={board.visibility === 'PRIVATE' ? 'Este tablero es Privado' : 'Este tablero es visible para el Espacio de Trabajo'}
-                      >
-                        {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
-                      </div>
-                    )}
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <h1 className="text-xs sm:text-sm font-bold text-white truncate tracking-tight">
+                {board.name}
+              </h1>
 
-                    <AnimatePresence>
-                      {isVisibilityDropdownOpen && (
-                        <>
-                          <div 
-                            className="fixed inset-0 z-40" 
-                            onClick={() => setIsVisibilityDropdownOpen(false)}
-                          />
-                          <motion.div 
-                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                            className="absolute left-0 mt-2 w-56 bg-[#1C1F26] border border-white/10 rounded-[4px] shadow-2xl z-50 overflow-hidden"
-                          >
-                            <div className="p-2 border-b border-white/5">
-                              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest px-2">Visibilidad</span>
-                            </div>
-                            <div className="p-1">
-                              <button 
-                                onClick={() => { handleUpdateVisibility('PRIVATE'); setIsVisibilityDropdownOpen(false); }}
-                                className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'PRIVATE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Lock size={14} />
-                                  <span>Privado</span>
-                                </div>
-                                {board.visibility === 'PRIVATE' && <Check size={14} />}
-                              </button>
-                              <button 
-                                onClick={() => { handleUpdateVisibility('WORKSPACE'); setIsVisibilityDropdownOpen(false); }}
-                                className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'WORKSPACE' ? 'bg-[#6C5DD3] text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Building2 size={14} />
-                                  <span>Espacio de Trabajo</span>
-                                </div>
-                                {board.visibility === 'WORKSPACE' && <Check size={14} />}
-                              </button>
-                            </div>
-                            <div className="p-3 bg-white/5 border-t border-white/5">
-                              <p className="text-[10px] text-white/40 leading-relaxed italic">
-                                {board.visibility === 'PRIVATE' 
-                                  ? 'Solo los miembros del tablero pueden verlo y editarlo.' 
-                                  : 'Todos los miembros del espacio de trabajo pueden ver este tablero.'}
-                              </p>
-                            </div>
-                          </motion.div>
-                        </>
-                      )}
-                    </AnimatePresence>
+              {/* Visibility Selector */}
+              <div className="relative flex-shrink-0">
+                {isAdmin ? (
+                  <button
+                    onClick={() => setIsVisibilityDropdownOpen(!isVisibilityDropdownOpen)}
+                    className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 hover:text-white transition-all flex items-center gap-2"
+                    title={board.visibility === 'PRIVATE' ? 'Click para cambiar visibilidad (Privado)' : 'Click para cambiar visibilidad (Espacio de trabajo)'}
+                  >
+                    {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
+                  </button>
+                ) : (
+                  <div
+                    className="p-1 sm:p-1.5 rounded-[4px] bg-white/5 border border-white/10 text-white/40 flex items-center gap-2 cursor-default"
+                    title={board.visibility === 'PRIVATE' ? 'Este tablero es Privado' : 'Este tablero es visible para el Espacio de Trabajo'}
+                  >
+                    {board.visibility === 'PRIVATE' ? <Lock size={13} className="sm:w-3.5 sm:h-3.5" /> : <Building2 size={13} className="sm:w-3.5 sm:h-3.5" />}
                   </div>
+                )}
 
-                  {(isSaving || isRefreshing) && (
-                    <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10 animate-in fade-in zoom-in duration-300 flex-shrink-0">
-                      <div className={`w-1.5 h-1.5 rounded animate-pulse ${isRefreshing ? 'bg-indigo-400' : 'bg-emerald-400'}`} />
-                      <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
-                        {isRefreshing ? 'Actualizando' : 'Salvando'}
-                      </span>
-                    </div>
+                <AnimatePresence>
+                  {isVisibilityDropdownOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsVisibilityDropdownOpen(false)}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                        className="absolute left-0 mt-2 w-56 bg-[#1C1F26] border border-white/10 rounded-[4px] shadow-2xl z-50 overflow-hidden"
+                      >
+                        <div className="p-2 border-b border-white/5">
+                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest px-2">Visibilidad</span>
+                        </div>
+                        <div className="p-1">
+                          <button
+                            onClick={() => { handleUpdateVisibility('PRIVATE'); setIsVisibilityDropdownOpen(false); }}
+                            className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'PRIVATE' ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Lock size={14} />
+                              <span>Privado</span>
+                            </div>
+                            {board.visibility === 'PRIVATE' && <Check size={14} />}
+                          </button>
+                          <button
+                            onClick={() => { handleUpdateVisibility('WORKSPACE'); setIsVisibilityDropdownOpen(false); }}
+                            className={`w-full flex items-center justify-between p-2 rounded-[4px] text-xs font-bold transition-all ${board.visibility === 'WORKSPACE' ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Building2 size={14} />
+                              <span>Espacio de Trabajo</span>
+                            </div>
+                            {board.visibility === 'WORKSPACE' && <Check size={14} />}
+                          </button>
+                        </div>
+                        <div className="p-3 bg-white/5 border-t border-white/5">
+                          <p className="text-[10px] text-white/40 leading-relaxed italic">
+                            {board.visibility === 'PRIVATE'
+                              ? 'Solo los miembros del tablero pueden verlo y editarlo.'
+                              : 'Todos los miembros del espacio de trabajo pueden ver este tablero.'}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </>
                   )}
-                </div>
+                </AnimatePresence>
               </div>
+
+              {(isSaving || isRefreshing) && (
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/5 border border-white/10 animate-in fade-in zoom-in duration-300 flex-shrink-0">
+                  <div className={`w-1.5 h-1.5 rounded animate-pulse ${isRefreshing ? 'bg-[var(--lumins-accent)]' : 'bg-emerald-400'}`} />
+                  <span className="text-[9px] font-bold text-white/60 uppercase tracking-tighter">
+                    {isRefreshing ? 'Actualizando' : 'Salvando'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -948,23 +910,22 @@ const BoardDetailPage: React.FC = () => {
         <div className="flex md:hidden items-center gap-1.5 flex-shrink-0">
           {/* Quick Filter */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded border text-sm font-bold transition-all active:scale-95 shadow-sm ${
-                filterUserId || isFiltersOpen 
-                  ? 'bg-white/20 border-white/40 text-white ring-2 ring-white/10' 
-                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/15'
-              }`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded border text-sm font-bold transition-all active:scale-95 shadow-sm ${filterUserId || isFiltersOpen
+                ? 'bg-white/20 border-white/40 text-white ring-2 ring-white/10'
+                : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/15'
+                }`}
               title="Filtrar tarjetas"
             >
-              <Filter size={15} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
+              <Filter size={15} strokeWidth={2.5} className={filterUserId ? 'text-[var(--lumins-accent)]' : ''} />
             </button>
 
             <AnimatePresence>
               {isFiltersOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsFiltersOpen(false)} />
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -977,7 +938,7 @@ const BoardDetailPage: React.FC = () => {
                       )}
                     </div>
                     <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
-                      <button 
+                      <button
                         onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
                         className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded transition-colors text-sm text-white/70"
                       >
@@ -985,12 +946,12 @@ const BoardDetailPage: React.FC = () => {
                         Todos los miembros
                       </button>
                       {board.members?.map(member => (
-                        <button 
+                        <button
                           key={member.userId}
                           onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                          className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
+                          className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold' : 'text-white/70 hover:text-white'}`}
                         >
-                          <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
+                          <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-[var(--lumins-accent)]' : ''}`}>
                             <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
                           </div>
                           <span className="truncate">{member.user.name}</span>
@@ -1021,7 +982,13 @@ const BoardDetailPage: React.FC = () => {
               <Users size={15} strokeWidth={2.5} />
             )}
             {(board.members?.length || 0) > 1 && (
-              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-0.5 bg-[#6C5DD3] text-white text-[9px] font-black rounded-full flex items-center justify-center border border-zinc-900 shadow">
+              <span
+                style={{
+                  backgroundColor: 'var(--lumins-accent)',
+                  color: 'var(--lumins-accent-on)',
+                }}
+                className="absolute -top-1 -right-1 min-w-4 h-4 px-0.5 text-[9px] font-black rounded-full flex items-center justify-center border border-zinc-900 shadow"
+              >
                 {board.members?.length}
               </span>
             )}
@@ -1038,67 +1005,65 @@ const BoardDetailPage: React.FC = () => {
         </div>
 
         {/* Desktop Right Actions (hidden md:flex) */}
-        <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-shrink-0">
-          {/* Members Group */}
+        <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
+          {/* Members Avatars */}
           <div
             onClick={() => setIsMembersModalOpen(true)}
-            className="flex items-center -space-x-3 hover:space-x-1 transition-all cursor-pointer p-1.5 hover:bg-white/5 rounded border border-transparent hover:border-white/10"
+            className="flex items-center -space-x-2 hover:space-x-0.5 transition-all cursor-pointer px-1 py-0.5 hover:bg-white/10 rounded-lg"
+            title="Miembros del tablero"
           >
-            {board.members?.slice(0, 4).map((member) => (
+            {board.members?.slice(0, 3).map((member) => (
               <div
                 key={member.userId}
-                className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-xl ring-1 ring-white/10"
+                className="w-6 h-6 rounded-full border border-black/40 bg-zinc-800 flex items-center justify-center overflow-hidden shadow-sm"
               >
                 <UserAvatar
                   name={member.user.name}
                   avatarUrl={member.user.avatarUrl}
-                  size="sm"
+                  size="xs"
                 />
               </div>
             ))}
-            {(board.members?.length || 0) > 4 && (
-              <div className="w-8 h-8 rounded border-2 border-zinc-900/50 bg-[#2D3139] flex items-center justify-center text-[10px] font-black text-white/80 shadow-xl ring-1 ring-white/10">
-                +{(board.members?.length || 0) - 4}
+            {(board.members?.length || 0) > 3 && (
+              <div className="w-6 h-6 rounded-full border border-black/40 bg-[#2D3139] flex items-center justify-center text-[9px] font-black text-white/90">
+                +{(board.members?.length || 0) - 3}
               </div>
             )}
           </div>
 
-          {/* My role badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-wider text-white/70">
-            <span>{userRole === 'admin' ? 'Administrador' : userRole === 'editor' ? 'Miembro' : 'Invitado'}</span>
-          </div>
+          <span className="hidden xl:inline-flex items-center px-2 py-0.5 rounded-md bg-white/10 text-[9.5px] font-bold uppercase tracking-wider text-white/75">
+            {userRole === 'admin' ? 'Admin' : userRole === 'editor' ? 'Miembro' : 'Invitado'}
+          </span>
 
-          <div className="w-px h-8 bg-white/10 mx-1" />
+          <div className="w-px h-4 bg-white/15 mx-0.5" />
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button 
+          {/* Compact Icon Toolbar */}
+          <div className="flex items-center gap-1">
+            <button
               onClick={() => setIsArchivedModalOpen(true)}
-              className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded border border-white/10 bg-white/5 text-white/80 text-sm font-bold transition-all hover:text-white hover:bg-white/15 hover:border-white/20 active:scale-95 shadow-lg"
-              title="Ver archivo"
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-all active:scale-95 cursor-pointer"
+              title="Elementos archivados"
             >
-              <ArchiveRestore size={16} strokeWidth={2.5} />
-              <span className="hidden lg:inline">Archivo</span>
+              <ArchiveRestore size={15} />
             </button>
 
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className={`flex items-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
-                  filterUserId || isFiltersOpen 
-                    ? 'bg-white/20 border-white/40 text-white ring-4 ring-white/5' 
-                    : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20'
-                }`}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all active:scale-95 cursor-pointer ${filterUserId || isFiltersOpen
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/80 hover:text-white hover:bg-white/15'
+                  }`}
+                title={filterUserId ? 'Filtrado activo' : 'Filtrar por miembro'}
               >
-                <Filter size={16} strokeWidth={2.5} className={filterUserId ? 'text-indigo-400' : ''} />
-                <span className="hidden lg:inline">{filterUserId ? 'Filtrado' : 'Filtros'}</span>
+                <Filter size={15} className={filterUserId ? 'text-[var(--lumins-accent)]' : ''} />
               </button>
 
               <AnimatePresence>
                 {isFiltersOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsFiltersOpen(false)} />
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -1111,7 +1076,7 @@ const BoardDetailPage: React.FC = () => {
                         )}
                       </div>
                       <div className="max-h-[300px] overflow-y-auto px-2 space-y-1">
-                        <button 
+                        <button
                           onClick={() => { setFilterUserId(null); setIsFiltersOpen(false); }}
                           className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 rounded transition-colors text-sm text-white/70"
                         >
@@ -1119,12 +1084,12 @@ const BoardDetailPage: React.FC = () => {
                           Todos los miembros
                         </button>
                         {board.members?.map(member => (
-                          <button 
+                          <button
                             key={member.userId}
                             onClick={() => { setFilterUserId(member.userId); setIsFiltersOpen(false); }}
-                            className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[#6C5DD3]/20 text-[#8E82E3] font-bold' : 'text-white/70 hover:text-white'}`}
+                            className={`w-full px-2 py-2 flex items-center gap-3 hover:bg-white/5 rounded transition-all text-sm ${filterUserId === member.userId ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] font-bold' : 'text-white/70 hover:text-white'}`}
                           >
-                            <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-indigo-500' : ''}`}>
+                            <div className={`p-0.5 rounded ${filterUserId === member.userId ? 'ring-2 ring-[var(--lumins-accent)]' : ''}`}>
                               <UserAvatar name={member.user.name} avatarUrl={member.user.avatarUrl} size="sm" />
                             </div>
                             <span className="truncate">{member.user.name}</span>
@@ -1137,46 +1102,48 @@ const BoardDetailPage: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            <button 
+            <button
               onClick={() => setIsMembersModalOpen(true)}
-              className="flex items-center justify-center gap-2 h-10 px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
-              title="Miembros"
+              style={{
+                backgroundColor: 'var(--lumins-accent)',
+                color: 'var(--lumins-accent-on)',
+              }}
+              className="flex items-center justify-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-bold transition-all hover:brightness-95 active:scale-95 shadow-sm cursor-pointer"
+              title="Compartir y miembros"
             >
-              <Users size={16} strokeWidth={2.5} />
-              <span className="hidden lg:inline">Miembros</span>
+              <Users size={13} strokeWidth={2.5} />
+              <span className="hidden lg:inline">Compartir</span>
             </button>
 
             {isAdmin && (
-              <button 
-                onClick={() => setIsSettingsDrawerOpen(true)}
-                className="flex items-center justify-center gap-2 h-10 px-4 rounded bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 hover:border-white/20 text-sm font-bold transition-all active:scale-95 shadow-lg"
-                title="Configuración"
-              >
-                <Settings size={18} strokeWidth={2.5} />
-                <span className="hidden lg:inline">Configuración</span>
-              </button>
+              <BoardOptionsMenu
+                board={board}
+                onUpdate={fetchBoard}
+                workspaceRole={userRole}
+                onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
+                externalOpen={isSettingsDrawerOpen}
+                onExternalClose={() => setIsSettingsDrawerOpen(false)}
+              />
             )}
 
             {/* List Navigator for quick jump */}
             <div className="relative group">
-              <button 
+              <button
                 onClick={() => setIsListNavOpen(!isListNavOpen)}
-                className={`flex items-center justify-center gap-2 h-10 px-3 sm:px-4 rounded border text-sm font-bold transition-all active:scale-95 shadow-lg ${
-                  isListNavOpen 
-                    ? 'bg-white/20 border-white/40 text-white' 
-                    : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/15'
-                }`}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all active:scale-95 cursor-pointer ${isListNavOpen
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/80 hover:text-white hover:bg-white/15'
+                  }`}
                 title="Navegar por listas"
               >
-                <Menu size={16} strokeWidth={2.5} />
-                <span className="hidden sm:inline">Listas</span>
+                <Menu size={15} />
               </button>
 
               <AnimatePresence>
                 {isListNavOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsListNavOpen(false)} />
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -1187,7 +1154,7 @@ const BoardDetailPage: React.FC = () => {
                       </div>
                       <div className="max-h-[300px] overflow-y-auto px-2 space-y-1 custom-scrollbar">
                         {lists.map(list => (
-                          <button 
+                          <button
                             key={list.id}
                             onClick={() => scrollToList(list.id)}
                             className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-white/5 rounded-lg transition-all text-sm text-white/70 hover:text-white group"
@@ -1213,7 +1180,7 @@ const BoardDetailPage: React.FC = () => {
         {isMobileBoardMenuOpen && (
           <div className="md:hidden fixed inset-0 z-[100] flex items-end justify-center">
             {/* Dark Backdrop */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -1222,7 +1189,7 @@ const BoardDetailPage: React.FC = () => {
             />
 
             {/* Bottom Sheet */}
-            <motion.div 
+            <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
@@ -1230,7 +1197,7 @@ const BoardDetailPage: React.FC = () => {
               className="relative w-full bg-[#1C1F26] text-white rounded-t-[28px] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-white/10 z-10 max-h-[85vh] flex flex-col overflow-hidden"
             >
               {/* Pull handle */}
-              <div 
+              <div
                 className="w-full flex items-center justify-center pt-3 pb-1 cursor-pointer"
                 onClick={() => setIsMobileBoardMenuOpen(false)}
               >
@@ -1240,7 +1207,13 @@ const BoardDetailPage: React.FC = () => {
               {/* Sheet Header */}
               <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded bg-gradient-to-br from-[#6C5DD3] to-[#8E82E3] flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow">
+                  <div
+                    style={{
+                      backgroundColor: 'var(--lumins-accent)',
+                      color: 'var(--lumins-accent-on)',
+                    }}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0 shadow"
+                  >
                     {board.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -1253,7 +1226,7 @@ const BoardDetailPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsMobileBoardMenuOpen(false)}
                   className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 active:scale-95"
                 >
@@ -1303,7 +1276,7 @@ const BoardDetailPage: React.FC = () => {
                     className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-between transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] flex items-center justify-center">
                         <ArchiveRestore size={16} />
                       </div>
                       <div className="text-left">
@@ -1367,11 +1340,10 @@ const BoardDetailPage: React.FC = () => {
                           handleUpdateVisibility('PRIVATE');
                           setIsMobileBoardMenuOpen(false);
                         }}
-                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                          board.visibility === 'PRIVATE'
-                            ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow'
-                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                        }`}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${board.visibility === 'PRIVATE'
+                          ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow'
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                          }`}
                       >
                         <Lock size={14} />
                         <span>Privado</span>
@@ -1381,11 +1353,10 @@ const BoardDetailPage: React.FC = () => {
                           handleUpdateVisibility('WORKSPACE');
                           setIsMobileBoardMenuOpen(false);
                         }}
-                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                          board.visibility === 'WORKSPACE'
-                            ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow'
-                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                        }`}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${board.visibility === 'WORKSPACE'
+                          ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow'
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                          }`}
                       >
                         <Building2 size={14} />
                         <span>Espacio de Trabajo</span>
@@ -1400,7 +1371,7 @@ const BoardDetailPage: React.FC = () => {
       </AnimatePresence>
 
       {/* Canvas Area (Lists) */}
-      <main 
+      <main
         id="board-canvas"
         ref={scrollRef}
         onMouseDown={handleMouseDown}
@@ -1408,21 +1379,21 @@ const BoardDetailPage: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
-        className={`flex-1 h-[calc(100vh-124px)] md:h-[calc(100vh-144px)] overflow-x-auto overflow-y-hidden custom-scrollbar px-4 sm:px-6 md:px-8 pt-3 md:pt-4 pb-6 transition-all duration-300 bg-transparent ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+        className={`flex-1 min-h-0 overflow-x-auto overflow-y-hidden custom-scrollbar px-3 sm:px-5 pt-2.5 pb-5 transition-all duration-300 bg-transparent ${isPanning ? 'cursor-grabbing select-none' : 'cursor-default'}`}
       >
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={collisionDetectionStrategy} 
-          onDragStart={handleDragStart} 
+        <DndContext
+          sensors={sensors}
+          collisionDetection={collisionDetectionStrategy}
+          onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex items-start gap-4 md:gap-6 h-full pb-4">
+          <div className="flex items-start gap-3 h-full pb-4">
             <SortableContext items={lists.map(l => l.id)} strategy={horizontalListSortingStrategy}>
               {lists.map((list) => (
-                <SortableList 
-                  key={list.id} 
-                  list={list} 
+                <SortableList
+                  key={list.id}
+                  list={list}
                   onCardClick={handleOpenCard}
                   onAddCard={handleAddCard}
                   onUpdateList={handleUpdateList}
@@ -1434,34 +1405,34 @@ const BoardDetailPage: React.FC = () => {
                 />
               ))}
             </SortableContext>
-            
+
             {canEdit && (
               isAddingList ? (
-                <form onSubmit={handleAddList} className="w-[82vw] sm:w-[85vw] md:w-[272px] flex-shrink-0 bg-white/90 dark:bg-[#1C1F26]/90 backdrop-blur-md rounded-xl md:rounded-lg border border-white/30 dark:border-white/10 p-3 h-fit shadow-xl">
+                <form onSubmit={handleAddList} className="w-[82vw] sm:w-[272px] flex-shrink-0 bg-[#F1F2F4]/95 dark:bg-[#16181D]/92 backdrop-blur-md rounded-xl border border-black/5 dark:border-white/10 p-2.5 h-fit shadow-lg">
                   <input
                     autoFocus
                     placeholder="Nombre de la lista..."
                     value={newListTitle}
                     onChange={(e) => setNewListTitle(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded px-3 py-2 text-sm font-medium mb-3 focus:bg-white dark:focus:bg-[#13151A] focus:border-[#6C5DD3] focus:ring-4 focus:ring-[#6C5DD3]/10 outline-none transition-all text-zinc-900 dark:text-zinc-100"
+                    className="w-full bg-white dark:bg-[#13151A] border border-zinc-200 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs font-medium mb-2 focus:border-[var(--lumins-accent)] focus:ring-2 focus:ring-[var(--lumins-accent)]/15 outline-none transition-all text-zinc-900 dark:text-zinc-100"
                   />
-                   <div className="flex items-center gap-2">
-                    <button type="submit" className="flex-1 bg-[#6C5DD3] hover:bg-[#312e81] text-white text-sm font-bold py-2 rounded transition-colors shadow-md shadow-[#6C5DD3]/20">
+                  <div className="flex items-center gap-1.5">
+                    <button type="submit" className="flex-1 bg-[var(--lumins-accent)] hover:brightness-95 text-[var(--lumins-accent-on)] text-xs font-bold py-1.5 rounded-lg transition-all shadow-xs cursor-pointer">
                       Añadir lista
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsAddingList(false)}
-                      className="px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-sm font-medium transition-colors"
+                      className="px-2.5 py-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
                   </div>
                 </form>
-               ) : (
+              ) : (
                 <button
                   onClick={() => setIsAddingList(true)}
-                  className="w-[82vw] sm:w-[85vw] md:w-[272px] h-[52px] flex items-center justify-start px-4 gap-3 rounded-xl md:rounded-lg bg-white/20 dark:bg-white/5 border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-white/10 transition-all font-bold text-sm flex-shrink-0 shadow-lg backdrop-blur-md"
+                  className="w-[82vw] sm:w-[272px] h-10 flex items-center justify-start px-3.5 gap-2 rounded-xl bg-black/25 hover:bg-black/35 border border-white/15 text-white/90 hover:text-white transition-all font-bold text-xs flex-shrink-0 shadow-md backdrop-blur-md cursor-pointer"
                 >
                   <Plus size={18} strokeWidth={3} />
                   Añadir otra lista
@@ -1522,15 +1493,6 @@ const BoardDetailPage: React.FC = () => {
         boardName={board.name}
         workspaceId={board.workspaceId}
         onUpdate={fetchBoard}
-      />
-
-      <BoardSettingsSlideOver
-        isOpen={isSettingsDrawerOpen}
-        onClose={() => setIsSettingsDrawerOpen(false)}
-        board={board}
-        onUpdate={fetchBoard}
-        workspaceRole={userRole}
-        onUpdateBoard={(updatedData) => setBoard(prev => prev ? { ...prev, ...updatedData } : null)}
       />
 
       <ConfirmActionModal

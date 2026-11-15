@@ -75,92 +75,95 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-full ${className || 'w-[340px] sm:w-[350px] rounded shadow-xl border border-zinc-200 dark:border-white/10 animate-in fade-in zoom-in duration-200'}`}>
+    <div className={`bg-white dark:bg-[#1C1F26] flex flex-col max-h-[85dvh] overflow-y-auto ${className || 'w-[304px] sm:w-[312px] rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-white/10 animate-in fade-in zoom-in-95 duration-150'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pb-2">
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-100 dark:border-white/5 shrink-0">
         <button 
+          type="button"
           onClick={onClose} 
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
+          className="p-1 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all cursor-pointer"
+          aria-label="Volver"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={15} />
         </button>
-        <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
+        <h3 className="text-[10px] tracking-[0.25em] font-black text-zinc-500 dark:text-zinc-400 uppercase">
           Fechas
         </h3>
         <button 
+          type="button"
           onClick={onClose} 
-          className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded transition-all"
+          className="p-1 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-all cursor-pointer"
+          aria-label="Cerrar"
         >
-          <X size={16} />
+          <X size={15} />
         </button>
       </div>
 
       {/* Calendario */}
-      <div className="p-4 border-b border-zinc-100 dark:border-white/5 flex justify-center bg-zinc-50/30 dark:bg-black/10">
+      <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-white/5 flex justify-center bg-zinc-50/40 dark:bg-black/10">
         <style>{`
           .rdp-root {
-            --rdp-accent-color: #6C5DD3;
-            --rdp-range_middle-background-color: #E8E9EC;
-            --rdp-range_middle-color: #6C5DD3;
-            --rdp-range_start-background-color: #6C5DD3;
-            --rdp-range_end-background-color: #6C5DD3;
+            --rdp-accent-color: var(--lumins-accent);
+            --rdp-range_middle-background-color: var(--lumins-accent-soft);
+            --rdp-range_middle-color: var(--lumins-accent-fg);
+            --rdp-range_start-background-color: var(--lumins-accent);
+            --rdp-range_end-background-color: var(--lumins-accent);
+            --rdp-day-width: 34px;
+            --rdp-day-height: 30px;
             margin: 0;
             font-family: inherit;
-          }
-          .dark .rdp-root {
-            --rdp-range_middle-background-color: rgba(108, 93, 211, 0.1);
-            --rdp-range_middle-color: #8E82E3;
           }
           .rdp-day_button {
             border-radius: 9999px !important;
             font-weight: 600 !important;
-            font-size: 0.8rem !important;
-            width: 32px !important;
-            height: 32px !important;
+            font-size: 0.75rem !important;
+            width: 30px !important;
+            height: 28px !important;
           }
           .rdp-selected .rdp-day_button {
-            background-color: var(--rdp-accent-color) !important;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(108, 93, 211, 0.25) !important;
+            background-color: var(--lumins-accent) !important;
+            color: var(--lumins-accent-on) !important;
+            box-shadow: none !important;
+          }
+          .rdp-range_middle {
+            background-color: var(--lumins-accent-soft) !important;
           }
           .rdp-range_middle .rdp-day_button {
-            background-color: #F0F1F3 !important;
-            color: #6C5DD3 !important;
+            background-color: transparent !important;
+            color: var(--lumins-accent-fg) !important;
             border-radius: 0 !important;
+            box-shadow: none !important;
           }
-          .dark .rdp-range_middle .rdp-day_button {
-            background-color: rgba(108, 93, 211, 0.1) !important;
-            color: #8E82E3 !important;
+          .rdp-range_start {
+            background: linear-gradient(90deg, transparent 50%, var(--lumins-accent-soft) 50%) !important;
           }
-          .rdp-range_start .rdp-day_button {
-            border-top-right-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
+          .rdp-range_end {
+            background: linear-gradient(90deg, var(--lumins-accent-soft) 50%, transparent 50%) !important;
           }
-          .rdp-range_end .rdp-day_button {
-            border-top-left-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
+          .rdp-range_start.rdp-range_end {
+            background: transparent !important;
           }
           .rdp-day_button:hover:not([disabled]):not(.rdp-selected) {
-            background-color: #F0F1F3 !important;
-            color: #6C5DD3 !important;
+            background-color: var(--lumins-accent-soft) !important;
+            color: var(--lumins-accent-fg) !important;
           }
           .dark .rdp-day_button:hover:not([disabled]):not(.rdp-selected) {
-            background-color: rgba(255, 255, 255, 0.05) !important;
+            background-color: rgba(255, 255, 255, 0.06) !important;
             color: #f4f4f5 !important;
           }
           .rdp-head_cell {
             color: #71717a;
             font-weight: 800;
-            font-size: 0.65rem;
+            font-size: 0.625rem;
             text-transform: uppercase;
-            padding-bottom: 0.75rem;
+            padding-bottom: 0.35rem;
             letter-spacing: 0.05em;
           }
           .rdp-month_caption {
             font-weight: 800;
             color: #18181b;
-            font-size: 0.85rem;
-            padding: 0 0.5rem 1.25rem;
+            font-size: 0.8rem;
+            padding: 0 0.25rem 0.5rem;
             letter-spacing: -0.01em;
           }
           .dark .rdp-month_caption {
@@ -169,6 +172,8 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
           .rdp-nav_button {
             color: #71717a !important;
             border-radius: 8px !important;
+            width: 26px !important;
+            height: 26px !important;
           }
           .rdp-nav_button:hover {
             background-color: #F0F1F3 !important;
@@ -188,19 +193,19 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
       </div>
 
       {/* Controles de Fecha */}
-      <div className="p-4 flex flex-col gap-5">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Fecha de inicio</label>
-          <div className="flex items-center gap-3">
+      <div className="px-3.5 py-3 flex flex-col gap-2.5">
+        <div className="space-y-1">
+          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Fecha de inicio</label>
+          <div className="flex items-center gap-2">
             <div 
               onClick={() => setHasStartDate(!hasStartDate)}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all ${
+              className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
                 hasStartDate 
-                  ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                  ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' 
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
               }`}
             >
-              {hasStartDate && <Check size={12} strokeWidth={4} />}
+              {hasStartDate && <Check size={10} strokeWidth={4} />}
             </div>
             <input 
               type="text"
@@ -208,32 +213,32 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
               disabled={!hasStartDate}
               placeholder="D/M/AAAA"
               value={range?.from ? format(range.from, 'd/M/yyyy') : ''}
-              className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3]'}`}
+              className={`h-8 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none transition-all ${!hasStartDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[var(--lumins-accent)]/20 focus:border-[var(--lumins-accent)]'}`}
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Fecha de vencimiento</label>
-          <div className="flex items-center gap-3">
+        <div className="space-y-1">
+          <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Fecha de vencimiento</label>
+          <div className="flex items-center gap-2">
             <div 
               onClick={() => setHasDueDate(!hasDueDate)}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
+              className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
                 hasDueDate 
-                  ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white' 
+                  ? 'bg-[var(--lumins-accent)] border-[var(--lumins-accent)] text-[var(--lumins-accent-on)]' 
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-[#13151A]'
               }`}
             >
-              {hasDueDate && <Check size={12} strokeWidth={4} />}
+              {hasDueDate && <Check size={10} strokeWidth={4} />}
             </div>
-            <div className="flex-1 flex items-center gap-2 min-w-0">
+            <div className="flex-1 flex items-center gap-1.5 min-w-0">
               <input 
                 type="text"
                 readOnly
                 disabled={!hasDueDate}
                 placeholder="D/M/AAAA"
                 value={hasDueDate ? (range?.to ? format(range.to, 'd/M/yyyy') : (range?.from && !hasStartDate ? format(range.from, 'd/M/yyyy') : '')) : ''}
-                className={`bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-zinc-900 dark:text-zinc-100 flex-1 min-w-0 outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[#6C5DD3]/20 focus:border-[#6C5DD3]'}`}
+                className={`h-8 bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 text-xs font-bold text-zinc-900 dark:text-zinc-100 flex-1 min-w-0 outline-none transition-all ${!hasDueDate ? 'opacity-40 cursor-not-allowed' : 'focus:ring-2 focus:ring-[var(--lumins-accent)]/20 focus:border-[var(--lumins-accent)]'}`}
               />
               <TimeSelector12h
                 value={dueTime}
@@ -245,22 +250,24 @@ const DatesPopover: React.FC<DatesPopoverProps> = ({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Acciones */}
-      <div className="px-4 pb-5 pt-2 flex flex-col gap-3">
-        <button 
-          onClick={handleSave}
-          className="w-full bg-[#6C5DD3] hover:bg-[#312e81] text-white font-bold py-3 rounded transition-all shadow-lg shadow-[#6C5DD3]/20 active:scale-[0.98] text-sm"
-        >
-          Guardar fechas
-        </button>
-        <button 
-          onClick={() => { onRemoveDates(); onClose(); }}
-          className="w-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 font-bold py-3 rounded hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all active:scale-[0.98] text-sm"
-        >
-          Quitar fechas
-        </button>
+        {/* Acciones compactas en una fila */}
+        <div className="flex items-center gap-2 pt-1.5">
+          <button 
+            type="button"
+            onClick={() => { onRemoveDates(); onClose(); }}
+            className="h-8 px-3 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 font-bold hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all active:scale-[0.98] text-xs cursor-pointer"
+          >
+            Quitar
+          </button>
+          <button 
+            type="button"
+            onClick={handleSave}
+            className="flex-1 h-8 bg-[var(--lumins-accent)] hover:brightness-95 text-[var(--lumins-accent-on)] font-bold rounded-lg transition-all shadow-xs active:scale-[0.98] text-xs cursor-pointer"
+          >
+            Guardar fechas
+          </button>
+        </div>
       </div>
     </div>
   );

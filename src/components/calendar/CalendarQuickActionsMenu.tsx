@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { addDays, nextMonday, startOfDay } from 'date-fns';
 import {
   CheckCircle2,
@@ -232,7 +232,7 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
                   onQuickMoveDate(event, today);
                   onClose();
                 }}
-                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
+                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#12A9A8]/10 hover:text-[#12A9A8] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
               >
                 Hoy
               </button>
@@ -242,7 +242,7 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
                   onQuickMoveDate(event, tomorrow);
                   onClose();
                 }}
-                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
+                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#12A9A8]/10 hover:text-[#12A9A8] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
               >
                 Mañana
               </button>
@@ -252,7 +252,7 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
                   onQuickMoveDate(event, upcomingMonday);
                   onClose();
                 }}
-                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#6C5DD3]/10 hover:text-[#6C5DD3] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
+                className="py-1 px-1.5 rounded-md bg-zinc-50 dark:bg-white/[0.04] hover:bg-[#12A9A8]/10 hover:text-[#12A9A8] text-[10px] font-bold text-zinc-700 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 transition-colors"
               >
                 Próx. Lun
               </button>
@@ -301,7 +301,7 @@ const CalendarQuickActionsMenu: React.FC<CalendarQuickActionsMenuProps> = ({
                           {m.name}
                         </span>
                       </div>
-                      {isAssigned && <Check size={12} className="text-[#6C5DD3] shrink-0" />}
+                      {isAssigned && <Check size={12} className="text-[#12A9A8] shrink-0" />}
                     </button>
                   );
                 })}

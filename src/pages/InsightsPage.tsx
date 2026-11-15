@@ -7,7 +7,7 @@ export default function InsightsPage() {
   
   return (
     <div className="flex-1 flex flex-col h-full bg-[#F4F6F9] dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 overflow-hidden">
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-3 sm:px-5 py-3">
         <InsightsDashboard workspaceId={workspaceId} />
       </div>
     </div>

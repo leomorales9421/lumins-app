@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import {
   X,
@@ -256,7 +256,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
         {/* Header */}
         <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between bg-zinc-50/70 dark:bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#6C5DD3]/12 text-[#6C5DD3] dark:text-[#A599F9] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[#12A9A8]/12 text-[#12A9A8] dark:text-[#4ED4D2] flex items-center justify-center">
               <Plus size={16} strokeWidth={2.5} />
             </div>
             <div>
@@ -297,7 +297,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="¿Qué hay que hacer? (Presiona Enter para guardar)"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3]/30 focus:border-[#6C5DD3]"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#12A9A8]/30 focus:border-[#12A9A8]"
               />
             </div>
 
@@ -312,7 +312,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                   <select
                     value={boardId}
                     onChange={e => setBoardId(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#6C5DD3]"
+                    className="w-full h-9 px-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#12A9A8]"
                   >
                     {editableBoards.map(b => (
                       <option key={b.id} value={b.id}>
@@ -331,7 +331,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                 <select
                   value={listId}
                   onChange={e => setListId(e.target.value)}
-                  className="w-full h-9 px-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#6C5DD3]"
+                  className="w-full h-9 px-2.5 rounded-xl bg-zinc-50 dark:bg-[#13161C] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#12A9A8]"
                 >
                   {availableLists.map(l => (
                     <option key={l.id} value={l.id}>
@@ -346,7 +346,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
             <div className="p-3 rounded-xl bg-zinc-50/80 dark:bg-[#13161C] border border-zinc-200/70 dark:border-white/[0.06] space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  <CalendarIcon size={12} className="text-[#6C5DD3]" />
+                  <CalendarIcon size={12} className="text-[#12A9A8]" />
                   Fechas programadas
                 </span>
                 <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 cursor-pointer select-none">
@@ -354,7 +354,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                     type="checkbox"
                     checked={useStartDate}
                     onChange={e => setUseStartDate(e.target.checked)}
-                    className="rounded border-zinc-300 text-[#6C5DD3] focus:ring-[#6C5DD3]"
+                    className="rounded border-zinc-300 text-[#12A9A8] focus:ring-[#12A9A8]"
                   />
                   Rango de varios días
                 </label>
@@ -405,7 +405,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                       onClick={() => setPriority(p)}
                       className={`py-1.5 px-2 rounded-lg text-[11px] font-extrabold border transition-all flex items-center justify-center gap-1.5 ${
                         active
-                          ? `${info.badgeClass} ring-2 ring-[#6C5DD3]/25`
+                          ? `${info.badgeClass} ring-2 ring-[#12A9A8]/25`
                           : 'border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                     >
@@ -437,7 +437,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                         onClick={() => toggleAssignee(m.id)}
                         className={`inline-flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full text-[11px] font-bold border transition-all ${
                           selected
-                            ? 'bg-[#6C5DD3]/15 border-[#6C5DD3] text-[#6C5DD3] dark:text-[#A599F9]'
+                            ? 'bg-[#12A9A8]/15 border-[#12A9A8] text-[#12A9A8] dark:text-[#4ED4D2]'
                             : 'bg-zinc-50 dark:bg-white/[0.04] border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
                         }`}
                       >
@@ -598,7 +598,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || title.trim().length < 2}
-                className="px-4 py-2 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] disabled:opacity-50 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm shadow-[#6C5DD3]/25 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] disabled:opacity-50 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm shadow-[#12A9A8]/25 transition-all"
               >
                 {isSubmitting ? (
                   <>

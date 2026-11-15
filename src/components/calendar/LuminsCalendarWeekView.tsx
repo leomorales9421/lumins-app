@@ -185,7 +185,7 @@ const DraggableWeekCard: React.FC<DraggableWeekCardProps> = ({
             <span
               key={lbl.id}
               className="px-1.5 py-0.5 rounded text-[9px] font-extrabold text-white truncate max-w-[90px]"
-              style={{ backgroundColor: lbl.color || '#6C5DD3' }}
+              style={{ backgroundColor: lbl.color || '#12A9A8' }}
             >
               {lbl.name || 'Etiqueta'}
             </span>
@@ -313,11 +313,11 @@ const DroppableWeekColumn: React.FC<DroppableWeekColumnProps> = ({
       }}
       className={`flex flex-col min-h-0 h-full border-r border-zinc-200/70 dark:border-white/[0.06] last:border-r-0 transition-all ${
         today
-          ? 'bg-[#6C5DD3]/[0.04] dark:bg-[#6C5DD3]/[0.08]'
+          ? 'bg-[#12A9A8]/[0.04] dark:bg-[#12A9A8]/[0.08]'
           : weekend
           ? 'bg-zinc-50/60 dark:bg-white/[0.015]'
           : 'bg-white dark:bg-[#181B22]'
-      } ${isOver || isExternalOver ? 'ring-2 ring-inset ring-[#6C5DD3] bg-[#6C5DD3]/15 dark:bg-[#6C5DD3]/25 z-10' : ''}`}
+      } ${isOver || isExternalOver ? 'ring-2 ring-inset ring-[#12A9A8] bg-[#12A9A8]/15 dark:bg-[#12A9A8]/25 z-10' : ''}`}
     >
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 space-y-2">
         {singleDayEvents.length === 0 ? (
@@ -488,18 +488,18 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                   onClick={() => handleMobileDayJump(day)}
                   className={`flex flex-col items-center py-1.5 px-0.5 rounded-xl transition-all active:scale-95 ${
                     isSelected
-                      ? 'bg-[#6C5DD3] text-white shadow-sm shadow-[#6C5DD3]/25'
+                      ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                       : today
-                      ? 'bg-[#6C5DD3]/10 text-[#6C5DD3] dark:text-[#9E8CFC]'
+                      ? 'bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)]'
                       : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <span
                     className={`text-[10px] font-extrabold uppercase tracking-tight leading-none ${
                       isSelected
-                        ? 'text-white/85'
+                        ? 'text-[var(--lumins-accent-on)]/85'
                         : today
-                        ? 'text-[#6C5DD3] dark:text-[#9E8CFC]'
+                        ? 'text-[var(--lumins-accent-fg)]'
                         : 'text-zinc-400 dark:text-zinc-500'
                     }`}
                   >
@@ -566,7 +566,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                   onClick={() => setSelectedMobileDayKey(key)}
                   className={`transition-colors ${
                     today
-                      ? 'bg-[#6C5DD3]/[0.03] dark:bg-[#6C5DD3]/[0.06]'
+                      ? 'bg-[var(--lumins-accent-soft)]/40'
                       : isSelected
                       ? 'bg-zinc-50/70 dark:bg-white/[0.015]'
                       : ''
@@ -578,7 +578,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                       <span
                         className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
                           today
-                            ? 'bg-[#6C5DD3] text-white shadow-xs shadow-[#6C5DD3]/30'
+                            ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                             : isSelected
                             ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
                             : 'bg-zinc-100 dark:bg-white/[0.08] text-zinc-700 dark:text-zinc-200'
@@ -594,7 +594,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                           {format(day, 'd MMM', { locale: es })}
                         </span>
                         {today && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#6C5DD3]/15 text-[#6C5DD3] dark:text-[#9E8CFC] shrink-0">
+                          <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] shrink-0">
                             Hoy
                           </span>
                         )}
@@ -620,7 +620,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                         return (
                           <div key={`${key}:${ev.id}`} className="space-y-1">
                             {isMultiDay && (
-                              <div className="flex items-center gap-1 text-[10px] font-bold text-[#6C5DD3] dark:text-[#9E8CFC] px-1">
+                              <div className="flex items-center gap-1 text-[10px] font-bold text-[#D97706] dark:text-[#FFCC40] px-1">
                                 <CalendarRange size={11} />
                                 <span>
                                   Varios días: {format(start, 'd MMM', { locale: es })} –{' '}
@@ -666,7 +666,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                 <div
                   key={key}
                   className={`group/header px-2 lg:px-3 py-2.5 border-r border-zinc-200/60 dark:border-white/[0.05] last:border-r-0 flex items-center justify-between gap-1 min-w-0 ${
-                    today ? 'bg-[#6C5DD3]/[0.06] dark:bg-[#6C5DD3]/[0.12]' : ''
+                    today ? 'bg-[var(--lumins-accent-soft)]/70' : ''
                   }`}
                 >
                   <div className="flex items-center gap-1.5 lg:gap-2 min-w-0">
@@ -674,7 +674,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                       style={{ borderRadius: '9999px' }}
                       className={`w-6 h-6 lg:w-7 lg:h-7 text-xs font-black flex items-center justify-center shrink-0 ${
                         today
-                          ? 'bg-[#6C5DD3] text-white shadow-sm shadow-[#6C5DD3]/30'
+                          ? 'bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] shadow-xs'
                           : 'bg-zinc-200/70 dark:bg-white/10 text-zinc-800 dark:text-zinc-200'
                       }`}
                     >
@@ -701,7 +701,7 @@ const LuminsCalendarWeekView: React.FC<LuminsCalendarWeekViewProps> = ({
                         type="button"
                         onClick={() => onOpenQuickCreate(day, day)}
                         title="Crear tarea en este día"
-                        className="opacity-0 group-hover/header:opacity-100 w-5 h-5 rounded-md flex items-center justify-center text-zinc-400 hover:text-[#6C5DD3] hover:bg-[#6C5DD3]/12 transition-all"
+                        className="opacity-0 group-hover/header:opacity-100 w-5 h-5 rounded-md flex items-center justify-center text-zinc-400 hover:text-[#12A9A8] hover:bg-[#12A9A8]/12 transition-all"
                       >
                         <Plus size={12} strokeWidth={2.5} />
                       </button>

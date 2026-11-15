@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CheckSquare, ChevronDown, Copy, Loader2, X } from 'lucide-react';
+import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import { toast } from 'sonner';
 import apiClient from '../lib/api-client';
 import type { Board } from '../types/board';
@@ -175,8 +176,9 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
 
   if (isLoading) {
     return (
-      <div className="w-[340px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-200 dark:border-white/10 p-8 flex items-center justify-center">
-        <Loader2 className="animate-spin text-zinc-400 dark:text-zinc-500" />
+      <div className="w-[340px] bg-white dark:bg-[#1C1F26] rounded shadow-2xl border border-zinc-200 dark:border-white/10 p-8 flex flex-col items-center justify-center gap-2">
+        <LuminsLogoLoader size="xs" />
+        <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">Cargando...</span>
       </div>
     );
   }
@@ -203,7 +205,7 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
           <select
             value={selectedBoardId}
             onChange={(e) => setSelectedBoardId(e.target.value)}
-            className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+            className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
           >
             {Object.entries(groupedBoards).map(([workspaceName, workspaceBoards]) => (
               <optgroup key={workspaceName} label={workspaceName}>
@@ -229,7 +231,7 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
             <select
               value={selectedListId}
               onChange={(e) => setSelectedListId(e.target.value)}
-              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
             >
               {lists.map((list) => (
                 <option key={list.id} value={list.id}>
@@ -250,7 +252,7 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
             <select
               value={selectedPosition}
               onChange={(e) => setSelectedPosition(Number(e.target.value))}
-              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[#6C5DD3]/15 focus:border-[#6C5DD3]/40 cursor-pointer"
+              className="appearance-none bg-zinc-50 dark:bg-[#13151A] rounded p-2.5 text-sm text-zinc-900 dark:text-zinc-100 w-full outline-none border border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-[var(--lumins-accent)]/15 focus:border-[var(--lumins-accent)] cursor-pointer"
             >
               {positions.map((position) => (
                 <option key={position} value={position}>
@@ -284,7 +286,7 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
                 type="checkbox"
                 checked={item.checked}
                 onChange={(e) => item.onChange(e.target.checked)}
-                className="accent-[#6C5DD3]"
+                className="accent-[var(--lumins-accent)]"
               />
               <span>{item.label}</span>
             </label>
@@ -295,7 +297,7 @@ const DuplicateCardPopover: React.FC<DuplicateCardPopoverProps> = ({
       <button
         onClick={handleDuplicate}
         disabled={isDuplicating || !selectedListId || !selectedBoardId}
-        className="w-full bg-[#6C5DD3] text-white font-bold py-2.5 rounded mt-5 hover:bg-[#312e81] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#6C5DD3]/20"
+        className="w-full bg-[var(--lumins-accent)] text-[var(--lumins-accent-on)] font-bold py-2.5 rounded-lg mt-5 hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm cursor-pointer"
       >
         {isDuplicating ? <Loader2 size={16} className="animate-spin" /> : <Copy size={16} />}
         Duplicar
