@@ -60,7 +60,7 @@ const NotificationsBellMenu: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 w-[340px] sm:w-[390px] max-w-[calc(100vw-24px)] bg-white dark:bg-[#1E222D] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[90]">
+        <div className="fixed inset-x-3 top-14 sm:inset-x-auto sm:top-auto sm:absolute sm:right-0 sm:mt-2.5 sm:w-[390px] bg-white dark:bg-[#1E222D] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[90]">
           {/* Header */}
           <div className="px-4 py-3 border-b border-slate-100 dark:border-white/10 flex items-center justify-between gap-2 bg-slate-50/70 dark:bg-[#181B24]">
             <div className="flex items-center gap-2">

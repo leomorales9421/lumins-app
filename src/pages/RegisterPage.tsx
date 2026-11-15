@@ -36,7 +36,9 @@ const RegisterPage: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES_LIST[0]); // Default VE
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Existing User Password
   const [existingUserPassword, setExistingUserPassword] = useState('');
@@ -160,6 +162,11 @@ const RegisterPage: React.FC = () => {
 
     if (password && password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    if ((password || confirmPassword) && password !== confirmPassword) {
+      setError('Las contraseñas no coinciden. Verifica e inténtalo de nuevo.');
       return;
     }
 
@@ -547,6 +554,38 @@ const RegisterPage: React.FC = () => {
                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Confirm Password Field */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 ml-0.5">Confirmar contraseña</label>
+                    <div className="relative flex items-center">
+                      <Lock className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Repite tu contraseña"
+                        autoComplete="new-password"
+                        className={`w-full h-9 bg-[#F8FAFC] border rounded-lg pl-9 pr-9 text-xs sm:text-[13px] font-medium text-slate-900 outline-none focus:bg-white focus:ring-2 transition-all ${
+                          confirmPassword && password !== confirmPassword
+                            ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
+                            : 'border-slate-200 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8]'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    {confirmPassword && password !== confirmPassword && (
+                      <span className="text-[11px] font-medium text-red-500 ml-0.5">
+                        Las contraseñas no coinciden
+                      </span>
+                    )}
                   </div>
 
                   {error && (

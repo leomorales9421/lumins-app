@@ -195,6 +195,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
         sessionStorage.setItem(`lumins_onboarding_dismissed_${user.id}`, 'true');
       } catch { }
     }
+    (window as any).__luminsAwaitingThemePicker = true;
     onClose();
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('open-theme-picker', { detail: { isPostOnboarding: true } }));
@@ -300,6 +301,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
       if (onCompleted) {
         onCompleted(newWorkspace.id, newBoard.id);
       }
+      (window as any).__luminsAwaitingThemePicker = true;
       onClose();
 
       navigate(`/boards/${newBoard.id}`);
@@ -601,8 +603,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                           value={workspaceName}
                           onChange={(e) => setWorkspaceName(e.target.value)}
                           placeholder="Ej. Acme Studio, Mi Empresa, Lumins Team"
-                          className="w-full h-9 bg-slate-50/90 border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all"
-                          autoFocus
+                          className="w-full h-11 sm:h-9 bg-slate-50/90 border border-slate-200 rounded-xl sm:rounded-lg px-3.5 sm:px-3 text-sm sm:text-[13px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all"
+                          autoFocus={typeof window !== 'undefined' && window.innerWidth >= 640}
                         />
                       </div>
 
@@ -632,7 +634,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                     <button
                       onClick={handleNext}
                       disabled={!workspaceName.trim()}
-                      className="w-full sm:w-auto h-9 px-6 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all disabled:opacity-40 cursor-pointer"
+                      className="w-full sm:w-auto h-11 sm:h-9 px-6 rounded-xl sm:rounded-lg font-bold text-sm sm:text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all disabled:opacity-40 cursor-pointer"
                     >
                       Continuar
                     </button>
@@ -670,8 +672,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                           value={boardName}
                           onChange={(e) => setBoardName(e.target.value)}
                           placeholder="Ej. Tareas Semanales, Lanzamiento Web"
-                          className="w-full h-9 bg-slate-50/90 border border-slate-200 rounded-lg px-3 text-xs sm:text-[13px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all"
-                          autoFocus
+                          className="w-full h-11 sm:h-9 bg-slate-50/90 border border-slate-200 rounded-xl sm:rounded-lg px-3.5 sm:px-3 text-sm sm:text-[13px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#12A9A8] focus:ring-2 focus:ring-[#12A9A8]/15 transition-all"
+                          autoFocus={typeof window !== 'undefined' && window.innerWidth >= 640}
                         />
                       </div>
 
@@ -732,7 +734,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                         </div>
 
                         {bgTab === 'colors' ? (
-                          <div className="grid grid-cols-6 gap-2 max-h-28 overflow-y-auto p-1 custom-scrollbar">
+                          <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-28 overflow-y-auto p-1 custom-scrollbar">
                             {PLATFORM_COLOR_PRESETS.map((choice) => {
                               const presetValue = `${choice.value}?tone=dark&lava=true`;
                               const isActive = !customBgFile && selectedBgValue.startsWith(choice.value);
@@ -798,7 +800,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                               )}
                             </div>
 
-                            <div className="grid grid-cols-4 gap-2 max-h-28 overflow-y-auto p-1 custom-scrollbar">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-28 overflow-y-auto p-1 custom-scrollbar">
                               {UNSPLASH_CURATED_WALLPAPERS.map((img) => {
                                 const isActive = !customBgFile && selectedBgValue === img.fullUrl;
                                 return (
@@ -843,7 +845,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                     <button
                       onClick={handleNext}
                       disabled={!boardName.trim()}
-                      className="w-full sm:w-auto h-9 px-6 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all disabled:opacity-40 cursor-pointer"
+                      className="w-full sm:w-auto h-11 sm:h-9 px-6 rounded-xl sm:rounded-lg font-bold text-sm sm:text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all disabled:opacity-40 cursor-pointer"
                     >
                       Continuar
                     </button>
@@ -886,8 +888,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                           value={cardTitle}
                           onChange={(e) => setCardTitle(e.target.value)}
                           placeholder="¿Qué hay en tu lista de tareas por hacer?"
-                          className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none resize-none font-medium"
-                          autoFocus
+                          className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 text-sm sm:text-xs focus:outline-none resize-none font-medium"
+                          autoFocus={typeof window !== 'undefined' && window.innerWidth >= 640}
                         />
                         <div className="flex justify-end pt-1.5">
                           <button
@@ -929,7 +931,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
                     <button
                       onClick={handleNext}
-                      className="w-full sm:w-auto h-9 px-6 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all cursor-pointer"
+                      className="w-full sm:w-auto h-11 sm:h-9 px-6 rounded-xl sm:rounded-lg font-bold text-sm sm:text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all cursor-pointer"
                     >
                       Continuar
                     </button>
@@ -1085,7 +1087,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
                     <button
                       onClick={handleNext}
-                      className="w-full sm:w-auto h-9 px-6 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all cursor-pointer"
+                      className="w-full sm:w-auto h-11 sm:h-9 px-6 rounded-xl sm:rounded-lg font-bold text-sm sm:text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-xs active:scale-[0.98] transition-all cursor-pointer"
                     >
                       Continuar
                     </button>

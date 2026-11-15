@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Monitor, Palette, Check, Loader2 } from 'lucide-react';
-import { LuminsGuidedIcon } from './icons/LuminsIcons';
+import { LuminsGuidedIcon, LuminsSettingsIcon } from './icons/LuminsIcons';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
@@ -54,8 +54,44 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
     }
   };
 
+  const markPromptCompleted = () => {
+    if (user?.id) {
+      try {
+        localStorage.setItem(`lumins_theme_prompt_completed_${user.id}`, 'true');
+      } catch { }
+    }
+  };
+
+  const showPreferenceSavedToast = () => {
+    toast.custom(
+      (t) => (
+        <div
+          onClick={() => toast.dismiss(t)}
+          className="flex items-start gap-3 w-full max-w-sm bg-white dark:bg-[#1E222D] border border-[#12A9A8]/35 dark:border-[#4ED4D2]/25 rounded-2xl px-4 py-3.5 shadow-xl shadow-slate-900/10 dark:shadow-black/50 cursor-pointer"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 flex items-center justify-center shrink-0">
+            <LuminsSettingsIcon size={20} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-bold text-slate-900 dark:text-zinc-100 leading-tight">
+              Preferencia guardada
+            </p>
+            <p className="text-xs text-slate-600 dark:text-zinc-300 mt-1 leading-snug">
+              Puedes cambiarla cuando quieras en{' '}
+              <span className="font-semibold text-[#0E8786] dark:text-[#4ED4D2]">
+                Configuración &gt; Preferencias
+              </span>.
+            </p>
+          </div>
+        </div>
+      ),
+      { duration: 4800 }
+    );
+  };
+
   // Revert back to original theme if cancelled
   const handleCancel = () => {
+    markPromptCompleted();
     applyThemeToDom(initialThemeRef.current, true);
     setSelectedTheme(initialThemeRef.current);
     onClose();
@@ -65,6 +101,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     isSavedRef.current = true;
+    markPromptCompleted();
     try {
       applyThemeToDom(selectedTheme, true);
       const res = await apiClient.patch<{ data: { user: any } }>('/api/auth/me', {
@@ -75,18 +112,12 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
         setUser((prev) => (prev ? { ...prev, ...res.data.user, theme: selectedTheme } : res.data.user));
       }
 
-      toast.success(
-        selectedTheme === 'dark' 
-          ? '🌙 Modo oscuro guardado' 
-          : selectedTheme === 'light' 
-          ? '☀️ Modo claro guardado' 
-          : '💻 Tema del sistema guardado'
-      );
+      showPreferenceSavedToast();
       onClose();
     } catch (err) {
       console.error('Error saving theme:', err);
       // Even if API fails, local storage keeps user choice
-      toast.success('Preferencia aplicada');
+      showPreferenceSavedToast();
       onClose();
     } finally {
       setIsSaving(false);

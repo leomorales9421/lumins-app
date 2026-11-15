@@ -255,7 +255,16 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     const openTrello = () => setShowTrelloImportModal(true);
     const openOnboarding = () => setShowOnboardingModal(true);
     const openTheme = (e: any) => {
-      setIsPostOnboardingTheme(!!e?.detail?.isPostOnboarding);
+      (window as any).__luminsAwaitingThemePicker = false;
+      const isPostOnboarding = !!e?.detail?.isPostOnboarding;
+      if (isPostOnboarding && user?.id) {
+        try {
+          if (localStorage.getItem(`lumins_theme_prompt_completed_${user.id}`) === 'true') {
+            return;
+          }
+        } catch { }
+      }
+      setIsPostOnboardingTheme(isPostOnboarding);
       setShowThemeModal(true);
     };
     
@@ -288,7 +297,12 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   useEffect(() => {
     const waitingForAutoOnboarding =
       !isLoadingWorkspaces && workspaces.length === 0 && !!user?.id && !hasAutoOpenedOnboardingRef.current;
-    const isBusy = isLoadingWorkspaces || showOnboardingModal || showThemeModal || waitingForAutoOnboarding;
+    const isBusy =
+      isLoadingWorkspaces ||
+      showOnboardingModal ||
+      showThemeModal ||
+      waitingForAutoOnboarding ||
+      Boolean((window as any).__luminsAwaitingThemePicker);
     (window as any).__luminsOnboardingBusy = isBusy;
     if (!isBusy && user?.id) {
       window.dispatchEvent(new CustomEvent('lumins-updates-ready'));
