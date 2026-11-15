@@ -691,6 +691,67 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       }
       if (onUpdate) onUpdate();
       window.dispatchEvent(new CustomEvent('lumins:card-updated', { detail: { cardId, boardId } }));
+
+      // If card has an upcoming Google Meet and a new future date was set, offer to move the meeting too
+      const targetNewDateStr = dates.dueDate || dates.startDate;
+      const activeMeet = card?.meetingData;
+      if (activeMeet?.meetUrl && targetNewDateStr) {
+        const meetStart = new Date(activeMeet.scheduledStart);
+        const newTarget = new Date(targetNewDateStr);
+        if (
+          !isNaN(meetStart.getTime()) &&
+          !isNaN(newTarget.getTime()) &&
+          meetStart.getTime() > Date.now()
+        ) {
+          const movedStart = new Date(
+            newTarget.getFullYear(),
+            newTarget.getMonth(),
+            newTarget.getDate(),
+            meetStart.getHours(),
+            meetStart.getMinutes(),
+            0,
+            0
+          );
+          const isSameDay =
+            movedStart.getFullYear() === meetStart.getFullYear() &&
+            movedStart.getMonth() === meetStart.getMonth() &&
+            movedStart.getDate() === meetStart.getDate();
+
+          if (!isSameDay && movedStart.getTime() > Date.now()) {
+            const newLabel = format(movedStart, "d 'de' MMM", { locale: es });
+            toast('Esta tarjeta tiene un Google Meet agendado', {
+              description: `¿Deseas mover también la reunión al ${newLabel}?`,
+              duration: 9000,
+              action: {
+                label: 'Mover reunión',
+                onClick: async () => {
+                  try {
+                    const res: any = await apiClient.post(
+                      `/api/integrations/google-meet/cards/${cardId}/schedule`,
+                      {
+                        scheduledStart: movedStart.toISOString(),
+                        durationMinutes: activeMeet.durationMinutes || 45,
+                        inviteAssignees: activeMeet.inviteAssignees,
+                        invitedAssigneeIds: activeMeet.invitedAssigneeIds || [],
+                        externalGuests: activeMeet.externalGuests || [],
+                        hideInternalDetails: activeMeet.hideInternalDetails,
+                        agendaNote: activeMeet.agendaNote || '',
+                      }
+                    );
+                    const updatedMeet = res?.meetingData || res?.data?.meetingData;
+                    if (updatedMeet) {
+                      setCard(prev => (prev ? { ...prev, meetingData: updatedMeet } : null));
+                    }
+                    toast.success(`Reunión movida al ${newLabel}`);
+                  } catch (moveErr: any) {
+                    toast.error(moveErr?.message || 'No se pudo mover la reunión');
+                  }
+                },
+              },
+            });
+          }
+        }
+      }
     } catch (err) {
       console.error('Error updating dates:', err);
     } finally {
@@ -1984,31 +2045,69 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
                         {(card.meetingData.invitedAssignees?.length || 0) > 0 && (
                           <div className="flex items-center -space-x-1.5 shrink-0">
-                            {card.meetingData.invitedAssignees.map(member => (
-                              <div
-                                key={member.id}
-                                title={`${member.name} (${member.email})`}
-                                className="w-5 h-5 rounded-full ring-2 ring-white dark:ring-[#1C1F26] overflow-hidden"
-                              >
-                                <UserAvatar
-                                  name={member.name}
-                                  avatarUrl={member.avatarUrl || undefined}
-                                  size="xs"
-                                />
-                              </div>
-                            ))}
+                            {card.meetingData.invitedAssignees.map(member => {
+                              const status = card.meetingData?.attendeeStatuses?.[member.email.toLowerCase()];
+                              const statusText =
+                                status === 'accepted'
+                                  ? 'Confirmado'
+                                  : status === 'declined'
+                                  ? 'Rechazado'
+                                  : status === 'tentative'
+                                  ? 'Tal vez'
+                                  : 'Pendiente';
+                              const ringColor =
+                                status === 'accepted'
+                                  ? 'ring-emerald-500'
+                                  : status === 'declined'
+                                  ? 'ring-rose-500'
+                                  : status === 'tentative'
+                                  ? 'ring-amber-400'
+                                  : 'ring-white dark:ring-[#1C1F26]';
+
+                              return (
+                                <div
+                                  key={member.id}
+                                  title={`${member.name} (${member.email}) · ${statusText}`}
+                                  className={`w-5 h-5 rounded-full ring-2 ${ringColor} overflow-hidden`}
+                                >
+                                  <UserAvatar
+                                    name={member.name}
+                                    avatarUrl={member.avatarUrl || undefined}
+                                    size="xs"
+                                  />
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
 
                         {(card.meetingData.externalGuests?.length || 0) > 0 && (
-                          <span
-                            title={card.meetingData.externalGuests.join(', ')}
-                            className="inline-flex items-center px-2 py-0.5 rounded-md bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-zinc-300 font-medium truncate max-w-[280px]"
-                          >
-                            +{card.meetingData.externalGuests.length} externo
-                            {card.meetingData.externalGuests.length === 1 ? '' : 's'}:{' '}
-                            {card.meetingData.externalGuests.join(', ')}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                            {card.meetingData.externalGuests.map(email => {
+                              const status = card.meetingData?.attendeeStatuses?.[email.toLowerCase()];
+                              const badge =
+                                status === 'accepted'
+                                  ? { text: 'Confirmado', cls: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/25' }
+                                  : status === 'declined'
+                                  ? { text: 'Rechazado', cls: 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/25' }
+                                  : status === 'tentative'
+                                  ? { text: 'Tal vez', cls: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/25' }
+                                  : { text: 'Pendiente', cls: 'text-slate-500 dark:text-zinc-400 bg-white dark:bg-white/5 border-slate-200/80 dark:border-white/10' };
+
+                              return (
+                                <span
+                                  key={email}
+                                  title={`${email} · ${badge.text}`}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-medium truncate max-w-[260px] ${badge.cls}`}
+                                >
+                                  <span className="truncate">{email}</span>
+                                  <span className="text-[9px] font-bold uppercase opacity-80 shrink-0">
+                                    · {badge.text}
+                                  </span>
+                                </span>
+                              );
+                            })}
+                          </div>
                         )}
 
                         {card.meetingData.agendaNote && (

@@ -31,6 +31,8 @@ export interface CardMeetingAssignee {
   avatarUrl?: string | null;
 }
 
+export type MeetRsvpStatus = 'accepted' | 'declined' | 'tentative' | 'needsAction';
+
 export interface CardMeetingData {
   meetUrl: string;
   googleEventId?: string | null;
@@ -42,6 +44,7 @@ export interface CardMeetingData {
   invitedAssigneeIds: string[];
   invitedAssignees: CardMeetingAssignee[];
   externalGuests: string[];
+  attendeeStatuses?: Record<string, MeetRsvpStatus>;
   hideInternalDetails: boolean;
   agendaNote?: string | null;
   organizerUserId: string;
@@ -49,6 +52,25 @@ export interface CardMeetingData {
   organizerEmail?: string;
   updatedAt: string;
 }
+
+const RSVP_BADGE_MAP: Record<MeetRsvpStatus, { label: string; className: string }> = {
+  accepted: {
+    label: 'Confirmado',
+    className: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+  },
+  declined: {
+    label: 'Rechazado',
+    className: 'bg-rose-500/12 text-rose-600 dark:text-rose-400 border-rose-500/25',
+  },
+  tentative: {
+    label: 'Tal vez',
+    className: 'bg-amber-500/12 text-amber-700 dark:text-amber-300 border-amber-500/25',
+  },
+  needsAction: {
+    label: 'Pendiente',
+    className: 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-zinc-400 border-slate-200 dark:border-white/10',
+  },
+};
 
 interface GoogleMeetScheduleModalProps {
   isOpen: boolean;
@@ -299,6 +321,11 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
     const parsedTime = parseTime12h(startTime12h) || { hours: 10, minutes: 0 };
     const startDateObj = new Date(y, m - 1, d, parsedTime.hours, parsedTime.minutes, 0, 0);
 
+    if (startDateObj.getTime() < Date.now() - 60_000) {
+      toast.error('No puedes agendar una reunión en una fecha u hora pasada.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res: any = await apiClient.post(
@@ -522,6 +549,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                 </label>
                 <input
                   type="date"
+                  min={format(new Date(), 'yyyy-MM-dd')}
                   value={dateStr}
                   onChange={e => setDateStr(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#13151A] text-zinc-800 dark:text-zinc-200 outline-none focus:border-emerald-500"
@@ -660,22 +688,31 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
 
               {externalGuests.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {externalGuests.map(email => (
-                    <span
-                      key={email}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#12A9A8]/10 text-[#12A9A8] dark:text-[#4ED4D2] border border-[#12A9A8]/25"
-                    >
-                      <Mail size={11} />
-                      <span>{email}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExternalGuest(email)}
-                        className="hover:text-rose-500 transition-colors"
+                  {externalGuests.map(email => {
+                    const rsvp = existingMeeting?.attendeeStatuses?.[email.toLowerCase()];
+                    const rsvpMeta = rsvp ? RSVP_BADGE_MAP[rsvp] : null;
+                    return (
+                      <span
+                        key={email}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#12A9A8]/10 text-[#12A9A8] dark:text-[#4ED4D2] border border-[#12A9A8]/25"
                       >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
+                        <Mail size={11} />
+                        <span>{email}</span>
+                        {rsvpMeta && (
+                          <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold border ${rsvpMeta.className}`}>
+                            {rsvpMeta.label}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExternalGuest(email)}
+                          className="hover:text-rose-500 transition-colors"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 

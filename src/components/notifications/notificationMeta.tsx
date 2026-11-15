@@ -7,6 +7,7 @@ import {
   LuminsMentionIcon,
   LuminsWarningIcon,
 } from '../icons/LuminsIcons';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 
 export interface NotificationTypeVisual {
   label: string;
@@ -53,6 +54,12 @@ const NOTIFICATION_TYPE_META: Record<string, NotificationTypeVisual> = {
     icon: <LuminsWarningIcon size={17} />,
     badgeClass: 'bg-[#FF665E]/15 text-[#e04c45] dark:bg-[#FF665E]/20 dark:text-[#ff8b85]',
     iconWrapperClass: 'bg-[#FFCC40]/15 text-[#d99b00] dark:text-[#FFCC40]',
+  },
+  MEET_RSVP: {
+    label: 'Google Meet',
+    icon: <GoogleMeetIcon size={17} />,
+    badgeClass: 'bg-emerald-500/12 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+    iconWrapperClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
   },
 };
 
