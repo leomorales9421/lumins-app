@@ -645,34 +645,37 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
 
             {/* 2. Confirmation of Card Assignees */}
             <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-[#13151A]/60 space-y-3">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-start sm:items-center justify-between gap-2.5">
                 <label
                   onClick={() => setInviteAssignees(!inviteAssignees)}
-                  className="flex items-center gap-2.5 cursor-pointer select-none"
+                  className="flex items-start sm:items-center gap-2.5 cursor-pointer select-none min-w-0 flex-1"
                 >
                   <div
-                    className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${
+                    className={`w-4 h-4 mt-0.5 sm:mt-0 rounded flex items-center justify-center border shrink-0 transition-colors ${
                       inviteAssignees
-                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        ? 'bg-[#12A9A8] border-[#12A9A8] text-white'
                         : 'border-zinc-300 dark:border-white/20 bg-white dark:bg-black/20'
                     }`}
                   >
                     {inviteAssignees && <Check size={11} strokeWidth={3} />}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                      <Users size={13} className="text-emerald-500" />
-                      Invitar a los asignados de la tarjeta
+                      <Users size={13} className="text-[#12A9A8] dark:text-[#4ED4D2] shrink-0" />
+                      <span className="sm:hidden truncate">Invitar asignados</span>
+                      <span className="hidden sm:inline">Invitar a los asignados de la tarjeta</span>
                     </span>
-                    <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">
-                      Confirma quiénes del equipo asignado recibirán invitación a esta reunión
+                    <span className="text-[11px] sm:text-[10px] text-zinc-500 dark:text-zinc-400 block mt-0.5 leading-snug">
+                      <span className="sm:hidden">Elige quiénes recibirán la invitación</span>
+                      <span className="hidden sm:inline">Confirma quiénes del equipo asignado recibirán invitación a esta reunión</span>
                     </span>
                   </div>
                 </label>
 
                 {assignees.length > 0 && inviteAssignees && (
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                    {selectedAssigneeIds.length}/{assignees.length} seleccionados
+                  <span className="shrink-0 whitespace-nowrap text-[11px] sm:text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#12A9A8]/12 border border-[#12A9A8]/25 text-[#0E8786] dark:text-[#4ED4D2] tabular-nums">
+                    {selectedAssigneeIds.length}/{assignees.length}
+                    <span className="hidden sm:inline"> seleccionados</span>
                   </span>
                 )}
               </div>
@@ -683,7 +686,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                 </p>
               ) : (
                 inviteAssignees && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
                     {assignees.map(member => {
                       const isSelected = selectedAssigneeIds.includes(member.id);
                       return (
@@ -693,7 +696,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                           onClick={() => toggleAssignee(member.id)}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
                             isSelected
-                              ? 'bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 shadow-2xs'
+                              ? 'bg-[#12A9A8]/12 border-[#12A9A8] text-[#0E8786] dark:text-[#4ED4D2] shadow-2xs'
                               : 'bg-white dark:bg-[#1C1F26] border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 opacity-65'
                           }`}
                         >
@@ -702,8 +705,8 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                             avatarUrl={member.avatarUrl}
                             size="xs"
                           />
-                          <span className="truncate max-w-[130px]">{member.name}</span>
-                          {isSelected && <Check size={11} className="text-emerald-500 shrink-0" />}
+                          <span className="truncate max-w-[140px]">{member.name}</span>
+                          {isSelected && <Check size={11} className="text-[#12A9A8] dark:text-[#4ED4D2] shrink-0" />}
                         </button>
                       );
                     })}
