@@ -58,8 +58,20 @@ const NOTIFICATION_TYPE_META: Record<string, NotificationTypeVisual> = {
   MEET_RSVP: {
     label: 'Google Meet',
     icon: <GoogleMeetIcon size={17} />,
-    badgeClass: 'bg-emerald-500/12 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    iconWrapperClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    badgeClass: 'bg-[#12A9A8]/12 text-[#0E8786] dark:bg-[#12A9A8]/20 dark:text-[#4ED4D2]',
+    iconWrapperClass: 'bg-[#12A9A8]/12 text-[#12A9A8] dark:text-[#4ED4D2]',
+  },
+  MEET_REMINDER: {
+    label: 'Meet pronto',
+    icon: <GoogleMeetIcon size={17} />,
+    badgeClass: 'bg-[#12A9A8]/15 text-[#0E8786] dark:bg-[#12A9A8]/25 dark:text-[#4ED4D2]',
+    iconWrapperClass: 'bg-[#12A9A8]/15 text-[#12A9A8] dark:text-[#4ED4D2]',
+  },
+  MEET_FOLLOWUP: {
+    label: 'Cierre Meet',
+    icon: <GoogleMeetIcon size={17} />,
+    badgeClass: 'bg-[#FFCC40]/20 text-[#9c6f00] dark:bg-[#FFCC40]/20 dark:text-[#FFCC40]',
+    iconWrapperClass: 'bg-[#FFCC40]/18 text-[#9c6f00] dark:text-[#FFCC40]',
   },
 };
 

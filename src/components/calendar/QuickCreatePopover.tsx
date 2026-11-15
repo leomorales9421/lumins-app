@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import {
   X,
@@ -85,6 +85,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
   const [inviteAssigneesToMeet, setInviteAssigneesToMeet] = useState<boolean>(true);
   const [externalMeetGuests, setExternalMeetGuests] = useState<string[]>([]);
   const [guestEmailInput, setGuestEmailInput] = useState<string>('');
+  const [meetAgendaNote, setMeetAgendaNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -180,6 +181,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
               invitedAssigneeIds: inviteAssigneesToMeet ? selectedAssigneeIds : [],
               externalGuests: finalGuests,
               hideInternalDetails: finalGuests.length > 0,
+              agendaNote: meetAgendaNote.trim() || undefined,
             }
           );
           const meetPayload = meetRes?.data || meetRes;
@@ -457,22 +459,23 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
             )}
 
             {/* Google Meet Optional Toggle */}
-            <div className="p-3 rounded-xl bg-emerald-500/[0.06] dark:bg-emerald-500/[0.08] border border-emerald-500/20 space-y-2.5">
+            <div className="p-3 rounded-xl bg-[#12A9A8]/[0.06] dark:bg-[#12A9A8]/[0.08] border border-[#12A9A8]/25 space-y-2.5">
               <label className="flex items-center justify-between gap-2 cursor-pointer select-none">
                 <span className="flex items-center gap-2 text-xs font-extrabold text-zinc-900 dark:text-zinc-100">
                   <GoogleMeetIcon size={15} />
-                  <span>Agendar videollamada de Google Meet</span>
+                  <span className="sm:hidden">Videollamada Google Meet</span>
+                  <span className="hidden sm:inline">Agendar videollamada de Google Meet</span>
                 </span>
                 <input
                   type="checkbox"
                   checked={includeMeet}
                   onChange={e => setIncludeMeet(e.target.checked)}
-                  className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                  className="rounded border-zinc-300 text-[#12A9A8] focus:ring-[#12A9A8]"
                 />
               </label>
 
               {includeMeet && (
-                <div className="space-y-2.5 pt-2 border-t border-emerald-500/15">
+                <div className="space-y-2.5 pt-2 border-t border-[#12A9A8]/15">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <span className="block text-[10px] font-bold text-zinc-400 mb-0.5">
@@ -483,6 +486,11 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                         onChange={setMeetTime12h}
                         direction="up"
                         className="w-full"
+                        minMinutesFromMidnight={
+                          dueDateStr === format(new Date(), 'yyyy-MM-dd')
+                            ? new Date().getHours() * 60 + new Date().getMinutes()
+                            : undefined
+                        }
                       />
                     </div>
                     <div>
@@ -492,7 +500,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                       <select
                         value={meetDuration}
                         onChange={e => setMeetDuration(Number(e.target.value))}
-                        className="w-full h-9 px-2 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200"
+                        className="w-full h-9 px-2 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-[#12A9A8]"
                       >
                         <option value={15}>15 min</option>
                         <option value={30}>30 min</option>
@@ -503,17 +511,23 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                     </div>
                   </div>
 
-                  <label className="flex items-center gap-2 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={inviteAssigneesToMeet}
-                      onChange={e => setInviteAssigneesToMeet(e.target.checked)}
-                      className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      Confirmar invitación a los asignados ({selectedAssigneeIds.length})
-                    </span>
-                  </label>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={inviteAssigneesToMeet}
+                        onChange={e => setInviteAssigneesToMeet(e.target.checked)}
+                        className="rounded border-zinc-300 text-[#12A9A8] focus:ring-[#12A9A8] shrink-0"
+                      />
+                      <span className="sm:hidden truncate">Invitar asignados</span>
+                      <span className="hidden sm:inline truncate">Invitar a los asignados</span>
+                    </label>
+                    {selectedAssigneeIds.length > 0 && inviteAssigneesToMeet && (
+                      <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#12A9A8]/12 border border-[#12A9A8]/25 text-[#0E8786] dark:text-[#4ED4D2] tabular-nums">
+                        {selectedAssigneeIds.length} sel.
+                      </span>
+                    )}
+                  </div>
 
                   <div className="space-y-1">
                     <span className="block text-[10px] font-bold text-zinc-400">
@@ -540,7 +554,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                           }
                         }}
                         placeholder="invitado@externo.com + Enter"
-                        className="flex-1 h-8 px-2.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-medium text-zinc-900 dark:text-zinc-100"
+                        className="flex-1 h-9 sm:h-8 px-2.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-medium text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#12A9A8]"
                       />
                       <button
                         type="button"
@@ -556,7 +570,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                           }
                           setGuestEmailInput('');
                         }}
-                        className="px-2.5 h-8 rounded-lg bg-emerald-600 text-white text-[11px] font-bold"
+                        className="px-3 h-9 sm:h-8 rounded-lg bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold transition-colors cursor-pointer"
                       >
                         +
                       </button>
@@ -566,7 +580,7 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                         {externalMeetGuests.map(email => (
                           <span
                             key={email}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#12A9A8]/12 border border-[#12A9A8]/25 text-[#0E8786] dark:text-[#4ED4D2] text-[10px] font-bold"
                           >
                             {email}
                             <button
@@ -581,6 +595,19 @@ const QuickCreatePopover: React.FC<QuickCreatePopoverProps> = ({
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold text-zinc-400">
+                      Nota o agenda (opcional)
+                    </span>
+                    <input
+                      type="text"
+                      value={meetAgendaNote}
+                      onChange={e => setMeetAgendaNote(e.target.value)}
+                      placeholder="Ej. Revisar avances y definir siguientes pasos"
+                      className="w-full h-9 sm:h-8 px-2.5 rounded-lg bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 text-xs font-medium text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-[#12A9A8]"
+                    />
                   </div>
                 </div>
               )}

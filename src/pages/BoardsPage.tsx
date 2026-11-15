@@ -113,13 +113,19 @@ const BoardsPage: React.FC = () => {
       return true;
     });
 
-    if (sortBy === 'name') {
-      return [...result].sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    }
-    if (sortBy === 'cards') {
-      return [...result].sort((a, b) => (b._count?.cards || 0) - (a._count?.cards || 0));
-    }
-    return result;
+    const isStarred = (b: Board) => Boolean(b.starred) || starredIds.includes(b.id);
+
+    return [...result].sort((a, b) => {
+      const starDiff = Number(isStarred(b)) - Number(isStarred(a));
+      if (starDiff !== 0) return starDiff;
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name, 'es');
+      }
+      if (sortBy === 'cards') {
+        return (b._count?.cards || 0) - (a._count?.cards || 0);
+      }
+      return 0;
+    });
   }, [boards, searchQuery, visibilityFilter, onlyStarred, sortBy, starredIds]);
 
   const totalPages = itemsPerPage === -1 ? 1 : Math.max(1, Math.ceil(filteredBoards.length / itemsPerPage));
@@ -510,9 +516,14 @@ const BoardsPage: React.FC = () => {
                          currentBoards.map((board, index) => (
                            <motion.div
                              key={board.id}
+                             layout
                              initial={{ opacity: 0, y: 16 }}
                              animate={{ opacity: 1, y: 0 }}
-                             transition={{ duration: 0.35, delay: index * 0.04 }}
+                             transition={{
+                               layout: { type: 'spring', stiffness: 320, damping: 30 },
+                               duration: 0.3,
+                               delay: Math.min(index * 0.03, 0.24),
+                             }}
                            >
                              <BoardCard board={board} />
                            </motion.div>

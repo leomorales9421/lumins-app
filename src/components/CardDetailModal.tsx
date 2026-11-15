@@ -168,12 +168,49 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
   const [isMeetModalOpen, setIsMeetModalOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [isUpdatingMeetStatus, setIsUpdatingMeetStatus] = useState(false);
+  const [meetNow, setMeetNow] = useState(() => Date.now());
   const [showMobileProperties, setShowMobileProperties] = useState(false);
   const currentCardIdRef = React.useRef<string | null>(null);
 
   useEffect(() => {
     setShowMobileProperties(false);
+    setMeetNow(Date.now());
   }, [isOpen, cardId]);
+
+  useEffect(() => {
+    if (!isOpen || !card?.meetingData?.meetUrl) return;
+    setMeetNow(Date.now());
+    const interval = window.setInterval(() => setMeetNow(Date.now()), 30000);
+    return () => window.clearInterval(interval);
+  }, [isOpen, card?.meetingData?.meetUrl]);
+
+  const handleUpdateMeetStatus = async (status: 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW') => {
+    if (!card?.id || isUpdatingMeetStatus) return;
+    setIsUpdatingMeetStatus(true);
+    try {
+      const res = await apiClient.patch<{ data?: { meetingData?: CardMeetingData } }>(
+        `/api/integrations/google-meet/cards/${card.id}/status`,
+        { status }
+      );
+      const updatedMeet = res.data?.meetingData;
+      if (updatedMeet) {
+        setCard((prev) => (prev ? { ...prev, meetingData: updatedMeet } : prev));
+      }
+      await fetchCardDetails(true);
+      toast.success(
+        status === 'COMPLETED'
+          ? 'Reunión marcada como realizada'
+          : status === 'NO_SHOW'
+          ? 'Reunión marcada como no realizada'
+          : 'Reunión marcada como programada'
+      );
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'No se pudo actualizar el estado de la reunión');
+    } finally {
+      setIsUpdatingMeetStatus(false);
+    }
+  };
   const initialDataRef = React.useRef(initialData);
 
   useEffect(() => {
@@ -2008,61 +2045,184 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               </div>
               )}
 
-              {/* Scheduled Google Meet Banner (Compact, clean native style) */}
-              {card?.meetingData?.meetUrl && (
-                <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.03] px-3.5 py-2.5 space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#13151A] border border-slate-200/80 dark:border-white/10 flex items-center justify-center shrink-0">
+              {/* Scheduled Google Meet Banner (Live status + Host + Mobile-native controls) */}
+              {card?.meetingData?.meetUrl && (() => {
+                const meet = card.meetingData!;
+                const startMs = new Date(meet.scheduledStart).getTime();
+                const endMs = meet.scheduledEnd
+                  ? new Date(meet.scheduledEnd).getTime()
+                  : startMs + (meet.durationMinutes || 45) * 60 * 1000;
+                const lifecycle = meet.status || 'SCHEDULED';
+                const isLive =
+                  lifecycle === 'SCHEDULED' &&
+                  !Number.isNaN(startMs) &&
+                  meetNow >= startMs - 15 * 60 * 1000 &&
+                  meetNow <= endMs;
+                const isStartingSoon = isLive && meetNow < startMs;
+                const isPastUnconfirmed =
+                  lifecycle === 'SCHEDULED' && !Number.isNaN(endMs) && meetNow > endMs;
+
+                const statusBadge =
+                  lifecycle === 'COMPLETED'
+                    ? {
+                        label: 'Realizada',
+                        cls: 'bg-[#12A9A8]/12 text-[#0E8786] dark:text-[#4ED4D2] border-[#12A9A8]/25',
+                        dot: 'bg-[#12A9A8]',
+                      }
+                    : lifecycle === 'NO_SHOW'
+                    ? {
+                        label: 'No realizada',
+                        cls: 'bg-[#FF665E]/12 text-[#d6453e] dark:text-[#ff8a84] border-[#FF665E]/25',
+                        dot: 'bg-[#FF665E]',
+                      }
+                    : isLive
+                    ? {
+                        label: isStartingSoon ? 'Empieza pronto' : 'En curso',
+                        cls: 'bg-[#12A9A8]/15 text-[#0E8786] dark:text-[#4ED4D2] border-[#12A9A8]/35',
+                        dot: 'bg-[#12A9A8] animate-pulse',
+                      }
+                    : isPastUnconfirmed
+                    ? {
+                        label: 'Finalizada · ¿Se realizó?',
+                        cls: 'bg-[#FFCC40]/20 text-[#9c6f00] dark:text-[#FFCC40] border-[#FFCC40]/35',
+                        dot: 'bg-[#FFCC40]',
+                      }
+                    : {
+                        label: 'Programada',
+                        cls: 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-300 border-slate-200/80 dark:border-white/10',
+                        dot: 'bg-slate-400',
+                      };
+
+                return (
+                <div className="rounded-2xl sm:rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.03] px-3.5 py-3 sm:py-2.5 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+                    <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg bg-white dark:bg-[#13151A] border border-slate-200/80 dark:border-white/10 flex items-center justify-center shrink-0">
                         <GoogleMeetIcon size={17} />
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 truncate">
                             Google Meet
                           </span>
                           <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 shrink-0">
-                            · {card.meetingData.durationMinutes || 45} min
+                            · {meet.durationMinutes || 45} min
+                          </span>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${statusBadge.cls}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
+                            {statusBadge.label}
                           </span>
                         </div>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-zinc-400 truncate">
-                          {format(parseISO(card.meetingData.scheduledStart), "EEE d 'de' MMM · h:mm a", { locale: es })}
+                        <p className="text-[11px] font-medium text-slate-600 dark:text-zinc-300 truncate mt-0.5">
+                          {format(parseISO(meet.scheduledStart), "EEE d 'de' MMM · h:mm a", { locale: es })}
                         </p>
+                        {(meet.organizerName || (meet.rescheduledCount || 0) > 0) && (
+                          <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate mt-0.5">
+                            {meet.organizerName ? `Anfitrión: ${meet.organizerName}` : ''}
+                            {meet.organizerName && (meet.rescheduledCount || 0) > 0 ? ' · ' : ''}
+                            {(meet.rescheduledCount || 0) > 0
+                              ? `Pospuesta ${meet.rescheduledCount} ${meet.rescheduledCount === 1 ? 'vez' : 'veces'}`
+                              : ''}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(card.meetingData!.meetUrl);
+                          navigator.clipboard.writeText(meet.meetUrl);
                           toast.success('Enlace de Google Meet copiado al portapapeles');
                         }}
                         title="Copiar enlace"
-                        className="w-8 h-8 rounded-lg bg-white dark:bg-[#13151A] text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors inline-flex items-center justify-center cursor-pointer"
+                        className="w-10 h-10 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg bg-white dark:bg-[#13151A] text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors inline-flex items-center justify-center cursor-pointer shrink-0"
                       >
-                        <Copy size={13} />
+                        <Copy size={14} className="sm:w-[13px] sm:h-[13px]" />
                       </button>
                       {!isReadOnly && (
                         <button
                           type="button"
                           onClick={() => setIsMeetModalOpen(true)}
-                          title="Editar reunión e invitados"
-                          className="w-8 h-8 rounded-lg bg-white dark:bg-[#13151A] text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors inline-flex items-center justify-center cursor-pointer"
+                          title="Editar o posponer reunión"
+                          className="w-10 h-10 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg bg-white dark:bg-[#13151A] text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors inline-flex items-center justify-center cursor-pointer shrink-0"
                         >
-                          <Edit2 size={13} />
+                          <Edit2 size={14} className="sm:w-[13px] sm:h-[13px]" />
                         </button>
                       )}
-                      <a
-                        href={card.meetingData.meetUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="h-8 px-3 rounded-lg text-xs font-semibold bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-2xs transition-colors inline-flex items-center justify-center whitespace-nowrap"
-                      >
-                        Unirse
-                      </a>
+                      {lifecycle === 'NO_SHOW' && !isReadOnly ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsMeetModalOpen(true)}
+                          className="flex-1 sm:flex-initial h-10 sm:h-8 px-3.5 sm:px-3 rounded-xl sm:rounded-lg text-xs font-semibold bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-2xs transition-colors inline-flex items-center justify-center whitespace-nowrap cursor-pointer"
+                        >
+                          Reagendar
+                        </button>
+                      ) : (
+                        <a
+                          href={meet.meetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 sm:flex-initial h-10 sm:h-8 px-3.5 sm:px-3 rounded-xl sm:rounded-lg text-xs font-semibold bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-2xs transition-colors inline-flex items-center justify-center whitespace-nowrap"
+                        >
+                          {isLive ? 'Unirse ahora' : 'Unirse'}
+                        </a>
+                      )}
                     </div>
                   </div>
+
+                  {/* Post-meeting native confirmation bar */}
+                  {isPastUnconfirmed && !isReadOnly && (
+                    <div className="pt-2.5 border-t border-slate-200/70 dark:border-white/10 space-y-2">
+                      <p className="text-[11px] font-semibold text-slate-700 dark:text-zinc-200">
+                        La hora programada ya pasó. ¿Se realizó la reunión?
+                      </p>
+                      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={isUpdatingMeetStatus}
+                          onClick={() => handleUpdateMeetStatus('COMPLETED')}
+                          className="h-10 sm:h-8 px-3 rounded-xl sm:rounded-lg text-xs font-bold bg-[#12A9A8] hover:bg-[#0E8786] text-white transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        >
+                          Sí, realizada
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isUpdatingMeetStatus}
+                          onClick={() => setIsMeetModalOpen(true)}
+                          className="h-10 sm:h-8 px-3 rounded-xl sm:rounded-lg text-xs font-bold bg-white dark:bg-[#13151A] text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        >
+                          Posponer
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isUpdatingMeetStatus}
+                          onClick={() => handleUpdateMeetStatus('NO_SHOW')}
+                          className="col-span-2 sm:col-span-1 h-10 sm:h-8 px-3 rounded-xl sm:rounded-lg text-xs font-semibold text-[#d6453e] dark:text-[#ff8a84] bg-[#FF665E]/10 hover:bg-[#FF665E]/15 border border-[#FF665E]/25 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                        >
+                          No se hizo
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {lifecycle === 'COMPLETED' && meet.completedByName && (
+                    <div className="pt-2 border-t border-slate-200/70 dark:border-white/5 flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-zinc-300">
+                      <span className="truncate">
+                        Confirmada por <strong className="font-semibold">{meet.completedByName}</strong>
+                      </span>
+                      {!isReadOnly && (
+                        <button
+                          type="button"
+                          disabled={isUpdatingMeetStatus}
+                          onClick={() => setIsMeetModalOpen(true)}
+                          className="text-[11px] font-semibold text-[#0E8786] dark:text-[#4ED4D2] hover:underline shrink-0 cursor-pointer"
+                        >
+                          Agendar otra
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {(card.meetingData.agendaNote ||
                     (card.meetingData.invitedAssignees?.length || 0) > 0 ||
@@ -2145,7 +2305,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     </div>
                   )}
                 </div>
-              )}
+                );
+              })()}
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">

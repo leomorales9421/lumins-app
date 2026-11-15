@@ -1194,14 +1194,38 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Doodle arrow on desktop */}
+                    {/* Animated precise arrow: Mobile vertical + Desktop curved */}
                     {!cardDropped && (
-                      <div className="hidden xl:block absolute left-[245px] top-[25px] z-20 pointer-events-none">
-                        <svg className="w-24 h-16 text-[#FFCC40] overflow-visible" viewBox="0 0 100 60" fill="none">
-                          <path d="M 5 20 Q 50 0 90 40" stroke="currentColor" strokeWidth="3" strokeDasharray="5 3" />
-                          <polygon points="90,40 78,35 84,27" fill="currentColor" />
-                        </svg>
-                      </div>
+                      <>
+                        {/* Mobile / Tablet vertical animated arrow */}
+                        <div className="lg:hidden flex flex-col items-center justify-center -my-1.5 z-20 pointer-events-none">
+                          <motion.div
+                            animate={{ y: [0, 5, 0] }}
+                            transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
+                            className="flex flex-col items-center gap-0.5"
+                          >
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#FFCC40]/25 border border-[#FFCC40]/60 text-amber-900 text-[10px] font-bold shadow-2xs">
+                              Toca o arrastra hacia aquí ↓
+                            </span>
+                            <svg className="w-7 h-7 text-[#12A9A8]" viewBox="0 0 28 28" fill="none">
+                              <path d="M14 4V22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="3 3" />
+                              <path d="M8 17L14 23L20 17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </motion.div>
+                        </div>
+
+                        {/* Desktop animated arrow */}
+                        <motion.div
+                          animate={{ x: [0, 6, 0] }}
+                          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                          className="hidden lg:flex items-center justify-center self-center -mx-2 z-20 pointer-events-none shrink-0"
+                        >
+                          <svg className="w-14 h-12 text-[#FFCC40] drop-shadow-xs overflow-visible" viewBox="0 0 64 48" fill="none">
+                            <path d="M 4 28 Q 30 6 56 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="5 4" />
+                            <path d="M 48 18 L 57 25 L 47 30" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </motion.div>
+                      </>
                     )}
 
                     {/* RIGHT: WIDE GENUINE LUMINS BOARD CANVAS */}
@@ -1279,17 +1303,33 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                                 {isTargetColumn ? (
                                   <div
                                     onPointerDown={(e) => handleStartDrag(e, 'col')}
-                                    className={`bg-white border rounded-lg p-2 sm:p-2.5 shadow-xs relative border-l-4 border-l-[#12A9A8] select-none cursor-grab active:cursor-grabbing hover:shadow-md transition-all touch-none ${isDragging && dragSource === 'col'
+                                    className={`bg-white border rounded-lg p-2.5 shadow-xs relative border-l-4 border-l-[#12A9A8] select-none cursor-grab active:cursor-grabbing hover:shadow-md transition-all touch-none ${isDragging && dragSource === 'col'
                                       ? 'opacity-30 border-dashed border-[#12A9A8]'
                                       : isMarkedDone
-                                        ? 'border-emerald-300 ring-1 ring-emerald-200/80 shadow-xs'
+                                        ? 'border-[#12A9A8]/50 ring-1 ring-[#12A9A8]/25 shadow-xs'
                                         : 'border-slate-200'
                                       }`}
-                                    title="Arrastra para mover a otra columna o haz clic en el check para marcarla como lista"
+                                    title="Arrastra para mover a otra columna o toca el círculo para marcarla como lista"
                                   >
+                                    {/* Precise animated arrow pointing to the circle checkbox when pending */}
+                                    {!isMarkedDone && (
+                                      <motion.div
+                                        animate={{ y: [0, -3, 0] }}
+                                        transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+                                        className="flex items-center gap-1 mb-1.5 pointer-events-none"
+                                      >
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFCC40]/25 border border-[#FFCC40]/60 text-amber-900 text-[10px] font-bold">
+                                          ↓ Toca el círculo para completar
+                                        </span>
+                                      </motion.div>
+                                    )}
+
                                     <div className="flex items-start gap-2">
-                                      {/* Touch-friendly Checkbox */}
+                                      {/* Touch-friendly Circular Checkbox with beacon ring */}
                                       <div className="relative shrink-0 mt-0.5" data-checkbox-btn>
+                                        {!isMarkedDone && (
+                                          <span className="absolute -inset-1 rounded-full bg-[#12A9A8]/30 animate-ping pointer-events-none" />
+                                        )}
                                         <button
                                           type="button"
                                           onClick={(e) => {
@@ -1297,11 +1337,11 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                                             setIsMarkedDone(!isMarkedDone);
                                             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
                                           }}
-                                          className={`w-[18px] h-[18px] min-w-[18px] min-h-[18px] rounded-[5px] border-[1.5px] shrink-0 flex items-center justify-center transition-all cursor-pointer ${isMarkedDone
+                                          className={`relative w-5 h-5 min-w-[20px] min-h-[20px] rounded-full border-2 shrink-0 flex items-center justify-center transition-all cursor-pointer ${isMarkedDone
                                             ? 'bg-[#12A9A8] border-[#12A9A8] text-white shadow-xs'
-                                            : 'border-slate-300 bg-white hover:border-[#12A9A8] hover:bg-slate-50 shadow-xs'
+                                            : 'border-[#12A9A8] bg-[#12A9A8]/10 hover:bg-[#12A9A8]/20 shadow-xs'
                                             }`}
-                                          title="Haz clic para marcar como lista"
+                                          title="Toca para marcar como lista"
                                         >
                                           {isMarkedDone && <Check size={11} strokeWidth={3} className="text-white" />}
                                         </button>
@@ -1330,9 +1370,9 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                                               setIsMarkedDone(!isMarkedDone);
                                               if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
                                             }}
-                                            className={`px-1.5 py-0.2 rounded text-[9.5px] font-bold transition-all flex items-center gap-0.5 cursor-pointer whitespace-nowrap shrink-0 ${isMarkedDone
-                                              ? 'text-[#0E8786] bg-[#12A9A8]/10'
-                                              : 'text-[#FF665E] bg-[#FF665E]/10 hover:bg-[#FF665E]/20 border border-[#FF665E]/20'
+                                            className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold transition-all flex items-center gap-0.5 cursor-pointer whitespace-nowrap shrink-0 ${isMarkedDone
+                                              ? 'text-[#0E8786] bg-[#12A9A8]/12 border border-[#12A9A8]/25'
+                                              : 'text-[#0E8786] bg-[#12A9A8]/10 hover:bg-[#12A9A8]/20 border border-[#12A9A8]/25'
                                               }`}
                                           >
                                             <Check size={10} strokeWidth={2.5} />

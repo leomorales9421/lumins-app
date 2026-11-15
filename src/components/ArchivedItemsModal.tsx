@@ -129,7 +129,7 @@ export default function ArchivedItemsModal({
         {/* Modal Header */}
         <div className="px-5 py-3.5 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-[#F8FAFC] dark:bg-zinc-900 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 text-[#0E8786] dark:text-[#4ED4D2] border border-[#12A9A8]/20 flex items-center justify-center shrink-0">
               <ArchiveRestore size={22} />
             </div>
             <div>
@@ -137,11 +137,11 @@ export default function ArchivedItemsModal({
                 <h2 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-100">
                   Tarjetas Archivadas
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 text-[#0E8786] dark:text-[#4ED4D2]">
                   {cards.length}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
                 Restaura tarjetas para volver a mostrarlas en el tablero
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function ArchivedItemsModal({
           <button
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 active:scale-95 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all shrink-0"
+            className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 active:scale-95 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all shrink-0 cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -165,7 +165,7 @@ export default function ArchivedItemsModal({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por título o lista..."
-              className="w-full pl-9 pr-8 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs sm:text-sm text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] transition-all"
+              className="w-full pl-9 pr-8 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs sm:text-sm text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#12A9A8]/30 focus:border-[#12A9A8] transition-all"
             />
             {searchQuery && (
               <button
@@ -179,14 +179,14 @@ export default function ArchivedItemsModal({
 
           {/* Sort Selector */}
           <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-zinc-500 shrink-0">
+            <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 shrink-0">
               <Clock size={14} />
               Ordenar:
             </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full sm:w-auto px-3 py-2 border rounded-xl bg-white dark:bg-zinc-800 dark:border-zinc-700 text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] transition-all"
+              className="w-full sm:w-auto px-3 py-2 border border-zinc-200 rounded-xl bg-white dark:bg-zinc-800 dark:border-zinc-700 text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#12A9A8]/30 focus:border-[#12A9A8] transition-all"
             >
               <option value="updatedDesc">Archivada: Más reciente</option>
               <option value="updatedAsc">Archivada: Más antigua</option>
@@ -221,21 +221,21 @@ export default function ArchivedItemsModal({
               {filteredAndSortedCards.map((card) => (
                 <div
                   key={card.id}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 hover:border-[#6C5DD3]/50 dark:hover:border-[#6C5DD3]/50 transition-all shadow-sm group"
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 hover:border-[#12A9A8]/50 dark:hover:border-[#4ED4D2]/40 transition-all shadow-sm group"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                         {card.list?.name || 'Sin lista'}
                       </span>
                       {card.isDone && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#12A9A8]/12 text-[#0E8786] dark:text-[#4ED4D2] flex items-center gap-1">
                           <CheckCircle2 size={10} />
                           Completada
                         </span>
                       )}
                     </div>
-                    <h4 className="font-bold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 break-words leading-snug">
+                    <h4 className="font-bold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 break-all sm:break-words line-clamp-2 leading-snug">
                       {card.title}
                     </h4>
 
@@ -255,7 +255,7 @@ export default function ArchivedItemsModal({
                     <button
                       onClick={() => handleRestore(card.id)}
                       disabled={restoringId === card.id}
-                      className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-[#6C5DD3]/10 hover:bg-[#6C5DD3]/20 active:bg-[#6C5DD3]/30 text-[#6C5DD3] dark:bg-[#6C5DD3]/20 dark:hover:bg-[#6C5DD3]/30 dark:text-indigo-300 transition-all active:scale-95 flex items-center justify-center gap-2 border border-[#6C5DD3]/20 disabled:opacity-50"
+                      className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-[#12A9A8]/12 hover:bg-[#12A9A8]/20 active:bg-[#12A9A8]/30 text-[#0E8786] dark:bg-[#12A9A8]/20 dark:hover:bg-[#12A9A8]/30 dark:text-[#4ED4D2] transition-all active:scale-95 flex items-center justify-center gap-2 border border-[#12A9A8]/25 disabled:opacity-50 cursor-pointer"
                     >
                       <RefreshCw size={14} className={restoringId === card.id ? 'animate-spin' : ''} />
                       <span>{restoringId === card.id ? 'Restaurando...' : 'Restaurar'}</span>

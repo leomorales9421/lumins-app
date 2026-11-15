@@ -50,6 +50,11 @@ export interface CardMeetingData {
   organizerUserId: string;
   organizerName?: string;
   organizerEmail?: string;
+  status?: 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW';
+  completedAt?: string | null;
+  completedByUserId?: string | null;
+  completedByName?: string | null;
+  rescheduledCount?: number;
   updatedAt: string;
 }
 
