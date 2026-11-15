@@ -162,7 +162,7 @@ const AccountSummaryCard: React.FC = () => {
                 <button
                   key={ws.id}
                   type="button"
-                  onClick={() => navigate(`/w/${ws.id}/boards`)}
+                  onClick={() => navigate(`/w/${ws.id}/dashboard`)}
                   className="w-full flex items-center justify-between gap-2.5 p-2.5 rounded-lg border border-slate-200/70 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] hover:border-[var(--lumins-accent-border)] hover:bg-[var(--lumins-accent-soft)]/40 transition-all text-left cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
