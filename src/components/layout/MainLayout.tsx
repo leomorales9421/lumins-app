@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../lib/api-client';
@@ -393,9 +393,11 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
           
           <main className="flex-1 min-w-0 w-full overflow-y-auto overflow-x-hidden custom-scrollbar relative">
             <ModuleLoaderOverlay />
-            <PageTransitionWrapper>
-              <Outlet />
-            </PageTransitionWrapper>
+            <Suspense fallback={null}>
+              <PageTransitionWrapper>
+                <Outlet />
+              </PageTransitionWrapper>
+            </Suspense>
           </main>
         </div>
       </div>
