@@ -284,11 +284,46 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <UserAvatar
-                user={user}
-                size="xs"
-                className="border border-white dark:border-[#212632] shadow-xs rounded-md"
-              />
+              {(() => {
+                const members =
+                  board.displayMembers && board.displayMembers.length > 0
+                    ? board.displayMembers
+                    : board.owner
+                    ? [board.owner]
+                    : user
+                    ? [user]
+                    : [];
+                const visibleMembers = members.slice(0, 4);
+                const extraCount = members.length - visibleMembers.length;
+
+                return (
+                  <div className="flex items-center">
+                    <div className="flex items-center -space-x-1.5">
+                      {visibleMembers.map((member) => (
+                        <div
+                          key={member.id}
+                          title={member.name || member.email}
+                          className="rounded-md ring-1 ring-white dark:ring-[#212632] shadow-xs"
+                        >
+                          <UserAvatar
+                            user={member}
+                            size="xs"
+                            className="rounded-md"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {extraCount > 0 && (
+                      <span
+                        title={`${extraCount} miembros más`}
+                        className="ml-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-md bg-slate-100 dark:bg-white/10 text-[9px] font-bold text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-white/10"
+                      >
+                        +{extraCount}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-1 text-slate-400 dark:text-zinc-500">
                 <Calendar size={12} />
                 <span className="text-[10px] font-semibold">

@@ -60,7 +60,19 @@ export interface Board {
   updatedAt?: string;
   starred?: boolean;
   ownerId?: string;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string | null;
+  };
   members?: BoardMember[];
+  displayMembers?: Array<{
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string | null;
+  }>;
   lists?: List[];
   labels?: Array<{ id: string; name: string; color: string }>;
   background?: string;
