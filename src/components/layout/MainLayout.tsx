@@ -63,20 +63,47 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [isLoadingBg, setIsLoadingBg] = useState(false);
 
   const isSystemAdmin = isSystemAdminUser(user);
+  const storedImpersonated = getImpersonatedWorkspace();
   const isImpersonatingWorkspace = Boolean(
     isSystemAdmin &&
       !isLoadingWorkspaces &&
       workspaceId &&
       workspaceId !== 'global' &&
-      !workspaces.some((w) => w.id === workspaceId)
+      !workspaces.some((w) => w.id === workspaceId) &&
+      storedImpersonated?.id === workspaceId
   );
-  const impersonatedInfo = isImpersonatingWorkspace ? getImpersonatedWorkspace() : null;
+  const impersonatedInfo = isImpersonatingWorkspace ? storedImpersonated : null;
 
   useEffect(() => {
     if (isSystemAdmin && workspaceId && workspaces.some((w) => w.id === workspaceId)) {
       clearImpersonatedWorkspace();
     }
   }, [isSystemAdmin, workspaceId, workspaces]);
+
+  // Redirect away from stale, deleted, or unauthorized workspaceId in URL
+  useEffect(() => {
+    if (isLoadingWorkspaces || !workspaceId || workspaceId === 'global') return;
+    if (workspaces.length === 0) return;
+    if (workspaces.some((w) => w.id === workspaceId)) return;
+    if (isSystemAdmin && storedImpersonated?.id === workspaceId) return;
+
+    const savedOwnId = localStorage.getItem('lastActiveWorkspaceId');
+    const validTarget = workspaces.find((w) => w.id === savedOwnId) || workspaces[0];
+    if (!validTarget) return;
+
+    localStorage.setItem('lastActiveWorkspaceId', validTarget.id);
+    const currentSuffix = location.pathname.replace(/^\/w\/[^/]+/, '') || '/dashboard';
+    navigate(`/w/${validTarget.id}${currentSuffix}${location.search}`, { replace: true });
+  }, [
+    isLoadingWorkspaces,
+    workspaceId,
+    workspaces,
+    isSystemAdmin,
+    storedImpersonated?.id,
+    location.pathname,
+    location.search,
+    navigate,
+  ]);
 
   const handleExitImpersonation = useCallback(
     (destination: 'own' | 'admin') => {
