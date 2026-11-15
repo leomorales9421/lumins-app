@@ -1591,46 +1591,30 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
-              <span className="cu-section-label">Responsables</span>
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
+            {assignedMemberIds.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="cu-section-label">Responsables</span>
+                <div
+                  onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
+                  title="Gestionar responsables"
+                  className="flex -space-x-2 cursor-pointer w-fit"
+                >
                   {boardMembers.filter(m => assignedMemberIds.includes(m.id)).map(member => (
-                    <div 
+                    <div
                       key={member.id}
                       title={member.name}
-                      className="w-8 h-8 rounded border-2 border-white dark:border-[#1C1F26] shadow-sm transition-transform hover:scale-110 hover:z-10 cursor-help"
+                      className="w-8 h-8 rounded border-2 border-white dark:border-[#1C1F26] shadow-sm transition-transform hover:scale-110 hover:z-10"
                     >
-                      <UserAvatar 
-                        name={member.name} 
-                        avatarUrl={member.avatarUrl} 
+                      <UserAvatar
+                        name={member.name}
+                        avatarUrl={member.avatarUrl}
                         size="sm"
                       />
                     </div>
                   ))}
                 </div>
-                <SmartPopover
-                  isOpen={activePopover === 'members_header'}
-                  onClose={() => setActivePopover(null)}
-                  trigger={
-                    <button 
-                      onClick={() => setActivePopover(activePopover === 'members_header' ? null : 'members_header')}
-                      className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] transition-all cursor-pointer"
-                    >
-                      <span className="text-base leading-none">+</span>
-                    </button>
-                  }
-                  content={
-                    <MembersPopover 
-                      onClose={() => setActivePopover(null)}
-                      boardMembers={boardMembers}
-                      assignedMemberIds={assignedMemberIds}
-                      onToggleMember={handleToggleMember}
-                    />
-                  }
-                />
               </div>
-            </div>
+            )}
 
             {(card?.startDate || card?.dueDate) && (
               <div className="flex flex-col gap-2">
@@ -1876,7 +1860,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       onClick={() => setActivePopover(activePopover === 'members' ? null : 'members')}
                       className="flex-shrink-0 flex items-center justify-center gap-1.5 h-7 px-2.5 rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 font-semibold text-xs hover:bg-zinc-200/80 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] transition-all active:scale-95 whitespace-nowrap cursor-pointer"
                     >
-                      <Users size={13} /> Miembros
+                      <Users size={13} /> Responsables
                     </button>
                   }
                   content={

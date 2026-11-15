@@ -30,8 +30,8 @@ const MENU_OPTIONS: MenuOption[] = [
   },
   {
     id: 'members',
-    title: 'Miembros',
-    subtitle: 'Asignar responsables',
+    title: 'Responsables',
+    subtitle: 'Asignar a la tarjeta',
     icon: Users,
   },
   {

@@ -53,7 +53,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
         )}
         
         <h3 className="text-[10px] tracking-[0.3em] font-black text-zinc-500 dark:text-zinc-500 uppercase">
-          Miembros
+          Responsables
         </h3>
         
         <button 
@@ -69,7 +69,7 @@ const MembersPopover: React.FC<MembersPopoverProps> = ({
         <div className="relative group">
           <input 
             type="text"
-            placeholder="Buscar miembros..."
+            placeholder="Buscar responsables..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-zinc-50 dark:bg-[#13151A] border border-zinc-200 dark:border-white/10 rounded p-2.5 pl-9 text-xs font-bold text-zinc-900 dark:text-zinc-100 w-full outline-none focus:ring-4 focus:ring-[var(--lumins-accent)]/10 focus:border-[var(--lumins-accent)] transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
