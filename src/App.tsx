@@ -86,6 +86,24 @@ const BoardShortLinkRedirect: React.FC = () => {
   return <Navigate to={`/boards/${id}${search ? `?${search}` : ''}`} replace />;
 };
 
+const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  if (isLoading) return <PageLoader />;
+
+  if (isAuthenticated) {
+    const redirectParam = searchParams.get('redirect');
+    const safeTarget =
+      redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : '/app';
+    return <Navigate to={safeTarget} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const GlobalInvitationDetector: React.FC = () => {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
@@ -121,10 +139,10 @@ function App() {
                 <V2FeatureOnboardingModal />
                 <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+                  <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+                  <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+                  <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
                   <Route path="/invite" element={<InvitePage />} />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   
