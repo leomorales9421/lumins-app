@@ -3,6 +3,7 @@ import { LuminsServerErrorIcon } from './icons/LuminsIcons';
 
 interface ErrorBoundaryState {
   hasError: boolean;
+  errorMessage?: string;
 }
 
 export class ErrorBoundary extends React.Component<
@@ -14,8 +15,8 @@ export class ErrorBoundary extends React.Component<
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, errorMessage: error?.message };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
@@ -39,6 +40,11 @@ export class ErrorBoundary extends React.Component<
             <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1.5 leading-relaxed max-w-sm">
               La vista encontró un problema al renderizarse. Recarga la aplicación para continuar.
             </p>
+            {this.state.errorMessage && (
+              <p className="mt-3 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 text-[11px] font-mono text-slate-500 dark:text-zinc-400 max-w-full break-words">
+                {this.state.errorMessage}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-6">
               <button
                 type="button"

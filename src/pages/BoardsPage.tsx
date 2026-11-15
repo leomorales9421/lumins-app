@@ -418,13 +418,25 @@ const BoardsPage: React.FC = () => {
                    )}
 
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 min-h-[200px]">
-                     <AnimatePresence mode="popLayout">
+                     <AnimatePresence>
                        {isPaginating ? (
-                         <div className="col-span-full flex items-center justify-center py-20">
+                         <motion.div
+                           key="boards-paginating"
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: 1 }}
+                           exit={{ opacity: 0 }}
+                           className="col-span-full flex items-center justify-center py-20"
+                         >
                            <Loader2 size={28} className="animate-spin text-[var(--lumins-accent)]" />
-                         </div>
+                         </motion.div>
                        ) : currentBoards.length === 0 ? (
-                         <div className="col-span-full bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/[0.11] p-12 text-center flex flex-col items-center">
+                         <motion.div
+                           key="boards-empty-filter"
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: 1 }}
+                           exit={{ opacity: 0 }}
+                           className="col-span-full bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/[0.11] p-12 text-center flex flex-col items-center"
+                         >
                            <Filter size={22} className="text-slate-400 dark:text-zinc-500 mb-3" />
                            <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
                              No hay tableros con estos filtros
@@ -445,7 +457,7 @@ const BoardsPage: React.FC = () => {
                            >
                              Limpiar filtros
                            </button>
-                         </div>
+                         </motion.div>
                        ) : (
                          currentBoards.map((board, index) => (
                            <motion.div
