@@ -149,9 +149,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   const [guestEmailInput, setGuestEmailInput] = useState('');
 
   const [hideInternalDetails, setHideInternalDetails] = useState<boolean>(
-    existingMeeting
-      ? existingMeeting.hideInternalDetails
-      : (existingMeeting?.externalGuests?.length || 0) > 0
+    existingMeeting ? existingMeeting.hideInternalDetails : false
   );
 
   const [agendaNote, setAgendaNote] = useState<string>(existingMeeting?.agendaNote || '');

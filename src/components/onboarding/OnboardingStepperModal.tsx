@@ -1120,7 +1120,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                     )}
 
                     {/* RIGHT: WIDE GENUINE LUMINS BOARD CANVAS */}
-                    <div className={`flex-1 w-full rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-xl shadow-slate-200/60 transition-all ${selectedBg.value} text-left relative overflow-hidden`}>
+                    <div className={`flex-1 w-full rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-xl shadow-slate-200/60 transition-all ${!customBgPreview && !selectedBgValue.startsWith('http') && !selectedBgValue.startsWith('/') ? selectedBgValue.split('?')[0] : 'bg-slate-100'} text-left relative overflow-hidden`}>
 
                       {/* Lumins Board Header Bar */}
                       <div className="flex items-center justify-between gap-3 mb-2.5 sm:mb-3 bg-white/90 backdrop-blur-md px-3 sm:px-3.5 py-2 rounded-xl border border-white/60 shadow-xs">

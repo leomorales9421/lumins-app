@@ -2215,12 +2215,18 @@ const WorkspaceCalendarPage: React.FC = () => {
           onClose={() => setMeetModalEvent(null)}
           cardId={meetModalEvent.extendedProps.cardId || meetModalEvent.id.replace(/^meet:/, '')}
           cardTitle={meetModalEvent.title}
-          cardStartDate={meetModalEvent.extendedProps.startDate}
-          cardDueDate={meetModalEvent.extendedProps.dueDate}
-          assignees={meetModalEvent.extendedProps.assignees || []}
+          defaultDate={meetModalEvent.extendedProps.startDate || meetModalEvent.extendedProps.dueDate}
+          assignees={(meetModalEvent.extendedProps.assignees || []).map((a) => ({
+            id: a.id,
+            name: a.name,
+            email: a.email || '',
+            avatarUrl: a.avatarUrl || undefined,
+          }))}
           existingMeeting={meetModalEvent.extendedProps.meetingData}
-          onScheduled={() => fetchEvents(true)}
-          onRemoved={() => fetchEvents(true)}
+          onScheduled={() => {
+            fetchEvents(true);
+            setMeetModalEvent(null);
+          }}
         />
       )}
     </div>
