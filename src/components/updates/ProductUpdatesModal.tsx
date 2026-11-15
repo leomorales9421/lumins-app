@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -16,29 +16,52 @@ import {
 } from 'lucide-react';
 import { useProductUpdates } from '../../contexts/ProductUpdatesContext';
 import type { ReleaseHighlight, ProductRelease } from '../../config/productUpdates';
+import {
+  LuminsCalendarIcon,
+  LuminsLockIcon,
+  LuminsSettingsIcon,
+  LuminsSparkleUpdateIcon,
+} from '../icons/LuminsIcons';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 
 const renderHighlightIcon = (iconName?: string) => {
-  const iconProps = { size: 18, className: 'shrink-0 text-[#6C5DD3] dark:text-[#A599F9]' };
   switch (iconName) {
+    case 'video':
+      return <GoogleMeetIcon size={18} />;
     case 'calendar':
-      return <Calendar {...iconProps} />;
-    case 'download':
-      return <Download {...iconProps} />;
-    case 'mail':
-      return <Mail {...iconProps} />;
-    case 'smartphone':
-      return <Smartphone {...iconProps} />;
+      return <LuminsCalendarIcon size={18} />;
     case 'shield':
-      return <Shield {...iconProps} />;
+      return <LuminsLockIcon size={18} />;
+    case 'palette':
+      return <LuminsSettingsIcon size={18} />;
+    case 'download':
+      return <Download size={18} className="shrink-0 text-[#12A9A8]" />;
+    case 'mail':
+      return <Mail size={18} className="shrink-0 text-[#12A9A8]" />;
+    case 'smartphone':
+      return <Smartphone size={18} className="shrink-0 text-[#12A9A8]" />;
     default:
-      return <Sparkles {...iconProps} />;
+      return <LuminsSparkleUpdateIcon size={18} />;
   }
 };
 
 export const ProductUpdatesModal: React.FC = () => {
-  const { isOpen, closeUpdates, releases, latestRelease } = useProductUpdates();
-  const [selectedReleaseId, setSelectedReleaseId] = useState<string>(latestRelease.id);
+  const {
+    isOpen,
+    closeUpdates,
+    openV2Onboarding,
+    releases,
+    latestRelease,
+    activeReleaseId,
+  } = useProductUpdates();
+  const [selectedReleaseId, setSelectedReleaseId] = useState<string>(activeReleaseId || latestRelease.id);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isOpen && activeReleaseId) {
+      setSelectedReleaseId(activeReleaseId);
+    }
+  }, [isOpen, activeReleaseId]);
 
   if (!isOpen) return null;
 
@@ -46,6 +69,10 @@ export const ProductUpdatesModal: React.FC = () => {
     releases.find((r) => r.id === selectedReleaseId) || latestRelease;
 
   const handleAction = () => {
+    if (currentRelease.ctaAction === 'onboarding') {
+      openV2Onboarding();
+      return;
+    }
     closeUpdates();
     if (currentRelease.ctaUrl) {
       navigate(currentRelease.ctaUrl);
@@ -73,13 +100,16 @@ export const ProductUpdatesModal: React.FC = () => {
           className="relative w-full max-w-3xl bg-white dark:bg-[#181B22] rounded-t-[32px] sm:rounded-3xl shadow-2xl border-t sm:border border-zinc-200/90 dark:border-white/10 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh] z-10"
         >
           {/* Header con gradiente Lumins */}
-          <div className="relative px-5 sm:px-8 pt-3 sm:pt-7 pb-5 sm:pb-6 bg-gradient-to-br from-[#6C5DD3] via-[#7C3AED] to-[#4F46E5] text-white overflow-hidden shrink-0">
+          <div className="relative px-5 sm:px-8 pt-3 sm:pt-7 pb-5 sm:pb-6 bg-gradient-to-br from-[#151821] via-[#1B202C] to-[#13292D] text-white overflow-hidden shrink-0 border-b border-white/10">
+            {/* Barra tricolor Lumins superior */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF665E] via-[#12A9A8] to-[#FFCC40]" />
+
             {/* Grab Handle para móvil estilo iOS / Android Sheet */}
             <div className="w-12 h-1.5 bg-white/35 rounded-full mx-auto mb-3 sm:hidden" />
 
             {/* Elemento decorativo de fondo */}
-            <div className="absolute -right-8 -top-8 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute right-12 bottom-0 w-24 h-24 bg-purple-400/20 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-[#12A9A8]/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute right-12 bottom-0 w-24 h-24 bg-[#FFCC40]/15 rounded-full blur-xl pointer-events-none" />
 
             {/* Botón cerrar */}
             <button
@@ -107,7 +137,7 @@ export const ProductUpdatesModal: React.FC = () => {
             <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-snug pr-10 sm:pr-12">
               {currentRelease.title}
             </h2>
-            <p className="text-xs sm:text-sm text-purple-100 font-medium mt-1.5 sm:mt-2 line-clamp-2 max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-300 font-medium mt-1.5 sm:mt-2 line-clamp-2 max-w-xl leading-relaxed">
               {currentRelease.subtitle}
             </p>
           </div>
@@ -124,7 +154,7 @@ export const ProductUpdatesModal: React.FC = () => {
                   onClick={() => setSelectedReleaseId(rel.id)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all shrink-0 ${
                     rel.id === selectedReleaseId
-                      ? 'bg-[#6C5DD3] text-white shadow-xs'
+                      ? 'bg-[#12A9A8] text-white shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-white/5'
                   }`}
                 >
@@ -144,11 +174,11 @@ export const ProductUpdatesModal: React.FC = () => {
               {currentRelease.highlights.map((item, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/70 dark:border-white/5 hover:border-[#6C5DD3]/40 transition-colors flex flex-col justify-between active:scale-[0.99]"
+                  className="p-3.5 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/70 dark:border-white/5 hover:border-[#12A9A8]/40 transition-colors flex flex-col justify-between active:scale-[0.99]"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2.5 sm:mb-3">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#6C5DD3]/10 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#12A9A8]/12 flex items-center justify-center shrink-0">
                         {renderHighlightIcon(item.iconName)}
                       </div>
                       {item.tag && (
@@ -188,7 +218,7 @@ export const ProductUpdatesModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAction}
-                  className="flex-[2] sm:flex-initial sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-black transition-all shadow-md shadow-[#6C5DD3]/25 flex items-center justify-center gap-2 active:scale-95"
+                  className="flex-[2] sm:flex-initial sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-xs font-black transition-all shadow-md shadow-[#12A9A8]/25 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                 >
                   <span>{currentRelease.ctaText}</span>
                   <ArrowRight size={14} />

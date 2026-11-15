@@ -15,7 +15,12 @@ import { ModuleLoaderOverlay } from '../../contexts/NavigationLoaderContext';
 import { motion } from 'framer-motion';
 
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldAlert, ArrowLeft, LogOut } from 'lucide-react';
+import {
+  clearImpersonatedWorkspace,
+  getImpersonatedWorkspace,
+  isSystemAdminUser,
+} from '../../lib/superAdminImpersonation';
 import {
   DEFAULT_BOARD_BACKGROUND,
   normalizeBoardBackground,
@@ -56,6 +61,42 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [menuLayout, setMenuLayout] = useState<MenuLayout>(() => resolveMenuLayout());
   const [isLoadingBg, setIsLoadingBg] = useState(false);
+
+  const isSystemAdmin = isSystemAdminUser(user);
+  const isImpersonatingWorkspace = Boolean(
+    isSystemAdmin &&
+      !isLoadingWorkspaces &&
+      workspaceId &&
+      workspaceId !== 'global' &&
+      !workspaces.some((w) => w.id === workspaceId)
+  );
+  const impersonatedInfo = isImpersonatingWorkspace ? getImpersonatedWorkspace() : null;
+
+  useEffect(() => {
+    if (isSystemAdmin && workspaceId && workspaces.some((w) => w.id === workspaceId)) {
+      clearImpersonatedWorkspace();
+    }
+  }, [isSystemAdmin, workspaceId, workspaces]);
+
+  const handleExitImpersonation = useCallback(
+    (destination: 'own' | 'admin') => {
+      clearImpersonatedWorkspace();
+      if (destination === 'admin') {
+        navigate('/w/global/system-admin?tab=workspaces');
+        return;
+      }
+      const savedOwnId = localStorage.getItem('lastActiveWorkspaceId');
+      const ownTarget =
+        workspaces.find((w) => w.id === savedOwnId) || workspaces[0];
+      if (ownTarget) {
+        localStorage.setItem('lastActiveWorkspaceId', ownTarget.id);
+        navigate(`/w/${ownTarget.id}/dashboard`);
+      } else {
+        navigate('/workspaces');
+      }
+    },
+    [navigate, workspaces]
+  );
 
   useEffect(() => {
     const handleMenuLayoutChange = () => {
@@ -356,6 +397,49 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
             hideDesktopNav={menuLayout === 'sidebar'}
             logout={logout}
           />
+        )}
+
+        {isImpersonatingWorkspace && (
+          <div className="w-full bg-[#151821] text-white border-b border-[#FF665E]/35 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 z-40 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#FF665E]/20 text-[#FF665E] border border-[#FF665E]/30 text-[10px] font-black uppercase tracking-wider shrink-0">
+                <ShieldAlert size={12} />
+                Impersonando
+              </span>
+              <p className="text-xs font-medium text-zinc-200 truncate">
+                Espacio externo:{' '}
+                <span className="font-bold text-white">
+                  {impersonatedInfo?.id === workspaceId && impersonatedInfo?.name
+                    ? impersonatedInfo.name
+                    : 'Espacio de otro usuario'}
+                </span>
+                {impersonatedInfo?.id === workspaceId && impersonatedInfo?.ownerName && (
+                  <span className="hidden sm:inline text-zinc-400">
+                    {' '}· Propietario: {impersonatedInfo.ownerName}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleExitImpersonation('own')}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-[11px] font-bold transition-colors cursor-pointer"
+              >
+                <LogOut size={12} />
+                Salir a mi espacio
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExitImpersonation('admin')}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-zinc-100 text-[11px] font-bold transition-colors cursor-pointer"
+              >
+                <ArrowLeft size={12} />
+                Super Panel
+              </button>
+            </div>
+          </div>
         )}
 
         <div className="flex flex-1 overflow-hidden min-w-0 w-full">

@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, Check, Plus, Search, Grid, ArrowRight, Settings, Sliders } from 'lucide-react';
+import { ChevronDown, Check, Plus, Search, Grid, ArrowRight, Settings, Sliders, ShieldAlert, LogOut } from 'lucide-react';
 import apiClient from '../lib/api-client';
 import SmartPopover from './SmartPopover';
 import DeleteWorkspaceModal from './DeleteWorkspaceModal';
 import EditWorkspaceModal, { type WorkspaceEditableData } from './EditWorkspaceModal';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  clearImpersonatedWorkspace,
+  getImpersonatedWorkspace,
+  isSystemAdminUser,
+} from '../lib/superAdminImpersonation';
 
 interface Workspace {
   id: string;
@@ -57,8 +62,20 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
     return () => window.removeEventListener('workspace-changed', handleRefresh);
   }, []);
 
+  const isSystemAdmin = isSystemAdminUser(user);
+  const isImpersonating = Boolean(
+    isSystemAdmin &&
+      !isLoading &&
+      workspaceId &&
+      workspaceId !== 'global' &&
+      !workspaces.some((w) => w.id === workspaceId)
+  );
+  const impersonatedInfo = isImpersonating ? getImpersonatedWorkspace() : null;
+
   const activeWorkspaceId = workspaceId || localStorage.getItem('lastActiveWorkspaceId');
-  const currentWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0];
+  const currentWorkspace = isImpersonating
+    ? undefined
+    : workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0];
 
   useEffect(() => {
     if (workspaceId && workspaces.some(w => w.id === workspaceId)) {
@@ -76,6 +93,7 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
   };
 
   const handleSwitch = (id: string) => {
+    clearImpersonatedWorkspace();
     trackRecentWorkspace(id);
     localStorage.setItem('lastActiveWorkspaceId', id);
     navigate(`/w/${id}/dashboard`);
@@ -159,10 +177,55 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
 
   const popoverContent = (
     <div className="w-68 bg-white dark:bg-[#1C1F26] rounded-xl shadow-dropdown border border-slate-200/90 dark:border-white/10 p-1.5 z-50 flex flex-col max-h-[460px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      {isImpersonating && (
+        <div className="mb-1.5 p-2 rounded-lg bg-[#FF665E]/10 border border-[#FF665E]/25">
+          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-[#FF665E]">
+            <ShieldAlert size={12} />
+            Impersonando espacio externo
+          </div>
+          <p className="text-[11px] font-semibold text-slate-700 dark:text-zinc-200 truncate mt-0.5">
+            {impersonatedInfo?.id === workspaceId && impersonatedInfo?.name
+              ? impersonatedInfo.name
+              : 'Espacio de otro usuario'}
+          </p>
+          <div className="mt-2 flex items-center gap-1.5">
+            {workspaces[0] && (
+              <button
+                type="button"
+                onClick={() => {
+                  const ownId = localStorage.getItem('lastActiveWorkspaceId');
+                  const target = workspaces.find((w) => w.id === ownId) || workspaces[0];
+                  handleSwitch(target.id);
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-[10px] font-bold transition-colors cursor-pointer"
+              >
+                <LogOut size={11} />
+                Ir a mi espacio
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                clearImpersonatedWorkspace();
+                setIsOpen(false);
+                navigate('/w/global/system-admin?tab=workspaces');
+              }}
+              className="px-2 py-1 rounded-md bg-slate-200/80 dark:bg-white/10 hover:bg-slate-300/80 dark:hover:bg-white/15 text-slate-700 dark:text-zinc-200 text-[10px] font-bold transition-colors cursor-pointer"
+            >
+              Super Panel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="px-1.5 pt-1 pb-1.5">
         <div className="flex items-center justify-between mb-1.5 px-1.5">
           <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-            {searchQuery.trim() ? 'Resultados' : 'Espacios'}
+            {searchQuery.trim()
+              ? 'Resultados'
+              : isSystemAdmin
+                ? 'Mis espacios de trabajo'
+                : 'Espacios'}
           </p>
           <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
             {workspaces.length} en total
@@ -305,13 +368,21 @@ const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onCreateClick, is
             title={isCollapsed ? (currentWorkspace?.name || 'Espacios') : undefined}
             className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-2.5 py-1.5'} rounded-xl transition-all group w-full cursor-pointer ${isFloating ? 'hover:bg-white/10' : 'hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent hover:border-slate-200/80 dark:hover:border-white/10'}`}
           >
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)] flex-shrink-0 flex items-center justify-center text-[var(--lumins-accent-on)] text-[10px] font-black shadow-xs group-hover:scale-105 transition-transform">
-              {currentWorkspace ? getInitials(currentWorkspace.name) : 'LW'}
+            <div className={`w-7 h-7 rounded-lg ${isImpersonating ? 'bg-[#FF665E] text-white' : 'bg-gradient-to-br from-[var(--lumins-accent)] to-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)]'} flex-shrink-0 flex items-center justify-center text-[10px] font-black shadow-xs group-hover:scale-105 transition-transform`}>
+              {isImpersonating
+                ? 'IMP'
+                : currentWorkspace
+                  ? getInitials(currentWorkspace.name)
+                  : 'LW'}
             </div>
 
             <div className={`flex items-center justify-between transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-full opacity-100 ml-2.5'}`}>
-              <span className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-slate-800 dark:text-zinc-100'}`}>
-                {currentWorkspace?.name || 'Sin Espacios'}
+              <span className={`text-xs font-bold truncate ${isFloating ? 'text-white' : isImpersonating ? 'text-[#FF665E]' : 'text-slate-800 dark:text-zinc-100'}`}>
+                {isImpersonating
+                  ? (impersonatedInfo?.id === workspaceId && impersonatedInfo?.name
+                      ? impersonatedInfo.name
+                      : 'Impersonando espacio')
+                  : (currentWorkspace?.name || 'Sin Espacios')}
               </span>
               <ChevronDown size={14} className={`${isFloating ? 'text-white/50' : 'text-slate-400 dark:text-zinc-500'} min-w-[14px]`} />
             </div>

@@ -270,10 +270,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       apiClient.clearTokens();
       setUser(null);
       try {
+        localStorage.removeItem('lastActiveWorkspaceId');
+        localStorage.removeItem('lumins_recent_workspaces');
         localStorage.removeItem('theme');
         localStorage.removeItem('lumins_accent');
         localStorage.removeItem('lumins_menu_layout');
         localStorage.removeItem('lumins_sidebar_collapsed');
+        sessionStorage.removeItem('lumins_impersonated_workspace');
         applyAccentToDom('teal', false);
         applyMenuLayout('top', false);
         applyThemeToDom('light', false);

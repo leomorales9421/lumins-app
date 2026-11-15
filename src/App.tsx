@@ -4,7 +4,9 @@ import { PermissionProvider } from './contexts/PermissionContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './components/NotificationProvider';
 import { ProductUpdatesProvider } from './contexts/ProductUpdatesContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 import { ProductUpdatesModal } from './components/updates/ProductUpdatesModal';
+import V2FeatureOnboardingModal from './components/updates/V2FeatureOnboardingModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -28,6 +30,7 @@ const MembersPage = lazy(() => import('./pages/MembersPage'));
 const WorkspaceActivityPage = lazy(() => import('./pages/WorkspaceActivityPage'));
 const WorkspaceCalendarPage = lazy(() => import('./pages/WorkspaceCalendarPage'));
 const SystemAdminPage = lazy(() => import('./pages/SystemAdminPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfileSettings = lazy(() => import('./pages/settings/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/settings/SecuritySettings'));
@@ -113,7 +116,9 @@ function App() {
             <GlobalInvitationDetector />
             <NotificationProvider>
               <ProductUpdatesProvider>
+                <NotificationsProvider>
                 <ProductUpdatesModal />
+                <V2FeatureOnboardingModal />
                 <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
@@ -136,6 +141,7 @@ function App() {
                     <Route path="/w/:workspaceId/system-admin" element={<SystemAdminPage />} />
                     <Route path="/boards/:id" element={<BoardDetailPage />} />
                     <Route path="/b/:id" element={<BoardDetailPage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     
                     <Route path="/settings" element={<SettingsPage />}>
                       <Route index element={<Navigate to="profile" replace />} />
@@ -159,6 +165,7 @@ function App() {
                 </Routes>
               </Suspense>
               <GlobalToaster />
+                </NotificationsProvider>
               </ProductUpdatesProvider>
             </NotificationProvider>
           </SocketProvider>

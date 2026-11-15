@@ -443,3 +443,63 @@ export const LuminsClockIcon: React.FC<IconProps> = ({ size = 28, className = ''
     <circle cx="28" cy="8" r="2.2" fill="#FFCC40" />
   </svg>
 );
+
+/**
+ * Campana de Notificaciones Lumins: trazo limpio con badajo Dorado y nodo Turquesa
+ */
+export const LuminsBellIcon: React.FC<IconProps> = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M18 8.5C18 5.46243 15.3137 3 12 3C8.68629 3 6 5.46243 6 8.5C6 12.6 4.2 14.8 3.5 16H20.5C19.8 14.8 18 12.6 18 8.5Z"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9.6 18.2C10.15 19.4 11.02 20 12 20C12.98 20 13.85 19.4 14.4 18.2"
+      stroke="#FFCC40"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+    />
+    <circle cx="17.5" cy="5.5" r="2" fill="#12A9A8" />
+  </svg>
+);
+
+/**
+ * Novedades Lumins: destello principal Turquesa con chispas Coral y Dorado
+ */
+export const LuminsSparkleUpdateIcon: React.FC<IconProps> = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M11 3L12.75 7.75L17.5 9.5L12.75 11.25L11 16L9.25 11.25L4.5 9.5L9.25 7.75L11 3Z"
+      fill="#12A9A8"
+      fillOpacity="0.18"
+      stroke="#12A9A8"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M18.5 14L19.4 16.1L21.5 17L19.4 17.9L18.5 20L17.6 17.9L15.5 17L17.6 16.1L18.5 14Z"
+      fill="#FFCC40"
+    />
+    <circle cx="5.5" cy="18" r="1.6" fill="#FF665E" />
+  </svg>
+);
+
+/**
+ * Mención Lumins: burbuja de conversación con acentos Turquesa y Coral
+ */
+export const LuminsMentionIcon: React.FC<IconProps> = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M20 11.5C20 15.6421 16.4183 19 12 19C10.7 19 9.48 18.71 8.4 18.19L4.5 19.5L5.58 16.05C4.58 14.79 4 13.21 4 11.5C4 7.35786 7.58172 4 12 4C16.4183 4 20 7.35786 20 11.5Z"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <circle cx="9.2" cy="11.5" r="1.3" fill="#FF665E" />
+    <circle cx="12" cy="11.5" r="1.3" fill="#12A9A8" />
+    <circle cx="14.8" cy="11.5" r="1.3" fill="#FFCC40" />
+  </svg>
+);

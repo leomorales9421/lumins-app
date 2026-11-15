@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { 
   HelpCircle, 
   AlertCircle, 
@@ -61,7 +61,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; badge: string; icon: Reac
   },
   sugerencia: {
     label: 'Sugerencia',
-    badge: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+    badge: 'bg-[#12A9A8]/10 text-purple-600 dark:text-[#12A9A8] border-[#12A9A8]/20',
     icon: <Lightbulb size={14} />,
   },
   queja: {
@@ -219,7 +219,7 @@ export const SupportTicketsAdmin: React.FC = () => {
       <div className="bg-white dark:bg-[#1C1F26] border border-zinc-200/80 dark:border-white/10 rounded-3xl p-6 shadow-xs">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2 text-[#6C5DD3] font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-[#12A9A8] font-bold text-xs uppercase tracking-widest mb-1">
               <HelpCircle size={16} />
               Soporte y Atención al Usuario
             </div>
@@ -312,7 +312,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                   `}
                 >
                   <span>{labelMap[s]}</span>
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-[#6C5DD3]/10 text-[#6C5DD3]' : 'bg-zinc-200/60 dark:bg-white/5 text-zinc-500'}`}>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-[#12A9A8]/10 text-[#12A9A8]' : 'bg-zinc-200/60 dark:bg-white/5 text-zinc-500'}`}>
                     {countVal}
                   </span>
                 </button>
@@ -351,7 +351,7 @@ export const SupportTicketsAdmin: React.FC = () => {
         {/* Tickets List */}
         {loading && tickets.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-            <Loader2 size={24} className="animate-spin text-[#6C5DD3]" />
+            <Loader2 size={24} className="animate-spin text-[#12A9A8]" />
             <p className="text-xs font-bold text-zinc-400">Cargando tickets de soporte...</p>
           </div>
         ) : tickets.length === 0 ? (
@@ -410,7 +410,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                         <div className="font-extrabold text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-1.5">
                           <span className="truncate">{ticket.subject}</span>
                           {ticket.attachmentUrl && (
-                            <span title={ticket.attachmentName || 'Contiene archivo adjunto'} className="shrink-0 text-[#6C5DD3] bg-[#6C5DD3]/10 p-0.5 rounded">
+                            <span title={ticket.attachmentName || 'Contiene archivo adjunto'} className="shrink-0 text-[#12A9A8] bg-[#12A9A8]/10 p-0.5 rounded">
                               <Paperclip size={12} />
                             </span>
                           )}
@@ -459,7 +459,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                             e.stopPropagation();
                             openTicketDetail(ticket);
                           }}
-                          className="px-3 py-1 rounded-lg text-xs font-bold text-[#6C5DD3] hover:bg-[#6C5DD3]/10 transition-colors"
+                          className="px-3 py-1 rounded-lg text-xs font-bold text-[#12A9A8] hover:bg-[#12A9A8]/10 transition-colors"
                         >
                           Ver Detalle &rarr;
                         </button>
@@ -536,7 +536,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                   <span>·</span>
                   <a 
                     href={`mailto:${selectedTicket.userEmail}?subject=Re: [${selectedTicket.ticketCode}] ${selectedTicket.subject}`}
-                    className="text-[#6C5DD3] dark:text-[#A599F9] hover:underline flex items-center gap-1 font-semibold"
+                    className="text-[#12A9A8] dark:text-[#4fd1cf] hover:underline flex items-center gap-1 font-semibold"
                   >
                     <Mail size={12} />
                     {selectedTicket.userEmail}
@@ -572,7 +572,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                           onClick={() => window.open(selectedTicket.attachmentUrl!, '_blank')}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-[#6C5DD3]/10 text-[#6C5DD3] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center shrink-0">
                           <Paperclip size={18} />
                         </div>
                       )}
@@ -589,7 +589,7 @@ export const SupportTicketsAdmin: React.FC = () => {
                       href={selectedTicket.attachmentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                      className="px-3 py-1.5 rounded-xl bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
                     >
                       <ExternalLink size={13} />
                       <span>Abrir</span>
@@ -657,7 +657,7 @@ export const SupportTicketsAdmin: React.FC = () => {
             <div className="px-6 py-4 bg-zinc-50 dark:bg-black/20 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0">
               <a
                 href={`mailto:${selectedTicket.userEmail}?subject=Re: [${selectedTicket.ticketCode}] ${encodeURIComponent(selectedTicket.subject)}`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb3] text-white text-xs font-extrabold shadow-md shadow-[#6C5DD3]/20 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-xs font-extrabold shadow-md shadow-[#12A9A8]/20 transition-all active:scale-95"
               >
                 <Mail size={14} />
                 <span>Responder por Correo al Usuario</span>

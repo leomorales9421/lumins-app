@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
-import { Bell, Menu, Settings, ChevronDown } from 'lucide-react';
+import { Menu, Settings, ChevronDown } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
+import NotificationsBellMenu from './NotificationsBellMenu';
 import UserAvatar from '../ui/UserAvatar';
-import { useProductUpdates } from '../../contexts/ProductUpdatesContext';
 import { BrandLogo } from '../ui/BrandLogo';
 import WorkspaceSwitcher from '../WorkspaceSwitcher';
 import SupportModal from '../support/SupportModal';
@@ -67,7 +67,6 @@ const NavBar: React.FC<NavBarProps> = ({
   const { workspaceId: urlWorkspaceId } = useParams<{ workspaceId: string }>();
   const effectiveWorkspaceId = urlWorkspaceId === 'global' ? null : urlWorkspaceId;
   const workspaceId = effectiveWorkspaceId || localStorage.getItem('lastActiveWorkspaceId');
-  const { openUpdates, hasUnread } = useProductUpdates();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
@@ -174,22 +173,8 @@ const NavBar: React.FC<NavBarProps> = ({
               canCreateBoard={canCreateBoard}
             />
 
-            {/* Campana de Novedades */}
-            <button
-              type="button"
-              onClick={openUpdates}
-              className="relative p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] transition-all flex items-center justify-center cursor-pointer"
-              title="Novedades y mejoras del sistema"
-              aria-label="Novedades y mejoras"
-            >
-              <Bell size={17} />
-              {hasUnread && (
-                <span className="absolute top-1.5 right-1.5 flex h-2 w-2 pointer-events-none">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF665E] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF665E] ring-2 ring-white dark:ring-[#1C1F26]" />
-                </span>
-              )}
-            </button>
+            {/* Campana de Notificaciones */}
+            <NotificationsBellMenu />
 
             <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 

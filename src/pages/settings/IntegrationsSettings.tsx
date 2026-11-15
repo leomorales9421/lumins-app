@@ -15,6 +15,7 @@ import { GoogleMeetIcon, GoogleDriveIcon } from '../../components/ui/GoogleIcons
 import { toast } from 'sonner';
 import { apiClient } from '../../lib/api-client';
 import { Badge } from '../../components/ui/Badge';
+import { usePlatformSettings } from '../../hooks/usePlatformSettings';
 
 const TrelloIcon = ({ size = 24, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -47,6 +48,13 @@ interface GoogleDriveStatus {
 
 const IntegrationsSettings: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { settings: platformSettings } = usePlatformSettings();
+  const disabledIntegrations = [
+    !platformSettings.integrations.googleCalendar && 'Google Calendar',
+    !platformSettings.integrations.googleMeet && 'Google Meet',
+    !platformSettings.integrations.googleDrive && 'Google Drive',
+    !platformSettings.integrations.trelloImport && 'Trello',
+  ].filter(Boolean) as string[];
 
   // Trello state
   const [trelloToken, setTrelloToken] = useState<string | null>(null);
@@ -387,9 +395,12 @@ const IntegrationsSettings: React.FC = () => {
     }, 800);
   };
 
+  const isDriveEnabled = platformSettings.integrations.googleDrive;
+  const totalAvailableCount = isDriveEnabled ? 4 : 3;
   const connectedCount =
     (gcalStatus.connected ? 1 : 0) +
     (gmeetStatus.connected ? 1 : 0) +
+    (isDriveEnabled && gdriveStatus.connected ? 1 : 0) +
     (trelloToken ? 1 : 0);
 
   return (
@@ -398,7 +409,7 @@ const IntegrationsSettings: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2.5">
           <Badge tone="teal" variant="dot" size="sm">
-            {connectedCount}/3 activas
+            {connectedCount}/{totalAvailableCount} activas
           </Badge>
           <span className="text-xs text-slate-500 dark:text-zinc-400">
             Conecta tus herramientas externas para sincronizar tareas y reuniones.
@@ -406,9 +417,22 @@ const IntegrationsSettings: React.FC = () => {
         </div>
 
         <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500">
-          Próximamente: <strong className="text-slate-600 dark:text-zinc-300">Google Drive, Slack, Jira y GitHub</strong>
+          Próximamente:{' '}
+          <strong className="text-slate-600 dark:text-zinc-300">
+            {isDriveEnabled ? 'Slack, Jira y GitHub' : 'Google Drive, Slack, Jira y GitHub'}
+          </strong>
         </span>
       </div>
+
+      {disabledIntegrations.length > 0 && (
+        <div className="mb-3 px-3.5 py-2.5 rounded-xl bg-[#FFCC40]/12 border border-[#FFCC40]/30 text-xs text-slate-700 dark:text-zinc-200 flex items-center gap-2">
+          <AlertCircle size={15} className="text-[#d99b00] dark:text-[#FFCC40] shrink-0" />
+          <span>
+            Deshabilitadas temporalmente por el administrador:{' '}
+            <strong className="font-bold">{disabledIntegrations.join(', ')}</strong>.
+          </span>
+        </div>
+      )}
 
       {/* Compact 4-column Architectural Grid (scales cleanly for 10+ integrations) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -755,13 +779,23 @@ const IntegrationsSettings: React.FC = () => {
           </div>
         </section>
 
-        {/* 4. GOOGLE DRIVE INTEGRATION (Disabled - Pronto) */}
-        <section className="bg-white/80 dark:bg-[#1C1F26]/70 rounded-xl border border-slate-200/80 dark:border-white/10 p-3.5 flex flex-col justify-between opacity-80">
+        {/* 4. GOOGLE DRIVE INTEGRATION */}
+        <section
+          className={`rounded-xl border p-3.5 flex flex-col justify-between transition-all ${
+            isDriveEnabled
+              ? 'bg-white dark:bg-[#1C1F26] border-slate-200/90 dark:border-white/10 shadow-xs hover:border-[var(--lumins-accent-border)]'
+              : 'bg-white/80 dark:bg-[#1C1F26]/70 border-slate-200/80 dark:border-white/10 opacity-80'
+          }`}
+        >
           <div>
             {/* Card Header */}
             <div className="flex items-start justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-1.5 shrink-0 grayscale-[35%]">
+                <div
+                  className={`w-9 h-9 rounded-lg bg-zinc-50 dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center p-1.5 shrink-0 ${
+                    !isDriveEnabled ? 'grayscale-[35%]' : ''
+                  }`}
+                >
                   <GoogleDriveIcon size={20} />
                 </div>
                 <div className="min-w-0">
@@ -769,31 +803,104 @@ const IntegrationsSettings: React.FC = () => {
                     Google Drive
                   </h3>
                   <div className="mt-0.5">
-                    <Badge variant="dot" tone="amber" size="xs">Pronto</Badge>
+                    {!isDriveEnabled ? (
+                      <Badge variant="dot" tone="amber" size="xs">Deshabilitada</Badge>
+                    ) : isLoadingGdrive ? (
+                      <span className="text-[10px] font-semibold text-zinc-400 inline-flex items-center gap-1">
+                        <Loader2 size={10} className="animate-spin" /> Cargando...
+                      </span>
+                    ) : gdriveStatus.connected ? (
+                      <Badge variant="dot" tone="teal" size="xs">Conectado</Badge>
+                    ) : (
+                      <Badge variant="dot" tone="neutral" size="xs">No vinculado</Badge>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {isDriveEnabled && gdriveStatus.connected && (
+                <a
+                  href="https://drive.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Abrir Google Drive"
+                  className="p-1 rounded-md text-zinc-400 hover:text-[var(--lumins-accent-fg)] hover:bg-[var(--lumins-accent-soft)] transition-colors shrink-0"
+                >
+                  <ExternalLink size={13} />
+                </a>
+              )}
             </div>
 
             {/* Description */}
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-snug line-clamp-2">
               Adjunta documentos, hojas de cálculo y archivos pesados desde Google Drive.
             </p>
+
+            {/* Connected Metadata Pills */}
+            {isDriveEnabled && gdriveStatus.connected && gdriveStatus.accountEmail && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100/80 dark:bg-white/5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/70 dark:border-white/10 max-w-full truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="truncate">{gdriveStatus.accountEmail}</span>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Card Footer Actions */}
           <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between gap-2">
             <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
-              En desarrollo
+              {!isDriveEnabled
+                ? 'Inactiva por plataforma'
+                : gdriveStatus.connected
+                ? 'Archivos en la nube'
+                : 'Adjuntos directos'}
             </span>
 
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center justify-center h-7 px-3 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500 border border-slate-200/70 dark:border-white/10 cursor-not-allowed"
-            >
-              Pronto
-            </button>
+            {!isDriveEnabled ? (
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center justify-center h-7 px-3 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500 border border-slate-200/70 dark:border-white/10 cursor-not-allowed"
+              >
+                Inactiva
+              </button>
+            ) : gdriveStatus.connected ? (
+              <button
+                type="button"
+                onClick={handleUnlinkGoogleDrive}
+                disabled={isUnlinkingGdrive}
+                className="inline-flex items-center justify-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-bold text-zinc-500 hover:text-[#D94841] bg-zinc-100/80 hover:bg-[#FF665E]/10 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                {isUnlinkingGdrive ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <>
+                    <Link2Off size={11} />
+                    <span>Desvincular</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConnectGoogleDrive}
+                disabled={isConnectingGdrive || isLoadingGdrive}
+                className="inline-flex items-center justify-center gap-1 h-7 px-3 rounded-lg text-[11px] font-bold bg-[var(--lumins-accent)] hover:bg-[var(--lumins-accent-hover)] text-[var(--lumins-accent-on)] shadow-2xs active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                {isConnectingGdrive ? (
+                  <>
+                    <Loader2 size={11} className="animate-spin" />
+                    <span>Conectando</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Vincular</span>
+                    <ArrowRight size={11} />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </section>
       </div>

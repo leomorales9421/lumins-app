@@ -88,6 +88,17 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   onScheduled,
 }) => {
   const navigate = useNavigate();
+  const [isMeetGloballyDisabled, setIsMeetGloballyDisabled] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    apiClient
+      .get<{ data: { integrations?: { googleMeet?: boolean } } }>('/api/system/settings/public')
+      .then((res) => {
+        setIsMeetGloballyDisabled(res?.data?.integrations?.googleMeet === false);
+      })
+      .catch(() => {});
+  }, [isOpen]);
 
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isMeetConnected, setIsMeetConnected] = useState(false);
@@ -369,7 +380,28 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
           </button>
         </div>
 
-        {isCheckingStatus ? (
+        {isMeetGloballyDisabled ? (
+          <div className="p-7 text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#FF665E]/12 text-[#FF665E] flex items-center justify-center mx-auto">
+              <GoogleMeetIcon size={24} />
+            </div>
+            <div className="space-y-1.5 max-w-sm mx-auto">
+              <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100">
+                Google Meet deshabilitado
+              </h4>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                El administrador de la plataforma deshabilitó temporalmente la programación de reuniones con Google Meet.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-white/10 text-xs font-bold text-zinc-700 dark:text-zinc-200 cursor-pointer"
+            >
+              Cerrar
+            </button>
+          </div>
+        ) : isCheckingStatus ? (
           <div className="p-10 flex flex-col items-center justify-center gap-3">
             <LuminsLogoLoader size="xs" />
             <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
