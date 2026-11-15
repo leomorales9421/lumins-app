@@ -100,10 +100,11 @@ export const V2FeatureOnboardingModal: React.FC = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.98 }}
           transition={{ duration: 0.22 }}
-          className="relative w-full max-w-xl bg-white dark:bg-[#181B22] rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden z-10"
+          className="relative w-full max-w-xl bg-white dark:bg-[#181B22] rounded-t-[28px] sm:rounded-3xl shadow-2xl border-t sm:border border-zinc-200 dark:border-white/10 overflow-hidden z-10 max-h-[90dvh] overflow-y-auto pb-[env(safe-area-inset-bottom)]"
         >
           {/* Barra tricolor Lumins V2 */}
           <div className="h-1.5 w-full bg-gradient-to-r from-[#FF665E] via-[#12A9A8] to-[#FFCC40]" />
+          <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mt-2.5 sm:hidden" />
 
           {/* Header */}
           <div className="px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between">

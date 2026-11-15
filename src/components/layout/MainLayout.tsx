@@ -284,6 +284,17 @@ const MainLayout: React.FC<MainLayoutProps> = () => {
     }
   }, [workspaceId, isLoadingWorkspaces, workspaces]);
 
+  // Sync onboarding/theme busy gate so ProductUpdatesModal only opens AFTER Stepper -> Theme
+  useEffect(() => {
+    const waitingForAutoOnboarding =
+      !isLoadingWorkspaces && workspaces.length === 0 && !!user?.id && !hasAutoOpenedOnboardingRef.current;
+    const isBusy = isLoadingWorkspaces || showOnboardingModal || showThemeModal || waitingForAutoOnboarding;
+    (window as any).__luminsOnboardingBusy = isBusy;
+    if (!isBusy && user?.id) {
+      window.dispatchEvent(new CustomEvent('lumins-updates-ready'));
+    }
+  }, [isLoadingWorkspaces, showOnboardingModal, showThemeModal, workspaces.length, user?.id]);
+
   // Check if user has 0 workspaces and automatically show onboarding
   useEffect(() => {
     if (!isLoadingWorkspaces && workspaces.length === 0 && user?.id) {

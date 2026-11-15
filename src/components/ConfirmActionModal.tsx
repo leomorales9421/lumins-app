@@ -135,7 +135,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="confirm-modal-title"
@@ -151,12 +151,14 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.94, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            exit={{ opacity: 0, scale: 0.96, y: 24 }}
             transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[380px] rounded-[28px] border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-[#191C23]/95 backdrop-blur-xl shadow-[0_24px_60px_-15px_rgba(0,0,0,0.32)] p-6 sm:p-7 text-center overflow-hidden"
+            className="relative w-full sm:max-w-[380px] rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-[#191C23]/95 backdrop-blur-xl shadow-[0_24px_60px_-15px_rgba(0,0,0,0.32)] px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-7 text-center overflow-hidden"
           >
+            {/* Pull handle nativo en mobile */}
+            <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-zinc-700 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             {/* Línea sutil tricolor en borde superior */}
             <div
               className="absolute top-0 inset-x-0 h-[2px] opacity-80"

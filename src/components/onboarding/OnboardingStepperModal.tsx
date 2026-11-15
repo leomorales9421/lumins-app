@@ -196,6 +196,9 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
       } catch { }
     }
     onClose();
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('open-theme-picker', { detail: { isPostOnboarding: true } }));
+    }, 280);
   };
 
   // Final Action: Create real workspace, board, lists and card
@@ -954,8 +957,13 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                       </p>
                     </div>
 
+                    {/* Hint claro para mobile */}
+                    <div className="sm:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#12A9A8]/10 border border-[#12A9A8]/25 text-[#0E8786] text-[11px] font-semibold">
+                      Toca cada herramienta para ver cómo se conecta con Lumins
+                    </div>
+
                     {/* Central Diagram with Real Logos and Doodle Arrows */}
-                    <div className="w-full max-w-3xl relative py-3 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-0">
+                    <div className="w-full max-w-3xl relative py-1 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
 
                       {/* Left: Trello Card & Arrow */}
                       <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
@@ -981,11 +989,15 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                           </button>
                         </div>
 
-                        {/* Arrow pointing right */}
+                        {/* Arrow pointing right (desktop) & down connector (mobile) */}
                         <svg className="w-16 h-8 text-slate-400 overflow-visible hidden sm:block" viewBox="0 0 60 30" fill="none">
                           <path d="M 5 20 Q 30 5 55 15" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
                           <polygon points="55,10 60,16 53,18" fill="currentColor" />
                         </svg>
+                        <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-bold text-[#0079BF] py-0.5">
+                          <span>↓</span>
+                          <span>Importa tus tarjetas a Lumins</span>
+                        </div>
                       </div>
 
                       {/* Center: Lumins Board List */}
@@ -1036,7 +1048,11 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
 
                       {/* Right: Google Calendar Card & Arrow */}
                       <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
-                        <div className="bg-white border border-slate-200/90 p-4 rounded-2xl shadow-md flex flex-col items-center text-center w-full sm:w-48 hover:border-emerald-500 hover:shadow-lg transition-all group">
+                        <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-bold text-emerald-600 py-0.5">
+                          <span>↑</span>
+                          <span>Sincroniza fechas con tu tablero</span>
+                        </div>
+                        <div className="bg-white border border-slate-200/90 p-3.5 sm:p-4 rounded-2xl shadow-md flex flex-col items-center text-center w-full sm:w-48 hover:border-emerald-500 hover:shadow-lg transition-all group">
                           <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-2 shadow-inner">
                             <GoogleCalendarIcon size={24} />
                           </div>
@@ -1100,11 +1116,12 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                   {/* Modern Minimalist Guide Indicator */}
                   {!cardDropped ? (
                     <Alert variant="pill" tone="coral" title="Paso 1" pulse>
-                      Haz clic o arrastra la tarjeta a cualquier columna
+                      <span className="lg:hidden">Toca la tarjeta o una columna para moverla</span>
+                      <span className="hidden lg:inline">Haz clic o arrastra la tarjeta a cualquier columna</span>
                     </Alert>
                   ) : !isMarkedDone ? (
                     <Alert variant="pill" tone="amber" title="Paso 2" pulse>
-                      Toca la casilla en la tarjeta para marcarla como lista
+                      Toca el círculo junto al título para completarla
                     </Alert>
                   ) : (
                     <Alert variant="pill" tone="teal" title="Completado">
@@ -1154,8 +1171,9 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                               <span className="flex items-center gap-1 text-slate-600 whitespace-nowrap">
                                 <Clock size={10} className="text-slate-400" /> 18 nov
                               </span>
-                              <span className="text-[#12A9A8] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-0.5 text-[10px] whitespace-nowrap">
-                                <span>Mover</span> →
+                              <span className="text-[#12A9A8] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1 text-[10px] whitespace-nowrap">
+                                <span className="lg:hidden px-1.5 py-0.5 rounded bg-[#12A9A8]/10 animate-pulse">Toca para mover →</span>
+                                <span className="hidden lg:inline">Mover →</span>
                               </span>
                             </div>
                           </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Monitor, Palette, Check, Loader2, Sparkles } from 'lucide-react';
+import { Sun, Moon, Monitor, Palette, Check, Loader2 } from 'lucide-react';
+import { LuminsGuidedIcon } from './icons/LuminsIcons';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
@@ -112,9 +113,9 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
       id: 'dark',
       label: 'Modo Oscuro',
       sublabel: 'Descanso visual con tonos oscuros',
-      icon: <Moon size={20} className="text-indigo-400" />,
+      icon: <Moon size={20} className="text-[#4ED4D2]" />,
       previewBg: 'bg-[#13151A] border-zinc-800',
-      accentColor: 'border-[#6C5DD3] bg-indigo-500/10 text-indigo-400',
+      accentColor: 'border-[#12A9A8] bg-[#12A9A8]/10 text-[#4ED4D2]',
     },
     {
       id: 'system',
@@ -151,7 +152,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
 
           {/* Header */}
           <div className="flex items-center gap-3.5 mb-5 pb-4 border-b border-zinc-100 dark:border-white/10">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#6C5DD3] to-[#8E82E3] text-white flex items-center justify-center shadow-md shadow-[#6C5DD3]/20 shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#12A9A8] to-[#0E8786] text-white flex items-center justify-center shadow-md shadow-[#12A9A8]/25 shrink-0">
               <Palette size={22} strokeWidth={2.2} />
             </div>
             <div>
@@ -160,12 +161,12 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
                   Elige tu Apariencia
                 </h3>
                 {isPostOnboarding && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold flex items-center gap-1">
-                    <Sparkles size={10} /> Nuevo
+                  <span className="px-2 py-0.5 rounded-full bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#4ED4D2] border border-[#12A9A8]/20 text-[10px] font-extrabold inline-flex items-center gap-1">
+                    <LuminsGuidedIcon size={11} active /> Nuevo
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
+              <p className="text-xs text-zinc-500 dark:text-zinc-300 font-medium mt-0.5">
                 Toca una opción para previsualizar el cambio en tiempo real.
               </p>
             </div>
@@ -181,10 +182,10 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => handleSelectTheme(opt.id)}
-                  className={`w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left active:scale-[0.98] ${
+                  className={`w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left active:scale-[0.98] cursor-pointer ${
                     isSelected
-                      ? 'border-[#6C5DD3] bg-[#6C5DD3]/5 dark:bg-[#6C5DD3]/15 shadow-sm ring-2 ring-[#6C5DD3]/20'
-                      : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-zinc-50/50 dark:bg-white/[0.02]'
+                      ? 'border-[#12A9A8] bg-[#12A9A8]/[0.06] dark:bg-[#12A9A8]/[0.14] shadow-sm ring-2 ring-[#12A9A8]/20'
+                      : 'border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 bg-zinc-50/50 dark:bg-white/[0.03]'
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -195,11 +196,11 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
 
                     <div className="min-w-0">
                       <div className={`text-sm font-extrabold truncate ${
-                        isSelected ? 'text-[#6C5DD3] dark:text-white' : 'text-zinc-900 dark:text-zinc-100'
+                        isSelected ? 'text-[#0E8786] dark:text-[#4ED4D2]' : 'text-zinc-900 dark:text-zinc-100'
                       }`}>
                         {opt.label}
                       </div>
-                      <div className="text-xs text-zinc-400 dark:text-zinc-500 font-medium truncate">
+                      <div className="text-xs text-zinc-500 dark:text-zinc-300/80 font-medium truncate">
                         {opt.sublabel}
                       </div>
                     </div>
@@ -208,7 +209,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
                   {/* Radio / Checkmark Indicator */}
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all shrink-0 ml-2 ${
                     isSelected
-                      ? 'bg-[#6C5DD3] border-[#6C5DD3] text-white shadow-sm'
+                      ? 'bg-[#12A9A8] border-[#12A9A8] text-white shadow-sm'
                       : 'border-zinc-300 dark:border-zinc-600 bg-transparent'
                   }`}>
                     {isSelected && <Check size={13} strokeWidth={3} className="text-white" />}
@@ -224,7 +225,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
               type="button"
               onClick={handleCancel}
               disabled={isSaving}
-              className="flex-1 py-3 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors text-center"
+              className="flex-1 py-3 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors text-center cursor-pointer"
             >
               Mantener actual ({initialThemeRef.current === 'dark' ? 'Oscuro' : initialThemeRef.current === 'light' ? 'Claro' : 'Automático'})
             </button>
@@ -232,7 +233,7 @@ export const ThemePreferenceModal: React.FC<ThemePreferenceModalProps> = ({
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#6C5DD3] hover:bg-[#5b4eb8] text-white text-xs font-extrabold transition-all shadow-lg shadow-[#6C5DD3]/25 active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-extrabold transition-all shadow-lg shadow-[#12A9A8]/25 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? (
                 <>

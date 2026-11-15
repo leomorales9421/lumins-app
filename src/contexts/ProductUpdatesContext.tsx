@@ -92,11 +92,46 @@ export const ProductUpdatesProvider: React.FC<{ children: React.ReactNode }> = (
     setHasUnread(queue.length > 0);
 
     if (queue.length > 0) {
-      // Abrir solo la más vieja no leída (nunca modales juntos)
-      nextTimerRef.current = window.setTimeout(() => {
-        setActiveReleaseId(queue[0].id);
+      const tryOpenNext = () => {
+        const path = window.location.pathname;
+        const isAuthRoute =
+          path.startsWith('/login') ||
+          path.startsWith('/register') ||
+          path.startsWith('/auth/callback') ||
+          path.startsWith('/forgot-password') ||
+          path.startsWith('/reset-password');
+        const isOnboardingBusy = Boolean((window as any).__luminsOnboardingBusy);
+
+        if (isAuthRoute || isOnboardingBusy || pendingQueueRef.current.length === 0) {
+          return false;
+        }
+
+        setActiveReleaseId(pendingQueueRef.current[0].id);
         setIsOpen(true);
+        return true;
+      };
+
+      // Esperar a que termine el onboarding/theme si está activo, o abrir tras 650ms
+      nextTimerRef.current = window.setTimeout(() => {
+        tryOpenNext();
       }, 650);
+
+      const onUpdatesReady = () => {
+        if (nextTimerRef.current) {
+          window.clearTimeout(nextTimerRef.current);
+        }
+        nextTimerRef.current = window.setTimeout(() => {
+          tryOpenNext();
+        }, 420);
+      };
+
+      window.addEventListener('lumins-updates-ready', onUpdatesReady);
+      return () => {
+        if (nextTimerRef.current) {
+          window.clearTimeout(nextTimerRef.current);
+        }
+        window.removeEventListener('lumins-updates-ready', onUpdatesReady);
+      };
     }
 
     return () => {
