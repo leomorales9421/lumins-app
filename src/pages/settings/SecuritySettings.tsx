@@ -4,7 +4,6 @@ import { Badge } from '../../components/ui/Badge';
 import { LuminsTrashIcon } from '../../components/icons/LuminsIcons';
 import LuminsLogoLoader from '../../components/ui/LuminsLogoLoader';
 import apiClient from '../../lib/api-client';
-import { useModuleLoading } from '../../contexts/NavigationLoaderContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ConfirmActionModal from '../../components/ConfirmActionModal';
@@ -51,7 +50,6 @@ const SecuritySettings: React.FC = () => {
   // Sessions state
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
-  useModuleLoading(sessionsLoading, 'settings-security');
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
   const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false);
