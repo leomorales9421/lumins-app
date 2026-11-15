@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import AmbientBackground from '../components/layout/AmbientBackground';
 import BrandLogo from '../components/ui/BrandLogo';
 import { LuminsLogoLoader } from '../components/ui/LuminsLogoLoader';
+import { LuminsSuccessIcon } from '../components/icons/LuminsIcons';
 import { OtpInput } from '../components/auth/OtpInput';
 import { CountryPhoneInput, type CountryOption, COUNTRIES_LIST } from '../components/auth/CountryPhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -624,9 +625,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ initialStep }) => {
                 transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="w-full max-w-[400px] mx-auto md:mx-0"
               >
-                <div className="mb-6">
-                  <div className="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 border border-emerald-100">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div className="mb-6 text-center">
+                  <div className="w-14 h-14 bg-[#12A9A8]/10 border border-[#12A9A8]/25 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <LuminsSuccessIcon size={28} />
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-2">
                     ¡Revisa tu bandeja de entrada!

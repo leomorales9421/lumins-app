@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Lock, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Lock, ArrowLeft, AlertCircle } from 'lucide-react';
+import { LuminsSuccessIcon } from '../components/icons/LuminsIcons';
 import Button from '../components/ui/Button';
 import apiClient from '../lib/api-client';
 import AmbientBackground from '../components/layout/AmbientBackground';
@@ -161,8 +162,8 @@ const ResetPasswordPage: React.FC = () => {
                 transition={{ duration: 0.16, ease: 'easeOut' }}
                 className="text-center py-4 w-full max-w-[400px] mx-auto md:mx-0"
               >
-                <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-[14px] flex items-center justify-center mx-auto mb-5 border border-emerald-100">
-                  <CheckCircle2 size={28} />
+                <div className="w-14 h-14 bg-[#12A9A8]/10 border border-[#12A9A8]/25 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                  <LuminsSuccessIcon size={28} />
                 </div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">¡Contraseña actualizada!</h2>
                 <p className="text-sm text-slate-500 mb-6 leading-relaxed">
