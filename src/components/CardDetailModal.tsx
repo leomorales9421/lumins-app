@@ -961,7 +961,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       )}
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#13151A]/60 backdrop-blur-sm transition-opacity"
+        className={`fixed inset-0 bg-[#13151A]/60 backdrop-blur-sm transition-opacity ${
+          isMeetModalOpen || isDriveModalOpen ? 'hidden' : ''
+        }`}
         onClick={onClose}
       />
 
@@ -969,7 +971,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       <motion.div
         layout
         layoutRoot
-        className="relative w-full sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[86vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:animate-in sm:fade-in sm:zoom-in sm:duration-200 border-t sm:border border-zinc-200 dark:border-white/10"
+        className={`relative w-full sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[86vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 sm:animate-in sm:fade-in sm:zoom-in sm:duration-200 border-t sm:border border-zinc-200 dark:border-white/10 ${
+          isMeetModalOpen || isDriveModalOpen ? 'hidden' : ''
+        }`}
       >
         
         {/* Mobile Pull/Drag Indicator Pill */}
@@ -2209,6 +2213,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
           <GoogleMeetScheduleModal
             isOpen={isMeetModalOpen}
             onClose={() => setIsMeetModalOpen(false)}
+            backLabel="Volver a la tarjeta"
             cardId={cardId}
             cardTitle={card?.title || displayTitle}
             defaultDate={card?.dueDate || card?.startDate || null}

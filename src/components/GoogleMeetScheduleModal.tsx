@@ -3,6 +3,7 @@ import LuminsLogoLoader from './ui/LuminsLogoLoader';
 import { format, parseISO } from 'date-fns';
 import {
   X,
+  ArrowLeft,
   Users,
   Mail,
   Plus,
@@ -12,7 +13,6 @@ import {
   Clock,
   Loader2,
   Trash2,
-  Sparkles,
   ExternalLink,
   Copy,
 } from 'lucide-react';
@@ -64,6 +64,7 @@ interface GoogleMeetScheduleModalProps {
   }>;
   existingMeeting?: CardMeetingData | null;
   onScheduled: (meetingData: CardMeetingData | null) => void;
+  backLabel?: string;
 }
 
 const DURATION_OPTIONS = [
@@ -86,6 +87,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   assignees,
   existingMeeting,
   onScheduled,
+  backLabel,
 }) => {
   const navigate = useNavigate();
   const [isMeetGloballyDisabled, setIsMeetGloballyDisabled] = useState(false);
@@ -357,6 +359,16 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
         {/* Header */}
         <div className="px-5 py-4 border-b border-zinc-100 dark:border-white/10 flex items-center justify-between bg-zinc-50/60 dark:bg-black/20">
           <div className="flex items-center gap-3 min-w-0">
+            {backLabel && (
+              <button
+                type="button"
+                onClick={onClose}
+                title={backLabel}
+                className="p-1.5 -ml-1 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+              >
+                <ArrowLeft size={16} />
+              </button>
+            )}
             <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs">
               <GoogleMeetIcon size={20} />
             </div>
@@ -372,7 +384,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -420,33 +432,35 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
-              {canQuickLink && (
+            <div className="flex items-center justify-center pt-2">
+              {canQuickLink ? (
                 <button
                   type="button"
                   onClick={handleQuickActivate}
                   disabled={isActivatingQuickLink}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
                 >
                   {isActivatingQuickLink ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Sparkles size={14} />
+                    <GoogleMeetIcon size={15} />
                   )}
-                  <span>Activar ahora con mi cuenta de Calendar</span>
+                  <span>Activar Google Meet</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    navigate('/settings/integrations');
+                  }}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all whitespace-nowrap cursor-pointer"
+                >
+                  <GoogleMeetIcon size={15} />
+                  <span>Vincular Google Meet</span>
+                  <ExternalLink size={13} />
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  navigate('/settings/integrations');
-                }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 transition-all"
-              >
-                <span>Ir a Configuración &gt; Integraciones</span>
-                <ExternalLink size={13} />
-              </button>
             </div>
           </div>
         ) : (
@@ -734,7 +748,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting || isRemoving}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
