@@ -109,14 +109,23 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
   const [isActivatingQuickLink, setIsActivatingQuickLink] = useState(false);
 
   const [dateStr, setDateStr] = useState<string>(() => {
-    const source = existingMeeting?.scheduledStart || defaultDate;
-    if (source) {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    if (existingMeeting?.scheduledStart) {
       try {
-        const d = parseISO(source);
+        const d = parseISO(existingMeeting.scheduledStart);
         if (!isNaN(d.getTime())) return format(d, 'yyyy-MM-dd');
       } catch {}
     }
-    return format(new Date(), 'yyyy-MM-dd');
+    if (defaultDate) {
+      try {
+        const d = parseISO(defaultDate);
+        if (!isNaN(d.getTime())) {
+          const formatted = format(d, 'yyyy-MM-dd');
+          return formatted >= todayStr ? formatted : todayStr;
+        }
+      } catch {}
+    }
+    return todayStr;
   });
 
   const [startTime12h, setStartTime12h] = useState<string>(() => {
