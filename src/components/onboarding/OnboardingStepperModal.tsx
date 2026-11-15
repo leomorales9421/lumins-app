@@ -36,6 +36,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api-client';
 import { useAuth } from '../../contexts/AuthContext';
 import { GoogleCalendarIcon } from '../ui/GoogleCalendarIcon';
+import { GoogleMeetIcon } from '../ui/GoogleIcons';
 import { BrandLogo } from '../ui/BrandLogo';
 import {
   BOARD_BACKGROUND_PRESETS,
@@ -106,7 +107,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
   const [createdCards, setCreatedCards] = useState<string[]>(['Planificar objetivos del equipo']);
   const [selectedPriority, setSelectedPriority] = useState<'P0' | 'P1' | 'P2' | 'P3'>('P1');
   const [trelloImportTested, setTrelloImportTested] = useState(false);
-  const [googleCalendarSyncTested, setGoogleCalendarSyncTested] = useState(false);
+  const [googleCalendarSyncTested, setGoogleCalendarSyncTested] = useState(true);
+  const [googleMeetSyncTested, setGoogleMeetSyncTested] = useState(true);
   const [droppedCol, setDroppedCol] = useState<number | null>(null);
   const cardDropped = droppedCol !== null;
   const [isMarkedDone, setIsMarkedDone] = useState(false);
@@ -142,7 +144,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
       setCreatedCards(['Planificar objetivos del equipo']);
       setSelectedPriority('P1');
       setTrelloImportTested(false);
-      setGoogleCalendarSyncTested(false);
+      setGoogleCalendarSyncTested(true);
+      setGoogleMeetSyncTested(true);
       setDroppedCol(null);
       setIsDragging(false);
       setDragSource(null);
@@ -939,7 +942,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                 )}
 
                 {/* ═════════════════════════════════════════════════════════════ */}
-                {/* STEP 3: CONECTA TRELLO Y GOOGLE CALENDAR (CON LOGOS REALES) */}
+                {/* STEP 3: CONECTA GOOGLE MEET Y GOOGLE CALENDAR (COMPACTO MOBILE) */}
                 {/* ═════════════════════════════════════════════════════════════ */}
                 {currentStep === 3 && (
                   <motion.div
@@ -948,141 +951,147 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -15 }}
                     transition={{ duration: 0.35 }}
-                    className="w-full max-w-4xl flex flex-col items-center text-center space-y-6"
+                    className="w-full max-w-lg flex flex-col items-center text-center space-y-4 sm:space-y-5"
                   >
-                    <div className="space-y-2 max-w-xl px-2">
-                      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-                        Reúne todas tus tareas en Lumins
+                    <div className="space-y-1.5 max-w-md px-2">
+                      <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+                        Conecta Meet y Calendar
                       </h1>
                       <p className="text-slate-600 text-xs sm:text-sm font-normal leading-relaxed">
-                        Conecta tus herramientas favoritas para importar proyectos existentes y sincronizar tus fechas de entrega.
+                        Sincroniza fechas y agenda videollamadas directo desde cada tarjeta de Lumins.
                       </p>
                     </div>
 
-                    {/* Hint claro para mobile */}
-                    <div className="sm:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#12A9A8]/10 border border-[#12A9A8]/25 text-[#0E8786] text-[11px] font-semibold">
-                      Toca cada herramienta para ver cómo se conecta con Lumins
-                    </div>
-
-                    {/* Central Diagram with Real Logos and Doodle Arrows */}
-                    <div className="w-full max-w-3xl relative py-1 sm:py-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
-
-                      {/* Left: Trello Card & Arrow */}
-                      <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
-                        <div className="bg-white border border-slate-200/90 p-4 rounded-2xl shadow-md flex flex-col items-center text-center w-full sm:w-48 hover:border-[#0079BF] hover:shadow-lg transition-all group">
-                          <div className="w-11 h-11 rounded-xl bg-[#0079BF]/10 flex items-center justify-center mb-2 shadow-inner">
-                            <TrelloLogo size={24} />
+                    {/* Single Compact Mobile-Native Interactive Card */}
+                    <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-5 shadow-lg shadow-slate-200/50 text-left space-y-3">
+                      {/* Live Card Preview */}
+                      <div className="bg-slate-50 border border-[#12A9A8]/35 rounded-xl p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="w-2 h-2 rounded-full bg-[#12A9A8] shrink-0" />
+                            <span className="text-xs font-bold text-slate-900 truncate">
+                              {mainCardTitle}
+                            </span>
                           </div>
-                          <div className="font-bold text-xs text-slate-800">Trello</div>
-                          <div className="text-[10px] text-slate-500 mb-2.5">Importador Nativo</div>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTrelloImportTested(true);
-                              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
-                            }}
-                            className={`text-[10px] font-bold px-3 py-1 rounded-md transition-all w-full sm:w-auto cursor-pointer ${trelloImportTested
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-[#0079BF] text-white hover:bg-[#026AA7]'
-                              }`}
-                          >
-                            {trelloImportTested ? '✓ Disponible' : 'Probar Trello'}
-                          </button>
-                        </div>
-
-                        {/* Arrow pointing right (desktop) & down connector (mobile) */}
-                        <svg className="w-16 h-8 text-slate-400 overflow-visible hidden sm:block" viewBox="0 0 60 30" fill="none">
-                          <path d="M 5 20 Q 30 5 55 15" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
-                          <polygon points="55,10 60,16 53,18" fill="currentColor" />
-                        </svg>
-                        <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-bold text-[#0079BF] py-0.5">
-                          <span>↓</span>
-                          <span>Importa tus tarjetas a Lumins</span>
-                        </div>
-                      </div>
-
-                      {/* Center: Lumins Board List */}
-                      <div className="w-full sm:w-64 sm:mx-4 bg-white border-2 border-[#12A9A8] shadow-xl shadow-[#12A9A8]/15 rounded-2xl p-4 text-left relative z-10">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-800">
-                            <span className="w-2 h-2 rounded-full bg-[#12A9A8]" />
-                            <span>Tablero Lumins</span>
-                          </div>
-                          <span className="text-[10px] font-semibold text-[#12A9A8] bg-[#12A9A8]/10 border border-[#12A9A8]/30 px-2.5 py-0.5 rounded-full">
-                            En vivo
+                          <span className="text-[10px] font-bold text-[#0E8786] bg-[#12A9A8]/10 border border-[#12A9A8]/25 px-2 py-0.5 rounded-full shrink-0">
+                            Vista previa
                           </span>
                         </div>
 
-                        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 space-y-2">
-                          <div className="text-xs font-bold text-slate-900 truncate">
-                            {mainCardTitle}
-                          </div>
-
-                          {trelloImportTested && (
-                            <motion.div
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="text-[10px] bg-[#0079BF]/10 border border-[#0079BF]/20 text-[#0079BF] px-2 py-1 rounded-md flex items-center gap-1.5 font-medium"
-                            >
-                              <TrelloLogo size={12} />
-                              <span>Tarjeta importada de Trello</span>
-                            </motion.div>
-                          )}
-
+                        <AnimatePresence initial={false}>
                           {googleCalendarSyncTested && (
                             <motion.div
-                              initial={{ opacity: 0, x: 10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="text-[10px] bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-1 rounded-md flex items-center gap-1.5 font-medium"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden"
                             >
-                              <GoogleCalendarIcon size={12} />
-                              <span>Sincronizado con GCalendar</span>
+                              <div className="text-[11px] bg-white border border-slate-200/80 text-slate-700 px-2.5 py-1.5 rounded-lg flex items-center justify-between gap-2 font-medium">
+                                <span className="flex items-center gap-1.5 truncate">
+                                  <GoogleCalendarIcon size={13} />
+                                  <span className="truncate">Sincronizado con Google Calendar</span>
+                                </span>
+                                <span className="text-[10px] font-bold text-[#0E8786] shrink-0">18 nov</span>
+                              </div>
                             </motion.div>
                           )}
+                        </AnimatePresence>
 
-                          <div className="pt-1.5 flex items-center justify-between text-[10px] border-t border-slate-200/60 font-medium">
-                            <span className="text-[#FF665E] bg-[#FF665E]/10 px-1.5 py-0.5 rounded border border-[#FF665E]/20 font-semibold">Prioridad P1</span>
-                            <span className="text-amber-800 bg-[#FFCC40]/15 px-1.5 py-0.5 rounded border border-[#FFCC40]/25 font-semibold">Vence en 3 días</span>
-                          </div>
-                        </div>
+                        <AnimatePresence initial={false}>
+                          {googleMeetSyncTested && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="text-[11px] bg-white border border-[#12A9A8]/30 text-slate-800 px-2.5 py-1.5 rounded-lg flex items-center justify-between gap-2 font-medium">
+                                <span className="flex items-center gap-1.5 truncate">
+                                  <GoogleMeetIcon size={13} />
+                                  <span className="truncate font-semibold">Google Meet · 10:00 AM</span>
+                                </span>
+                                <span className="px-2 py-0.5 rounded-md bg-[#12A9A8] text-white text-[10px] font-bold shrink-0">
+                                  Unirse
+                                </span>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {!googleCalendarSyncTested && !googleMeetSyncTested && (
+                          <p className="text-[11px] text-slate-400 italic py-0.5">
+                            Activa una integración abajo para verla en tu tarjeta
+                          </p>
+                        )}
                       </div>
 
-                      {/* Right: Google Calendar Card & Arrow */}
-                      <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
-                        <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-bold text-emerald-600 py-0.5">
-                          <span>↑</span>
-                          <span>Sincroniza fechas con tu tablero</span>
-                        </div>
-                        <div className="bg-white border border-slate-200/90 p-3.5 sm:p-4 rounded-2xl shadow-md flex flex-col items-center text-center w-full sm:w-48 hover:border-emerald-500 hover:shadow-lg transition-all group">
-                          <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-2 shadow-inner">
-                            <GoogleCalendarIcon size={24} />
+                      {/* Native-style Toggle Rows */}
+                      <div className="space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGoogleCalendarSyncTested((v) => !v);
+                            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                          }}
+                          className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                            googleCalendarSyncTested
+                              ? 'bg-[#12A9A8]/[0.06] border-[#12A9A8]/35'
+                              : 'bg-slate-50/70 border-slate-200/80 hover:bg-slate-100/80'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                              <GoogleCalendarIcon size={18} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-slate-900">Google Calendar</div>
+                              <div className="text-[11px] text-slate-500 truncate">Sincroniza fechas y recordatorios</div>
+                            </div>
                           </div>
-                          <div className="font-bold text-xs text-slate-800">Google Calendar</div>
-                          <div className="text-[10px] text-slate-500 mb-2.5">Sincronización Bidireccional</div>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setGoogleCalendarSyncTested(true);
-                              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
-                            }}
-                            className={`text-[10px] font-bold px-3 py-1 rounded-md transition-all w-full sm:w-auto cursor-pointer ${googleCalendarSyncTested
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                              }`}
+                          <span
+                            className={`w-10 h-6 rounded-full p-0.5 transition-colors shrink-0 flex items-center ${
+                              googleCalendarSyncTested ? 'bg-[#12A9A8] justify-end' : 'bg-slate-300 justify-start'
+                            }`}
                           >
-                            {googleCalendarSyncTested ? '✓ Sincronizado' : 'Probar GCalendar'}
-                          </button>
-                        </div>
+                            <span className="w-5 h-5 rounded-full bg-white shadow-xs" />
+                          </span>
+                        </button>
 
-                        {/* Arrow pointing left */}
-                        <svg className="w-16 h-8 text-slate-400 overflow-visible hidden sm:block" viewBox="0 0 60 30" fill="none">
-                          <path d="M 55 20 Q 30 5 5 15" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
-                          <polygon points="5,10 0,16 7,18" fill="currentColor" />
-                        </svg>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGoogleMeetSyncTested((v) => !v);
+                            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                          }}
+                          className={`w-full flex items-center justify-between gap-3 p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                            googleMeetSyncTested
+                              ? 'bg-[#12A9A8]/[0.06] border-[#12A9A8]/35'
+                              : 'bg-slate-50/70 border-slate-200/80 hover:bg-slate-100/80'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                              <GoogleMeetIcon size={18} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-slate-900">Google Meet</div>
+                              <div className="text-[11px] text-slate-500 truncate">Agenda llamadas desde tus tarjetas</div>
+                            </div>
+                          </div>
+                          <span
+                            className={`w-10 h-6 rounded-full p-0.5 transition-colors shrink-0 flex items-center ${
+                              googleMeetSyncTested ? 'bg-[#12A9A8] justify-end' : 'bg-slate-300 justify-start'
+                            }`}
+                          >
+                            <span className="w-5 h-5 rounded-full bg-white shadow-xs" />
+                          </span>
+                        </button>
                       </div>
 
+                      <div className="flex items-center justify-center gap-1.5 pt-0.5 text-[11px] text-slate-500">
+                        <TrelloLogo size={12} />
+                        <span>También puedes importar tableros de Trello en cualquier momento.</span>
+                      </div>
                     </div>
 
                     <button
