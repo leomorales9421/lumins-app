@@ -201,15 +201,15 @@ export const ProductUpdatesModal: React.FC = () => {
 
           {/* Footer con botones de acción estilo App Nativa */}
           <div className="py-2.5 sm:py-4 px-4 sm:px-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-zinc-50/90 dark:bg-black/40 border-t border-zinc-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 shrink-0 backdrop-blur-md">
-            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium hidden sm:inline">
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium hidden sm:inline min-w-0">
               Puedes volver a abrir este resumen pulsando la campana de notificaciones.
             </span>
 
-            <div className="flex flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex flex-row items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
               <button
                 type="button"
                 onClick={closeUpdates}
-                className="flex-1 sm:flex-initial sm:w-auto px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-white/10 transition-colors text-center"
+                className="flex-1 sm:flex-initial sm:w-auto whitespace-nowrap shrink-0 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-white/10 transition-colors text-center cursor-pointer"
               >
                 Cerrar
               </button>
@@ -218,10 +218,10 @@ export const ProductUpdatesModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAction}
-                  className="flex-[2] sm:flex-initial sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-xs font-black transition-all shadow-md shadow-[#12A9A8]/25 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                  className="flex-[2] sm:flex-initial sm:w-auto whitespace-nowrap shrink-0 px-4 sm:px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0e8f8e] text-white text-xs font-black transition-all shadow-md shadow-[#12A9A8]/25 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                 >
                   <span>{currentRelease.ctaText}</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={14} className="shrink-0" />
                 </button>
               )}
             </div>
