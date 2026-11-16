@@ -718,7 +718,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   };
 
   const handleUpdateDates = async (dates: { startDate: string | null, dueDate: string | null }) => {
-    if (!cardId) return;
+    if (!cardId || isReadOnly) return;
     setIsSaving(true);
     try {
       await apiClient.patch(`/api/cards/${cardId}`, {
@@ -869,7 +869,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   };
   
   const handleUpdateProperties = async (properties: { priority?: string | null; riskLevel?: string | null; module?: string | null }) => {
-    if (!cardId) return;
+    if (!cardId || isReadOnly) return;
     
     // Optimistic update
     if (card) {
@@ -1486,8 +1486,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     {/* Tile 2: Propiedades */}
                     <button
                       type="button"
-                      onClick={() => setActivePopover(activePopover === 'mobile_properties' ? null : 'mobile_properties')}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                      disabled={isReadOnly}
+                      onClick={() => !isReadOnly && setActivePopover(activePopover === 'mobile_properties' ? null : 'mobile_properties')}
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 transition-colors text-left ${!isReadOnly ? 'active:bg-zinc-100 dark:active:bg-white/10 cursor-pointer' : 'cursor-default opacity-85'}`}
                     >
                       <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                         <Zap size={14} />
@@ -1505,8 +1506,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     {/* Tile 3: Fechas */}
                     <button
                       type="button"
-                      onClick={() => setActivePopover(activePopover === 'mobile_dates' ? null : 'mobile_dates')}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                      disabled={isReadOnly}
+                      onClick={() => !isReadOnly && setActivePopover(activePopover === 'mobile_dates' ? null : 'mobile_dates')}
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 transition-colors text-left ${!isReadOnly ? 'active:bg-zinc-100 dark:active:bg-white/10 cursor-pointer' : 'cursor-default opacity-85'}`}
                     >
                       <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                         <Clock size={14} />
@@ -1526,8 +1528,9 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                     {/* Tile 4: Etiquetas */}
                     <button
                       type="button"
-                      onClick={() => setActivePopover(activePopover === 'mobile_labels' ? null : 'mobile_labels')}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 active:bg-zinc-100 dark:active:bg-white/10 transition-colors text-left cursor-pointer"
+                      disabled={isReadOnly}
+                      onClick={() => !isReadOnly && setActivePopover(activePopover === 'mobile_labels' ? null : 'mobile_labels')}
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 transition-colors text-left ${!isReadOnly ? 'active:bg-zinc-100 dark:active:bg-white/10 cursor-pointer' : 'cursor-default opacity-85'}`}
                     >
                       <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                         <Tag size={14} />
@@ -1749,12 +1752,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 <span className="cu-section-label">Fechas</span>
                 <div className="flex items-center gap-2">
                   <SmartPopover
-                    isOpen={activePopover === 'dates_badge'}
+                    isOpen={!isReadOnly && activePopover === 'dates_badge'}
                     onClose={() => setActivePopover(null)}
                     trigger={
                       <div 
-                        onClick={() => setActivePopover(activePopover === 'dates_badge' ? null : 'dates_badge')}
-                        className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 px-2.5 py-1 rounded-lg font-semibold text-xs cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] transition-all border border-zinc-200 dark:border-white/10"
+                        onClick={() => !isReadOnly && setActivePopover(activePopover === 'dates_badge' ? null : 'dates_badge')}
+                        className={`flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 px-2.5 py-1 rounded-lg font-semibold text-xs transition-all border border-zinc-200 dark:border-white/10 ${!isReadOnly ? 'cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)]' : 'cursor-default'}`}
                       >
                         <Clock size={14} />
                         <span className="flex items-center gap-1 flex-wrap">
@@ -1771,7 +1774,7 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                             <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] uppercase">Vencido</span>
                           )}
                         </span>
-                        <ChevronDown size={14} className="ml-1 opacity-50" />
+                        {!isReadOnly && <ChevronDown size={14} className="ml-1 opacity-50" />}
                       </div>
                     }
                     content={
@@ -1792,14 +1795,14 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
               <div className="flex flex-col gap-2">
                 <span className="cu-section-label">Propiedades</span>
                 <SmartPopover
-                  isOpen={activePopover === 'properties'}
+                  isOpen={!isReadOnly && activePopover === 'properties'}
                   onClose={() => setActivePopover(null)}
                   trigger={
                     <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
                       {card.priority && card.priority !== 'P3' && (
                         <div 
-                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
-                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105
+                          onClick={() => !isReadOnly && setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 transition-transform ${!isReadOnly ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
                             ${card.priority === 'P0' ? 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E]' : 
                               card.priority === 'P1' ? 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40]' : 
                               'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2]'}`}
@@ -1810,8 +1813,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       )}
                       {card.priority === 'P3' && (
                         <div 
-                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
-                          className="px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+                          onClick={() => !isReadOnly && setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300 flex items-center gap-2 transition-transform ${!isReadOnly ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
                         >
                           <Zap size={12} />
                           P3 - Baja
@@ -1819,8 +1822,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       )}
                       {card.riskLevel && (
                         <div 
-                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
-                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105
+                          onClick={() => !isReadOnly && setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 transition-transform ${!isReadOnly ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
                             ${card.riskLevel === 'high' ? 'bg-[#FF665E]/[0.10] text-[#D94841] dark:bg-[#FF665E]/15 dark:text-[#FF857E]' : 
                               card.riskLevel === 'med' ? 'bg-[#FFCC40]/[0.20] text-amber-900 dark:bg-[#FFCC40]/15 dark:text-[#FFCC40]' : 
                               'bg-[#12A9A8]/[0.10] text-[#0E8786] dark:bg-[#12A9A8]/15 dark:text-[#4ED4D2]'}`}
@@ -1830,8 +1833,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       )}
                       {card.module && (
                         <div 
-                          onClick={() => setActivePopover(activePopover === 'properties' ? null : 'properties')}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] border border-[var(--lumins-accent-border)] flex items-center gap-1.5 cursor-pointer transition-transform hover:scale-105"
+                          onClick={() => !isReadOnly && setActivePopover(activePopover === 'properties' ? null : 'properties')}
+                          className={`px-2.5 py-1 rounded-md text-xs font-bold bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] border border-[var(--lumins-accent-border)] flex items-center gap-1.5 transition-transform ${!isReadOnly ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
                         >
                           {card.module}
                         </div>
