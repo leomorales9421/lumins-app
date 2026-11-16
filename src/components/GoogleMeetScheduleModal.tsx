@@ -826,14 +826,14 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="px-4 sm:px-5 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-zinc-100 dark:border-white/10 bg-white dark:bg-[#1C1F26] shrink-0 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
-              <div className="flex items-center justify-between sm:justify-start">
+            <div className="px-4 sm:px-5 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-zinc-100 dark:border-white/10 bg-white dark:bg-[#1C1F26] shrink-0 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
+              <div className="flex items-center justify-between sm:justify-start min-w-0 flex-1">
                 {existingMeeting ? (
                   <button
                     type="button"
                     onClick={handleRemoveMeet}
                     disabled={isRemoving || isSubmitting}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-[#d6453e] dark:text-[#ff8a84] hover:bg-[#FF665E]/10 transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
                   >
                     {isRemoving ? (
                       <Loader2 size={13} className="animate-spin" />
@@ -843,25 +843,28 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                     <span>Quitar Meet</span>
                   </button>
                 ) : connectedEmail ? (
-                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 truncate max-w-[240px]">
+                  <span
+                    title={`Organizador: ${connectedEmail}`}
+                    className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 truncate block w-full"
+                  >
                     Organizador: {connectedEmail}
                   </span>
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isSubmitting || isRemoving}
-                  className="px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 bg-zinc-100 sm:bg-transparent dark:bg-white/5 sm:dark:bg-transparent transition-colors shrink-0"
+                  className="px-3.5 py-2.5 sm:py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 bg-zinc-100 sm:bg-transparent dark:bg-white/5 sm:dark:bg-transparent transition-colors shrink-0 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isRemoving}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 active:scale-95 whitespace-nowrap cursor-pointer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-md shadow-[#12A9A8]/20 transition-all disabled:opacity-50 active:scale-95 whitespace-nowrap cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -871,7 +874,7 @@ const GoogleMeetScheduleModal: React.FC<GoogleMeetScheduleModalProps> = ({
                   ) : (
                     <>
                       <GoogleMeetIcon size={15} />
-                      <span>{existingMeeting ? 'Actualizar reunión' : 'Crear y enviar invitaciones'}</span>
+                      <span>{existingMeeting ? 'Actualizar reunión' : 'Crear y enviar'}</span>
                     </>
                   )}
                 </button>

@@ -74,8 +74,13 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     embedUrl: string;
     originalUrl: string;
   } | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   if (attachments.length === 0) return null;
+
+  const INITIAL_VISIBLE = 4;
+  const hasMore = attachments.length > INITIAL_VISIBLE;
+  const visibleAttachments = showAll ? attachments : attachments.slice(0, INITIAL_VISIBLE);
 
   const renderThumbnail = (attachment: Attachment) => {
     const isDrive = isGoogleDriveAttachment(attachment);
@@ -138,46 +143,68 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
 
   return (
     <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-white/5">
-      <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-        <Paperclip size={16} className="text-[var(--lumins-accent-fg)]" />
-        <h3 className="text-sm font-bold tracking-tight">Adjuntos</h3>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+          <Paperclip size={16} className="text-[var(--lumins-accent-fg)]" />
+          <h3 className="text-sm font-bold tracking-tight">Adjuntos</h3>
+          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#12A9A8]/12 text-[#0E8786] dark:bg-[#12A9A8]/20 dark:text-[#4ED4D2] tabular-nums">
+            {attachments.length}
+          </span>
+        </div>
+
+        {hasMore && (
+          <button
+            type="button"
+            onClick={() => setShowAll((prev) => !prev)}
+            className="text-xs font-bold text-[#0E8786] dark:text-[#4ED4D2] hover:underline px-2 py-1 rounded-lg hover:bg-[#12A9A8]/10 transition-colors cursor-pointer shrink-0"
+          >
+            {showAll ? 'Mostrar menos' : `Ver todos (${attachments.length})`}
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-1">
-        {attachments.map(attachment => {
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 ${
+          showAll ? 'max-h-[340px] overflow-y-auto custom-scrollbar pr-1' : ''
+        }`}
+      >
+        {visibleAttachments.map(attachment => {
           const isDrive = isGoogleDriveAttachment(attachment);
           const embedUrl = isDrive ? getGoogleDriveEmbedUrl(attachment.url) : null;
 
           return (
             <div
               key={attachment.id}
-              className="group flex items-center gap-4 p-3 rounded border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] hover:shadow-soft transition-all mb-3 w-fit pr-10 relative overflow-hidden"
+              className="group flex items-center gap-3 p-2.5 rounded-xl border border-zinc-200/90 dark:border-white/10 bg-white dark:bg-[#13151A] hover:border-[#12A9A8]/50 dark:hover:border-[#4ED4D2]/40 hover:shadow-soft transition-all w-full min-w-0 relative overflow-hidden"
             >
               {/* Glossy background effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/5 to-transparent pointer-events-none" />
 
               {renderThumbnail(attachment)}
 
-              <div className="flex flex-col min-w-0 z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[240px] group-hover:text-[var(--lumins-accent-fg)] transition-colors">
+              <div className="flex flex-col min-w-0 flex-1 z-10">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span
+                    title={attachment.name}
+                    className="text-xs sm:text-[13px] font-bold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-[var(--lumins-accent-fg)] transition-colors"
+                  >
                     {attachment.name}
                   </span>
                   {isDrive && (
-                    <span className="px-1.5 py-0.5 rounded bg-[var(--lumins-accent-soft)] text-[var(--lumins-accent-fg)] text-[9px] font-extrabold uppercase tracking-wider shrink-0">
+                    <span className="px-1.5 py-0.5 rounded bg-[#12A9A8]/12 text-[#0E8786] dark:text-[#4ED4D2] text-[9px] font-extrabold uppercase tracking-wider shrink-0">
                       {getDriveTypeLabel(attachment.mime, attachment.url)}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] tracking-widest font-black text-zinc-500 dark:text-zinc-400 uppercase">
+                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-zinc-500 dark:text-zinc-400">
+                  <span className="font-bold uppercase tracking-wide shrink-0">
                     {format(new Date(attachment.createdAt), 'dd/MM/yyyy')}
                   </span>
                   {attachment.sizeBytes && (
                     <>
-                      <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded" />
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                      <span className="w-1 h-1 bg-zinc-300 dark:bg-white/20 rounded-full shrink-0" />
+                      <span className="font-semibold uppercase shrink-0">
                         {attachment.sizeBytes >= 1024 * 1024
                           ? `${(attachment.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
                           : `${(attachment.sizeBytes / 1024).toFixed(1)} KB`}
@@ -186,7 +213,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center gap-4 mt-1.5">
+                <div className="flex flex-wrap items-center gap-3 mt-1.5">
                   {embedUrl && (
                     <button
                       type="button"
@@ -197,7 +224,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
                           originalUrl: attachment.url,
                         })
                       }
-                      className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1 min-h-[28px] sm:min-h-0 text-[11px] font-bold text-[#0E8786] dark:text-[#4ED4D2] hover:underline cursor-pointer"
                     >
                       <Eye size={11} />
                       Vista previa
@@ -208,21 +235,22 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
                     href={attachment.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[11px] font-bold text-[var(--lumins-accent-fg)] hover:underline cursor-pointer group/link"
+                    className="inline-flex items-center gap-1 min-h-[28px] sm:min-h-0 text-[11px] font-bold text-[#0E8786] dark:text-[#4ED4D2] hover:underline cursor-pointer group/link"
                   >
                     <ExternalLink
-                      size={10}
+                      size={11}
                       className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform"
                     />
-                    {isDrive ? 'Abrir en Drive' : 'Ver'}
+                    {isDrive ? 'Abrir' : 'Ver'}
                   </a>
 
                   {!isReadOnly && (
                     <button
+                      type="button"
                       onClick={() => onDelete(attachment.id)}
-                      className="flex items-center gap-1 text-[11px] font-bold text-rose-500 dark:text-rose-400 hover:underline cursor-pointer group/del"
+                      className="inline-flex items-center gap-1 min-h-[28px] sm:min-h-0 text-[11px] font-bold text-[#d6453e] dark:text-[#ff8a84] hover:underline cursor-pointer group/del"
                     >
-                      <Trash2 size={10} className="group-hover/del:scale-110 transition-transform" />
+                      <Trash2 size={11} className="group-hover/del:scale-110 transition-transform" />
                       {isDrive ? 'Desvincular' : 'Eliminar'}
                     </button>
                   )}
@@ -236,11 +264,11 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       {/* Inline Google Drive Preview Modal */}
       {previewAttachment && (
         <div
-          className="fixed inset-0 z-[220] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-[220] bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
           onClick={() => setPreviewAttachment(null)}
         >
           <div
-            className="w-full max-w-4xl h-[80vh] bg-white dark:bg-[#1C1F26] rounded-2xl shadow-2xl border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col"
+            className="w-full max-w-4xl h-[88dvh] sm:h-[80vh] bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-2xl shadow-2xl border-t sm:border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col pb-[env(safe-area-inset-bottom)] sm:pb-0"
             onClick={e => e.stopPropagation()}
           >
             <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between bg-zinc-50 dark:bg-[#13151A]">
