@@ -3,8 +3,15 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../lib/api-client';
 import { motion } from 'framer-motion';
-import { Loader2, CheckCircle2, XCircle, Users, ArrowRight, ShieldAlert, LogOut, User } from 'lucide-react';
+import { ArrowRight, User } from 'lucide-react';
 import Cookies from 'js-cookie';
+import BrandLogo from '../components/ui/BrandLogo';
+import LuminsLogoLoader from '../components/ui/LuminsLogoLoader';
+import {
+  LuminsMembersIcon,
+  LuminsSuccessIcon,
+  LuminsWarningIcon,
+} from '../components/icons/LuminsIcons';
 
 interface InvitationData {
   email: string;
@@ -23,6 +30,7 @@ const InvitePage: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'mismatch'>('loading');
   const [message, setMessage] = useState('Verificando tu invitación...');
   const [inviteData, setInviteData] = useState<InvitationData | null>(null);
+  const [successRedirectPath, setSuccessRedirectPath] = useState<string>('/app');
 
   useEffect(() => {
     const processInvitation = async () => {
@@ -47,12 +55,19 @@ const InvitePage: React.FC = () => {
         const data = response.data;
         setInviteData(data);
 
+        const targets = Array.isArray(data?.targetId) ? data.targetId : [];
+        const singleBoardTarget =
+          targets.length === 1 && targets[0]?.type === 'BOARD' && targets[0]?.id
+            ? `/boards/${targets[0].id}`
+            : '/app';
+        setSuccessRedirectPath(singleBoardTarget);
+
         // If already accepted, just show success or redirect
         if (data.isAlreadyAccepted) {
           Cookies.remove('invitation_token');
           setStatus('success');
-          setMessage('Ya eres miembro de este equipo. Redirigiendo al dashboard...');
-          setTimeout(() => navigate('/app'), 2000);
+          setMessage('Ya eres miembro de este equipo. Redirigiendo...');
+          setTimeout(() => navigate(singleBoardTarget), 2000);
           return;
         }
 
@@ -92,7 +107,7 @@ const InvitePage: React.FC = () => {
         
         // Auto redirect after success
         setTimeout(() => {
-          navigate('/app');
+          navigate(singleBoardTarget);
         }, 3000);
 
       } catch (err: any) {
@@ -112,95 +127,138 @@ const InvitePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] flex items-center justify-center p-4 font-sans">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+    <div className="min-h-[100dvh] bg-[#F4F6F9] dark:bg-[#13151A] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+      {/* Subtle Lumins ambient glow */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-35"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 18% 20%, rgba(18, 169, 168, 0.14) 0%, transparent 45%),
+            radial-gradient(circle at 82% 80%, rgba(255, 204, 64, 0.12) 0%, transparent 45%)
+          `,
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-zinc-100"
+        className="relative max-w-md w-full bg-white dark:bg-[#1C1F26] rounded-[24px] shadow-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden text-center z-10"
       >
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[#4338ca]/10 rounded-2xl flex items-center justify-center text-[#4338ca]">
-            <Users size={32} />
+        {/* Barra tricolor Lumins */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#FF665E] via-[#12A9A8] to-[#FFCC40]" />
+
+        <div className="p-6 sm:p-8">
+          <div className="flex justify-center mb-5">
+            <BrandLogo size="sm" />
           </div>
-        </div>
 
-        <h1 className="text-2xl font-bold text-[#1E293B] mb-2">Invitación de Equipo</h1>
-        
-        <div className="my-8">
-          {status === 'loading' && (
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-10 h-10 text-[#4338ca] animate-spin" />
-              <p className="text-zinc-500 font-medium">{message}</p>
+          <div className="flex justify-center mb-4">
+            <div className="w-14 h-14 bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 border border-[#12A9A8]/25 rounded-2xl flex items-center justify-center">
+              <LuminsMembersIcon size={28} />
             </div>
-          )}
+          </div>
 
-          {status === 'success' && (
-            <div className="flex flex-col items-center gap-4">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500" />
-              <p className="text-zinc-600 font-medium">{message}</p>
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 3 }}
-                className="h-1 bg-emerald-500 rounded-full mt-4"
-              />
-              <p className="text-xs text-zinc-400 mt-2">Redirigiendo a tu espacio de trabajo...</p>
-            </div>
-          )}
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight mb-1.5">
+            Invitación de Equipo
+          </h1>
 
-          {status === 'mismatch' && inviteData && (
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-2">
-                <ShieldAlert size={32} />
+          <div className="my-6">
+            {status === 'loading' && (
+              <div className="flex flex-col items-center gap-4 py-2">
+                <LuminsLogoLoader size="sm" />
+                <p className="text-sm text-slate-600 dark:text-zinc-300 font-medium">{message}</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-zinc-600 font-medium">
-                  Esta invitación es para <span className="text-[#4338ca] font-bold">{inviteData.email}</span>.
+            )}
+
+            {status === 'success' && (
+              <div className="flex flex-col items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 border border-[#12A9A8]/25 flex items-center justify-center">
+                  <LuminsSuccessIcon size={30} />
+                </div>
+                <p className="text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed">
+                  {message}
                 </p>
-                <p className="text-zinc-500 text-sm">
-                  Actualmente estás logueado como <span className="font-semibold text-zinc-700">{user?.email}</span>.
+                <div className="w-full h-1.5 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden mt-2">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 3, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-[#12A9A8] to-[#4ED4D2] rounded-full"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                  Redirigiendo a tu espacio de trabajo...
                 </p>
               </div>
-              
-              <div className="w-full space-y-3 pt-4">
-                <button 
-                  onClick={handleLogoutAndSwitch}
-                  className="w-full bg-[#4338ca] text-white font-bold py-3 rounded-xl hover:bg-[#312e81] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#4338ca]/20"
-                >
-                  <User size={18} /> Cambiar de cuenta
-                </button>
-                <Link 
+            )}
+
+            {status === 'mismatch' && inviteData && (
+              <div className="flex flex-col items-center gap-5">
+                <div className="w-14 h-14 bg-[#FF665E]/12 border border-[#FF665E]/25 rounded-2xl flex items-center justify-center">
+                  <LuminsWarningIcon size={28} />
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-sm text-slate-700 dark:text-zinc-200 font-medium">
+                    Esta invitación es para{' '}
+                    <span className="text-[#0E8786] dark:text-[#4ED4D2] font-bold">
+                      {inviteData.email}
+                    </span>.
+                  </p>
+                  <p className="text-slate-500 dark:text-zinc-400 text-xs">
+                    Actualmente estás logueado como{' '}
+                    <span className="font-semibold text-slate-700 dark:text-zinc-200">
+                      {user?.email}
+                    </span>.
+                  </p>
+                </div>
+
+                <div className="w-full space-y-2.5 pt-2">
+                  <button
+                    onClick={handleLogoutAndSwitch}
+                    className="w-full h-11 sm:h-10 bg-[#12A9A8] hover:bg-[#0E8786] text-white font-bold text-sm rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md shadow-[#12A9A8]/20 cursor-pointer"
+                  >
+                    <User size={16} />
+                    <span>Cambiar de cuenta</span>
+                  </button>
+                  <Link
+                    to="/app"
+                    className="w-full h-10 text-xs text-slate-500 dark:text-zinc-400 font-semibold hover:text-slate-800 dark:hover:text-zinc-200 transition-all flex items-center justify-center gap-2"
+                  >
+                    Continuar como {user?.name.split(' ')[0]}
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-14 h-14 bg-[#FF665E]/12 border border-[#FF665E]/25 rounded-2xl flex items-center justify-center">
+                  <LuminsWarningIcon size={28} />
+                </div>
+                <p className="text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed">
+                  {message}
+                </p>
+                <Link
                   to="/app"
-                  className="w-full py-3 text-zinc-500 font-medium hover:text-zinc-700 transition-all flex items-center justify-center gap-2"
+                  className="mt-2 inline-flex items-center gap-2 h-11 sm:h-10 px-5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-sm font-bold shadow-md shadow-[#12A9A8]/20 transition-all active:scale-[0.98]"
                 >
-                  Continuar como {user?.name.split(' ')[0]}
+                  <span>Ir a mi panel</span>
+                  <ArrowRight size={15} />
                 </Link>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {status === 'error' && (
-            <div className="flex flex-col items-center gap-4">
-              <XCircle className="w-12 h-12 text-rose-500" />
-              <p className="text-zinc-600 font-medium">{message}</p>
-              <Link 
-                to="/app"
-                className="mt-6 flex items-center gap-2 text-[#4338ca] font-bold hover:underline"
-              >
-                Ir a mi Dashboard <ArrowRight size={16} />
-              </Link>
-            </div>
+          {status === 'success' && (
+            <button
+              onClick={() => navigate(successRedirectPath)}
+              className="w-full h-11 sm:h-10 bg-[#12A9A8] hover:bg-[#0E8786] text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98] shadow-md shadow-[#12A9A8]/20 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>{successRedirectPath.startsWith('/boards/') ? 'Ir al tablero ahora' : 'Ir al Dashboard ahora'}</span>
+              <ArrowRight size={15} />
+            </button>
           )}
         </div>
-
-        {status === 'success' && (
-          <button 
-            onClick={() => navigate('/app')}
-            className="w-full bg-[#4338ca] text-white font-bold py-3 rounded-xl hover:bg-[#312e81] transition-all shadow-lg shadow-[#4338ca]/20"
-          >
-            Ir al Dashboard ahora
-          </button>
-        )}
       </motion.div>
     </div>
   );
