@@ -206,11 +206,12 @@ export const SortableList: React.FC<SortableListProps> = ({
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1C1F26] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between">
-                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Opciones de lista</span>
-                      <button onClick={() => setIsMenuOpen(false)} className="md:hidden p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded">
+                    <div className="h-1 w-full bg-gradient-to-r from-[#FF665E] via-[#12A9A8] to-[#FFCC40]" />
+                    <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Opciones de lista</span>
+                      <button onClick={() => setIsMenuOpen(false)} className="md:hidden p-1 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg">
                         <X size={14} />
                       </button>
                     </div>
@@ -222,9 +223,9 @@ export const SortableList: React.FC<SortableListProps> = ({
                           setIsEditingTitle(true);
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-[var(--lumins-accent-soft)] hover:text-[var(--lumins-accent-fg)] rounded-lg transition-all flex items-center gap-3"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-zinc-800 dark:text-zinc-200 hover:bg-[#12A9A8]/10 hover:text-[#0E8786] dark:hover:text-[#4ED4D2] rounded-xl transition-all flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded bg-zinc-100 dark:bg-white/5 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 text-[#0E8786] dark:text-[#4ED4D2] flex items-center justify-center shrink-0">
                           <Pencil size={14} strokeWidth={2.5} />
                         </div>
                         <span>Editar nombre</span>
@@ -247,16 +248,16 @@ export const SortableList: React.FC<SortableListProps> = ({
                                 onArchiveAllCards?.(list.id, list.name || list.title || 'Lista', completedCards.length, true);
                                 setIsMenuOpen(false);
                               }}
-                              className="w-full text-left px-3 py-2 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all flex items-center justify-between group"
+                              className="w-full text-left px-3 py-2 text-[13px] font-bold text-[#0E8786] dark:text-[#4ED4D2] hover:bg-[#12A9A8]/10 rounded-xl transition-all flex items-center justify-between group cursor-pointer"
                               title="Archivar solo las tarjetas marcadas como completadas"
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-7 h-7 rounded bg-emerald-100/70 dark:bg-emerald-500/15 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 size={14} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" />
+                                <div className="w-7 h-7 rounded-lg bg-[#12A9A8]/12 dark:bg-[#12A9A8]/20 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 size={14} strokeWidth={2.5} className="text-[#0E8786] dark:text-[#4ED4D2]" />
                                 </div>
                                 <span className="truncate">Archivar completadas</span>
                               </div>
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shrink-0">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#12A9A8]/15 text-[#0E8786] dark:text-[#4ED4D2] shrink-0 tabular-nums">
                                 {completedCards.length}
                               </span>
                             </button>
@@ -268,16 +269,16 @@ export const SortableList: React.FC<SortableListProps> = ({
                               onArchiveAllCards?.(list.id, list.name || list.title || 'Lista', cards.length, false);
                               setIsMenuOpen(false);
                             }}
-                            className="w-full text-left px-3 py-2 text-[13px] font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all flex items-center justify-between group"
+                            className="w-full text-left px-3 py-2 text-[13px] font-bold text-amber-800 dark:text-[#FFCC40] hover:bg-[#FFCC40]/15 rounded-xl transition-all flex items-center justify-between group cursor-pointer"
                             title="Archivar todas las tarjetas de esta lista"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-7 h-7 rounded bg-amber-100/70 dark:bg-amber-500/15 flex items-center justify-center shrink-0">
-                                <Archive size={14} strokeWidth={2.5} className="text-amber-600 dark:text-amber-400" />
+                              <div className="w-7 h-7 rounded-lg bg-[#FFCC40]/20 dark:bg-[#FFCC40]/15 flex items-center justify-center shrink-0">
+                                <Archive size={14} strokeWidth={2.5} className="text-amber-700 dark:text-[#FFCC40]" />
                               </div>
                               <span className="truncate">Archivar todas</span>
                             </div>
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#FFCC40]/25 text-amber-900 dark:text-[#FFCC40] shrink-0 tabular-nums">
                               {cards.length}
                             </span>
                           </button>
@@ -292,9 +293,9 @@ export const SortableList: React.FC<SortableListProps> = ({
                           onArchiveList?.(list.id, list.name || list.title || 'esta lista');
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-all flex items-center gap-3 cursor-pointer"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-amber-800 dark:text-[#FFCC40] hover:bg-[#FFCC40]/15 rounded-xl transition-all flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded bg-orange-100/50 dark:bg-orange-500/5 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#FFCC40]/20 dark:bg-[#FFCC40]/15 text-amber-700 dark:text-[#FFCC40] flex items-center justify-center shrink-0">
                           <Archive size={14} strokeWidth={2.5} />
                         </div>
                         <span>Archivar lista</span>
@@ -306,17 +307,17 @@ export const SortableList: React.FC<SortableListProps> = ({
                           onDeleteList?.(list.id, list.name || list.title || 'esta lista');
                           setIsMenuOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-3 cursor-pointer"
+                        className="w-full text-left px-3 py-2 text-[13px] font-bold text-[#d6453e] dark:text-[#ff8a84] hover:bg-[#FF665E]/10 rounded-xl transition-all flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded bg-red-100/50 dark:bg-red-500/5 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#FF665E]/12 dark:bg-[#FF665E]/15 text-[#d6453e] dark:text-[#ff8a84] flex items-center justify-center shrink-0">
                           <Trash2 size={14} strokeWidth={2.5} />
                         </div>
                         <span>Eliminar lista</span>
                       </button>
                     </div>
 
-                    <div className="p-3 bg-zinc-50 dark:bg-white/5 border-t border-zinc-100 dark:border-white/5">
-                      <p className="text-[10px] text-zinc-400 leading-tight italic">
+                    <div className="p-3 bg-zinc-50 dark:bg-white/[0.03] border-t border-zinc-100 dark:border-white/5">
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-tight italic">
                         Esta acción no se puede deshacer si la lista tiene tarjetas.
                       </p>
                     </div>
