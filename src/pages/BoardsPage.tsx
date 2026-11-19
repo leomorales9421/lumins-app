@@ -196,7 +196,7 @@ const BoardsPage: React.FC = () => {
         const lastId = localStorage.getItem('lastActiveWorkspaceId');
         const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
         navigate(`/w/${targetId}/dashboard`, { replace: true });
-      } else if (!workspaces.some(w => w.id === workspaceId) && user?.globalRole !== 'SYSTEM_ADMIN') {
+      } else if (!workspaces.some(w => w.id === workspaceId)) {
         toast.error('Acceso denegado', {
           description: 'Has sido eliminado de este espacio de trabajo o no tienes acceso.',
         });
