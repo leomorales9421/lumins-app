@@ -191,12 +191,22 @@ const BoardsPage: React.FC = () => {
   }, [loadData]);
 
   useEffect(() => {
-    if (!isLoadingWorkspaces && !workspaceId && workspaces.length > 0) {
-      const lastId = localStorage.getItem('lastActiveWorkspaceId');
-      const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
-      navigate(`/w/${targetId}/dashboard`, { replace: true });
+    if (!isLoadingWorkspaces && workspaces.length > 0) {
+      if (!workspaceId) {
+        const lastId = localStorage.getItem('lastActiveWorkspaceId');
+        const targetId = workspaces.find(w => w.id === lastId)?.id || workspaces[0].id;
+        navigate(`/w/${targetId}/dashboard`, { replace: true });
+      } else if (!workspaces.some(w => w.id === workspaceId) && user?.globalRole !== 'SYSTEM_ADMIN') {
+        toast.error('Acceso denegado', {
+          description: 'Has sido eliminado de este espacio de trabajo o no tienes acceso.',
+        });
+        if (localStorage.getItem('lastActiveWorkspaceId') === workspaceId) {
+          localStorage.removeItem('lastActiveWorkspaceId');
+        }
+        navigate(`/w/${workspaces[0].id}/dashboard`, { replace: true });
+      }
     }
-  }, [isLoadingWorkspaces, workspaceId, workspaces, navigate]);
+  }, [isLoadingWorkspaces, workspaceId, workspaces, user?.globalRole, navigate]);
 
   return (
     <div className="flex-1 flex flex-col font-sans min-w-0 w-full overflow-x-hidden">

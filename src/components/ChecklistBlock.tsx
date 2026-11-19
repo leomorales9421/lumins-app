@@ -134,7 +134,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
             <button 
               type="button"
               onClick={() => setIsEditingTitle(true)}
-              className="bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-[var(--lumins-accent-fg)] text-xs font-semibold px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 border border-zinc-200/60 dark:border-white/5 cursor-pointer"
+              className="h-7 px-2.5 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-[#12A9A8]/12 hover:text-[#0E8786] dark:hover:text-[#4ED4D2] text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-1.5 border border-zinc-200/70 dark:border-white/10 cursor-pointer"
               title="Editar título del checklist"
             >
               <Edit2 size={12} />
@@ -143,7 +143,7 @@ const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
             <button 
               type="button"
               onClick={() => onDeleteChecklist(checklist.id)}
-              className="bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-semibold px-2.5 py-1.5 rounded transition-colors flex items-center gap-1.5 border border-zinc-200/60 dark:border-white/5"
+              className="h-7 px-2.5 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-[#FF665E]/10 hover:text-[#d6453e] dark:hover:text-[#ff8a84] text-xs font-semibold rounded-md transition-colors inline-flex items-center gap-1.5 border border-zinc-200/70 dark:border-white/10 cursor-pointer"
               title="Eliminar checklist"
             >
               <Trash2 size={12} />

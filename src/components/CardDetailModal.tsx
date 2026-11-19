@@ -337,8 +337,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
         console.error('Error fetching activity feed:', err);
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching card details:', err);
+      if (err?.response?.status === 403 || err?.response?.status === 404) {
+        toast.error('Acceso denegado', { description: 'No tienes acceso a esta tarjeta o ha sido eliminada.' });
+        onClose();
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);

@@ -214,8 +214,14 @@ const BoardDetailPage: React.FC = () => {
       }
 
       setLists(filteredLists);
-    } catch (err) {
-      navigate('/app');
+    } catch (err: any) {
+      if (id) boardMemoryCache.delete(id);
+      setBoard(null);
+      setLists([]);
+      setSelectedCardId(null);
+      const errMsg = err?.response?.data?.message || 'No tienes permiso para acceder a este tablero o has sido removido.';
+      toast.error('Acceso denegado', { description: errMsg });
+      navigate('/app', { replace: true });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -223,6 +229,33 @@ const BoardDetailPage: React.FC = () => {
   }, [id, navigate, filterUserId]); // Removed board from dependencies
 
   useEffect(() => { fetchBoard(); }, [fetchBoard, filterUserId]);
+
+  // Real-time eviction listener if removed while on page
+  useEffect(() => {
+    const handlePermissionUpdate = (e: any) => {
+      const { type, resourceId } = e.detail || {};
+      if (
+        (type === 'BOARD_REMOVED' && resourceId === id) ||
+        (type === 'WORKSPACE_REMOVED' && boardRef.current?.workspaceId === resourceId)
+      ) {
+        if (id) boardMemoryCache.delete(id);
+        setBoard(null);
+        setLists([]);
+        setSelectedCardId(null);
+        toast.error('Acceso denegado', {
+          description: type === 'BOARD_REMOVED'
+            ? 'Has sido eliminado de este tablero.'
+            : 'Has sido eliminado del espacio de trabajo al que pertenece este tablero.',
+        });
+        navigate('/app', { replace: true });
+      }
+    };
+
+    window.addEventListener('lumins:permission-updated', handlePermissionUpdate);
+    return () => {
+      window.removeEventListener('lumins:permission-updated', handlePermissionUpdate);
+    };
+  }, [id, navigate]);
 
   // Restore the last known background immediately on re-entry, before the board fetch resolves.
   useEffect(() => {
