@@ -15,6 +15,7 @@ import {
   Loader2,
   ExternalLink,
   RefreshCw,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -73,7 +74,7 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [connectedEmail, setConnectedEmail] = useState<string | undefined>();
 
-  const [activeTab, setActiveTab] = useState<'browse' | 'upload'>('browse');
+  const [activeTab, setActiveTab] = useState<'browse' | 'upload' | 'link'>('browse');
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState<DriveCategory>('all');
   const [files, setFiles] = useState<UserDriveFileItem[]>([]);
@@ -82,6 +83,9 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
   const [shareWithAnyone, setShareWithAnyone] = useState(true);
   const [isAttaching, setIsAttaching] = useState(false);
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
+  const [pasteUrl, setPasteUrl] = useState('');
+  const [pasteName, setPasteName] = useState('');
+  const [isPastingLink, setIsPastingLink] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -180,6 +184,51 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
       toast.error(err?.message || 'Error al subir archivo a tu Google Drive');
     } finally {
       setIsUploadingToDrive(false);
+    }
+  };
+
+  const extractDriveId = (url: string): string | null => {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  };
+
+  const handleAttachPastedLink = async () => {
+    if (!pasteUrl.trim()) return;
+    const extractedId = extractDriveId(pasteUrl) || `drive-${Date.now()}`;
+    const nameToUse = pasteName.trim() || 'Documento de Google Drive';
+
+    let mimeType = 'application/octet-stream';
+    if (pasteUrl.includes('spreadsheets') || pasteUrl.includes('sheets')) {
+      mimeType = 'application/vnd.google-apps.spreadsheet';
+    } else if (pasteUrl.includes('presentation') || pasteUrl.includes('slides')) {
+      mimeType = 'application/vnd.google-apps.presentation';
+    } else if (pasteUrl.includes('document') || pasteUrl.includes('docs')) {
+      mimeType = 'application/vnd.google-apps.document';
+    } else if (pasteUrl.includes('drive.google.com/file/d/')) {
+      mimeType = 'gdrive:application/octet-stream';
+    }
+
+    setIsPastingLink(true);
+    try {
+      const res: any = await apiClient.post(
+        `/api/integrations/google-drive/cards/${cardId}/attach`,
+        {
+          fileId: extractedId,
+          name: nameToUse,
+          mimeType,
+          webViewLink: pasteUrl.trim(),
+          shareWithAnyone: false,
+        }
+      );
+      const payload = res?.data || res;
+      const attachment = payload?.attachment || payload?.data?.attachment;
+      toast.success(`"${nameToUse}" vinculado desde Google Drive`);
+      onAttached(attachment);
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.message || 'Error al vincular el enlace de Google Drive');
+    } finally {
+      setIsPastingLink(false);
     }
   };
 
@@ -299,7 +348,18 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
                       : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                   }`}
                 >
-                  Subir archivo a mi Drive
+                  Subir archivo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('link')}
+                  className={`px-3.5 py-2 text-xs font-extrabold border-b-2 transition-colors ${
+                    activeTab === 'link'
+                      ? 'border-[#6C5DD3] text-[#6C5DD3] dark:text-[#8E82E3]'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  Pegar enlace de Drive
                 </button>
               </div>
 
@@ -364,15 +424,27 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
                   ) : files.length === 0 ? (
                     <div className="h-56 flex flex-col items-center justify-center text-center p-4">
                       <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                        No se encontraron archivos con ese filtro en tu Google Drive.
+                        {searchQuery ? 'No se encontraron archivos con ese filtro.' : 'No tienes archivos subidos con Lumins aún.'}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('upload')}
-                        className="mt-2 text-xs font-extrabold text-[#6C5DD3] hover:underline"
-                      >
-                        ¿Quieres subir un archivo nuevo a tu Drive?
-                      </button>
+                      <p className="text-[11px] text-zinc-400 mt-1 max-w-sm">
+                        Con el permiso seguro <code>drive.file</code>, puedes subir archivos a tu Drive o vincular cualquier archivo existente pegando su enlace.
+                      </p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('upload')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#6C5DD3] text-white hover:bg-[#5848C2] transition-colors"
+                        >
+                          Subir archivo nuevo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('link')}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-white/20 transition-colors"
+                        >
+                          Pegar enlace de Drive
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -441,7 +513,7 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
                   )}
                 </div>
               </div>
-            ) : (
+            ) : activeTab === 'upload' ? (
               /* Upload directly to user's Google Drive */
               <div className="p-6 flex flex-col items-center justify-center space-y-4">
                 <button
@@ -481,6 +553,72 @@ const GoogleDrivePickerModal: React.FC<GoogleDrivePickerModalProps> = ({
                     if (file) handleUploadFileToDrive(file);
                   }}
                 />
+              </div>
+            ) : (
+              /* Paste link to ANY Google Drive file */
+              <div className="p-6 flex flex-col justify-center space-y-4">
+                <div className="bg-zinc-50 dark:bg-black/20 p-4 rounded-xl border border-zinc-200/70 dark:border-white/10 space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                      Enlace de Google Drive *
+                    </label>
+                    <div className="relative">
+                      <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        type="url"
+                        value={pasteUrl}
+                        onChange={e => setPasteUrl(e.target.value)}
+                        placeholder="https://drive.google.com/file/d/... o https://docs.google.com/..."
+                        className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#6C5DD3]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                      Nombre o título del archivo (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={pasteName}
+                      onChange={e => setPasteName(e.target.value)}
+                      placeholder="Ej. Hoja de cálculo Q4, Video de diseño..."
+                      className="w-full px-3 py-2 text-xs font-medium rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#13151A] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#6C5DD3]"
+                    />
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    Puedes pegar cualquier enlace de archivo, carpeta o documento de Google Drive con acceso compartido.
+                  </p>
+
+                  <div className="pt-2 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('browse')}
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                    >
+                      Volver
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!pasteUrl.trim() || isPastingLink}
+                      onClick={handleAttachPastedLink}
+                      className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#6C5DD3] hover:bg-[#5848C2] shadow-md shadow-[#6C5DD3]/20 disabled:opacity-50 transition-all cursor-pointer"
+                    >
+                      {isPastingLink ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          <span>Vinculando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <GoogleDriveIcon size={14} />
+                          <span>Vincular enlace de Drive</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
