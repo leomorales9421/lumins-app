@@ -13,6 +13,7 @@ import {
   AlignLeft, 
   MessageSquare,
   ChevronDown,
+  ChevronUp,
   Loader2,
   Users,
   Zap,
@@ -137,7 +138,12 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [comment, setComment] = useState('');
   const [editTitle, setEditTitle] = useState('');
+  const [isTitleExpandedMobile, setIsTitleExpandedMobile] = useState(false);
+  const [isEditingTitleMobile, setIsEditingTitleMobile] = useState(false);
   const titleTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const mobileTitleTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const isTitleLong = (editTitle?.length || 0) > 45 || Boolean(editTitle?.includes('\n'));
 
   const adjustTitleHeight = (el?: HTMLTextAreaElement | null) => {
     const target = el || titleTextareaRef.current;
@@ -148,9 +154,25 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
     }
   };
 
+  const adjustMobileTitleHeight = (el?: HTMLTextAreaElement | null) => {
+    const target = el || mobileTitleTextareaRef.current;
+    if (target) {
+      target.style.height = '0px';
+      const nextHeight = Math.max(target.scrollHeight, 38);
+      target.style.height = `${nextHeight}px`;
+    }
+  };
+
   useEffect(() => {
     adjustTitleHeight();
-  }, [editTitle, card?.title]);
+  }, [editTitle, card?.title, isLoading]);
+
+  useEffect(() => {
+    if (isEditingTitleMobile) {
+      const timer = setTimeout(() => adjustMobileTitleHeight(), 10);
+      return () => clearTimeout(timer);
+    }
+  }, [isEditingTitleMobile, editTitle]);
 
   const [editDescription, setEditDescription] = useState('');
   const [activePopover, setActivePopover] = useState<'add' | 'labels' | 'members' | 'dates' | 'attachments' | 'properties' | 'options' | 'move' | 'duplicate' | 'members_header' | 'dates_badge' | 'attachments_main' | 'labels_main' | 'members_main' | 'dates_main' | 'properties_main' | 'mobile_duplicate' | 'mobile_members' | 'mobile_properties' | 'mobile_dates' | 'mobile_labels' | 'mobile_move' | 'mobile_attachments' | 'mobile_options' | null>(null);
@@ -409,6 +431,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setHasMoreActivities(false);
       setIsEditingDescription(false);
       setIsArchiveConfirmOpen(false);
+      setIsTitleExpandedMobile(false);
+      setIsEditingTitleMobile(false);
       return;
     }
 
@@ -426,6 +450,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
       setHasMoreActivities(false);
       setIsEditingDescription(false);
       setIsArchiveConfirmOpen(false);
+      setIsTitleExpandedMobile(false);
+      setIsEditingTitleMobile(false);
 
       fetchCardDetails(false);
       fetchChecklists();
@@ -1325,37 +1351,149 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({
             className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 p-4 sm:p-5 pt-3 sm:pt-4 no-scrollbar sm:custom-scrollbar pb-24 sm:pb-5"
           >
             
-            {/* Card Title */}
-          <div className="mb-1.5 sm:mb-2 min-w-0 w-full max-w-full">
-            <textarea 
-              ref={titleTextareaRef}
-              value={editTitle}
-              onChange={(e) => {
-                setEditTitle(e.target.value);
-                adjustTitleHeight(e.target);
-              }}
-              onBlur={handleUpdateTitle}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleUpdateTitle();
-                  e.currentTarget.blur();
-                }
-              }}
-              style={{
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-                whiteSpace: 'pre-wrap',
-                minHeight: '34px',
-                width: '100%',
-                maxWidth: '100%',
-                boxSizing: 'border-box'
-              }}
-              className="w-full max-w-full text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight outline-none focus:bg-zinc-100 dark:focus:bg-white/5 rounded-lg px-2 -ml-2 transition-colors border-none ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent resize-none overflow-hidden leading-snug block break-all sm:break-words [word-break:break-word] [overflow-wrap:anywhere]"
-              placeholder="Título de la tarjeta"
-              disabled={isLoading}
-            />
-          </div>
+            {/* Desktop Card Title (sm and above - untouched desktop experience) */}
+            <div className="hidden sm:block mb-1.5 sm:mb-2 min-w-0 w-full max-w-full">
+              <textarea 
+                ref={titleTextareaRef}
+                value={editTitle}
+                onChange={(e) => {
+                  setEditTitle(e.target.value);
+                  adjustTitleHeight(e.target);
+                }}
+                onBlur={handleUpdateTitle}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleUpdateTitle();
+                    e.currentTarget.blur();
+                  }
+                }}
+                style={{
+                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere',
+                  whiteSpace: 'pre-wrap',
+                  minHeight: '34px',
+                  width: '100%',
+                  maxWidth: '100%',
+                  boxSizing: 'border-box'
+                }}
+                className="w-full max-w-full text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight outline-none focus:bg-zinc-100 dark:focus:bg-white/5 rounded-lg px-2 -ml-2 transition-colors border-none ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent resize-none overflow-hidden leading-snug block break-all sm:break-words [word-break:break-word] [overflow-wrap:anywhere]"
+                placeholder="Título de la tarjeta"
+                disabled={isLoading || isReadOnly}
+              />
+            </div>
+
+            {/* Mobile Card Title (< sm - responsive title with ellipsis & expand toggle) */}
+            <div className="block sm:hidden mb-2.5 min-w-0 w-full">
+              {!isEditingTitleMobile ? (
+                <div>
+                  <div 
+                    onClick={() => {
+                      if (isTitleLong) {
+                        setIsTitleExpandedMobile(prev => !prev);
+                      } else if (!isReadOnly) {
+                        setIsEditingTitleMobile(true);
+                      }
+                    }}
+                    className={`${isTitleLong || !isReadOnly ? 'cursor-pointer active:opacity-75' : ''} transition-opacity select-none`}
+                  >
+                    <h1 
+                      className={`text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug break-words ${
+                        !isTitleExpandedMobile && isTitleLong ? 'line-clamp-2' : ''
+                      }`}
+                    >
+                      {editTitle || 'Sin título'}
+                    </h1>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-1 min-h-[22px]">
+                    {isTitleLong ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsTitleExpandedMobile(prev => !prev);
+                        }}
+                        className="text-xs font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 flex items-center gap-1 py-0.5 active:scale-95 transition-transform"
+                      >
+                        {isTitleExpandedMobile ? (
+                          <>
+                            <span>Mostrar menos</span>
+                            <ChevronUp size={13} />
+                          </>
+                        ) : (
+                          <>
+                            <span>Ver título completo</span>
+                            <ChevronDown size={13} />
+                          </>
+                        )}
+                      </button>
+                    ) : <div />}
+
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditingTitleMobile(true);
+                        }}
+                        className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 flex items-center gap-1 py-0.5 px-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all ml-auto"
+                      >
+                        <Edit2 size={11} />
+                        <span>Editar</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <textarea
+                    ref={mobileTitleTextareaRef}
+                    value={editTitle}
+                    onChange={(e) => {
+                      setEditTitle(e.target.value);
+                      adjustMobileTitleHeight(e.target);
+                    }}
+                    onBlur={() => {
+                      handleUpdateTitle();
+                      setIsEditingTitleMobile(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleUpdateTitle();
+                        setIsEditingTitleMobile(false);
+                      }
+                    }}
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
+                      whiteSpace: 'pre-wrap',
+                      minHeight: '44px',
+                      width: '100%',
+                      maxWidth: '100%',
+                      boxSizing: 'border-box'
+                    }}
+                    className="w-full max-w-full text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight outline-none focus:bg-zinc-100 dark:focus:bg-white/5 rounded-lg p-2 transition-colors border border-teal-500/50 ring-2 ring-teal-500/20 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent resize-none leading-snug block break-words"
+                    placeholder="Título de la tarjeta"
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-2 mt-1.5">
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        handleUpdateTitle();
+                        setIsEditingTitleMobile(false);
+                      }}
+                      className="text-xs font-semibold px-3 py-1 bg-teal-600 text-white rounded-md active:scale-95 shadow-sm"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
           {card?.createdAt && (
             <div className="flex items-center gap-3 mb-4 text-[11px] text-zinc-400 dark:text-zinc-500">
