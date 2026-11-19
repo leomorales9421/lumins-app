@@ -523,21 +523,16 @@ const BoardsPage: React.FC = () => {
                            </button>
                          </motion.div>
                        ) : (
-                         currentBoards.map((board, index) => (
-                           <motion.div
-                             key={board.id}
-                             layout
-                             initial={{ opacity: 0, y: 16 }}
-                             animate={{ opacity: 1, y: 0 }}
-                             transition={{
-                               layout: { type: 'spring', stiffness: 320, damping: 30 },
-                               duration: 0.3,
-                               delay: Math.min(index * 0.03, 0.24),
-                             }}
-                           >
-                             <BoardCard board={board} />
-                           </motion.div>
-                         ))
+                         currentBoards.map((board) => (
+                            <motion.div
+                              key={board.id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.15 }}
+                            >
+                              <BoardCard board={board} />
+                            </motion.div>
+                          ))
                        )}
                      </AnimatePresence>
                    </div>
