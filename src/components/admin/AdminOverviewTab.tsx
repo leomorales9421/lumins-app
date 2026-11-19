@@ -11,6 +11,8 @@ import {
   CheckCircle,
   FileText,
   HardDrive,
+  Share2,
+  Sparkles,
 } from 'lucide-react';
 import { formatBytes, type AdminStats } from './types';
 
@@ -121,6 +123,71 @@ const PlatformGrowthChart: React.FC<{ growth?: AdminStats['growth'] }> = ({ grow
   );
 };
 
+const ReferralStatsCard: React.FC<{ referralStats?: AdminStats['referralStats'] }> = ({
+  referralStats,
+}) => {
+  const total = referralStats?.total || 0;
+  const bySource = referralStats?.bySource || {};
+  const sortedSources = Object.entries(bySource).sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6 backdrop-blur-xl mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-3">
+            <Share2 size={20} className="text-[#12A9A8]" />
+            ¿Cómo nos conocieron? (Canales de Adquisición)
+          </h2>
+          <p className="text-sm text-cu-muted dark:text-zinc-500 mt-1">
+            Respuestas recopiladas en la bienvenida / onboarding de nuevos usuarios.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <span className="px-3 py-1.5 rounded-xl bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#12A9A8] text-xs font-black border border-[#12A9A8]/20">
+            {total} {total === 1 ? 'respuesta' : 'respuestas'}
+          </span>
+        </div>
+      </div>
+
+      {sortedSources.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {sortedSources.map(([source, count]) => {
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            return (
+              <div
+                key={source}
+                className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 space-y-2 hover:border-[#12A9A8]/30 transition-all"
+              >
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-cu-text dark:text-zinc-200">{source}</span>
+                  <span className="text-xs font-bold text-[#12A9A8]">
+                    {count} {count === 1 ? 'usuario' : 'usuarios'} ({pct}%)
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-200/80 dark:bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#12A9A8] via-[#FFCC40] to-[#FF665E] transition-all duration-500"
+                    style={{ width: `${Math.max(4, pct)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="p-8 text-center text-xs text-cu-muted dark:text-zinc-500 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-cu-border dark:border-white/10 flex flex-col items-center gap-2">
+          <Sparkles size={24} className="text-[#12A9A8]/60" />
+          <span>
+            Aún no se han registrado respuestas de adquisición. Conforme los nuevos usuarios respondan
+            en el paso de bienvenida, aquí se mostrarán los porcentajes de Instagram, TikTok, amigos,
+            etc.
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({ stats }) => {
   return (
     <>
@@ -205,6 +272,8 @@ const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({ stats }) => {
           </div>
         </div>
       </div>
+
+      <ReferralStatsCard referralStats={stats?.referralStats} />
     </>
   );
 };

@@ -30,7 +30,9 @@ import {
   Archive,
   Upload,
   Image as ImageIcon,
-  Palette
+  Palette,
+  Search,
+  Share2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api-client';
@@ -83,6 +85,143 @@ const ORGANIZATION_TYPES = [
   '🚀 Proyecto Personal'
 ];
 
+// Acquisition / Referral Channel Icons
+const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <defs>
+      <radialGradient id="luminsOnboardingIg" cx="30%" cy="107%" r="130%" fx="30%" fy="107%">
+        <stop offset="0%" stopColor="#fdf497" />
+        <stop offset="5%" stopColor="#fdf497" />
+        <stop offset="45%" stopColor="#fd5949" />
+        <stop offset="60%" stopColor="#d6249f" />
+        <stop offset="90%" stopColor="#285AEB" />
+      </radialGradient>
+    </defs>
+    <rect width="24" height="24" rx="6" fill="url(#luminsOnboardingIg)" />
+    <rect x="5.5" y="5.5" width="13" height="13" rx="3.5" stroke="#ffffff" strokeWidth="1.8" />
+    <circle cx="12" cy="12" r="3.2" stroke="#ffffff" strokeWidth="1.8" />
+    <circle cx="15.8" cy="8.2" r="0.9" fill="#ffffff" />
+  </svg>
+);
+
+const TikTokIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <rect width="24" height="24" rx="6" fill="#010101" />
+    <path
+      d="M16.5 9.2c-1.1-.3-1.9-1.2-2.1-2.2H12v8.5a2.5 2.5 0 1 1-2.5-2.5c.3 0 .7.1 1 .2V10.8a5 5 0 1 0 4 4.9V11.4c1.2.9 2.7 1.4 4.3 1.4V10.4c-.8 0-1.6-.4-2.3-1.2z"
+      fill="#ffffff"
+    />
+    <path
+      d="M14.4 7c-.2-1-.2-1-.2-1H12v.6c.2 1 1 1.9 2.1 2.2V7.4c.1-.1.2-.3.3-.4z"
+      fill="#25F4EE"
+    />
+    <path
+      d="M16.5 9.2c.7.8 1.5 1.2 2.3 1.2V9c-1.1 0-2.1-.4-2.8-1.2-.1.5-.2 1-.2 1.4h.7z"
+      fill="#FE2C55"
+    />
+  </svg>
+);
+
+const LinkedInIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <rect width="24" height="24" rx="6" fill="#0A66C2" />
+    <path
+      d="M7.5 9.5H5.2V17h2.3V9.5zM6.35 8.4a1.35 1.35 0 1 0 0-2.7 1.35 1.35 0 0 0 0 2.7zM18.8 17v-4.1c0-2.2-1.2-3.2-2.7-3.2-1.3 0-1.8.7-2.1 1.2v-1h-2.3c.03.6 0 7.1 0 7.1h2.3v-4c0-.2 0-.4.1-.6.2-.4.6-.9 1.3-.9.9 0 1.3.7 1.3 1.8V17h2.4z"
+      fill="#ffffff"
+    />
+  </svg>
+);
+
+const YouTubeIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <rect width="24" height="24" rx="6" fill="#FF0000" />
+    <path d="M10 8.5l5 3.5-5 3.5V8.5z" fill="#ffffff" />
+  </svg>
+);
+
+const XTwitterIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <rect width="24" height="24" rx="6" fill="#0F1419" />
+    <path
+      d="M14.2 6h2.1l-4.6 5.3L17 18h-4.2l-3.3-4.3L6.3 18H4.2l4.9-5.6L4 6h4.3l3 4 2.9-4zm-.7 10.7h1.2L8.7 7.2H7.4l6.1 9.5z"
+      fill="#ffffff"
+    />
+  </svg>
+);
+
+const FacebookIcon: React.FC<{ size?: number; className?: string }> = ({ size = 22, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+    <rect width="24" height="24" rx="6" fill="#1877F2" />
+    <path
+      d="M14 10.5h2v-2.5h-2c-1.7 0-3 1.3-3 3v1.5H9v2.5h2V19h2.5v-4H16l.5-2.5h-3v-1.2c0-.5.3-.8.5-.8z"
+      fill="#ffffff"
+    />
+  </svg>
+);
+
+const REFERRAL_OPTIONS = [
+  {
+    id: 'Instagram',
+    label: 'Instagram',
+    subtitle: 'Reels o publicaciones',
+    icon: <InstagramIcon size={22} />,
+  },
+  {
+    id: 'TikTok',
+    label: 'TikTok',
+    subtitle: 'Videos y tendencias',
+    icon: <TikTokIcon size={22} />,
+  },
+  {
+    id: 'LinkedIn',
+    label: 'LinkedIn',
+    subtitle: 'Publicaciones o contactos',
+    icon: <LinkedInIcon size={22} />,
+  },
+  {
+    id: 'YouTube',
+    label: 'YouTube',
+    subtitle: 'Tutoriales o videos',
+    icon: <YouTubeIcon size={22} />,
+  },
+  {
+    id: 'X (Twitter)',
+    label: 'X (Twitter)',
+    subtitle: 'Hilos o menciones',
+    icon: <XTwitterIcon size={22} />,
+  },
+  {
+    id: 'Facebook',
+    label: 'Facebook',
+    subtitle: 'Grupos o noticias',
+    icon: <FacebookIcon size={22} />,
+  },
+  {
+    id: 'Amigo o colega',
+    label: 'Amigo o colega',
+    subtitle: 'Recomendación directa',
+    icon: <Users size={20} className="text-[#FF665E]" />,
+  },
+  {
+    id: 'Empresa o equipo',
+    label: 'Empresa o equipo',
+    subtitle: 'Trabajo o proyecto laboral',
+    icon: <Building2 size={20} className="text-[#12A9A8]" />,
+  },
+  {
+    id: 'Búsqueda web',
+    label: 'Google o Búsqueda',
+    subtitle: 'Buscando gestor kanban',
+    icon: <Search size={20} className="text-[#FFCC40]" />,
+  },
+  {
+    id: 'Otro canal',
+    label: 'Otro canal',
+    subtitle: 'Podcast, evento u otro medio',
+    icon: <Sparkles size={20} className="text-purple-500" />,
+  },
+];
+
 export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
   isOpen,
   onClose,
@@ -112,6 +251,10 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
   const [droppedCol, setDroppedCol] = useState<number | null>(null);
   const cardDropped = droppedCol !== null;
   const [isMarkedDone, setIsMarkedDone] = useState(false);
+
+  // Referral / acquisition source state
+  const [referralSource, setReferralSource] = useState<string>('');
+  const [referralDetails, setReferralDetails] = useState<string>('');
 
   // Pointer-based Drag & Drop state (Genuine Lumins DragOverlay pattern)
   const [isDragging, setIsDragging] = useState(false);
@@ -151,13 +294,15 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
       setDragSource(null);
       setHoveredDropCol(null);
       setIsMarkedDone(false);
+      setReferralSource('');
+      setReferralDetails('');
       setIsCreating(false);
       setCreationStepMsg('');
       setError(null);
     }
   }, [isOpen, user]);
 
-  const totalSteps = 6;
+  const totalSteps = 7;
 
   const handleAddCard = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -291,7 +436,10 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
           await apiClient.put('/api/users/profile', {
             preferences: {
               ...(user.preferences || {}),
-              onboardingCompleted: true
+              onboardingCompleted: true,
+              referralSource: referralSource || null,
+              referralDetails: referralDetails ? referralDetails.trim() : null,
+              referralAnsweredAt: referralSource ? new Date().toISOString() : null,
             }
           });
         } catch (prefErr) {
@@ -1478,11 +1626,116 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
               )}
 
               {/* ═════════════════════════════════════════════════════════════ */}
-              {/* STEP 5: ¡HECHO! (FINAL CELEBRATION) */}
+              {/* STEP 5: ¿CÓMO NOS CONOCISTE? (CANAL DE ADQUISICIÓN) */}
               {/* ═════════════════════════════════════════════════════════════ */}
               {currentStep === 5 && (
                 <motion.div
-                  key="step-5"
+                  key="step-5-acquisition"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.35 }}
+                  className="w-full max-w-2xl flex flex-col items-center text-center space-y-6"
+                >
+                  <div className="space-y-2 max-w-xl px-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#12A9A8]/10 text-[#0E8786] text-xs font-bold uppercase tracking-wider mb-1">
+                      <Sparkles size={13} />
+                      <span>Una última pregunta</span>
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                      ¿Cómo te enteraste de Lumins?
+                    </h1>
+                    <p className="text-slate-600 text-xs sm:text-sm font-normal leading-relaxed">
+                      Cuéntanos qué red social, amigo o canal te trajo aquí para seguir mejorando tu experiencia.
+                    </p>
+                  </div>
+
+                  {/* Grid de opciones */}
+                  <div className="w-full grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 text-left">
+                    {REFERRAL_OPTIONS.map((opt) => {
+                      const isSelected = referralSource === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => setReferralSource(opt.id)}
+                          className={`p-3 sm:p-3.5 rounded-2xl border transition-all text-left flex items-start gap-3 cursor-pointer group ${
+                            isSelected
+                              ? 'bg-white border-[#12A9A8] ring-2 ring-[#12A9A8]/30 shadow-md shadow-[#12A9A8]/10'
+                              : 'bg-white/80 hover:bg-white border-slate-200/90 hover:border-slate-300 shadow-xs'
+                          }`}
+                        >
+                          <div className="shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                            {opt.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <span
+                                className={`text-xs sm:text-sm font-bold truncate ${
+                                  isSelected ? 'text-[#0E8786]' : 'text-slate-900'
+                                }`}
+                              >
+                                {opt.label}
+                              </span>
+                              {isSelected && (
+                                <div className="w-4 h-4 rounded-full bg-[#12A9A8] flex items-center justify-center shrink-0">
+                                  <Check size={10} className="text-white" strokeWidth={3} />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-500 leading-tight mt-0.5 line-clamp-1">
+                              {opt.subtitle}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Campo de detalles opcional */}
+                  <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm text-left space-y-2">
+                    <label className="block text-xs font-bold text-slate-700">
+                      ¿Quién te recomendó o qué detalle recuerdas?{' '}
+                      <span className="text-slate-400 font-normal">(Opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={referralDetails}
+                      onChange={(e) => setReferralDetails(e.target.value)}
+                      placeholder="Ej: Nombre de un amigo, usuario de red social, evento o búsqueda..."
+                      className="w-full text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#12A9A8] focus:bg-white transition-all"
+                      maxLength={160}
+                    />
+                  </div>
+
+                  {/* Botones de avance */}
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+                    <button
+                      onClick={handleNext}
+                      className="w-full sm:w-auto h-9 px-7 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-md shadow-[#12A9A8]/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>Continuar</span>
+                      <ArrowRight size={14} />
+                    </button>
+
+                    {!referralSource && (
+                      <button
+                        onClick={handleNext}
+                        className="text-xs text-slate-400 hover:text-slate-600 transition-colors py-1 cursor-pointer"
+                      >
+                        Omitir pregunta
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ═════════════════════════════════════════════════════════════ */}
+              {/* STEP 6: ¡HECHO! (FINAL CELEBRATION) */}
+              {/* ═════════════════════════════════════════════════════════════ */}
+              {currentStep === 6 && (
+                <motion.div
+                  key="step-6"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}

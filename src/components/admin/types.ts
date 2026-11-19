@@ -16,6 +16,10 @@ export interface AdminStats {
     boards: number;
     cards: number;
   }>;
+  referralStats?: {
+    total: number;
+    bySource: Record<string, number>;
+  };
 }
 
 export interface AdminWorkspace {
@@ -44,6 +48,9 @@ export interface AdminUserSummary {
   avatarUrl?: string | null;
   phone?: string | null;
   country?: string | null;
+  referralSource?: string | null;
+  referralDetails?: string | null;
+  referralAnsweredAt?: string | null;
   boardsOwned: number;
   workspacesOwned: number;
   workspacesJoined: number;
@@ -89,6 +96,9 @@ export interface AdminUserDetails {
     country?: string | null;
     language?: string | null;
     theme?: string | null;
+    referralSource?: string | null;
+    referralDetails?: string | null;
+    referralAnsweredAt?: string | null;
     notificationPrefs?: Record<string, any> | null;
     createdAt: string;
     updatedAt: string;

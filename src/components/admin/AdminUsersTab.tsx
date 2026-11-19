@@ -19,6 +19,7 @@ import {
   Clock3,
   Trash2,
   RefreshCw,
+  Share2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
@@ -235,8 +236,13 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({
                   {item.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-bold text-cu-text dark:text-zinc-100 truncate group-hover:text-[#12A9A8] transition-colors">
-                    {item.name}
+                  <div className="font-bold text-cu-text dark:text-zinc-100 truncate group-hover:text-[#12A9A8] transition-colors flex items-center gap-2">
+                    <span className="truncate">{item.name}</span>
+                    {item.referralSource && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#12A9A8] border border-[#12A9A8]/20 shrink-0">
+                        {item.referralSource}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-cu-muted dark:text-zinc-500 truncate">{item.email}</div>
                 </div>
@@ -537,6 +543,44 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({
                     <div className="text-xs text-cu-muted">espacios / tableros</div>
                   </div>
                 </div>
+              </div>
+
+              {/* Canal de Adquisición / ¿Cómo nos conoció? */}
+              <div className="bg-cu-surface dark:bg-dark-surface shadow-sm border border-cu-border dark:border-dark-border rounded-3xl p-6">
+                <h4 className="text-xs font-black uppercase tracking-widest text-cu-muted flex items-center gap-2 mb-3">
+                  <Share2 size={15} className="text-[#12A9A8]" />
+                  Canal de Adquisición / ¿Cómo nos conoció?
+                </h4>
+                {userDetails.user.referralSource ? (
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-cu-border dark:border-white/5 space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#12A9A8]/15 text-[#0E8786] dark:text-[#12A9A8] border border-[#12A9A8]/25">
+                        {userDetails.user.referralSource}
+                      </span>
+                      {userDetails.user.referralAnsweredAt && (
+                        <span className="text-xs text-cu-muted">
+                          Registrado el {new Date(userDetails.user.referralAnsweredAt).toLocaleDateString()} a las{' '}
+                          {new Date(userDetails.user.referralAnsweredAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    {userDetails.user.referralDetails && (
+                      <div className="text-xs text-cu-text dark:text-zinc-300 pt-2 border-t border-cu-border/50 dark:border-white/5">
+                        <span className="text-cu-muted font-medium">Detalle proporcionado: </span>
+                        <span className="font-semibold italic">
+                          "{userDetails.user.referralDetails}"
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-dashed border-cu-border dark:border-white/10 text-xs text-cu-muted">
+                    Sin datos de adquisición registrados (cuenta anterior o cuestionario omitido).
+                  </div>
+                )}
               </div>
 
               {/* Sesiones e Inicios de Sesión */}
