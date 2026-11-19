@@ -12,7 +12,6 @@ import {
   FileText,
   HardDrive,
   Share2,
-  Sparkles,
 } from 'lucide-react';
 import { formatBytes, type AdminStats } from './types';
 
@@ -176,7 +175,7 @@ const ReferralStatsCard: React.FC<{ referralStats?: AdminStats['referralStats'] 
         </div>
       ) : (
         <div className="p-8 text-center text-xs text-cu-muted dark:text-zinc-500 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-cu-border dark:border-white/10 flex flex-col items-center gap-2">
-          <Sparkles size={24} className="text-[#12A9A8]/60" />
+          <Share2 size={24} className="text-[#12A9A8]/60" />
           <span>
             Aún no se han registrado respuestas de adquisición. Conforme los nuevos usuarios respondan
             en el paso de bienvenida, aquí se mostrarán los porcentajes de Instagram, TikTok, amigos,

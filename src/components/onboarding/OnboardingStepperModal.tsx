@@ -218,7 +218,7 @@ const REFERRAL_OPTIONS = [
     id: 'Otro canal',
     label: 'Otro canal',
     subtitle: 'Podcast, evento u otro medio',
-    icon: <Sparkles size={20} className="text-purple-500" />,
+    icon: <MoreHorizontal size={20} className="text-slate-500" />,
   },
 ];
 
@@ -1638,10 +1638,6 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                   className="w-full max-w-2xl flex flex-col items-center text-center space-y-6"
                 >
                   <div className="space-y-2 max-w-xl px-2">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#12A9A8]/10 text-[#0E8786] text-xs font-bold uppercase tracking-wider mb-1">
-                      <Sparkles size={13} />
-                      <span>Una última pregunta</span>
-                    </div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
                       ¿Cómo te enteraste de Lumins?
                     </h1>
