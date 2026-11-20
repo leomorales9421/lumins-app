@@ -35,6 +35,7 @@ import {
   Share2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
 import { useAuth } from '../../contexts/AuthContext';
 import { GoogleCalendarIcon } from '../ui/GoogleCalendarIcon';
@@ -227,7 +228,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
   onClose,
   onCompleted
 }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   // Stepper state
@@ -362,12 +363,35 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
     }
   };
 
-  const handleContinueFromReferral = () => {
+  const handleContinueFromReferral = async () => {
+    if (!referralSource) {
+      toast.info('Por favor selecciona una opción o haz clic en "Omitir pregunta"');
+      return;
+    }
+
     if (user?.id) {
       try {
         localStorage.setItem(`lumins_referral_survey_dismissed_${user.id}`, 'true');
         localStorage.setItem(`lumins_referral_survey_completed_${user.id}`, 'true');
       } catch { }
+
+      try {
+        await apiClient.put('/api/users/profile', {
+          preferences: {
+            ...((user.preferences as any) || {}),
+            referralSource,
+            referralDetails: referralDetails ? referralDetails.trim() : null,
+            referralAnsweredAt: new Date().toISOString(),
+            referralSurveyCompleted: true,
+            referralDismissed: false,
+          }
+        });
+        if (refreshUser) {
+          refreshUser().catch(() => {});
+        }
+      } catch (err) {
+        console.warn('Failed saving referral source:', err);
+      }
     }
     handleNext();
   };
