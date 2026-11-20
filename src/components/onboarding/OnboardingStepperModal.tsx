@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Badge from '../ui/Badge';
 import Alert from '../ui/Alert';
@@ -302,7 +302,32 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
     }
   }, [isOpen, user]);
 
-  const totalSteps = 7;
+  // Check whether referral survey has already been answered or dismissed
+  const hasHandledReferral = useMemo(() => {
+    if (!user) return false;
+    const prefs = (user.preferences as any) || {};
+    if (
+      prefs.referralSurveyCompleted ||
+      prefs.referralDismissed ||
+      prefs.referralSource ||
+      prefs.referralAnsweredAt
+    ) {
+      return true;
+    }
+    try {
+      if (
+        localStorage.getItem(`lumins_referral_survey_dismissed_${user.id}`) === 'true' ||
+        localStorage.getItem(`lumins_referral_survey_completed_${user.id}`) === 'true'
+      ) {
+        return true;
+      }
+    } catch { }
+    return false;
+  }, [user]);
+
+  const showReferralStep = !hasHandledReferral;
+  const totalSteps = showReferralStep ? 7 : 6;
+  const celebrationStepIndex = showReferralStep ? 6 : 5;
 
   const handleAddCard = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -337,11 +362,46 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
     }
   };
 
+  const handleContinueFromReferral = () => {
+    if (user?.id) {
+      try {
+        localStorage.setItem(`lumins_referral_survey_dismissed_${user.id}`, 'true');
+        localStorage.setItem(`lumins_referral_survey_completed_${user.id}`, 'true');
+      } catch { }
+    }
+    handleNext();
+  };
+
+  const handleOmitReferralQuestion = () => {
+    if (user?.id) {
+      try {
+        localStorage.setItem(`lumins_referral_survey_dismissed_${user.id}`, 'true');
+      } catch { }
+      apiClient.put('/api/users/profile', {
+        preferences: {
+          ...((user.preferences as any) || {}),
+          referralSurveyCompleted: true,
+          referralDismissed: true,
+        }
+      }).catch(() => { });
+    }
+    handleNext();
+  };
+
   const handleSkip = () => {
     if (user?.id) {
       try {
         sessionStorage.setItem(`lumins_onboarding_dismissed_${user.id}`, 'true');
+        localStorage.setItem(`lumins_referral_survey_dismissed_${user.id}`, 'true');
       } catch { }
+      // Persist survey dismissal so reopening via assisted creation never shows the survey
+      apiClient.put('/api/users/profile', {
+        preferences: {
+          ...((user.preferences as any) || {}),
+          referralSurveyCompleted: true,
+          referralDismissed: true,
+        }
+      }).catch(() => { });
     }
     (window as any).__luminsAwaitingThemePicker = true;
     onClose();
@@ -431,6 +491,7 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
         try {
           localStorage.setItem(`lumins_onboarding_dismissed_${user.id}`, 'true');
           localStorage.setItem(`lumins_onboarding_completed_${user.id}`, 'true');
+          localStorage.setItem(`lumins_referral_survey_dismissed_${user.id}`, 'true');
           localStorage.setItem('lastActiveWorkspaceId', newWorkspace.id);
 
           await apiClient.put('/api/users/profile', {
@@ -440,6 +501,8 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
               referralSource: referralSource || null,
               referralDetails: referralDetails ? referralDetails.trim() : null,
               referralAnsweredAt: referralSource ? new Date().toISOString() : null,
+              referralSurveyCompleted: true,
+              referralDismissed: !referralSource,
             }
           });
         } catch (prefErr) {
@@ -1626,9 +1689,9 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
               )}
 
               {/* ═════════════════════════════════════════════════════════════ */}
-              {/* STEP 5: ¿CÓMO NOS CONOCISTE? (CANAL DE ADQUISICIÓN) */}
+              {/* STEP 5: ¿CÓMO NOS CONOCISTE? (CANAL DE ADQUISICIÓN - 1 SOLA VEZ) */}
               {/* ═════════════════════════════════════════════════════════════ */}
-              {currentStep === 5 && (
+              {showReferralStep && currentStep === 5 && (
                 <motion.div
                   key="step-5-acquisition"
                   initial={{ opacity: 0, y: 15 }}
@@ -1707,29 +1770,27 @@ export const OnboardingStepperModal: React.FC<OnboardingStepperModalProps> = ({
                   {/* Botones de avance */}
                   <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
                     <button
-                      onClick={handleNext}
+                      onClick={handleContinueFromReferral}
                       className="w-full sm:w-auto h-9 px-7 rounded-lg font-bold text-xs bg-[#12A9A8] hover:bg-[#0E8786] text-white shadow-md shadow-[#12A9A8]/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <span>Continuar</span>
                       <ArrowRight size={14} />
                     </button>
 
-                    {!referralSource && (
-                      <button
-                        onClick={handleNext}
-                        className="text-xs text-slate-400 hover:text-slate-600 transition-colors py-1 cursor-pointer"
-                      >
-                        Omitir pregunta
-                      </button>
-                    )}
+                    <button
+                      onClick={handleOmitReferralQuestion}
+                      className="text-xs text-slate-400 hover:text-slate-600 transition-colors py-1 cursor-pointer"
+                    >
+                      Omitir pregunta
+                    </button>
                   </div>
                 </motion.div>
               )}
 
               {/* ═════════════════════════════════════════════════════════════ */}
-              {/* STEP 6: ¡HECHO! (FINAL CELEBRATION) */}
+              {/* FINAL CELEBRATION (PASO FINAL) */}
               {/* ═════════════════════════════════════════════════════════════ */}
-              {currentStep === 6 && (
+              {currentStep === celebrationStepIndex && (
                 <motion.div
                   key="step-6"
                   initial={{ opacity: 0, y: 15 }}
