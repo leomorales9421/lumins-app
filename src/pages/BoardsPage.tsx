@@ -34,7 +34,7 @@ const BoardsPage: React.FC = () => {
     return 10;
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [isPaginating, setIsPaginating] = useState(false);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibilityFilter, setVisibilityFilter] = useState<'ALL' | 'WORKSPACE' | 'PRIVATE'>('ALL');
   const [onlyStarred, setOnlyStarred] = useState(false);
@@ -170,9 +170,7 @@ const BoardsPage: React.FC = () => {
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
-    setIsPaginating(true);
     setPage(newPage);
-    setTimeout(() => setIsPaginating(false), 400);
   }, [totalPages]);
 
   // Listen for board creation to refresh
@@ -481,61 +479,60 @@ const BoardsPage: React.FC = () => {
                      </div>
                    )}
 
-                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 min-h-[200px]">
-                     <AnimatePresence>
-                       {isPaginating ? (
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4">
+                     {currentBoards.length === 0 ? (
+                       <div
+                         key="boards-empty-filter"
+                         className="col-span-full bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/[0.11] p-12 text-center flex flex-col items-center"
+                       >
+                         <Filter size={22} className="text-slate-400 dark:text-zinc-500 mb-3" />
+                         <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
+                           No hay tableros con estos filtros
+                         </h3>
+                         <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 mb-4">
+                           Prueba ajustando la búsqueda o limpiando los filtros activos.
+                         </p>
+                         <button
+                           type="button"
+                           onClick={() => {
+                             setSearchQuery('');
+                             setVisibilityFilter('ALL');
+                             setOnlyStarred(false);
+                             setSortBy('recent');
+                             setPage(1);
+                           }}
+                           className="h-8 px-3.5 rounded-xl bg-slate-100 dark:bg-[#2A3040] text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                         >
+                           Limpiar filtros
+                         </button>
+                       </div>
+                     ) : (
+                       currentBoards.map((board) => (
                          <motion.div
-                           key="boards-paginating"
+                           key={board.id}
                            initial={{ opacity: 0 }}
                            animate={{ opacity: 1 }}
-                           exit={{ opacity: 0 }}
-                           className="col-span-full flex items-center justify-center py-20"
+                           transition={{ duration: 0.12 }}
                          >
-                           <Loader2 size={28} className="animate-spin text-[var(--lumins-accent)]" />
+                           <BoardCard board={board} />
                          </motion.div>
-                       ) : currentBoards.length === 0 ? (
-                         <motion.div
-                           key="boards-empty-filter"
-                           initial={{ opacity: 0 }}
-                           animate={{ opacity: 1 }}
-                           exit={{ opacity: 0 }}
-                           className="col-span-full bg-white dark:bg-[#212632] rounded-2xl border border-slate-200/90 dark:border-white/[0.11] p-12 text-center flex flex-col items-center"
-                         >
-                           <Filter size={22} className="text-slate-400 dark:text-zinc-500 mb-3" />
-                           <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
-                             No hay tableros con estos filtros
-                           </h3>
-                           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 mb-4">
-                             Prueba ajustando la búsqueda o limpiando los filtros activos.
-                           </p>
-                           <button
-                             type="button"
-                             onClick={() => {
-                               setSearchQuery('');
-                               setVisibilityFilter('ALL');
-                               setOnlyStarred(false);
-                               setSortBy('recent');
-                               setPage(1);
-                             }}
-                             className="h-8 px-3.5 rounded-xl bg-slate-100 dark:bg-[#2A3040] text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
-                           >
-                             Limpiar filtros
-                           </button>
-                         </motion.div>
-                       ) : (
-                         currentBoards.map((board) => (
-                            <motion.div
-                              key={board.id}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.15 }}
-                            >
-                              <BoardCard board={board} />
-                            </motion.div>
-                          ))
-                       )}
-                     </AnimatePresence>
+                       ))
+                     )}
                    </div>
+
+                   {/* Pagination — Bottom */}
+                   {totalPages > 1 && (
+                     <div className="flex justify-center mt-6 mb-4">
+                       <PaginationControls
+                         page={page}
+                         totalPages={totalPages}
+                         onPageChange={(p) => {
+                           goToPage(p);
+                           window.scrollTo({ top: 0, behavior: 'smooth' });
+                         }}
+                       />
+                     </div>
+                   )}
 
 
                  </>
