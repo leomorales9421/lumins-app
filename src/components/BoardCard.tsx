@@ -114,8 +114,8 @@ const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   }, [menuOpen]);
 
   const totalCards = board._count?.cards || 0;
-  const completedCards = board.completedCardsCount || 0;
-  const progress = totalCards === 0 ? 0 : Math.round((completedCards / totalCards) * 100);
+  const completedCards = Math.min(totalCards, Math.max(0, board.completedCardsCount || 0));
+  const progress = totalCards === 0 ? 0 : Math.min(100, Math.max(0, Math.round((completedCards / totalCards) * 100)));
 
   const openMenu = (e: React.MouseEvent) => {
     e.stopPropagation();

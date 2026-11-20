@@ -520,19 +520,7 @@ const BoardsPage: React.FC = () => {
                      )}
                    </div>
 
-                   {/* Pagination — Bottom */}
-                   {totalPages > 1 && (
-                     <div className="flex justify-center mt-6 mb-4">
-                       <PaginationControls
-                         page={page}
-                         totalPages={totalPages}
-                         onPageChange={(p) => {
-                           goToPage(p);
-                           window.scrollTo({ top: 0, behavior: 'smooth' });
-                         }}
-                       />
-                     </div>
-                   )}
+                   
 
 
                  </>
