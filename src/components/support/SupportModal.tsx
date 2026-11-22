@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
   Lightbulb, 
@@ -7,6 +9,9 @@ import {
   Paperclip,
   UploadCloud,
   FileText,
+  Copy,
+  Check,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../../lib/api-client';
@@ -29,49 +34,66 @@ interface SupportModalProps {
 
 type SupportCategory = 'problema' | 'duda' | 'sugerencia' | 'queja';
 
-const CATEGORIES: Array<{
+interface CategoryOption {
   id: SupportCategory;
   label: string;
+  badge: string;
   description: string;
   icon: React.ReactNode;
-  activeAccent: string;
-  activeTitle: string;
-}> = [
+  activeBorder: string;
+  activeBg: string;
+  activeBadge: string;
+  dotColor: string;
+}
+
+const CATEGORIES: CategoryOption[] = [
   {
     id: 'problema',
     label: 'Problema / Error',
+    badge: 'Bug',
     description: 'Fallo técnico, error en pantalla o algo no funciona.',
     icon: <LuminsErrorIcon size={20} />,
-    activeAccent: 'border-l-[3px] border-l-[#FF665E] border-[#FF665E]/35',
-    activeTitle: 'text-[#D94841] dark:text-[#FF857E]',
+    activeBorder: 'border-[#FF665E] ring-2 ring-[#FF665E]/20',
+    activeBg: 'bg-[#FF665E]/[0.05] dark:bg-[#FF665E]/10',
+    activeBadge: 'bg-[#FF665E]/15 text-[#D94841] dark:text-[#FF857E]',
+    dotColor: 'bg-[#FF665E]',
   },
   {
     id: 'duda',
     label: 'Duda o Consulta',
-    description: 'Preguntas sobre cómo usar una función en Lumins.',
+    badge: 'Ayuda',
+    description: 'Preguntas sobre cómo usar funciones o tableros.',
     icon: <LuminsInfoIcon size={20} />,
-    activeAccent: 'border-l-[3px] border-l-[#12A9A8] border-[#12A9A8]/35',
-    activeTitle: 'text-[#0E8786] dark:text-[#4CD4D3]',
+    activeBorder: 'border-[#12A9A8] ring-2 ring-[#12A9A8]/20',
+    activeBg: 'bg-[#12A9A8]/[0.05] dark:bg-[#12A9A8]/10',
+    activeBadge: 'bg-[#12A9A8]/15 text-[#0E8786] dark:text-[#4CD4D3]',
+    dotColor: 'bg-[#12A9A8]',
   },
   {
     id: 'sugerencia',
     label: 'Sugerencia',
-    description: 'Ideas de mejora o nuevas funciones que te gustaría ver.',
+    badge: 'Idea',
+    description: 'Ideas de funciones que te gustaría ver en Lumins.',
     icon: (
-      <span className="w-5 h-5 rounded-md bg-[#12A9A8] text-white flex items-center justify-center">
+      <span className="w-5 h-5 rounded-md bg-[#12A9A8] text-white flex items-center justify-center shadow-xs">
         <Lightbulb size={13} strokeWidth={2.4} />
       </span>
     ),
-    activeAccent: 'border-l-[3px] border-l-[#12A9A8] border-[#12A9A8]/35',
-    activeTitle: 'text-[#0E8786] dark:text-[#4CD4D3]',
+    activeBorder: 'border-[#12A9A8] ring-2 ring-[#12A9A8]/20',
+    activeBg: 'bg-[#12A9A8]/[0.05] dark:bg-[#12A9A8]/10',
+    activeBadge: 'bg-[#12A9A8]/15 text-[#0E8786] dark:text-[#4CD4D3]',
+    dotColor: 'bg-[#12A9A8]',
   },
   {
     id: 'queja',
     label: 'Queja o Reclamo',
+    badge: 'Reclamo',
     description: 'Inconformidad con el servicio o la experiencia.',
     icon: <LuminsWarningIcon size={20} />,
-    activeAccent: 'border-l-[3px] border-l-[#FFCC40] border-[#FFCC40]/50',
-    activeTitle: 'text-[#9A6700] dark:text-[#FFCC40]',
+    activeBorder: 'border-[#FFCC40] ring-2 ring-[#FFCC40]/25',
+    activeBg: 'bg-[#FFCC40]/[0.05] dark:bg-[#FFCC40]/10',
+    activeBadge: 'bg-[#FFCC40]/20 text-[#9A6700] dark:text-[#FFCC40]',
+    dotColor: 'bg-[#FFCC40]',
   },
 ];
 
@@ -91,6 +113,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [submittedTicket, setSubmittedTicket] = useState<{ ticketCode: string } | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Estados de adjunto
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -110,6 +133,18 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
     };
   }, [previewUrl]);
 
+  // Manejo de tecla Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading) {
+        handleResetAndClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, loading]);
+
   // Procesamiento y compresión de archivos
   const processFile = useCallback(async (file: File, isPasted = false) => {
     const isImage = file.type.startsWith('image/');
@@ -122,7 +157,6 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
         return;
       }
 
-      // Asignar nombre amigable si viene sin nombre o genérico del clipboard
       let targetFile = file;
       if (isPasted || !file.name || file.name === 'image.png') {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -156,7 +190,6 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
         }
       } catch (err) {
         console.error('Error al comprimir imagen de soporte:', err);
-        // Usar original como fallback
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setAttachedFile(targetFile);
         setPreviewUrl(URL.createObjectURL(targetFile));
@@ -165,7 +198,6 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
         setIsCompressing(false);
       }
     } else {
-      // Cualquier otro tipo de archivo (PDF, ZIP, TXT, DOC, etc.)
       if (file.size > MAX_FILE_BYTES) {
         toast.error('El archivo supera el límite permitido de 4 MB.', {
           description: `Tamaño detectado: ${formatBytes(file.size)}. El límite para documentos es de 4 MB.`,
@@ -206,7 +238,6 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
     if (!isOpen) return;
 
     const windowPasteListener = (e: ClipboardEvent) => {
-      // Solo interceptar si el usuario pegó una imagen
       const items = e.clipboardData?.items;
       if (!items) return;
 
@@ -260,7 +291,15 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
     setPreviewUrl(null);
     setCompressionSavings(null);
     setSubmittedTicket(null);
+    setCopiedCode(false);
     onClose();
+  };
+
+  const handleCopyTicketCode = (code: string) => {
+    navigator.clipboard?.writeText(code);
+    setCopiedCode(true);
+    toast.success('Código copiado al portapapeles');
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -302,266 +341,319 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
 
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
-      onPaste={handlePaste}
-    >
-      <div 
-        className="w-full max-w-xl bg-white dark:bg-[#1C1F26] rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/60 dark:bg-white/[0.02]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#13151A] border border-zinc-200/80 dark:border-white/10 shadow-xs flex items-center justify-center shrink-0">
-              <LuminsSupportIcon size={22} />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Centro de Soporte y Ayuda
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Escribe tu problema, duda o sugerencia directamente a nuestro equipo.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleResetAndClose}
-            className="w-8 h-8 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors cursor-pointer"
+  const modalContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md transition-all duration-300"
+          onClick={handleResetAndClose}
+          onPaste={handlePaste}
+        >
+          <motion.div 
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.98 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="w-full sm:max-w-xl md:max-w-2xl bg-white dark:bg-[#1C1F26] rounded-t-[28px] sm:rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[88vh]"
+            onClick={e => e.stopPropagation()}
           >
-            <X size={18} />
-          </button>
-        </div>
+            {/* Mobile Drag Indicator Pill */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300/80 dark:bg-white/20 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
-        {/* Modal Body */}
-        {submittedTicket ? (
-          <div className="p-8 text-center flex flex-col items-center justify-center space-y-4 my-auto">
-            <LuminsSuccessIcon size={44} />
-            <h4 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              ¡Mensaje enviado con éxito!
-            </h4>
-            <div className="inline-block px-3 py-1 rounded-lg bg-slate-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
-              Código de Ticket: {submittedTicket.ticketCode}
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-              Hemos registrado tu solicitud y se ha enviado una notificación directa con todos los detalles a nuestro equipo. Te responderemos al correo <strong>{user?.email}</strong>.
-            </p>
-            <button
-              onClick={handleResetAndClose}
-              className="mt-4 px-6 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm shadow-[#12A9A8]/20 cursor-pointer"
-            >
-              Entendido
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
-            {/* Category selection */}
-            <div>
-              <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-2">
-                ¿Qué tipo de mensaje deseas enviar?
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {CATEGORIES.map(cat => {
-                  const isSelected = category === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setCategory(cat.id)}
-                      className={`
-                        flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer active:scale-[0.99]
-                        ${isSelected 
-                          ? `bg-white dark:bg-[#1C1F26] ${cat.activeAccent} shadow-xs` 
-                          : 'border-zinc-200/80 dark:border-white/10 hover:border-zinc-300 dark:hover:border-zinc-700 bg-slate-50/50 dark:bg-[#13151A] text-zinc-600 dark:text-zinc-300'}
-                      `}
-                    >
-                      <span className="shrink-0 mt-0.5">{cat.icon}</span>
-                      <div className="min-w-0">
-                        <div className={`text-xs font-bold ${isSelected ? cat.activeTitle : 'text-zinc-800 dark:text-zinc-200'}`}>
-                          {cat.label}
-                        </div>
-                        <div className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight mt-0.5 truncate">
-                          {cat.description}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Asunto */}
-            <div>
-              <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block mb-1.5">
-                Asunto / Título
-              </label>
-              <input
-                type="text"
-                value={subject}
-                onChange={e => setSubject(e.target.value)}
-                placeholder="Ej. Problema al sincronizar Google Calendar"
-                maxLength={120}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all"
-                required
-              />
-            </div>
-
-            {/* Mensaje */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
-                  Descripción detallada
-                </label>
-                <span className="text-[10px] text-zinc-400 font-semibold">
-                  {message.length}/1000
-                </span>
-              </div>
-              <textarea
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder="Explica qué sucedió, pasos para reproducir el error o los detalles de tu sugerencia..."
-                rows={3}
-                maxLength={1000}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all resize-none"
-                required
-              />
-            </div>
-
-            {/* Sección de Archivo Adjunto */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-                  <Paperclip size={13} className="text-[#12A9A8]" />
-                  <span>Adjuntar Archivo o Captura (Opcional)</span>
-                </label>
-                <span className="text-[10px] text-zinc-400">
-                  Archivos máx 4 MB · Imágenes máx 6 MB
-                </span>
-              </div>
-
-              {/* Input file oculto */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept="*/*"
-                onChange={e => {
-                  if (e.target.files && e.target.files[0]) {
-                    processFile(e.target.files[0], false);
-                  }
-                }}
-              />
-
-              {isCompressing ? (
-                <div className="p-4 rounded-xl border border-dashed border-[#12A9A8]/40 bg-[#12A9A8]/5 flex items-center justify-center gap-3 text-xs text-[#12A9A8] font-bold animate-pulse">
-                  <Loader2 size={18} className="animate-spin" />
-                  <span>Minimizando y optimizando imagen...</span>
+            {/* Modal Header */}
+            <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-white/[0.02] backdrop-blur-xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#12A9A8]/15 to-[#12A9A8]/5 border border-[#12A9A8]/30 shadow-[0_0_15px_rgba(18,169,168,0.12)] flex items-center justify-center shrink-0 text-[#12A9A8]">
+                  <LuminsSupportIcon size={22} />
                 </div>
-              ) : attachedFile ? (
-                /* Archivo cargado con preview y opción de eliminar */
-                <div className="p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-slate-50/80 dark:bg-[#13151A] flex items-center justify-between gap-3 shadow-xs">
-                  <div className="flex items-center gap-3 min-w-0">
-                    {previewUrl ? (
-                      <img 
-                        src={previewUrl} 
-                        alt="Vista previa" 
-                        className="w-12 h-12 rounded-lg object-cover border border-zinc-200 dark:border-white/10 shrink-0" 
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-lg bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center shrink-0">
-                        <FileText size={20} />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                        {attachedFile.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-zinc-400 font-medium">
-                          {formatBytes(attachedFile.size)}
-                        </span>
-                        {compressionSavings && (
-                          <Badge tone="teal" variant="inline" size="xs">
-                            Comprimida (-{Math.round((1 - compressionSavings.compressed / compressionSavings.original) * 100)}%)
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleRemoveFile}
-                    className="w-8 h-8 rounded-lg text-zinc-400 hover:text-[#FF665E] hover:bg-[#FF665E]/10 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
-                    title="Eliminar archivo adjunto"
-                  >
-                    <LuminsTrashIcon size={16} />
-                  </button>
-                </div>
-              ) : (
-                /* Zona interactiva de drop/upload */
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`
-                    p-4 rounded-xl border border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center
-                    ${isDragging 
-                      ? 'border-[#12A9A8] bg-[#12A9A8]/5 ring-2 ring-[#12A9A8]/20 scale-[0.99]' 
-                      : 'border-zinc-300 dark:border-white/15 hover:border-[#12A9A8] dark:hover:border-[#12A9A8] bg-slate-50/60 dark:bg-[#13151A]/60 hover:bg-[#12A9A8]/[0.03]'}
-                  `}
-                >
-                  <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                    <UploadCloud size={19} className="text-[#12A9A8]" />
-                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">
-                      Haz clic para examinar o arrastra aquí tu archivo
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight truncate">
+                      Centro de Soporte y Ayuda
+                    </h3>
+                    <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#12A9A8]/10 text-[#0E8786] dark:text-[#4CD4D3] border border-[#12A9A8]/20">
+                      <Sparkles size={10} />
+                      Lumins
                     </span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 flex items-center gap-1">
-                    <span>O puedes pegar una captura directamente con</span>
-                    <kbd className="px-1.5 py-0.5 rounded bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-mono text-[10px] font-semibold border border-zinc-300 dark:border-zinc-700">
-                      Ctrl + V
-                    </kbd>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-0.5">
+                    Escribe tu problema, duda o sugerencia directamente a nuestro equipo.
                   </p>
                 </div>
-              )}
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center justify-end gap-2.5">
+              </div>
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                disabled={loading || isCompressing}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-white/10 flex items-center justify-center transition-all cursor-pointer shrink-0 ml-2"
+                aria-label="Cerrar soporte"
               >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={loading || isCompressing || !subject.trim() || !message.trim()}
-                className="px-5 py-2.5 rounded-xl bg-[#12A9A8] hover:bg-[#0E8786] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm shadow-[#12A9A8]/20 disabled:opacity-50 active:scale-95 cursor-pointer"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" />
-                    <span>Enviando...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send size={14} />
-                    <span>Enviar Ticket</span>
-                  </>
-                )}
+                <X size={18} />
               </button>
             </div>
-          </form>
-        )}
-      </div>
-    </div>
+
+            {/* Modal Body */}
+            {submittedTicket ? (
+              <div className="p-6 sm:p-10 text-center flex flex-col items-center justify-center space-y-4 my-auto overflow-y-auto">
+                <div className="w-16 h-16 rounded-3xl bg-[#12A9A8]/10 border border-[#12A9A8]/20 flex items-center justify-center shadow-lg shadow-[#12A9A8]/15 text-[#12A9A8]">
+                  <LuminsSuccessIcon size={38} />
+                </div>
+                <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-zinc-100">
+                  ¡Mensaje enviado con éxito!
+                </h4>
+
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm font-mono font-bold text-slate-800 dark:text-zinc-200 shadow-xs">
+                  <span>Ticket: {submittedTicket.ticketCode}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyTicketCode(submittedTicket.ticketCode)}
+                    className="p-1 rounded-md hover:bg-slate-200/70 dark:hover:bg-white/10 text-slate-500 dark:text-zinc-400 transition-colors cursor-pointer"
+                    title="Copiar código"
+                  >
+                    {copiedCode ? <Check size={14} className="text-[#12A9A8]" /> : <Copy size={14} />}
+                  </button>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
+                  Hemos registrado tu solicitud y una notificación directa ha llegado a nuestro equipo técnico. Te responderemos al correo <strong>{user?.email}</strong> con prioridad.
+                </p>
+
+                <div className="pt-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleResetAndClose}
+                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-[#12A9A8] to-[#0E8786] text-white text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-md shadow-[#12A9A8]/25 hover:brightness-105 active:scale-95 cursor-pointer"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+                {/* Category selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                      ¿Qué tipo de mensaje deseas enviar?
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
+                      Selecciona una categoría
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {CATEGORIES.map(cat => {
+                      const isSelected = category === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setCategory(cat.id)}
+                          className={`
+                            relative flex flex-col p-3 rounded-2xl border text-left transition-all cursor-pointer active:scale-[0.98] min-h-[76px] sm:min-h-[82px] justify-between
+                            ${isSelected 
+                              ? `bg-white dark:bg-[#1E222B] ${cat.activeBorder} ${cat.activeBg} shadow-sm` 
+                              : 'border-slate-200/90 dark:border-white/10 hover:border-slate-300 dark:hover:border-zinc-700 bg-slate-50/70 dark:bg-[#14161C] text-slate-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-white/[0.03]'}
+                          `}
+                        >
+                          <div className="flex items-start justify-between w-full gap-2">
+                            <span className="shrink-0">{cat.icon}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${cat.activeBadge}`}>
+                              {cat.badge}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 min-w-0">
+                            <div className={`text-xs font-bold leading-tight ${isSelected ? 'text-slate-900 dark:text-zinc-100 font-extrabold' : 'text-slate-800 dark:text-zinc-200'}`}>
+                              {cat.label}
+                            </div>
+                            <div className="text-[10.5px] text-slate-500 dark:text-zinc-400 leading-tight mt-0.5 line-clamp-2">
+                              {cat.description}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Asunto */}
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block mb-1.5">
+                    Asunto / Título
+                  </label>
+                  <input
+                    type="text"
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                    placeholder="Ej. Problema al sincronizar Google Calendar"
+                    maxLength={120}
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#1C1F26] focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Mensaje */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">
+                      Descripción detallada
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold">
+                      {message.length}/1000
+                    </span>
+                  </div>
+                  <textarea
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    placeholder="Explica qué sucedió, pasos para reproducir el error o los detalles de tu sugerencia..."
+                    rows={4}
+                    maxLength={1000}
+                    className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#13151A] text-sm font-medium text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#1C1F26] focus:ring-2 focus:ring-[#12A9A8]/20 focus:border-[#12A9A8] outline-none transition-all resize-none leading-relaxed"
+                    required
+                  />
+                </div>
+
+                {/* Sección de Archivo Adjunto */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
+                      <Paperclip size={13} className="text-[#12A9A8]" />
+                      <span>Adjuntar Archivo o Captura (Opcional)</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      Archivos máx 4 MB · Imágenes máx 6 MB
+                    </span>
+                  </div>
+
+                  {/* Input file oculto */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="*/*"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        processFile(e.target.files[0], false);
+                      }
+                    }}
+                  />
+
+                  {isCompressing ? (
+                    <div className="p-4 rounded-2xl border border-dashed border-[#12A9A8]/40 bg-[#12A9A8]/5 flex items-center justify-center gap-3 text-xs text-[#12A9A8] font-bold animate-pulse">
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Minimizando y optimizando imagen...</span>
+                    </div>
+                  ) : attachedFile ? (
+                    /* Archivo cargado con preview y opción de eliminar */
+                    <div className="p-3 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-slate-50 dark:bg-[#14161C] flex items-center justify-between gap-3 shadow-xs">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {previewUrl ? (
+                          <img 
+                            src={previewUrl} 
+                            alt="Vista previa" 
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-white/10 shrink-0" 
+                          />
+                        ) : (
+                          <div className="w-11 h-11 rounded-xl bg-[#12A9A8]/10 text-[#12A9A8] flex items-center justify-center shrink-0">
+                            <FileText size={20} />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 truncate">
+                            {attachedFile.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className="text-[11px] text-slate-400 font-medium">
+                              {formatBytes(attachedFile.size)}
+                            </span>
+                            {compressionSavings && (
+                              <Badge tone="teal" variant="inline" size="xs">
+                                Comprimida (-{Math.round((1 - compressionSavings.compressed / compressionSavings.original) * 100)}%)
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="w-9 h-9 rounded-xl text-slate-400 hover:text-[#FF665E] hover:bg-[#FF665E]/10 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                        title="Eliminar archivo adjunto"
+                      >
+                        <LuminsTrashIcon size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    /* Zona interactiva de drop/upload */
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`
+                        p-4 rounded-2xl border border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center
+                        ${isDragging 
+                          ? 'border-[#12A9A8] bg-[#12A9A8]/5 ring-2 ring-[#12A9A8]/20 scale-[0.99]' 
+                          : 'border-slate-300 dark:border-white/15 hover:border-[#12A9A8] dark:hover:border-[#12A9A8] bg-slate-50/70 dark:bg-[#14161C] hover:bg-[#12A9A8]/[0.02]'}
+                      `}
+                    >
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300 mb-1">
+                        <UploadCloud size={20} className="text-[#12A9A8]" />
+                        <span className="text-xs font-bold">
+                          Haz clic para examinar o arrastra aquí tu archivo
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 flex items-center gap-1 flex-wrap justify-center">
+                        <span>O puedes pegar una captura con</span>
+                        <kbd className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-zinc-300 font-mono text-[10px] font-semibold border border-slate-300/80 dark:border-white/10">
+                          Ctrl + V
+                        </kbd>
+                        <span>en cualquier momento</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Buttons — Adaptado móvil / tablet */}
+                <div className="pt-3 pb-1 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleResetAndClose}
+                    disabled={loading || isCompressing}
+                    className="w-full sm:w-auto order-2 sm:order-1 h-10 px-5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || isCompressing || !subject.trim() || !message.trim()}
+                    className="w-full sm:w-auto order-1 sm:order-2 h-10 px-6 rounded-xl bg-gradient-to-r from-[#12A9A8] to-[#0E8786] hover:brightness-105 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-[#12A9A8]/20 disabled:opacity-50 active:scale-95 cursor-pointer"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" />
+                        <span>Enviando solicitud...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={14} />
+                        <span>Enviar Ticket</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
 
 export default SupportModal;
